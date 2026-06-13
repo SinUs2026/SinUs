@@ -4,15 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SinUs – Öğretmen Girişi</title>
-<link rel="icon" type="image/png" sizes="32x32" href="assets/11111.jpeg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#0a1628 0%,#1a3a6b 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 .giris-kutu{background:white;border-radius:24px;padding:3rem 2.5rem;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-.logo-wrap{display:flex;align-items:center;justify-content:center;gap:0.6rem;margin-bottom:0.4rem}
-.logo-img{width:38px;height:38px;object-fit:contain}
-.logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#0a1628;text-align:center}
+.logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#0a1628;text-align:center;margin-bottom:0.3rem}
 .logo span{color:#d4af37}
 .altyazi{text-align:center;color:#64748b;font-size:0.9rem;margin-bottom:2rem}
 .rozet-wrap{text-align:center;margin-bottom:1.5rem}
@@ -24,7 +21,6 @@ input:focus{border-color:#2563a8}
 .giris-btn:hover{opacity:0.9}
 .giris-btn:disabled{background:#94a3b8;cursor:not-allowed}
 .geri{display:block;text-align:center;margin-top:1.2rem;color:#64748b;font-size:0.85rem;text-decoration:none}
-.geri:hover{color:#0a1628}
 .hata{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:0.75rem 1rem;border-radius:8px;font-size:0.85rem;margin-bottom:1rem;display:none}
 .basari{background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;padding:0.75rem 1rem;border-radius:8px;font-size:0.85rem;margin-bottom:1rem;display:none}
 </style>
@@ -32,10 +28,7 @@ input:focus{border-color:#2563a8}
 <body>
 <div class="giris-kutu">
   <div class="rozet-wrap"><div class="rozet">👨‍🏫 Öğretmen Girişi</div></div>
-  <div class="logo-wrap">
-    
-    <div class="logo">Sin<span>Us</span></div>
-  </div>
+  <div class="logo">Sin<span>Us</span></div>
   <div class="altyazi">Öğretmen paneline erişmek için giriş yapın</div>
   <div class="hata" id="hata"></div>
   <div class="basari" id="basari"></div>
