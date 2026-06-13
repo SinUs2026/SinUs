@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SinUs – Öğretmen Paneli</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#f4f6f9;color:#1e293b;display:flex;min-height:100vh}
+.sidebar{width:240px;background:#0a1628;min-height:100vh;padding:1.5rem 0;position:fixed;top:0;left:0;z-index:100}
+.sidebar-logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:white;padding:0 1.5rem;margin-bottom:0.3rem}
+.sidebar-logo span{color:#d4af37}
+.sidebar-alt{font-size:0.72rem;color:rgba(255,255,255,0.4);padding:0 1.5rem;margin-bottom:2rem;text-transform:uppercase;letter-spacing:0.5px}
+.sidebar-menu{list-style:none}
+.sidebar-menu li a{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1.5rem;color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.88rem;transition:all 0.2s}
+.sidebar-menu li a:hover{background:rgba(255,255,255,0.08);color:white}
+.sidebar-menu li a.aktif{background:rgba(96,165,250,0.15);color:#60a5fa;border-right:3px solid #60a5fa}
+.sidebar-menu li a .ikon{font-size:1rem;width:20px}
+.sidebar-alt2{font-size:0.7rem;color:rgba(255,255,255,0.3);padding:0 1.5rem;margin-top:1.5rem;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px}
+.ogretmen-bilgi{padding:0 1.5rem;margin-bottom:1.5rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.08)}
+.ogretmen-ad{font-size:0.85rem;font-weight:600;color:white}
+.ogretmen-rol{font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:2px}
+
+.icerik{margin-left:240px;flex:1;padding:2rem 2.5rem}
+.ust-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+.ust-bar h1{font-family:'Playfair Display',serif;font-size:1.6rem;color:#0a1628}
+.ust-bar p{color:#64748b;font-size:0.88rem;margin-top:0.2rem}
+.yeni-btn{background:#0a1628;color:white;border:none;padding:0.7rem 1.4rem;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem}
+
+.ozet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.ozet-kart{background:white;border-radius:14px;padding:1.3rem 1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.ozet-label{font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem}
+.ozet-deger{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#0a1628}
+.ozet-alt{font-size:0.75rem;margin-top:0.2rem;color:#64748b}
+
+.kart{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:1.5rem}
+.kart-ust{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem}
+.kart-baslik{font-size:0.85rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:0.75rem 1rem;font-size:0.75rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1.5px solid #f1f5f9}
+td{padding:0.85rem 1rem;font-size:0.88rem;border-bottom:1px solid #f8fafc;color:#1e293b}
+tr:hover td{background:#f8fafc}
+
+.durum{display:inline-flex;align-items:center;gap:0.3rem;padding:0.25rem 0.7rem;border-radius:20px;font-size:0.75rem;font-weight:600}
+.durum.aktif{background:#f0fdf4;color:#16a34a}
+.durum.pasif{background:#fef2f2;color:#dc2626}
+.durum.bekliyor{background:#fffbeb;color:#d97706}
+
+.islem-btn{padding:0.3rem 0.7rem;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;text-decoration:none;display:inline-block}
+.islem-btn.duzenle{background:#eff6ff;color:#2563a8}
+.islem-btn.program{background:#f0fdf4;color:#16a34a}
+.islem-btn.goruntule{background:#fefce8;color:#b45309}
+
+.asama-badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.75rem;font-weight:600}
+.asama-badge.a1{background:#eff6ff;color:#1d4ed8}
+.asama-badge.a2{background:#f0fdf4;color:#15803d}
+.asama-badge.a3{background:#fefce8;color:#b45309}
+.asama-badge.a4{background:#fdf4ff;color:#7e22ce}
+
+.sayfa{display:none}
+.sayfa.aktif{display:block}
+
+/* EGZERSİZ KARTI */
+.egzersiz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-bottom:1.5rem}
+.egzersiz-kart{background:white;border-radius:14px;padding:1.3rem 1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);border:1.5px solid #f1f5f9;transition:border-color 0.2s}
+.egzersiz-kart:hover{border-color:#bfdbfe}
+.egzersiz-kart-ust{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem}
+.egzersiz-ikon{font-size:1.6rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#f0f4ff;border-radius:10px}
+.egzersiz-isim{font-weight:700;font-size:0.9rem;color:#0a1628}
+.egzersiz-kategori{font-size:0.7rem;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-top:1px}
+.egzersiz-aciklama{font-size:0.8rem;color:#64748b;line-height:1.5;margin-bottom:1rem}
+.btn-basla{width:100%;padding:0.6rem;background:#0a1628;color:white;border:none;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-basla:hover{opacity:0.85}
+
+.kategori-baslik{font-size:0.8rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:1.5rem 0 0.8rem;padding-bottom:0.4rem;border-bottom:1.5px solid #f1f5f9}
+
+/* MODAL */
+.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+.modal.acik{display:flex}
+.modal-kutu{background:white;border-radius:20px;padding:2rem;width:520px;max-width:90%;max-height:90vh;overflow-y:auto}
+.modal-baslik{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#0a1628;margin-bottom:1.5rem}
+.form-grup{margin-bottom:1rem}
+.form-grup label{display:block;font-size:0.82rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem}
+.form-grup input,.form-grup select,.form-grup textarea{width:100%;padding:0.7rem 1rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.88rem;font-family:'DM Sans',sans-serif;outline:none}
+.form-grup input:focus,.form-grup select:focus{border-color:#2563a8}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.modal-btn-grup{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.5rem}
+.btn-iptal{background:#f1f5f9;color:#64748b;border:none;padding:0.7rem 1.4rem;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-kaydet{background:#0a1628;color:white;border:none;padding:0.7rem 1.4rem;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* ÖĞRENCİ DETAY */
+.detay-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.detay-kart{background:#f8fafc;border-radius:12px;padding:1rem 1.2rem}
+.detay-label{font-size:0.72rem;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.3rem}
+.detay-deger{font-size:1rem;font-weight:700;color:#0a1628}
+
+/* PROGRAM ÖNIZLEME */
+.program-onizleme{display:flex;flex-direction:column;gap:0.5rem}
+.program-gorev{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.9rem;background:#f8fafc;border-radius:8px;font-size:0.85rem}
+.program-gorev-ikon{font-size:1rem}
+.program-gorev-isim{flex:1;font-weight:500}
+.program-gorev-sure{font-size:0.75rem;color:#94a3b8}
+
+.bildirim{position:fixed;top:1.5rem;right:1.5rem;padding:0.9rem 1.5rem;border-radius:10px;font-size:0.88rem;font-weight:600;z-index:999;display:none;animation:fadeIn 0.3s}
+.bildirim.basari{background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0}
+.bildirim.hata{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.bos-durum{text-align:center;padding:3rem;color:#94a3b8;font-size:0.9rem}
+
+.ara-input{padding:0.5rem 1rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none;width:220px}
+.ara-input:focus{border-color:#2563a8}
+
+@media(max-width:768px){.sidebar{display:none}.icerik{margin-left:0}.ozet-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Sin<span>Us</span></div>
+  <div class="sidebar-alt">Öğretmen Paneli</div>
+  <ul class="sidebar-menu">
+    <li><a href="#" class="aktif" onclick="sayfaGoster('genel',this)"><span class="ikon">📊</span> Genel Bakış</a></li>
+    <li><a href="#" onclick="sayfaGoster('ogrencilerim',this)"><span class="ikon">👥</span> Öğrencilerim</a></li>
+    <div class="sidebar-alt2">Araçlar</div>
+    <li><a href="program-yonetimi.html?from=ogretmen"><span class="ikon">📅</span> Program Yönetimi</a></li>
+    <li><a href="#" onclick="sayfaGoster('egzersizler',this)"><span class="ikon">🌌</span> Egzersizler</a></li>
+    <li><a href="#" onclick="sayfaGoster('okuma-teknikleri',this)"><span class="ikon">📖</span> Okuma Teknikleri</a></li>
+    <li><a href="#" onclick="sayfaGoster('diger-calismalar',this)"><span class="ikon">🔤</span> Diğer Çalışmalar</a></li>
+    <div class="sidebar-alt2">Hesap</div>
+    <li><a href="giris.html"><span class="ikon">🚪</span> Çıkış Yap</a></li>
+  </ul>
+  <div class="ogretmen-bilgi">
+    <div class="ogretmen-ad" id="ogretmenAd">Öğretmen</div>
+    <div class="ogretmen-rol">Öğretmen Hesabı</div>
+  </div>
+</div>
+
+<div class="icerik">
+
+  <!-- GENEL BAKIŞ -->
+  <div id="sayfa-genel" class="sayfa aktif">
+    <div class="ust-bar">
+      <div><h1>Genel Bakış</h1><p>Öğrencilerinizin durumunu takip edin.</p></div>
+      <button class="yeni-btn" onclick="modalAc('ogrenci-ekle')">+ Öğrenci Ekle</button>
+    </div>
+    <div class="ozet-grid">
+      <div class="ozet-kart"><div class="ozet-label">Öğrencilerim</div><div class="ozet-deger" id="ozToplamOgrenci">—</div><div class="ozet-alt">Toplam</div></div>
+      <div class="ozet-kart"><div class="ozet-label">Aktif</div><div class="ozet-deger" id="ozAktif">—</div><div class="ozet-alt">Bu ay giriş yaptı</div></div>
+      <div class="ozet-kart"><div class="ozet-label">Bugün Çalışan</div><div class="ozet-deger" id="ozBugun">—</div><div class="ozet-alt">Görev tamamladı</div></div>
+      <div class="ozet-kart"><div class="ozet-label">Programlı Gün</div><div class="ozet-deger" id="ozProgram">—</div><div class="ozet-alt">Doldurulmuş gün</div></div>
+    </div>
+    <div class="kart">
+      <div class="kart-ust">
+        <span class="kart-baslik">👥 Öğrencilerim</span>
+        <input class="ara-input" type="text" placeholder="🔍 Öğrenci ara..." oninput="ogrenciAra(this.value)">
+      </div>
+      <div id="genel-ogrenci-liste"><div class="bos-durum">⏳ Yükleniyor...</div></div>
+    </div>
+  </div>
+
+  <!-- ÖĞRENCİLERİM -->
+  <div id="sayfa-ogrencilerim" class="sayfa">
+    <div class="ust-bar">
+      <div><h1>Öğrencilerim</h1><p>Öğrencilerinizi görüntüleyin ve programlarını düzenleyin.</p></div>
+      <button class="yeni-btn" onclick="modalAc('ogrenci-ekle')">+ Öğrenci Ekle</button>
+    </div>
+    <div class="kart">
+      <div class="kart-ust">
+        <span class="kart-baslik">👥 Öğrenci Listesi</span>
+        <input class="ara-input" type="text" placeholder="🔍 Öğrenci ara..." oninput="ogrenciAra(this.value)">
+      </div>
+      <div id="ogrenci-liste"><div class="bos-durum">⏳ Yükleniyor...</div></div>
+    </div>
+  </div>
+
+  <!-- EGZERSİZLER -->
+  <div id="sayfa-egzersizler" class="sayfa">
+    <div class="ust-bar"><div><h1>Egzersizler</h1><p>Göz ve odak egzersizlerini başlatın.</p></div></div>
+    <div class="kategori-baslik">👁️ Göz Kası Egzersizleri</div>
+    <div class="egzersiz-grid" id="grid-goz-og"></div>
+    <div class="kategori-baslik">🎯 Dikkat & Odak Egzersizleri</div>
+    <div class="egzersiz-grid" id="grid-odak-og"></div>
+  </div>
+
+  <!-- OKUMA TEKNİKLERİ -->
+  <div id="sayfa-okuma-teknikleri" class="sayfa">
+    <div class="ust-bar"><div><h1>Okuma Teknikleri</h1><p>Tüm okuma tekniği egzersizlerini başlatın.</p></div></div>
+    <div class="egzersiz-grid" id="grid-okuma-og"></div>
+  </div>
+
+  <!-- DİĞER ÇALIŞMALAR -->
+  <div id="sayfa-diger-calismalar" class="sayfa">
+    <div class="ust-bar"><div><h1>Diğer Çalışmalar</h1><p>1. Aşama modülleri ve ek çalışmalar.</p></div></div>
+    <div class="egzersiz-grid" id="grid-diger-og"></div>
+  </div>
+
+</div>
+
+<!-- MODALLAR -->
+<div class="modal" id="modal-ogrenci-ekle">
+  <div class="modal-kutu">
+    <div class="modal-baslik">➕ Öğrenci Ekle</div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Ad</label><input type="text" id="oe-ad" placeholder="Öğrencinin adı"></div>
+      <div class="form-grup"><label>Soyad</label><input type="text" id="oe-soyad" placeholder="Öğrencinin soyadı"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="oe-kullanici" placeholder="kullanici_adi"></div>
+      <div class="form-grup"><label>Şifre</label><input type="password" id="oe-sifre" placeholder="Şifre belirle"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Aşama</label>
+        <select id="oe-asama">
+          <option value="1">1. Aşama – Okuma Temeli</option>
+          <option value="2">2. Aşama – Akıcı Okuma</option>
+          <option value="3">3. Aşama – Hız + Anlama</option>
+          <option value="4">4. Aşama – Sınav Odaklı</option>
+        </select>
+      </div>
+      <div class="form-grup"><label>Lisans</label>
+        <select id="oe-lisans"><option value="6">6 Ay</option><option value="3">3 Ay</option><option value="12">1 Yıl</option></select>
+      </div>
+    </div>
+    <div class="modal-btn-grup">
+      <button class="btn-iptal" onclick="modalKapat('ogrenci-ekle')">İptal</button>
+      <button class="btn-kaydet" onclick="ogrenciKaydet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ÖĞRENCİ DETAY MODALI -->
+<div class="modal" id="modal-ogrenci-detay">
+  <div class="modal-kutu">
+    <div class="modal-baslik" id="detayBaslik">Öğrenci Detayı</div>
+    <div class="detay-grid">
+      <div class="detay-kart"><div class="detay-label">Kullanıcı Adı</div><div class="detay-deger" id="detayKullanici">—</div></div>
+      <div class="detay-kart"><div class="detay-label">Aşama</div><div class="detay-deger" id="detayAsama">—</div></div>
+      <div class="detay-kart"><div class="detay-label">Enerji</div><div class="detay-deger" id="detayEnerji">—</div></div>
+      <div class="detay-kart"><div class="detay-label">Gün</div><div class="detay-deger" id="detayGun">—</div></div>
+    </div>
+    <div style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.75rem">Bugünün Programı</div>
+    <div class="program-onizleme" id="detayProgram"><div style="color:#94a3b8;font-size:0.85rem">Yükleniyor...</div></div>
+    <div class="modal-btn-grup">
+      <button class="btn-iptal" onclick="modalKapat('ogrenci-detay')">Kapat</button>
+      <a id="detayProgramLink" href="#" class="btn-kaydet" style="text-decoration:none">📅 Programı Düzenle</a>
+    </div>
+  </div>
+</div>
+
+<div class="bildirim" id="bildirim"></div>
+
+<script>
+const SUPABASE_URL='https://sfyjnwhblxldrzbrnyva.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmeWpud2hibHhsZHJ6YnJueXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NDc4NTYsImV4cCI6MjA5NjMyMzg1Nn0.3mrQ2JSX4InY89iUnoJUCnWefxHXHjgM059PeLQedew';
+
+const EGZERSIZLER_GOZ=[
+  {dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip',ikon:'↔️',aciklama:'Yatay göz kası egzersizi.'},
+  {dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı',ikon:'↕️',aciklama:'Dikey göz kası egzersizi.'},
+  {dosya:'goz-sekil.html',isim:'Şekil Takibi',ikon:'⬡',aciklama:'Geometrik şekil takibi.'},
+  {dosya:'goz-genel.html',isim:'Genel Hareket',ikon:'🌀',aciklama:'Çok yönlü göz kası egzersizi.'},
+  {dosya:'goz-zoom.html',isim:'Genişleme-Daralma',ikon:'🔍',aciklama:'Siliyer kas egzersizi.'},
+  {dosya:'goz-sarkac.html',isim:'Sarkaç Takibi',ikon:'🕰️',aciklama:'Ritmik göz kası egzersizi.'},
+];
+const EGZERSIZLER_ODAK=[
+  {dosya:'meteor-takibi.html',isim:'Meteor Takibi',ikon:'☄️',aciklama:'Hareketli hedef takip egzersizi.'},
+  {dosya:'ev-takibi.html',isim:'Ev Takibi',ikon:'🏠',aciklama:'Odak ve dikkat geliştirme.'},
+  {dosya:'sayi-avi.html',isim:'Sayı Avı',ikon:'🔢',aciklama:'Görsel tarama egzersizi.'},
+  {dosya:'merkez-nokta.html',isim:'Merkez Nokta',ikon:'👁️',aciklama:'Periferik görüş egzersizi.'},
+  {dosya:'gizli-nesne.html',isim:'Gizli Nesne',ikon:'🔭',aciklama:'Görsel tarama ve odak.'},
+];
+const EGZERSIZLER_OKUMA=[
+  {dosya:'akan-kelime.html',isim:'Akan Kelime',ikon:'🌊',aciklama:'Kelimeler tek tek akar, akıcılık gelişir.'},
+  {dosya:'akan-cumle.html',isim:'Akan Cümle',ikon:'📜',aciklama:'Cümleler otomatik kayar.'},
+  {dosya:'parca-yakalama.html',isim:'Parça Yakalama',ikon:'🌟',aciklama:'Kelime grupları flash gösterilir.'},
+  {dosya:'ileri-akis.html',isim:'İleri Akış',ikon:'🚀',aciklama:'Metin akar, geri dönüş yok.'},
+  {dosya:'kaybolan-metin.html',isim:'Kaybolan Metin',ikon:'🌑',aciklama:'Okunan satır silinir.'},
+  {dosya:'merkez-kelime.html',isim:'Merkez Kelime',ikon:'⭐',aciklama:'Görme alanı genişletme.'},
+  {dosya:'ana-fikir.html',isim:'Ana Fikir Avcısı',ikon:'🌍',aciklama:'Oku ve ana fikri bul.'},
+  {dosya:'hedef-kelime.html',isim:'Hedef Kelime',ikon:'🎯',aciklama:'Dikkatli okuma egzersizi.'},
+  {dosya:'orp-okuma.html',isim:'ORP Okuma',ikon:'✨',aciklama:'Optimal tanım noktası tekniği.'},
+];
+const EGZERSIZLER_DIGER=[
+  {dosya:'asama1.html',isim:'1. Aşama Modülleri',ikon:'🔤',aciklama:'Harf tamamlama, kelime avı ve daha fazlası.'},
+];
+
+const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',asama1:'🔤'};
+const MODUL_AD={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',kelime_merdiveni:'Kelime Merdiveni',azalan:'Azalan Kelime',kelime_zinciri:'Kelime Zinciri',benzer_kelime:'Benzer Kelime',kelime_avi:'Kelime Avı',hizli_gor:'Hızlı Gör-Söyle',tekerleme:'Tekerleme Piramit',dogru_kelime:'Doğru Kelimeyi Bul',hafiza_okuma:'Hafıza + Okuma',mini_hikaye:'Mini Hikâye'};
+
+let tumOgrenciler=[];
+
+// ── SAYFA YÖNETİMİ ──
+function sayfaGoster(sayfa,link){
+  document.querySelectorAll('.sayfa').forEach(s=>s.classList.remove('aktif'));
+  document.querySelectorAll('.sidebar-menu li a').forEach(a=>a.classList.remove('aktif'));
+  document.getElementById('sayfa-'+sayfa).classList.add('aktif');
+  if(link) link.classList.add('aktif');
+  if(sayfa==='genel'||sayfa==='ogrencilerim') ogrencileriYukle();
+  if(sayfa==='egzersizler') egzersizleriOlustur();
+  if(sayfa==='okuma-teknikleri') okumaTeknikleriOlustur();
+  if(sayfa==='diger-calismalar') digerCalismalariOlustur();
+}
+
+// ── EGZERSİZ KARTLARI ──
+function egzersizKarti(e,gridId){
+  const grid=document.getElementById(gridId);
+  const kart=document.createElement('div');kart.className='egzersiz-kart';
+  kart.innerHTML=`<div class="egzersiz-kart-ust"><div class="egzersiz-ikon">${e.ikon}</div><div><div class="egzersiz-isim">${e.isim}</div></div></div><div class="egzersiz-aciklama">${e.aciklama}</div><button class="btn-basla" onclick="window.open('${e.dosya}?from=ogretmen','_blank')">▶ Başlat</button>`;
+  grid.appendChild(kart);
+}
+function egzersizleriOlustur(){
+  document.getElementById('grid-goz-og').innerHTML='';
+  document.getElementById('grid-odak-og').innerHTML='';
+  EGZERSIZLER_GOZ.forEach(e=>egzersizKarti(e,'grid-goz-og'));
+  EGZERSIZLER_ODAK.forEach(e=>egzersizKarti(e,'grid-odak-og'));
+}
+function okumaTeknikleriOlustur(){
+  document.getElementById('grid-okuma-og').innerHTML='';
+  EGZERSIZLER_OKUMA.forEach(e=>egzersizKarti(e,'grid-okuma-og'));
+}
+function digerCalismalariOlustur(){
+  document.getElementById('grid-diger-og').innerHTML='';
+  EGZERSIZLER_DIGER.forEach(e=>egzersizKarti(e,'grid-diger-og'));
+}
+
+// ── ÖĞRENCİLERİ YÜKLE ──
+async function ogrencileriYukle(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?rol=eq.ogrenci&order=ad',{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    tumOgrenciler=await res.json();
+    ogrenciTablosuOlustur(tumOgrenciler);
+    ozetGuncelle(tumOgrenciler);
+  }catch(e){
+    document.getElementById('genel-ogrenci-liste').innerHTML='<div class="bos-durum">❌ Yüklenemedi: '+e.message+'</div>';
+  }
+}
+
+function ozetGuncelle(ogrenciler){
+  document.getElementById('ozToplamOgrenci').textContent=ogrenciler.length;
+  document.getElementById('ozAktif').textContent=ogrenciler.filter(o=>o.aktif).length||'—';
+  document.getElementById('ozBugun').textContent='—';
+  document.getElementById('ozProgram').textContent='—';
+}
+
+function ogrenciTablosuOlustur(ogrenciler){
+  const html=ogrenciler.length===0?'<div class="bos-durum">📭 Henüz öğrenci yok.</div>':`
+    <table>
+      <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Aşama</th><th>Gün</th><th>Enerji</th><th>Durum</th><th>İşlem</th></tr></thead>
+      <tbody>${ogrenciler.map(o=>`
+        <tr>
+          <td><strong>${o.ad||''} ${o.soyad||''}</strong></td>
+          <td>${o.kullanici_adi||'—'}</td>
+          <td><span class="asama-badge a${o.asama||1}">${o.asama||1}. Aşama</span></td>
+          <td>${o.mevcut_gun||1}/30</td>
+          <td>⚡ ${o.enerji||0}</td>
+          <td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>
+          <td style="white-space:nowrap">
+            <button class="islem-btn goruntule" onclick="ogrenciDetay(${JSON.stringify(o).replace(/"/g,'&quot;')})" style="margin-right:4px">👁 Görüntüle</button>
+            <a class="islem-btn program" href="program-yonetimi.html?from=ogretmen&asama=${o.asama||1}&gun=${o.mevcut_gun||1}">📅 Program</a>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  document.getElementById('genel-ogrenci-liste').innerHTML=html;
+  document.getElementById('ogrenci-liste').innerHTML=html;
+}
+
+function ogrenciAra(q){
+  const filtre=tumOgrenciler.filter(o=>
+    (o.ad+' '+o.soyad+' '+o.kullanici_adi).toLowerCase().includes(q.toLowerCase())
+  );
+  ogrenciTablosuOlustur(filtre);
+}
+
+// ── ÖĞRENCİ DETAY ──
+async function ogrenciDetay(o){
+  document.getElementById('detayBaslik').textContent=(o.ad||'')+' '+(o.soyad||'');
+  document.getElementById('detayKullanici').textContent=o.kullanici_adi||'—';
+  document.getElementById('detayAsama').textContent=(o.asama||1)+'. Aşama';
+  document.getElementById('detayEnerji').textContent='⚡ '+(o.enerji||0);
+  document.getElementById('detayGun').textContent=(o.mevcut_gun||1)+'. Gün';
+  document.getElementById('detayProgramLink').href='program-yonetimi.html?from=ogretmen&asama='+(o.asama||1)+'&gun='+(o.mevcut_gun||1);
+  // Programı yükle
+  document.getElementById('detayProgram').innerHTML='<div style="color:#94a3b8;font-size:0.85rem">Yükleniyor...</div>';
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/gunluk_program?asama=eq.'+(o.asama||1)+'&gun=eq.'+(o.mevcut_gun||1),{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const data=await res.json();
+    if(data.length&&data[0].gorevler.length){
+      document.getElementById('detayProgram').innerHTML=data[0].gorevler.map(g=>`
+        <div class="program-gorev">
+          <span class="program-gorev-ikon">${TIP_IKON[g.tip]||'📌'}</span>
+          <span class="program-gorev-isim">${g.tip==='asama1'?(MODUL_AD[g.modul]||g.modul):g.isim}</span>
+          <span class="program-gorev-sure">⏱ ${g.sure} dk</span>
+        </div>`).join('');
+    } else {
+      document.getElementById('detayProgram').innerHTML='<div style="color:#94a3b8;font-size:0.85rem">Bu gün için henüz program oluşturulmamış.</div>';
+    }
+  }catch(e){document.getElementById('detayProgram').innerHTML='<div style="color:#dc2626;font-size:0.85rem">Program yüklenemedi.</div>';}
+  modalAc('ogrenci-detay');
+}
+
+// ── ÖĞRENCİ KAYDET ──
+async function ogrenciKaydet(){
+  const ad=document.getElementById('oe-ad').value.trim();
+  const soyad=document.getElementById('oe-soyad').value.trim();
+  const kullanici=document.getElementById('oe-kullanici').value.trim();
+  const sifre=document.getElementById('oe-sifre').value;
+  const asama=parseInt(document.getElementById('oe-asama').value);
+  if(!ad||!kullanici||!sifre){bildirimGoster('⚠️ Ad, kullanıcı adı ve şifre zorunlu!','hata');return;}
+  try{
+    await fetch(SUPABASE_URL+'/rest/v1/kullanicilar',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
+      body:JSON.stringify({ad,soyad,kullanici_adi:kullanici,sifre,rol:'ogrenci',asama,mevcut_gun:1,enerji:0,aktif:true})
+    });
+    bildirimGoster('✅ Öğrenci eklendi!','basari');
+    modalKapat('ogrenci-ekle');
+    ogrencileriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+function modalAc(tip){document.getElementById('modal-'+tip).classList.add('acik');}
+function modalKapat(tip){document.getElementById('modal-'+tip).classList.remove('acik');}
+function bildirimGoster(mesaj,tip){const el=document.getElementById('bildirim');el.textContent=mesaj;el.className='bildirim '+tip;el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
+
+// Sayfa yüklendiğinde
+ogrencileriYukle();
+</script>
+</body>
+</html>

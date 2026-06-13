@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SinUs – Öğrenci Paneli</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#f4f6f9;color:#1e293b}
+nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:white}
+.logo span{color:#d4af37}
+.nav-sag{display:flex;align-items:center;gap:1rem}
+.kullanici-ad{color:rgba(255,255,255,0.8);font-size:0.88rem}
+.cikis-btn{background:rgba(255,255,255,0.1);color:white;border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+.cikis-btn:hover{background:rgba(255,255,255,0.2)}
+.ana{max-width:1100px;margin:0 auto;padding:2rem 5%}
+
+.hosgeldin{margin-bottom:1.5rem}
+.hosgeldin h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:#0a1628;margin-bottom:0.3rem}
+.hosgeldin p{color:#64748b;font-size:0.95rem}
+
+.ustbilgi{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
+.bilgi-kart{background:white;border-radius:14px;padding:1.2rem 1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.bilgi-label{font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem}
+.bilgi-deger{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#0a1628}
+.bilgi-alt{font-size:0.78rem;color:#64748b;margin-top:0.2rem}
+.streak-satir{display:flex;gap:5px;margin-top:0.5rem;flex-wrap:wrap}
+.streak-nokta{width:10px;height:10px;border-radius:50%;background:#e2e8f0}
+.streak-nokta.dolu{background:#f97316}
+.enerji-badge{display:inline-flex;align-items:center;gap:0.3rem;background:#fffbeb;color:#b45309;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.75rem;font-weight:600;margin-top:0.3rem}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.sol{display:flex;flex-direction:column;gap:1.5rem}
+.sag{display:flex;flex-direction:column;gap:1.5rem}
+.kart{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.kart-baslik{font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.2rem}
+.bugun-baslik{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem}
+.bugun-baslik h3{font-size:1rem;font-weight:600;color:#0a1628}
+.gun-badge{background:#eff6ff;color:#2563a8;padding:0.25rem 0.7rem;border-radius:20px;font-size:0.75rem;font-weight:600}
+
+/* GÖREV LİSTESİ */
+.gorev-liste{display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.5rem}
+.gorev{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:10px;font-size:0.88rem;transition:all 0.2s;cursor:pointer;text-decoration:none;color:inherit}
+.gorev.tamamlandi{background:#f0fdf4;color:#15803d;cursor:default}
+.gorev.aktif{background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe}
+.gorev.aktif:hover{background:#dbeafe}
+.gorev.kilitli{background:#f8fafc;color:#94a3b8;cursor:default;pointer-events:none}
+.gorev-ikon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0}
+.tamamlandi .gorev-ikon{background:#dcfce7}
+.aktif .gorev-ikon{background:#dbeafe}
+.kilitli .gorev-ikon{background:#f1f5f9}
+.gorev-bilgi{flex:1}
+.gorev-isim{font-weight:600}
+.gorev-sure{font-size:0.75rem;opacity:0.7;margin-top:1px}
+.gorev-sure-badge{font-size:0.72rem;background:rgba(0,0,0,0.06);border-radius:10px;padding:2px 8px;white-space:nowrap}
+
+/* DEVAM ET BUTONU */
+.basla-btn{width:100%;padding:0.9rem;background:#0a1628;color:white;border:none;border-radius:10px;font-size:1rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.2s;text-decoration:none;display:block;text-align:center}
+.basla-btn:hover{background:#1a3a6b}
+.basla-btn.tamamlandi-btn{background:#16a34a}
+.basla-btn.disabled{background:#94a3b8;cursor:not-allowed;pointer-events:none}
+
+/* İLERLEME */
+.ilerleme-bar{background:#f1f5f9;border-radius:10px;height:8px;margin-bottom:0.5rem;overflow:hidden}
+.ilerleme-dolu{height:100%;background:linear-gradient(90deg,#2563a8,#60a5fa);border-radius:10px;transition:width 0.5s}
+.ilerleme-yazi{display:flex;justify-content:space-between;font-size:0.78rem;color:#64748b}
+
+/* SIRALAMA */
+.siralama-liste{display:flex;flex-direction:column;gap:0.6rem}
+.siralama-item{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.8rem;border-radius:10px;font-size:0.88rem}
+.siralama-item.ben{background:#eff6ff;border:1.5px solid #bfdbfe}
+.siralama-no{width:24px;height:24px;border-radius:50%;background:#0a1628;color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0}
+.siralama-no.altin{background:#f59e0b}
+.siralama-no.gumus{background:#94a3b8}
+.siralama-no.bronz{background:#b45309}
+.siralama-isim{flex:1;font-weight:500;color:#1e293b}
+.siralama-puan{font-weight:700;color:#2563a8;font-size:0.85rem}
+
+/* ROZETLER */
+.rozet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem}
+.rozet{background:#f8fafc;border-radius:12px;padding:1rem;text-align:center;border:1.5px solid #e2e8f0}
+.rozet.kazanildi{background:#fffbeb;border-color:#fde68a}
+.rozet-ikon{font-size:1.8rem;margin-bottom:0.4rem}
+.rozet-isim{font-size:0.72rem;font-weight:600;color:#64748b}
+.rozet.kazanildi .rozet-isim{color:#92400e}
+
+/* YÜKLENİYOR */
+.yukleniyor{text-align:center;padding:2rem;color:#94a3b8}
+.bos-program{text-align:center;padding:2rem;color:#94a3b8;font-size:0.88rem;border:2px dashed #e2e8f0;border-radius:12px}
+
+/* TİP İKONLARI */
+.tip-goz{color:#15803d}
+.tip-odak{color:#1d4ed8}
+.tip-okuma{color:#b45309}
+.tip-asama1{color:#7e22ce}
+
+@media(max-width:768px){.grid{grid-template-columns:1fr}.ustbilgi{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Sin<span>Us</span></div>
+  <div class="nav-sag">
+    <span class="kullanici-ad" id="navKullanici">👋 Merhaba</span>
+    <button class="cikis-btn" onclick="cikisYap()">Çıkış Yap</button>
+  </div>
+</nav>
+
+<div class="ana">
+  <div class="hosgeldin">
+    <h1 id="hosgeldinBaslik">Hoş geldin! 👋</h1>
+    <p id="hosgeldinAlt">Yükleniyor...</p>
+  </div>
+
+  <div class="ustbilgi">
+    <div class="bilgi-kart">
+      <div class="bilgi-label">Enerji</div>
+      <div class="bilgi-deger" id="bilgiEnerji">⚡ —</div>
+      <div class="enerji-badge" id="bilgiEnerjiAlt">Bugün</div>
+    </div>
+    <div class="bilgi-kart">
+      <div class="bilgi-label">Günlük Seri</div>
+      <div class="bilgi-deger" id="bilgiSeri">🔥 —</div>
+      <div class="streak-satir" id="streakSatir"></div>
+    </div>
+    <div class="bilgi-kart">
+      <div class="bilgi-label">Aşama</div>
+      <div class="bilgi-deger" id="bilgiAsama">—</div>
+      <div class="bilgi-alt" id="bilgiAsamaAlt">—</div>
+    </div>
+    <div class="bilgi-kart">
+      <div class="bilgi-label">Sıralama</div>
+      <div class="bilgi-deger" id="bilgiSiralama">#—</div>
+      <div class="bilgi-alt">Bu aşamada</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="sol">
+      <!-- BUGÜNKÜ GÖREVLER -->
+      <div class="kart">
+        <div class="bugun-baslik">
+          <h3>⚡ Bugünkü Görevler</h3>
+          <span class="gun-badge" id="gunBadge">— / 30</span>
+        </div>
+        <div class="gorev-liste" id="gorevListe">
+          <div class="yukleniyor">⏳ Program yükleniyor...</div>
+        </div>
+        <div id="baslaBtn"></div>
+      </div>
+
+      <!-- GENEL İLERLEME -->
+      <div class="kart">
+        <div class="kart-baslik">📈 Genel İlerleme</div>
+        <div style="margin-bottom:1rem">
+          <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.4rem">
+            <span id="ilerlemeAsamaAd">Aşama</span>
+            <span style="font-weight:600;color:#2563a8" id="ilerlemeGunler">— / 30 gün</span>
+          </div>
+          <div class="ilerleme-bar"><div class="ilerleme-dolu" id="ilerlemeBar" style="width:0%"></div></div>
+          <div class="ilerleme-yazi"><span id="ilerlemeYuzde">%0 tamamlandı</span><span id="ilerlemeKalan">— gün kaldı</span></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.4rem">
+            <span>Okuma Hızı</span>
+            <span style="font-weight:600;color:#2563a8" id="okumHizi">— kpm</span>
+          </div>
+          <div class="ilerleme-bar"><div class="ilerleme-dolu" id="hizBar" style="width:0%"></div></div>
+          <div class="ilerleme-yazi"><span>Hedef: 200 kpm</span><span id="hizYuzde">%0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sag">
+      <!-- SIRALAMA -->
+      <div class="kart">
+        <div class="kart-baslik">🏆 Sıralama</div>
+        <div class="siralama-liste" id="siralamaListe">
+          <div class="yukleniyor">⏳ Yükleniyor...</div>
+        </div>
+      </div>
+
+      <!-- ROZETLER -->
+      <div class="kart">
+        <div class="kart-baslik">🎖️ Rozetler</div>
+        <div class="rozet-grid" id="rozetGrid">
+          <div class="rozet kazanildi"><div class="rozet-ikon">📖</div><div class="rozet-isim">İlk Gün</div></div>
+          <div class="rozet"><div class="rozet-ikon">🔥</div><div class="rozet-isim">7 Gün Seri</div></div>
+          <div class="rozet"><div class="rozet-ikon">⚡</div><div class="rozet-isim">Hız Ustası</div></div>
+          <div class="rozet"><div class="rozet-ikon">🌌</div><div class="rozet-isim">Göz Ustası</div></div>
+          <div class="rozet"><div class="rozet-ikon">🎯</div><div class="rozet-isim">Dikkat Ustası</div></div>
+          <div class="rozet"><div class="rozet-ikon">🏅</div><div class="rozet-isim">30 Gün</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://sfyjnwhblxldrzbrnyva.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmeWpud2hibHhsZHJ6YnJueXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NDc4NTYsImV4cCI6MjA5NjMyMzg1Nn0.3mrQ2JSX4InY89iUnoJUCnWefxHXHjgM059PeLQedew';
+
+const ASAMA_AD={1:'Okuma Temeli',2:'Akıcı Okuma',3:'Hız + Anlama',4:'Sınav Odaklı'};
+const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',asama1:'🔤'};
+const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği',asama1:'1. Aşama'};
+const MODUL_AD={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',kelime_merdiveni:'Kelime Merdiveni',azalan:'Azalan Kelime',kelime_zinciri:'Kelime Zinciri',benzer_kelime:'Benzer Kelime',kelime_avi:'Kelime Avı',hizli_gor:'Hızlı Gör-Söyle',tekerleme:'Tekerleme Piramit',dogru_kelime:'Doğru Kelimeyi Bul',hafiza_okuma:'Hafıza + Okuma',mini_hikaye:'Mini Hikâye'};
+
+let ogrenci=null;
+let mevcutGorevler=[];
+let tamamlananIdx=-1; // en son tamamlanan görevin indeksi
+
+// ── GİRİŞ KONTROL ──
+async function panelYukle(){
+  // localStorage'dan kullanıcı al (giriş sayfası bunu yazıyor)
+  const kullaniciObj=localStorage.getItem('okubit_kullanici_obj');
+  if(!kullaniciObj){location.href='giris.html';return;}
+
+  let kullanici;
+  try{ kullanici = JSON.parse(kullaniciObj).kullanici_adi; }catch(e){location.href='giris.html';return;}
+  if(!kullanici){location.href='giris.html';return;}
+
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?kullanici_adi=eq.'+encodeURIComponent(kullanici),{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const data=await res.json();
+    if(!data.length){location.href='giris.html';return;}
+    ogrenci=data[0];
+    if(ogrenci.rol!=='ogrenci'){location.href='giris.html';return;}
+    bilgileriYukle();
+    programiYukle();
+    siralamaYukle();
+  }catch(e){
+    // Geliştirme modunda demo veri
+    ogrenci={ad:'Ali',soyad:'Demir',kullanici_adi:'ali2016',asama:2,mevcut_gun:7,enerji:248,aktif:true};
+    bilgileriYukle();
+    programiYukle();
+    siralamaYukle();
+  }
+}
+
+// ── BİLGİLERİ DOLDUR ──
+function bilgileriYukle(){
+  const ad=ogrenci.ad||'Öğrenci';
+  document.getElementById('navKullanici').textContent='👋 Merhaba, '+ad;
+  document.getElementById('hosgeldinBaslik').textContent='Hoş geldin, '+ad+'! 👋';
+
+  const asama=ogrenci.asama||1;
+  const gun=ogrenci.mevcut_gun||1;
+  const enerji=ogrenci.enerji||0;
+
+  document.getElementById('hosgeldinAlt').textContent=asama+'. Aşama · '+gun+'. Gün · Hadi başlayalım!';
+  document.getElementById('bilgiEnerji').textContent='⚡ '+enerji;
+  document.getElementById('bilgiAsama').textContent=asama+'. Aşama';
+  document.getElementById('bilgiAsamaAlt').textContent=ASAMA_AD[asama]||'';
+  document.getElementById('gunBadge').textContent='Gün '+gun+' / 30';
+
+  // İlerleme
+  const yuzde=Math.round((gun/30)*100);
+  document.getElementById('ilerlemeAsamaAd').textContent=asama+'. Aşama';
+  document.getElementById('ilerlemeGunler').textContent=gun+' / 30 gün';
+  document.getElementById('ilerlemeBar').style.width=yuzde+'%';
+  document.getElementById('ilerlemeYuzde').textContent='%'+yuzde+' tamamlandı';
+  document.getElementById('ilerlemeKalan').textContent=(30-gun)+' gün kaldı';
+
+  // Streak
+  const seri=ogrenci.gunluk_seri||0;
+  document.getElementById('bilgiSeri').textContent='🔥 '+seri;
+  const streak=document.getElementById('streakSatir');
+  streak.innerHTML='';
+  for(let i=0;i<10;i++){
+    const n=document.createElement('div');
+    n.className='streak-nokta'+(i<seri?' dolu':'');
+    streak.appendChild(n);
+  }
+
+  // Okuma hızı
+  const hiz=ogrenci.okuma_hizi||0;
+  document.getElementById('okumHizi').textContent=(hiz||'—')+' kpm';
+  const hizYuzde=Math.min(100,Math.round((hiz/200)*100));
+  document.getElementById('hizBar').style.width=hizYuzde+'%';
+  document.getElementById('hizYuzde').textContent='%'+hizYuzde;
+}
+
+// ── PROGRAMI YÜKLE ──
+async function programiYukle(){
+  const asama=ogrenci.asama||1;
+  const gun=ogrenci.mevcut_gun||1;
+
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/gunluk_program?asama=eq.'+asama+'&gun=eq.'+gun,{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const data=await res.json();
+
+    if(!data.length||!data[0].gorevler.length){
+      document.getElementById('gorevListe').innerHTML='<div class="bos-program">📋 Bu gün için henüz program oluşturulmamış.<br><small>Öğretmenin yakında ekleyecek!</small></div>';
+      document.getElementById('baslaBtn').innerHTML='';
+      return;
+    }
+
+    mevcutGorevler=data[0].gorevler;
+    // Tamamlananları localStorage'dan al (sekmeler arası paylaşım için)
+    const keyTamamlanan='okubit_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
+    tamamlananIdx=parseInt(localStorage.getItem(keyTamamlanan)||'-1');
+    gorevListesiOlustur();
+
+  }catch(e){
+    document.getElementById('gorevListe').innerHTML='<div class="bos-program">❌ Program yüklenemedi.</div>';
+  }
+}
+
+function gorevListesiOlustur(){
+  const liste=document.getElementById('gorevListe');
+  liste.innerHTML='';
+
+  mevcutGorevler.forEach((g,i)=>{
+    const tamamlandi=i<=tamamlananIdx;
+    const aktif=i===tamamlananIdx+1;
+    const kilitli=i>tamamlananIdx+1;
+
+    const isim=g.tip==='asama1'?(MODUL_AD[g.modul]||g.modul):g.isim;
+    const ikon=TIP_IKON[g.tip]||'📌';
+
+    const div=document.createElement('div');
+
+    if(tamamlandi){
+      div.className='gorev tamamlandi';
+      div.innerHTML=`<div class="gorev-ikon">✅</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''}</div></div><span class="gorev-sure-badge">✓ Tamamlandı</span>`;
+    } else if(aktif){
+      const url=gorevUrl(g);
+      div.className='gorev aktif';
+      div.innerHTML=`<div class="gorev-ikon">▶️</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${g.sure} dk</div></div><span class="gorev-sure-badge">Başlat →</span>`;
+      div.onclick=()=>gorevAc(i,url);
+    } else {
+      div.className='gorev kilitli';
+      div.innerHTML=`<div class="gorev-ikon">🔒</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${g.sure} dk</div></div>`;
+    }
+    liste.appendChild(div);
+  });
+
+  // Buton güncelle
+  const baslaDiv=document.getElementById('baslaBtn');
+  const aktifIdx=tamamlananIdx+1;
+
+  if(aktifIdx>=mevcutGorevler.length){
+    // Hepsi tamamlandı
+    baslaDiv.innerHTML='<div class="basla-btn tamamlandi-btn" style="cursor:default">🎉 Bugün Tamamlandı!</div>';
+  } else {
+    const g=mevcutGorevler[aktifIdx];
+    const isim=g.tip==='asama1'?(MODUL_AD[g.modul]||g.modul):g.isim;
+    const url=gorevUrl(g);
+    baslaDiv.innerHTML=`<a href="${url}" target="_blank" class="basla-btn" onclick="gorevAc(${aktifIdx},'${url}')">▶️ ${isim} — Başlat</a>`;
+  }
+}
+
+function gorevUrl(g){
+  if(g.tip==='asama1') return 'asama1.html?modul='+(g.modul||'')+'&from=ogrenci';
+  return (g.dosya||'#')+'?from=ogrenci';
+}
+
+function gorevAc(idx,url){
+  // Hedef görevin anahtarını localStorage'a yaz, egzersiz bittiğinde bu key işaretlenecek
+  const asama=ogrenci.asama||1;
+  const gun=ogrenci.mevcut_gun||1;
+  const bekleyenKey='okubit_bekleyen_gorev';
+  localStorage.setItem(bekleyenKey, JSON.stringify({
+    kullanici: ogrenci.kullanici_adi,
+    asama, gun, idx,
+    tamamlandiMi: false
+  }));
+  // Sekme açılır, kullanıcı dönünce kontrol edilecek
+}
+
+// Sayfa odaklandığında (egzersiz sekmesinden geri dönünce) kontrol et
+window.addEventListener('focus', kontrolEtTamamlandi);
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden) kontrolEtTamamlandi();
+});
+
+function kontrolEtTamamlandi(){
+  if(!ogrenci) return;
+  const bekleyenKey='okubit_bekleyen_gorev';
+  const veri=localStorage.getItem(bekleyenKey);
+  if(!veri) return;
+  try{
+    const b=JSON.parse(veri);
+    const asama=ogrenci.asama||1;
+    const gun=ogrenci.mevcut_gun||1;
+    if(b.kullanici===ogrenci.kullanici_adi && b.asama===asama && b.gun===gun && b.tamamlandiMi===true){
+      // Görevi tamamlandı yap
+      const key='okubit_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
+      const oncekiIdx=parseInt(localStorage.getItem(key)||'-1');
+      if(b.idx>oncekiIdx){
+        tamamlananIdx=b.idx;
+        localStorage.setItem(key,tamamlananIdx);
+        gorevListesiOlustur();
+        // Enerji güncelle (egzersiz başarı durumuna göre puan localStorage'dan okunabilir)
+        const kazanilanPuan=b.puan||10;
+        enerjiGuncelle(kazanilanPuan);
+      }
+      localStorage.removeItem(bekleyenKey);
+    }
+  }catch(e){}
+}
+
+async function enerjiGuncelle(puan){
+  const yeniEnerji=(ogrenci.enerji||0)+puan;
+  ogrenci.enerji=yeniEnerji;
+  document.getElementById('bilgiEnerji').textContent='⚡ '+yeniEnerji;
+  try{
+    await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi),{
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({enerji:yeniEnerji})
+    });
+  }catch(e){}
+}
+
+// ── SIRALAMA YÜKLE ──
+async function siralamaYukle(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?rol=eq.ogrenci&asama=eq.'+(ogrenci.asama||1)+'&order=enerji.desc&limit=5',{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const data=await res.json();
+    const renkler=['altin','gumus','bronz','',''];
+    let benimSira=data.findIndex(o=>o.kullanici_adi===ogrenci.kullanici_adi)+1;
+    document.getElementById('bilgiSiralama').textContent='#'+(benimSira||'—');
+
+    const html=data.map((o,i)=>`
+      <div class="siralama-item ${o.kullanici_adi===ogrenci.kullanici_adi?'ben':''}">
+        <div class="siralama-no ${renkler[i]||''}">${i+1}</div>
+        <span class="siralama-isim">${o.ad||o.kullanici_adi}${o.kullanici_adi===ogrenci.kullanici_adi?' (Sen)':''}</span>
+        <span class="siralama-puan">${o.enerji||0} ⚡</span>
+      </div>`).join('');
+    document.getElementById('siralamaListe').innerHTML=html||'<div style="color:#94a3b8;font-size:0.85rem;padding:1rem">Henüz sıralama yok.</div>';
+  }catch(e){
+    document.getElementById('siralamaListe').innerHTML='<div style="color:#94a3b8;font-size:0.85rem">Sıralama yüklenemedi.</div>';
+  }
+}
+
+function cikisYap(){
+  localStorage.removeItem('okubit_kullanici_obj');
+  sessionStorage.removeItem('okubit_kullanici');
+  location.href='giris.html';
+}
+
+// Başlat
+panelYukle();
+</script>
+</body>
+</html>
