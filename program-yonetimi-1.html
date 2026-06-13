@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Program Yönetimi – SinUs</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#f4f6f9;color:#1e293b;min-height:100vh}
+nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:white}
+.logo span{color:#d4af37}
+.nav-sag{display:flex;align-items:center;gap:1rem}
+.geri-btn{background:rgba(255,255,255,0.1);color:white;border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem}
+.geri-btn:hover{background:rgba(255,255,255,0.2)}
+.ana{max-width:1200px;margin:0 auto;padding:2rem}
+.ust-baslik{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.ust-baslik h1{font-family:'Playfair Display',serif;font-size:1.6rem;color:#0a1628}
+.ust-baslik p{color:#64748b;font-size:0.88rem;margin-top:0.3rem}
+.secici-kart{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:1.5rem}
+.secici-row{display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap}
+.secici-grup{display:flex;flex-direction:column;gap:0.4rem}
+.secici-grup label{font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
+.secici-select{padding:0.6rem 1rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;background:white;min-width:160px}
+.secici-select:focus{border-color:#2563a8}
+.yukle-btn{padding:0.65rem 1.4rem;background:#0a1628;color:white;border:none;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.yukle-btn:hover{background:#1a3a6b}
+.ana-grid{display:grid;grid-template-columns:1fr 380px;gap:1.5rem}
+.program-kart{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.program-kart-ust{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem}
+.program-kart-baslik{font-size:0.82rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
+.kaydet-btn{padding:0.55rem 1.2rem;background:#16a34a;color:white;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.kaydet-btn:hover{background:#15803d}
+.kaydet-btn:disabled{opacity:0.5;cursor:not-allowed}
+.gorev-listesi{display:flex;flex-direction:column;gap:0.6rem;min-height:120px;margin-bottom:1rem}
+.gorev-item{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;transition:all 0.2s}
+.gorev-item:hover{border-color:#bfdbfe;background:#f0f7ff}
+.gorev-tip-icon{font-size:1.2rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;flex-shrink:0}
+.gorev-tip-icon.goz{background:#f0fdf4}
+.gorev-tip-icon.odak{background:#eff6ff}
+.gorev-tip-icon.okuma{background:#fefce8}
+.gorev-tip-icon.asama1{background:#fdf4ff}
+.gorev-bilgi{flex:1}
+.gorev-isim{font-size:0.88rem;font-weight:600;color:#1e293b}
+.gorev-alt{font-size:0.74rem;color:#64748b;margin-top:2px}
+.gorev-sure{font-size:0.78rem;color:#64748b;white-space:nowrap}
+.gorev-sil{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;padding:4px;border-radius:4px;transition:color 0.2s}
+.gorev-sil:hover{color:#dc2626}
+.gorev-yukari,.gorev-asagi{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:0.9rem;padding:4px;border-radius:4px;transition:color 0.2s}
+.gorev-yukari:hover,.gorev-asagi:hover{color:#2563a8}
+.bos-program{text-align:center;padding:2.5rem;color:#94a3b8;font-size:0.9rem;border:2px dashed #e2e8f0;border-radius:12px}
+.ekle-kart{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);height:fit-content;position:sticky;top:76px}
+.ekle-kart-baslik{font-size:0.82rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.2rem}
+.tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.2rem}
+.tip-btn{padding:0.7rem 0.5rem;border:1.5px solid #e2e8f0;border-radius:10px;background:white;cursor:pointer;text-align:center;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.tip-btn:hover{border-color:#bfdbfe;background:#f0f7ff}
+.tip-btn.secili{border-color:#2563a8;background:#eff6ff}
+.tip-btn-icon{font-size:1.4rem;display:block;margin-bottom:4px}
+.tip-btn-isim{font-size:0.75rem;font-weight:600;color:#475569}
+.form-grup{margin-bottom:1rem}
+.form-grup label{display:block;font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:0.4rem}
+.form-select,.form-input{width:100%;padding:0.6rem 0.9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none}
+.form-select:focus,.form-input:focus{border-color:#2563a8}
+.ekle-gorev-btn{width:100%;padding:0.75rem;background:#2563a8;color:white;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.2s}
+.ekle-gorev-btn:hover{background:#1d4ed8}
+.ekle-gorev-btn:disabled{opacity:0.4;cursor:not-allowed}
+.badge{display:inline-block;padding:0.18rem 0.6rem;border-radius:20px;font-size:0.72rem;font-weight:600}
+.badge.goz{background:#f0fdf4;color:#15803d}
+.badge.odak{background:#eff6ff;color:#1d4ed8}
+.badge.okuma{background:#fefce8;color:#b45309}
+.badge.asama1{background:#fdf4ff;color:#7e22ce}
+.hizli-doldur-kart{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:1.5rem}
+.hizli-baslik{font-size:0.82rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem}
+.hizli-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.75rem}
+.hizli-btn{padding:0.7rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;color:#475569;text-align:left;transition:all 0.2s}
+.hizli-btn:hover{border-color:#bfdbfe;background:#f0f7ff;color:#1d4ed8}
+.hizli-btn span{display:block;font-size:0.72rem;font-weight:400;color:#94a3b8;margin-top:2px}
+.ozet-row{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;padding-top:1rem;border-top:1px solid #f1f5f9}
+.ozet-chip{background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:0.3rem 0.8rem;font-size:0.78rem;color:#475569}
+.bildirim{position:fixed;top:1.5rem;right:1.5rem;padding:0.9rem 1.5rem;border-radius:10px;font-size:0.88rem;font-weight:600;z-index:999;display:none;animation:fadeIn 0.3s}
+.bildirim.basari{background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0}
+.bildirim.hata{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.ana-grid{grid-template-columns:1fr}.ekle-kart{position:static}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Sin<span>Us</span> <span style="font-size:0.8rem;opacity:0.6;font-family:'DM Sans',sans-serif;font-weight:400">Program Yönetimi</span></div>
+  <div class="nav-sag">
+    <a id="geriLink" href="admin.html" class="geri-btn">← Panele Dön</a>
+  </div>
+</nav>
+
+<div class="ana">
+  <div class="ust-baslik">
+    <div>
+      <h1>📅 Program Yönetimi</h1>
+      <p>Her aşama ve gün için egzersiz, okuma tekniği ve çalışmaları buradan düzenleyin.</p>
+    </div>
+  </div>
+
+  <div class="secici-kart">
+    <div class="secici-row">
+      <div class="secici-grup">
+        <label>Aşama</label>
+        <select class="secici-select" id="secAsama">
+          <option value="1">1. Aşama – Okuma Temeli</option>
+          <option value="2">2. Aşama – Akıcı Okuma</option>
+          <option value="3">3. Aşama – Hız + Anlama</option>
+          <option value="4">4. Aşama – Sınav Odaklı</option>
+        </select>
+      </div>
+      <div class="secici-grup">
+        <label>Gün</label>
+        <select class="secici-select" id="secGun">
+          <script>for(var i=1;i<=30;i++) document.write('<option value="'+i+'">'+i+'. Gün</option>')</script>
+        </select>
+      </div>
+      <button class="yukle-btn" onclick="programYukle()">📂 Yükle</button>
+      <div id="durumChip" style="display:none;padding:0.5rem 1rem;border-radius:20px;font-size:0.8rem;font-weight:600;align-self:center"></div>
+    </div>
+  </div>
+
+  <div class="hizli-doldur-kart" id="hizliDoldurKart" style="display:none">
+    <div class="hizli-baslik">⚡ Hızlı Şablon</div>
+    <div class="hizli-grid">
+      <button class="hizli-btn" onclick="sablonUygula('temel')">🔤 1. Aşama Temel<span>Göz + Harf + Hikâye</span></button>
+      <button class="hizli-btn" onclick="sablonUygula('akici')">📖 Akıcılık Programı<span>Göz + Akan Kelime + ORP</span></button>
+      <button class="hizli-btn" onclick="sablonUygula('hiz')">🚀 Hız Programı<span>Göz + Parça + İleri Akış</span></button>
+      <button class="hizli-btn" onclick="sablonUygula('anlama')">🧠 Anlama Programı<span>Göz + Ana Fikir + Hedef</span></button>
+    </div>
+  </div>
+
+  <div class="ana-grid">
+    <div class="program-kart">
+      <div class="program-kart-ust">
+        <div>
+          <div class="program-kart-baslik" id="programBaslik">Program seçin</div>
+          <div id="ozetRow" class="ozet-row" style="display:none"></div>
+        </div>
+        <button class="kaydet-btn" id="kaydetBtn" onclick="programKaydet()" disabled>💾 Kaydet</button>
+      </div>
+      <div class="gorev-listesi" id="gorevListesi">
+        <div class="bos-durum" style="text-align:center;padding:2.5rem;color:#94a3b8">Bir aşama ve gün seçip "Yükle" butonuna tıklayın</div>
+      </div>
+    </div>
+
+    <div class="ekle-kart">
+      <div class="ekle-kart-baslik">➕ Görev Ekle</div>
+      <div class="tip-grid">
+        <button class="tip-btn" id="tipGoz" onclick="tipSec('goz')"><span class="tip-btn-icon">👁️</span><span class="tip-btn-isim">Göz Egzersizi</span></button>
+        <button class="tip-btn" id="tipOdak" onclick="tipSec('odak')"><span class="tip-btn-icon">🎯</span><span class="tip-btn-isim">Odak / Dikkat</span></button>
+        <button class="tip-btn" id="tipOkuma" onclick="tipSec('okuma')"><span class="tip-btn-icon">📖</span><span class="tip-btn-isim">Okuma Tekniği</span></button>
+        <button class="tip-btn" id="tipAsama1" onclick="tipSec('asama1')"><span class="tip-btn-icon">🔤</span><span class="tip-btn-isim">1. Aşama</span></button>
+      </div>
+      <div id="ekleForm">
+        <div class="form-grup" id="formGrupEgzersiz" style="display:none">
+          <label>Egzersiz</label>
+          <select class="form-select" id="secEgzersiz"></select>
+        </div>
+        <div class="form-grup" id="formGrupModul" style="display:none">
+          <label>Modül</label>
+          <select class="form-select" id="secModul">
+            <option value="harf_tamamlama">Harf Tamamlama</option>
+            <option value="karisik_harf">Karışık Harf</option>
+            <option value="kelime_merdiveni">Kelime Merdiveni</option>
+            <option value="azalan">Azalan Kelime</option>
+            <option value="kelime_zinciri">Kelime Zinciri</option>
+            <option value="benzer_kelime">Benzer Kelime</option>
+            <option value="kelime_avi">Kelime Avı</option>
+            <option value="hizli_gor">Hızlı Gör-Söyle</option>
+            <option value="tekerleme">Tekerleme Piramit</option>
+            <option value="dogru_kelime">Doğru Kelimeyi Bul</option>
+            <option value="hafiza_okuma">Hafıza + Okuma</option>
+            <option value="mini_hikaye">Mini Hikâye</option>
+          </select>
+        </div>
+        <div class="form-grup">
+          <label>Süre (dakika)</label>
+          <input type="number" class="form-input" id="ekSure" value="3" min="1" max="30">
+        </div>
+        <button class="ekle-gorev-btn" id="ekleGorevBtn" onclick="gorevEkle()" disabled>+ Listeye Ekle</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bildirim" id="bildirim"></div>
+
+<script>
+const SUPABASE_URL='https://sfyjnwhblxldrzbrnyva.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmeWpud2hibHhsZHJ6YnJueXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NDc4NTYsImV4cCI6MjA5NjMyMzg1Nn0.3mrQ2JSX4InY89iUnoJUCnWefxHXHjgM059PeLQedew';
+
+(function(){
+  const p=new URLSearchParams(window.location.search);
+  const from=p.get('from');
+  document.getElementById('geriLink').href=from==='ogretmen'?'ogretmen.html':'admin.html';
+  const asama=p.get('asama');const gun=p.get('gun');
+  if(asama){document.getElementById('secAsama').value=asama;}
+  if(gun){document.getElementById('secGun').value=gun;}
+  if(asama&&gun) setTimeout(programYukle,300);
+})();
+
+const EGZERSIZLER={
+  goz:[{dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip'},{dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip'},{dosya:'goz-sekil.html',isim:'Şekil Takibi'},{dosya:'goz-genel.html',isim:'Genel Hareket'},{dosya:'goz-zoom.html',isim:'Genişleme-Daralma'},{dosya:'goz-sarkac.html',isim:'Sarkaç Takibi'}],
+  odak:[{dosya:'meteor-takibi.html',isim:'Meteor Takibi'},{dosya:'ev-takibi.html',isim:'Ev Takibi'},{dosya:'sayi-avi.html',isim:'Sayı Avı'},{dosya:'merkez-nokta.html',isim:'Merkez Nokta'},{dosya:'gizli-nesne.html',isim:'Gizli Nesne'}],
+  okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'parca-yakalama.html',isim:'Parça Yakalama'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'ana-fikir.html',isim:'Ana Fikir Avcısı'},{dosya:'hedef-kelime.html',isim:'Hedef Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'}]
+};
+const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',asama1:'🔤'};
+const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği',asama1:'1. Aşama'};
+const MODUL_AD={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',kelime_merdiveni:'Kelime Merdiveni',azalan:'Azalan Kelime',kelime_zinciri:'Kelime Zinciri',benzer_kelime:'Benzer Kelime',kelime_avi:'Kelime Avı',hizli_gor:'Hızlı Gör-Söyle',tekerleme:'Tekerleme Piramit',dogru_kelime:'Doğru Kelimeyi Bul',hafiza_okuma:'Hafıza + Okuma',mini_hikaye:'Mini Hikâye'};
+const SABLONLAR={
+  temel:[{tip:'goz',dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip',sure:2},{tip:'goz',dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip',sure:2},{tip:'asama1',modul:'harf_tamamlama',isim:'Harf Tamamlama',sure:3},{tip:'asama1',modul:'kelime_merdiveni',isim:'Kelime Merdiveni',sure:3},{tip:'asama1',modul:'mini_hikaye',isim:'Mini Hikâye',sure:5}],
+  akici:[{tip:'goz',dosya:'goz-sarkac.html',isim:'Sarkaç Takibi',sure:2},{tip:'odak',dosya:'meteor-takibi.html',isim:'Meteor Takibi',sure:3},{tip:'okuma',dosya:'akan-kelime.html',isim:'Akan Kelime',sure:5},{tip:'okuma',dosya:'orp-okuma.html',isim:'ORP Okuma',sure:5}],
+  hiz:[{tip:'goz',dosya:'goz-zoom.html',isim:'Genişleme-Daralma',sure:2},{tip:'odak',dosya:'sayi-avi.html',isim:'Sayı Avı',sure:3},{tip:'okuma',dosya:'parca-yakalama.html',isim:'Parça Yakalama',sure:5},{tip:'okuma',dosya:'ileri-akis.html',isim:'İleri Akış',sure:5}],
+  anlama:[{tip:'goz',dosya:'goz-genel.html',isim:'Genel Hareket',sure:2},{tip:'odak',dosya:'merkez-nokta.html',isim:'Merkez Nokta',sure:3},{tip:'okuma',dosya:'ana-fikir.html',isim:'Ana Fikir Avcısı',sure:5},{tip:'okuma',dosya:'hedef-kelime.html',isim:'Hedef Kelime',sure:5}]
+};
+
+let mevcutGorevler=[];
+let secilenTip=null;
+let mevcutProgramId=null;
+
+function tipSec(tip){
+  secilenTip=tip;
+  document.querySelectorAll('.tip-btn').forEach(b=>b.classList.remove('secili'));
+  document.getElementById('tip'+tip.charAt(0).toUpperCase()+tip.slice(1)).classList.add('secili');
+  document.getElementById('formGrupEgzersiz').style.display=tip==='asama1'?'none':'block';
+  document.getElementById('formGrupModul').style.display=tip==='asama1'?'block':'none';
+  document.getElementById('ekleGorevBtn').disabled=false;
+  if(tip!=='asama1'){
+    const sec=document.getElementById('secEgzersiz');sec.innerHTML='';
+    (EGZERSIZLER[tip]||[]).forEach(e=>{const opt=document.createElement('option');opt.value=e.dosya;opt.textContent=e.isim;sec.appendChild(opt);});
+  }
+}
+
+async function programYukle(){
+  const asama=document.getElementById('secAsama').value;
+  const gun=document.getElementById('secGun').value;
+  document.getElementById('programBaslik').textContent=asama+'. Aşama · '+gun+'. Gün';
+  document.getElementById('kaydetBtn').disabled=false;
+  document.getElementById('hizliDoldurKart').style.display='block';
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/gunluk_program?asama=eq.'+asama+'&gun=eq.'+gun,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const data=await res.json();
+    if(data.length>0){mevcutGorevler=[...data[0].gorevler];mevcutProgramId=data[0].id;durumGoster('kayitli');}
+    else{mevcutGorevler=[];mevcutProgramId=null;durumGoster('bos');}
+    listeGuncelle();
+  }catch(e){bildirimGoster('❌ Yükleme hatası: '+e.message,'hata');}
+}
+
+function durumGoster(d){
+  const c=document.getElementById('durumChip');c.style.display='inline-flex';
+  if(d==='kayitli'){c.style.background='#f0fdf4';c.style.color='#16a34a';c.style.border='1px solid #bbf7d0';c.textContent='✓ Kayıtlı program var';}
+  else{c.style.background='#fefce8';c.style.color='#b45309';c.style.border='1px solid #fde68a';c.textContent='○ Henüz program yok';}
+}
+
+function listeGuncelle(){
+  const liste=document.getElementById('gorevListesi');
+  if(!mevcutGorevler.length){liste.innerHTML='<div class="bos-program">Bu gün için henüz görev eklenmemiş.<br><small>Sağdaki panelden görev ekleyin veya şablon kullanın.</small></div>';ozetGuncelle();return;}
+  liste.innerHTML='';
+  mevcutGorevler.forEach((g,i)=>{
+    const div=document.createElement('div');div.className='gorev-item';
+    const isim=g.tip==='asama1'?(MODUL_AD[g.modul]||g.modul):g.isim;
+    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span></div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
+    liste.appendChild(div);
+  });
+  ozetGuncelle();
+}
+
+function ozetGuncelle(){
+  const row=document.getElementById('ozetRow');
+  if(!mevcutGorevler.length){row.style.display='none';return;}
+  row.style.display='flex';
+  const toplamSure=mevcutGorevler.reduce((t,g)=>t+(g.sure||0),0);
+  const sayilar={};mevcutGorevler.forEach(g=>sayilar[g.tip]=(sayilar[g.tip]||0)+1);
+  row.innerHTML=`<span class="ozet-chip">⏱ Toplam ${toplamSure} dk</span>`+Object.entries(sayilar).map(([t,s])=>`<span class="ozet-chip">${TIP_IKON[t]} ${s} ${TIP_AD[t]}</span>`).join('');
+}
+
+function gorevEkle(){
+  if(!secilenTip) return;
+  const sure=parseInt(document.getElementById('ekSure').value)||3;
+  let gorev;
+  if(secilenTip==='asama1'){const modul=document.getElementById('secModul').value;gorev={tip:'asama1',modul,isim:MODUL_AD[modul],sure};}
+  else{const dosya=document.getElementById('secEgzersiz').value;const egz=(EGZERSIZLER[secilenTip]||[]).find(e=>e.dosya===dosya);gorev={tip:secilenTip,dosya,isim:egz?egz.isim:dosya,sure};}
+  mevcutGorevler.push(gorev);listeGuncelle();bildirimGoster('✅ Görev eklendi!','basari');
+}
+
+function gorevSil(idx){mevcutGorevler.splice(idx,1);listeGuncelle();}
+function siraDegistir(idx,yon){const y=idx+yon;if(y<0||y>=mevcutGorevler.length)return;[mevcutGorevler[idx],mevcutGorevler[y]]=[mevcutGorevler[y],mevcutGorevler[idx]];listeGuncelle();}
+
+function sablonUygula(s){
+  if(mevcutGorevler.length>0&&!confirm('Mevcut görevlerin üzerine yazılacak. Devam edilsin mi?'))return;
+  mevcutGorevler=[...SABLONLAR[s]];listeGuncelle();bildirimGoster('✅ Şablon uygulandı!','basari');
+}
+
+async function programKaydet(){
+  const asama=parseInt(document.getElementById('secAsama').value);
+  const gun=parseInt(document.getElementById('secGun').value);
+  const btn=document.getElementById('kaydetBtn');btn.textContent='⏳ Kaydediliyor...';btn.disabled=true;
+  try{
+    if(mevcutProgramId){
+      await fetch(SUPABASE_URL+'/rest/v1/gunluk_program?id=eq.'+mevcutProgramId,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({gorevler:mevcutGorevler})});
+    }else{
+      const res=await fetch(SUPABASE_URL+'/rest/v1/gunluk_program',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({asama,gun,gorevler:mevcutGorevler,aktif:true})});
+      const data=await res.json();mevcutProgramId=data[0].id;
+    }
+    bildirimGoster('✅ Program kaydedildi!','basari');durumGoster('kayitli');
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Kaydet';btn.disabled=false;
+}
+
+function bildirimGoster(mesaj,tip){const el=document.getElementById('bildirim');el.textContent=mesaj;el.className='bildirim '+tip;el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
+</script>
+</body>
+</html>
