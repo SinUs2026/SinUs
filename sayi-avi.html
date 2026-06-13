@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sayı Avı – OKUBİT</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #060d1a;
+  --bg2: #0a1628;
+  --accent: #00d4ff;
+  --accent2: #0088bb;
+  --gold: #ffd700;
+  --green: #00ff88;
+  --red: #ff4466;
+  --white: #e8f4ff;
+  --grey: #6a8aaa;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Nunito', sans-serif;
+  color: var(--white);
+  min-height: 100vh;
+  user-select: none;
+}
+
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 40%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(2px 2px at 60% 70%, rgba(0,212,255,0.2) 0%, transparent 100%);
+  pointer-events:none;
+  z-index:0;
+}
+
+#app {
+  position:relative;
+  z-index:1;
+  max-width:900px;
+  margin:0 auto;
+  padding:16px;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 0 16px;
+  flex-shrink:0;
+}
+.logo { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; color:var(--accent); letter-spacing:3px; text-shadow:0 0 20px rgba(0,212,255,0.5); }
+.logo span { color:var(--white); }
+.score-pill { display:flex; align-items:center; gap:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:5px 14px; font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; color:var(--accent); }
+
+.screen { display:none; flex-direction:column; align-items:center; flex:1; }
+.screen.active { display:flex; }
+.screen:not(.active) { pointer-events:none !important; visibility:hidden !important; }
+
+.game-title { font-family:'Orbitron',sans-serif; font-size:clamp(1.4rem,5vw,2.2rem); font-weight:900; text-align:center; margin:16px 0 6px; text-shadow:0 0 30px rgba(0,212,255,0.4); }
+.game-sub { color:var(--grey); font-size:0.8rem; letter-spacing:2px; text-align:center; margin-bottom:28px; }
+
+.menu-card { background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.15); border-radius:16px; padding:20px; width:100%; max-width:480px; margin-bottom:14px; }
+.menu-card h3 { font-family:'Orbitron',sans-serif; font-size:0.68rem; color:var(--accent); letter-spacing:2px; margin-bottom:14px; opacity:0.8; }
+
+.asama-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.asama-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:12px; padding:14px 8px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--grey); }
+.asama-btn:hover, .asama-btn.sel { background:rgba(0,212,255,0.15); border-color:var(--accent); color:var(--white); box-shadow:0 0 12px rgba(0,212,255,0.2); }
+.asama-btn .as-n { font-family:'Orbitron',sans-serif; font-size:0.9rem; font-weight:700; color:var(--accent); display:block; margin-bottom:4px; }
+.asama-btn .as-d { font-size:0.68rem; line-height:1.4; }
+
+.start-btn { width:100%; max-width:480px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 24px rgba(0,212,255,0.3); }
+.start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,212,255,0.4); }
+
+.game-hud { display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:16px; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px; }
+.hud-item { text-align:center; }
+.hud-lbl { font-size:0.62rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
+.hud-val { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; color:var(--accent); margin-top:2px; }
+.hud-val.hedef { color:var(--gold); font-size:1.3rem; }
+
+.hedef-banner {
+  width:100%;
+  max-width:600px;
+  background:rgba(255,215,0,0.08);
+  border:1.5px solid rgba(255,215,0,0.4);
+  border-radius:14px;
+  padding:14px 20px;
+  text-align:center;
+  margin-bottom:16px;
+}
+.hedef-banner-lbl { font-size:0.72rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+.hedef-sayi { font-family:'Orbitron',sans-serif; font-size:2.8rem; font-weight:900; color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.4); }
+
+.sayilar-alan {
+  width:100%;
+  max-width:800px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+  padding:20px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+  align-items:center;
+  min-height:300px;
+  margin-bottom:16px;
+  position:relative;
+}
+
+.sayi-item {
+  font-family:'Orbitron',sans-serif;
+  font-size:1rem;
+  font-weight:700;
+  color:rgba(100,180,220,0.7);
+  cursor:pointer;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid transparent;
+  transition:all 0.15s;
+  user-select:none;
+  min-width:44px;
+  text-align:center;
+}
+.sayi-item:hover { background:rgba(0,212,255,0.1); border-color:rgba(0,212,255,0.3); color:var(--white); }
+.sayi-item.bulunan { background:rgba(0,255,136,0.15); border-color:var(--green); color:var(--green); transform:scale(1.1); pointer-events:none; }
+.sayi-item.yanlis { background:rgba(255,68,102,0.15); border-color:var(--red); color:var(--red); animation:shake 0.3s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+.bitti-btn {
+  padding:12px 32px;
+  background:rgba(0,212,255,0.1);
+  border:1.5px solid rgba(0,212,255,0.4);
+  border-radius:12px;
+  color:var(--accent);
+  font-family:'Orbitron',sans-serif;
+  font-size:0.85rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:all 0.2s;
+  letter-spacing:1px;
+}
+.bitti-btn:hover { background:rgba(0,212,255,0.2); }
+
+.ilerleme-wrap { width:100%; max-width:600px; margin-bottom:10px; }
+.ilerleme-ust { display:flex; justify-content:space-between; font-size:0.75rem; color:var(--grey); margin-bottom:4px; }
+.ilerleme-bar { width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+.ilerleme-dolu { height:100%; background:linear-gradient(90deg,var(--accent2),var(--green)); border-radius:3px; transition:width 0.3s; }
+
+.sonuc-kart { width:100%; max-width:480px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.2); border-radius:20px; padding:28px 24px; text-align:center; margin:16px 0; animation:fadeUp 0.4s ease forwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.sonuc-icon { font-size:3rem; display:block; margin-bottom:10px; }
+.sonuc-baslik { font-family:'Orbitron',sans-serif; font-size:1.3rem; font-weight:900; color:var(--green); margin-bottom:6px; text-shadow:0 0 20px rgba(0,255,136,0.4); }
+.sonuc-sure { font-family:'Orbitron',sans-serif; font-size:2.5rem; font-weight:900; color:var(--gold); margin:12px 0; }
+.sonuc-sure-lbl { font-size:0.75rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
+.fark-kutu { display:inline-block; padding:8px 20px; border-radius:10px; font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; margin:10px 0 20px; }
+.fark-kutu.iyi { background:rgba(0,255,136,0.1); border:1.5px solid rgba(0,255,136,0.4); color:var(--green); }
+.fark-kutu.kotu { background:rgba(255,68,102,0.1); border:1.5px solid rgba(255,68,102,0.4); color:var(--red); }
+.fark-kutu.ilk { background:rgba(255,215,0,0.1); border:1.5px solid rgba(255,215,0,0.4); color:var(--gold); }
+.stats-row { display:flex; justify-content:space-around; padding:14px 0; border-top:1px solid rgba(255,255,255,0.07); border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:20px; }
+.stat-n { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; color:var(--accent); }
+.stat-l { font-size:0.68rem; color:var(--grey); margin-top:2px; }
+.btn-row { display:flex; gap:10px; justify-content:center; }
+.btn-play { flex:1; max-width:200px; padding:13px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:12px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.btn-play:hover { transform:translateY(-1px); }
+.btn-back { flex:1; max-width:160px; padding:13px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:12px; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.72rem; font-weight:700; cursor:pointer; }
+.btn-back:hover { background:rgba(255,255,255,0.1); color:var(--white); }
+
+@media(max-width:600px) {
+  .asama-grid { grid-template-columns:repeat(2,1fr); }
+  .sayi-item { font-size:0.88rem; padding:5px 8px; min-width:38px; }
+  .hedef-sayi { font-size:2rem; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo">OKU<span>BİT</span></div>
+    <div class="score-pill">⚡ <span id="hScore">0</span></div>
+  </div>
+
+  <!-- MENÜ -->
+  <div id="screenMenu" class="screen active">
+    <div style="font-size:2.5rem;margin-top:16px;margin-bottom:4px">🔢</div>
+    <div class="game-title">SAYI AVI</div>
+    <div class="game-sub">GÖRSEL TARAMA EGZERSİZİ</div>
+
+    <div class="menu-card">
+      <h3>AŞAMA</h3>
+      <div class="asama-grid">
+        <div class="asama-btn sel" onclick="selAsama(1,this)">
+          <span class="as-n">1</span>
+          <span class="as-d">Tek haneli<br>1-9</span>
+        </div>
+        <div class="asama-btn" onclick="selAsama(2,this)">
+          <span class="as-n">2</span>
+          <span class="as-d">Çift haneli<br>10-99</span>
+        </div>
+        <div class="asama-btn" onclick="selAsama(3,this)">
+          <span class="as-n">3</span>
+          <span class="as-d">Üç haneli<br>100-999</span>
+        </div>
+        <div class="asama-btn" onclick="selAsama(4,this)">
+          <span class="as-n">4</span>
+          <span class="as-d">Dört haneli<br>1000+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-card">
+      <h3>NASIL OYNANIR?</h3>
+      <div style="font-size:0.83rem;color:var(--grey);line-height:1.7">
+        🎯 Ekranda gösterilen hedef sayıyı bul ve tıkla<br>
+        ⏱️ Ne kadar hızlı bulursan o kadar iyi<br>
+        📈 Her seferinde önceki sürenle karşılaştırılır<br>
+        🔍 Tüm hedefleri bulduktan sonra süren durur
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="oyunuBaslat()">BAŞLAT ▶</button>
+    <a id="backBtn" href="#" style="margin-top:12px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;">← Panele Dön</a>
+  </div>
+
+  <!-- OYUN -->
+  <div id="screenGame" class="screen">
+    <div class="game-hud">
+      <div class="hud-item"><div class="hud-lbl">Aşama</div><div class="hud-val" id="hudAsama">1</div></div>
+      <div class="hud-item"><div class="hud-lbl">Süre</div><div class="hud-val" id="hudSure">0.0</div></div>
+      <div class="hud-item"><div class="hud-lbl">Bulunan</div><div class="hud-val" id="hudBulunan">0/0</div></div>
+      <div class="hud-item"><div class="hud-lbl">Puan</div><div class="hud-val" id="hudPuan">0</div></div>
+    </div>
+
+    <div class="hedef-banner">
+      <div class="hedef-banner-lbl">Hedef Sayı</div>
+      <div class="hedef-sayi" id="hedefSayi">—</div>
+    </div>
+
+    <div class="ilerleme-wrap">
+      <div class="ilerleme-ust">
+        <span id="ilerlemeYazi">0 / 0 bulundu</span>
+        <span id="ilerlemeYuzde">%0</span>
+      </div>
+      <div class="ilerleme-bar"><div class="ilerleme-dolu" id="ilerlemeDolu" style="width:0%"></div></div>
+    </div>
+
+    <div class="sayilar-alan" id="sayilarAlan"></div>
+
+    <button class="bitti-btn" id="bittiBtn" onclick="oyunuBitir()" style="display:none">✅ BİTTİ</button>
+  </div>
+
+  <!-- SONUÇ -->
+  <div id="screenSonuc" class="screen">
+    <div class="sonuc-kart">
+      <span class="sonuc-icon">🎯</span>
+      <div class="sonuc-baslik">TAMAMLANDI!</div>
+      <div class="sonuc-sure-lbl">Süren</div>
+      <div class="sonuc-sure" id="sonucSure">0.0 sn</div>
+      <div class="fark-kutu ilk" id="farkKutu">İlk deneme!</div>
+      <div class="stats-row">
+        <div><div class="stat-n" id="sToplamSure">0</div><div class="stat-l">En İyi</div></div>
+        <div><div class="stat-n" id="sBulunan">0</div><div class="stat-l">Bulunan</div></div>
+        <div><div class="stat-n" id="sPuan">0</div><div class="stat-l">Puan</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-play" onclick="tekrarOyna()">▶ TEKRAR</button>
+        <button class="btn-back" onclick="menuye()">MENÜ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PANELe DÖNÜŞ URL'İ ──
+(function() {
+  const from = new URLSearchParams(window.location.search).get('from');
+  document.getElementById('backBtn').href = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+})();
+
+const AYARLAR = {
+  1: { min:1,    max:9,    hedefSayisi:3, toplamSayi:9,  baslikSure:null },
+  2: { min:10,   max:99,   hedefSayisi:4, toplamSayi:50, baslikSure:null },
+  3: { min:100,  max:999,  hedefSayisi:3, toplamSayi:40, baslikSure:null },
+  4: { min:1000, max:9999, hedefSayisi:3, toplamSayi:35, baslikSure:null }
+};
+
+const enIyiSureler = {};
+
+const G = {
+  asama: 1, hedefler: [], mevcutHedefIndex: 0, sayilar: [],
+  bulunanlar: 0, baslangicZamani: 0, interval: null, puan: 0, toplamPuan: 0, sure: 0
+};
+
+function selAsama(n, el) {
+  G.asama = n;
+  document.querySelectorAll('.asama-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function rastgele(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function oyunuBaslat() {
+  const ayar = AYARLAR[G.asama];
+  G.hedefler = []; G.mevcutHedefIndex = 0; G.bulunanlar = 0; G.puan = 0; G.sure = 0;
+  const hedefSet = new Set();
+  let deneme = 0;
+  while (hedefSet.size < ayar.hedefSayisi && deneme < 1000) { hedefSet.add(rastgele(ayar.min, ayar.max)); deneme++; }
+  G.hedefler = [...hedefSet];
+  const tumSayilar = [...G.hedefler];
+  G.hedefler.forEach(h => { for (let i = 0; i < 2; i++) tumSayilar.push(h); });
+  while (tumSayilar.length < ayar.toplamSayi) { tumSayilar.push(rastgele(ayar.min, ayar.max)); }
+  G.sayilar = karistir(tumSayilar);
+  document.getElementById('hudAsama').textContent = G.asama + '. Aşama';
+  document.getElementById('hudBulunan').textContent = '0/' + G.hedefler.length;
+  document.getElementById('hudPuan').textContent = '0';
+  document.getElementById('hedefSayi').textContent = G.hedefler[0];
+  document.getElementById('bittiBtn').style.display = 'none';
+  ilerlemeGuncelle();
+  sayilariOlustur();
+  showScreen('screenGame');
+  G.baslangicZamani = Date.now();
+  G.interval = setInterval(() => {
+    G.sure = (Date.now() - G.baslangicZamani) / 1000;
+    document.getElementById('hudSure').textContent = G.sure.toFixed(1) + ' sn';
+  }, 100);
+}
+
+function sayilariOlustur() {
+  const alan = document.getElementById('sayilarAlan');
+  alan.innerHTML = '';
+  G.sayilar.forEach((sayi, idx) => {
+    const el = document.createElement('div');
+    el.className = 'sayi-item';
+    el.textContent = sayi;
+    el.dataset.sayi = sayi;
+    el.dataset.idx = idx;
+    el.addEventListener('click', sayiyaTıkla);
+    alan.appendChild(el);
+  });
+}
+
+function sayiyaTıkla(e) {
+  const el = e.currentTarget;
+  const sayi = parseInt(el.dataset.sayi);
+  const hedef = G.hedefler[G.mevcutHedefIndex];
+  if (sayi === hedef) {
+    el.classList.add('bulunan');
+    el.removeEventListener('click', sayiyaTıkla);
+    G.bulunanlar++;
+    G.mevcutHedefIndex++;
+    document.getElementById('hudBulunan').textContent = G.bulunanlar + '/' + G.hedefler.length;
+    ilerlemeGuncelle();
+    if (G.mevcutHedefIndex >= G.hedefler.length) { oyunuBitir(); }
+    else { document.getElementById('hedefSayi').textContent = G.hedefler[G.mevcutHedefIndex]; }
+  } else {
+    el.classList.add('yanlis');
+    setTimeout(() => el.classList.remove('yanlis'), 400);
+  }
+}
+
+function ilerlemeGuncelle() {
+  const toplam = G.hedefler.length;
+  const yuzde = toplam > 0 ? (G.bulunanlar / toplam * 100) : 0;
+  document.getElementById('ilerlemeYazi').textContent = G.bulunanlar + ' / ' + toplam + ' bulundu';
+  document.getElementById('ilerlemeYuzde').textContent = '%' + Math.round(yuzde);
+  document.getElementById('ilerlemeDolu').style.width = yuzde + '%';
+}
+
+function oyunuBitir() {
+  clearInterval(G.interval);
+  G.sure = (Date.now() - G.baslangicZamani) / 1000;
+  const temelPuan = 1000;
+  const sureCezasi = Math.floor(G.sure * 10);
+  G.puan = Math.max(100, temelPuan - sureCezasi + (G.bulunanlar * 50));
+  G.toplamPuan += G.puan;
+  document.getElementById('hScore').textContent = G.toplamPuan;
+  const anahtarKey = 'asama' + G.asama;
+  const oncekiEnIyi = enIyiSureler[anahtarKey] || null;
+  document.getElementById('sonucSure').textContent = G.sure.toFixed(1) + ' sn';
+  document.getElementById('sBulunan').textContent = G.bulunanlar + '/' + G.hedefler.length;
+  document.getElementById('sPuan').textContent = G.puan;
+  const farkKutu = document.getElementById('farkKutu');
+  if (!oncekiEnIyi) {
+    farkKutu.textContent = '🌟 İlk deneme!'; farkKutu.className = 'fark-kutu ilk';
+    document.getElementById('sToplamSure').textContent = G.sure.toFixed(1) + ' sn';
+  } else if (G.sure < oncekiEnIyi) {
+    const fark = (oncekiEnIyi - G.sure).toFixed(1);
+    farkKutu.textContent = '🚀 +' + fark + ' sn daha hızlı!'; farkKutu.className = 'fark-kutu iyi';
+    document.getElementById('sToplamSure').textContent = G.sure.toFixed(1) + ' sn';
+  } else {
+    const fark = (G.sure - oncekiEnIyi).toFixed(1);
+    farkKutu.textContent = '⏱️ -' + fark + ' sn daha yavaş'; farkKutu.className = 'fark-kutu kotu';
+    document.getElementById('sToplamSure').textContent = oncekiEnIyi.toFixed(1) + ' sn';
+  }
+  if (!oncekiEnIyi || G.sure < oncekiEnIyi) { enIyiSureler[anahtarKey] = G.sure; }
+  showScreen('screenSonuc');
+}
+
+function tekrarOyna() { oyunuBaslat(); }
+function menuye() { showScreen('screenMenu'); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function karistir(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>

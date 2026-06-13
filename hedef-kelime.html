@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hedef Kelime – OKUBİT</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+:root{--bg:#060d1a;--accent:#00d4ff;--accent2:#0088bb;--gold:#ffd700;--green:#00ff88;--red:#ff4466;--white:#e8f4ff;--grey:#6a8aaa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min-height:100vh;user-select:none;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1px 1px at 70% 60%,rgba(255,255,255,0.3) 0%,transparent 100%),radial-gradient(2px 2px at 45% 50%,rgba(0,212,255,0.12) 0%,transparent 100%);}
+#app{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:16px;min-height:100vh;display:flex;flex-direction:column;}
+.header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 16px;}
+.logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent);letter-spacing:3px;}
+.logo span{color:var(--white);}
+.mod-pill{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:20px;padding:5px 14px;font-size:0.78rem;color:var(--green);font-weight:700;}
+.screen{display:none;flex-direction:column;align-items:center;flex:1;}
+.screen.active{display:flex;}
+.game-title{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;text-align:center;margin:12px 0 4px;}
+.game-sub{color:var(--grey);font-size:0.8rem;letter-spacing:2px;text-align:center;margin-bottom:24px;}
+.ayar-kart{background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.15);border-radius:16px;padding:20px;width:100%;max-width:560px;margin-bottom:14px;}
+.ayar-kart h3{font-family:'Orbitron',sans-serif;font-size:0.68rem;color:var(--accent);letter-spacing:2px;margin-bottom:14px;opacity:0.8;}
+.metin-liste{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;}
+.metin-item{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px 14px;cursor:pointer;transition:all 0.2s;}
+.metin-item:hover{background:rgba(0,212,255,0.1);border-color:var(--accent);}
+.metin-item.secili{background:rgba(0,212,255,0.15);border-color:var(--accent);}
+.metin-item-baslik{font-weight:700;font-size:0.9rem;color:var(--white);}
+.metin-item-alt{font-size:0.72rem;color:var(--grey);margin-top:3px;}
+.zorluk-etiket{display:inline-block;padding:1px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;margin-right:6px;}
+.zorluk-etiket.basit{background:#f0fdf4;color:#15803d;}
+.zorluk-etiket.orta{background:#fefce8;color:#b45309;}
+.zorluk-etiket.zor{background:#fff1f2;color:#be123c;}
+.zorluk-etiket.cok_zor{background:#fdf4ff;color:#7e22ce;}
+.filtre-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.filtre-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.78rem;color:var(--grey);transition:all 0.2s;font-family:'Nunito',sans-serif;}
+.filtre-btn:hover,.filtre-btn.aktif{background:rgba(0,212,255,0.1);border-color:var(--accent);color:var(--white);}
+.basla-btn{width:100%;max-width:560px;padding:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;transition:all 0.2s;}
+.basla-btn:hover{transform:translateY(-2px);}
+.basla-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.geri-btn{margin-top:12px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
+
+/* OYUN */
+.oyun-hud{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:12px;}
+.hud-item{text-align:center;}
+.hud-lbl{font-size:0.6rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
+.hud-val{font-family:'Orbitron',sans-serif;font-size:0.9rem;font-weight:700;color:var(--accent);margin-top:2px;}
+
+/* Hedef kelime banner */
+.hedef-banner{width:100%;background:rgba(0,255,136,0.08);border:1.5px solid rgba(0,255,136,0.35);border-radius:14px;padding:12px 20px;margin-bottom:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.hedef-lbl{font-size:0.72rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+.hedef-kelime-goster{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:var(--green);text-shadow:0 0 15px rgba(0,255,136,0.4);}
+.hedef-sayac{font-size:0.78rem;color:var(--grey);margin-left:auto;}
+
+/* Metin alanı */
+.metin-alan{width:100%;background:rgba(255,255,255,0.02);border:1px solid rgba(0,255,136,0.15);border-radius:20px;padding:22px 26px;margin-bottom:12px;font-family:'Nunito',sans-serif;font-size:clamp(1rem,2.5vw,1.15rem);line-height:2;color:var(--white);max-height:340px;overflow-y:auto;}
+/* Vurgulanan kelime */
+.metin-alan .vurgu{background:rgba(0,255,136,0.2);color:var(--green);border-radius:4px;padding:1px 3px;font-weight:800;}
+
+/* Cevap girişi */
+.cevap-wrap{width:100%;max-width:560px;display:flex;gap:10px;margin-bottom:8px;}
+.cevap-input{flex:1;padding:12px 16px;background:rgba(0,212,255,0.06);border:2px solid rgba(0,212,255,0.3);border-radius:12px;color:var(--white);font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:700;text-align:center;outline:none;}
+.cevap-input:focus{border-color:var(--accent);}
+.cevap-btn{padding:12px 24px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;}
+
+/* Sonuç */
+.sonuc-kart{width:100%;max-width:480px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:28px 24px;text-align:center;margin:16px 0;}
+.sonuc-icon{font-size:3rem;display:block;margin-bottom:10px;}
+.sonuc-baslik{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;margin-bottom:8px;}
+.sonuc-baslik.dogru{color:var(--green);}
+.sonuc-baslik.yanlis{color:var(--red);}
+.sonuc-detay{color:var(--grey);font-size:0.9rem;margin-bottom:20px;}
+.stats-row{display:flex;justify-content:space-around;padding:14px 0;border-top:1px solid rgba(255,255,255,0.07);border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:20px;}
+.stat-n{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);}
+.stat-l{font-size:0.68rem;color:var(--grey);margin-top:2px;}
+.btn-row{display:flex;gap:10px;justify-content:center;}
+.btn-play{flex:1;max-width:200px;padding:13px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;}
+.btn-menu-back{flex:1;max-width:160px;padding:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo">OKU<span>BİT</span></div>
+    <div class="mod-pill">🎯 Hedef Kelime</div>
+  </div>
+
+  <!-- AYARLAR -->
+  <div id="screenAyar" class="screen active">
+    <div class="game-title">HEDEF KELİME</div>
+    <div class="game-sub">DİKKATLİ OKUMA EGZERSİZİ</div>
+    <div class="ayar-kart">
+      <h3>METİN SEÇ</h3>
+      <div class="filtre-row">
+        <button class="filtre-btn aktif" onclick="filtreUygula('',this)">Tümü</button>
+        <button class="filtre-btn" onclick="filtreUygula('basit',this)">Basit</button>
+        <button class="filtre-btn" onclick="filtreUygula('orta',this)">Orta</button>
+        <button class="filtre-btn" onclick="filtreUygula('zor',this)">Zor</button>
+        <button class="filtre-btn" onclick="filtreUygula('cok_zor',this)">Çok Zor</button>
+      </div>
+      <div class="metin-liste" id="metinListe">
+        <div style="text-align:center;color:var(--grey);padding:20px;font-size:0.85rem">⏳ Metinler yükleniyor...</div>
+      </div>
+    </div>
+    <div class="ayar-kart">
+      <h3>NASIL OYNANIR?</h3>
+      <div style="font-size:0.82rem;color:var(--grey);line-height:1.8">
+        🎯 Metinde bir <strong style="color:var(--green)">hedef kelime</strong> gösterilir<br>
+        🔍 Metni okurken o kelimeyi kaç kez geçtiğini say<br>
+        ✏️ Sayıyı gir ve kontrol et<br>
+        📈 Her doğruda puan kazan
+      </div>
+    </div>
+    <button class="basla-btn" id="baslaBtn" onclick="oyunuBaslat()" disabled>▶ BAŞLAT</button>
+    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+
+  <!-- OYUN -->
+  <div id="screenOyun" class="screen">
+    <div class="oyun-hud">
+      <div class="hud-item"><div class="hud-lbl">Metin</div><div class="hud-val" id="hudMetin">—</div></div>
+      <div class="hud-item"><div class="hud-lbl">Puan</div><div class="hud-val" id="hudPuan">0</div></div>
+      <div class="hud-item"><div class="hud-lbl">Tur</div><div class="hud-val" id="hudTur">1</div></div>
+    </div>
+
+    <div class="hedef-banner">
+      <div class="hedef-lbl">Hedef Kelime:</div>
+      <div class="hedef-kelime-goster" id="hedefKelimeGoster">—</div>
+      <div class="hedef-sayac" id="hedefSayac">Bu kelime kaç kez geçti?</div>
+    </div>
+
+    <div class="metin-alan" id="metinAlan"></div>
+
+    <div class="cevap-wrap">
+      <input type="number" class="cevap-input" id="cevapInput" min="0" max="999" placeholder="?" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      <button class="cevap-btn" onclick="cevapKontrol()">KONTROL</button>
+    </div>
+  </div>
+
+  <!-- SONUÇ -->
+  <div id="screenSonuc" class="screen">
+    <div class="sonuc-kart">
+      <span class="sonuc-icon" id="sonucIcon">🎯</span>
+      <div class="sonuc-baslik" id="sonucBaslik">DOĞRU!</div>
+      <div class="sonuc-detay" id="sonucDetay"></div>
+      <div class="stats-row">
+        <div><div class="stat-n" id="sDogru">0</div><div class="stat-l">Doğru</div></div>
+        <div><div class="stat-n" id="sYanlis">0</div><div class="stat-l">Yanlış</div></div>
+        <div><div class="stat-n" id="sPuan">0</div><div class="stat-l">Puan</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-play" onclick="tekrar()">▶ TEKRAR</button>
+        <button class="btn-menu-back" onclick="menuye()">MENÜ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://sfyjnwhblxldrzbrnyva.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmeWpud2hibHhsZHJ6YnJueXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NDc4NTYsImV4cCI6MjA5NjMyMzg1Nn0.3mrQ2JSX4InY89iUnoJUCnWefxHXHjgM059PeLQedew';
+(function(){const from=new URLSearchParams(window.location.search).get('from');document.getElementById('backBtn').href=from==='admin'?'admin.html':'ogrenci-panel.html';})();
+
+const G={metinler:[],seciliMetin:null,hedefKelime:'',dogruSayi:0,dogru:0,yanlis:0,puan:0,tur:1,filtre:''};
+
+async function metinleriYukle(){
+  try{
+    let url=SUPABASE_URL+'/rest/v1/ders_metinleri?order=zorluk,baslik';
+    if(G.filtre)url+='&zorluk=eq.'+G.filtre;
+    const res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    G.metinler=await res.json();metinListesiOlustur();
+  }catch(e){document.getElementById('metinListe').innerHTML='<div style="color:var(--red);padding:20px;text-align:center">❌ Yüklenemedi</div>';}
+}
+function metinListesiOlustur(){
+  const liste=document.getElementById('metinListe');
+  if(!G.metinler.length){liste.innerHTML='<div style="text-align:center;color:var(--grey);padding:20px">📭 Metin bulunamadı</div>';return;}
+  liste.innerHTML='';
+  G.metinler.forEach(m=>{
+    const div=document.createElement('div');div.className='metin-item'+(G.seciliMetin&&G.seciliMetin.id===m.id?' secili':'');
+    div.onclick=()=>metinSec(m,div);
+    div.innerHTML=`<div class="metin-item-baslik">${m.baslik}</div><div class="metin-item-alt"><span class="zorluk-etiket ${m.zorluk}">${zorlukAd(m.zorluk)}</span>${m.kelime_sayisi||'?'} kelime</div>`;
+    liste.appendChild(div);
+  });
+}
+function zorlukAd(z){return{basit:'Basit',orta:'Orta',zor:'Zor',cok_zor:'Çok Zor'}[z]||z;}
+function metinSec(m,el){G.seciliMetin=m;document.querySelectorAll('.metin-item').forEach(i=>i.classList.remove('secili'));el.classList.add('secili');document.getElementById('baslaBtn').disabled=false;}
+function filtreUygula(z,el){G.filtre=z;G.seciliMetin=null;document.getElementById('baslaBtn').disabled=true;document.querySelectorAll('.filtre-btn').forEach(b=>b.classList.remove('aktif'));el.classList.add('aktif');metinleriYukle();}
+
+function hedefKelimeSeç(metin){
+  // En sık geçen anlamlı kelimeleri bul
+  const kelimeler=metin.toLowerCase().replace(/[.,!?;:]/g,'').split(/\s+/);
+  const sayim={};
+  kelimeler.forEach(k=>{if(k.length>3)sayim[k]=(sayim[k]||0)+1;});
+  // En az 2 kez geçen kelimeler
+  const adaylar=Object.entries(sayim).filter(([k,s])=>s>=2&&s<=15).sort((a,b)=>b[1]-a[1]);
+  if(!adaylar.length)return{kelime:kelimeler[Math.floor(Math.random()*kelimeler.length)],sayi:1};
+  // Ortadan bir tane seç (çok yaygın olanı değil)
+  const idx=Math.floor(Math.random()*Math.min(5,adaylar.length));
+  return{kelime:adaylar[idx][0],sayi:adaylar[idx][1]};
+}
+
+function oyunuBaslat(){
+  if(!G.seciliMetin)return;
+  const {kelime,sayi}=hedefKelimeSeç(G.seciliMetin.metin);
+  G.hedefKelime=kelime;G.dogruSayi=sayi;
+  document.getElementById('hudMetin').textContent=G.seciliMetin.baslik.substring(0,15)+(G.seciliMetin.baslik.length>15?'...':'');
+  document.getElementById('hudTur').textContent=G.tur;
+  document.getElementById('hudPuan').textContent=G.puan;
+  document.getElementById('hedefKelimeGoster').textContent='"'+kelime+'"';
+  document.getElementById('hedefSayac').textContent='Bu kelime kaç kez geçti?';
+  // Metni vurgulu göster
+  const html=G.seciliMetin.metin.replace(new RegExp('\\b'+kelime+'\\b','gi'),m=>`<span class="vurgu">${m}</span>`);
+  document.getElementById('metinAlan').innerHTML=html;
+  document.getElementById('cevapInput').value='';
+  showScreen('screenOyun');
+  setTimeout(()=>document.getElementById('cevapInput').focus(),300);
+}
+
+function cevapKontrol(){
+  const girilen=parseInt(document.getElementById('cevapInput').value);
+  if(isNaN(girilen))return;
+  const isOk=girilen===G.dogruSayi;
+  if(isOk){G.dogru++;G.puan+=100;}else{G.yanlis++;}
+  document.getElementById('sonucIcon').textContent=isOk?'🎯':'🔍';
+  document.getElementById('sonucBaslik').textContent=isOk?'DOĞRU!':'YANLIŞ!';
+  document.getElementById('sonucBaslik').className='sonuc-baslik '+(isOk?'dogru':'yanlis');
+  document.getElementById('sonucDetay').textContent='"'+G.hedefKelime+'" kelimesi metinde '+G.dogruSayi+' kez geçiyor. Sen '+girilen+' dedin.';
+  document.getElementById('sDogru').textContent=G.dogru;
+  document.getElementById('sYanlis').textContent=G.yanlis;
+  document.getElementById('sPuan').textContent=G.puan;
+  showScreen('screenSonuc');
+}
+
+function tekrar(){G.tur++;oyunuBaslat();}
+function menuye(){showScreen('screenAyar');}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screenOyun').classList.contains('active'))cevapKontrol();});
+metinleriYukle();
+</script>
+</body>
+</html>

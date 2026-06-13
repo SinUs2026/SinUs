@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gizli Nesne – OKUBİT</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+:root{--bg:#060d1a;--accent:#00d4ff;--accent2:#0088bb;--gold:#ffd700;--green:#00ff88;--red:#ff4466;--white:#e8f4ff;--grey:#6a8aaa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min-height:100vh;user-select:none;}
+#app{max-width:700px;margin:0 auto;padding:16px;min-height:100vh;display:flex;flex-direction:column;}
+.header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 12px;}
+.logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent);letter-spacing:3px;}
+.logo span{color:var(--white);}
+.score-pill{background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:20px;padding:5px 14px;font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;color:var(--accent);}
+.screen{display:none;flex-direction:column;align-items:center;flex:1;}
+.screen.active{display:flex;}
+.game-title{font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;text-align:center;margin:12px 0 4px;}
+.game-sub{color:var(--grey);font-size:0.8rem;letter-spacing:2px;text-align:center;margin-bottom:20px;}
+.menu-card{background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.15);border-radius:16px;padding:18px;width:100%;max-width:480px;margin-bottom:12px;}
+.menu-card h3{font-family:'Orbitron',sans-serif;font-size:0.68rem;color:var(--accent);letter-spacing:2px;margin-bottom:12px;opacity:0.8;}
+.asama-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.asama-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px 4px;cursor:pointer;text-align:center;color:var(--grey);}
+.asama-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
+.asama-btn .as-n{font-family:'Orbitron',sans-serif;font-size:0.9rem;font-weight:700;color:var(--accent);display:block;margin-bottom:3px;}
+.asama-btn .as-d{font-size:0.62rem;line-height:1.4;}
+.start-btn{width:100%;max-width:480px;padding:15px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;}
+.geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
+.game-hud{display:flex;justify-content:space-between;width:100%;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:10px;}
+.hud-item{text-align:center;}
+.hud-lbl{font-size:0.58rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
+.hud-val{font-family:'Orbitron',sans-serif;font-size:0.88rem;font-weight:700;color:var(--accent);margin-top:1px;}
+.hedef-banner{width:100%;max-width:600px;background:rgba(255,215,0,0.08);border:1.5px solid rgba(255,215,0,0.35);border-radius:14px;padding:10px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+.hedef-lbl{font-size:0.72rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+.hedef-nesneler{display:flex;gap:8px;flex-wrap:wrap;}
+.hedef-nesne-item{font-size:1.8rem;background:rgba(255,215,0,0.1);border:1.5px solid rgba(255,215,0,0.4);border-radius:10px;padding:4px 8px;}
+.hedef-nesne-item.bulundu{background:rgba(0,255,136,0.15);border-color:var(--green);opacity:0.5;}
+.sure-bar-wrap{width:100%;max-width:600px;margin-bottom:8px;}
+.sure-bilgi{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--grey);margin-bottom:3px;}
+.sure-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+.sure-bar-ic{height:100%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:3px;transition:width 0.5s linear;}
+.sahne-wrap{width:100%;max-width:600px;position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);margin-bottom:10px;cursor:crosshair;}
+.sahne{width:100%;min-height:360px;background:radial-gradient(ellipse at 30% 40%, #0a1e3d 0%, #060d1a 60%, #020508 100%);position:relative;overflow:hidden;}
+.bg-star{position:absolute;border-radius:50%;background:rgba(255,255,255,0.6);pointer-events:none;}
+.bg-nebula{position:absolute;border-radius:50%;pointer-events:none;filter:blur(20px);}
+.bg-planet{position:absolute;pointer-events:none;font-size:2.5rem;opacity:0.15;filter:blur(1px);}
+.gizli-nesne{position:absolute;cursor:pointer;transition:transform 0.1s;line-height:1;-webkit-tap-highlight-color:transparent;}
+.gizli-nesne:hover{transform:scale(1.15);}
+.gizli-nesne.bulundu{animation:parlat 0.5s ease forwards;pointer-events:none;}
+@keyframes parlat{0%{transform:scale(1);}50%{transform:scale(1.4);filter:brightness(3);}100%{transform:scale(1.1);opacity:0.6;filter:brightness(2);}}
+.tik-efekt{position:absolute;width:40px;height:40px;border-radius:50%;border:2px solid var(--green);pointer-events:none;animation:tik 0.5s ease forwards;transform:translate(-50%,-50%);z-index:10;}
+@keyframes tik{0%{opacity:1;transform:translate(-50%,-50%) scale(0.5);}100%{opacity:0;transform:translate(-50%,-50%) scale(2);}}
+.sonuc-kart{width:100%;max-width:440px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:24px;text-align:center;margin:12px 0;}
+.sonuc-icon{font-size:3rem;display:block;margin-bottom:8px;}
+.sonuc-baslik{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;color:var(--green);margin-bottom:14px;}
+.stats-row{display:flex;justify-content:space-around;padding:12px 0;border-top:1px solid rgba(255,255,255,0.07);border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:18px;}
+.stat-n{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:700;color:var(--accent);}
+.stat-l{font-size:0.68rem;color:var(--grey);margin-top:2px;}
+.btn-row{display:flex;gap:10px;justify-content:center;}
+.btn-play{flex:1;max-width:200px;padding:12px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;}
+.btn-back{flex:1;max-width:160px;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo">OKU<span>BİT</span></div>
+    <div class="score-pill">⚡ <span id="hScore">0</span></div>
+  </div>
+
+  <!-- MENÜ -->
+  <div id="screenMenu" class="screen active">
+    <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">🔭</div>
+    <div class="game-title">GİZLİ NESNE</div>
+    <div class="game-sub">UZAY KEŞİF MİSYONU</div>
+
+    <div class="menu-card">
+      <h3>AŞAMA</h3>
+      <div class="asama-grid">
+        <div class="asama-btn sel" onclick="selAsama(1,this)"><span class="as-n">1</span><span class="as-d">3 nesne<br>Büyük</span></div>
+        <div class="asama-btn" onclick="selAsama(2,this)"><span class="as-n">2</span><span class="as-d">5 nesne<br>Orta</span></div>
+        <div class="asama-btn" onclick="selAsama(3,this)"><span class="as-n">3</span><span class="as-d">7 nesne<br>Küçük</span></div>
+        <div class="asama-btn" onclick="selAsama(4,this)"><span class="as-n">4</span><span class="as-d">10 nesne<br>Çok Küçük</span></div>
+      </div>
+    </div>
+
+    <div class="menu-card">
+      <h3>NASIL OYNANIR?</h3>
+      <div style="font-size:0.82rem;color:var(--grey);line-height:1.8">
+        🔭 Uzay sahnesinde gizlenmiş nesneleri bul<br>
+        👆 Bulduğuna tıkla veya dokun<br>
+        ⭐ Üstteki listede hangi nesneleri aradığın var<br>
+        ⏱️ Tümünü bulmak için süren var!
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="oyunuBaslat()">BAŞLAT ▶</button>
+    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+
+  <!-- OYUN -->
+  <div id="screenGame" class="screen">
+    <div class="game-hud">
+      <div class="hud-item"><div class="hud-lbl">Bulunan</div><div class="hud-val" id="hudBulunan">0/0</div></div>
+      <div class="hud-item"><div class="hud-lbl">Süre</div><div class="hud-val" id="hudSure">—</div></div>
+      <div class="hud-item"><div class="hud-lbl">Puan</div><div class="hud-val" id="hudPuan">0</div></div>
+    </div>
+
+    <div class="hedef-banner">
+      <div class="hedef-lbl">Bul:</div>
+      <div class="hedef-nesneler" id="hedefNesneler"></div>
+    </div>
+
+    <div class="sure-bar-wrap">
+      <div class="sure-bilgi">
+        <span id="sureYazi">—</span>
+        <span id="ipucuYazi">Nesneleri bul!</span>
+      </div>
+      <div class="sure-bar"><div class="sure-bar-ic" id="sureIc" style="width:100%"></div></div>
+    </div>
+
+    <div class="sahne-wrap">
+      <div class="sahne" id="sahne"></div>
+    </div>
+
+    <button class="geri-btn" onclick="menuye()">← Menüye Dön</button>
+  </div>
+
+  <!-- SONUÇ -->
+  <div id="screenSonuc" class="screen">
+    <div class="sonuc-kart">
+      <span class="sonuc-icon" id="sonucIcon">🏆</span>
+      <div class="sonuc-baslik" id="sonucBaslik">TAMAMLANDI!</div>
+      <div class="stats-row">
+        <div><div class="stat-n" id="sBulunan">0</div><div class="stat-l">Bulunan</div></div>
+        <div><div class="stat-n" id="sSure">0</div><div class="stat-l">Süre</div></div>
+        <div><div class="stat-n" id="sPuan">0</div><div class="stat-l">Puan</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-play" onclick="oyunuBaslat()">▶ TEKRAR</button>
+        <button class="btn-back" onclick="menuye()">MENÜ</button>
+      </div>
+    </div>
+    <a id="backBtn2" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+</div>
+
+<script>
+// ── PANELe DÖNÜŞ URL'İ ──
+(function() {
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  document.getElementById('backBtn').href = backUrl;
+  document.getElementById('backBtn2').href = backUrl;
+})();
+
+const HEDEF_NESNELER = ['⭐','🚀','☄️','🌙','🪐','🛸','💫','🌟','🔭','🌌'];
+const DEKOR_NESNELER = ['✨','🌠','💥','🌌','🌐','⚡','🔆','🌙','⚫'];
+
+const ASAMALAR = {
+  1:{hedefSayisi:3, boyut:32, sure:60,  arkaplanSayi:15, dekorBoyut:28},
+  2:{hedefSayisi:5, boyut:26, sure:90,  arkaplanSayi:20, dekorBoyut:24},
+  3:{hedefSayisi:7, boyut:20, sure:120, arkaplanSayi:28, dekorBoyut:20},
+  4:{hedefSayisi:10,boyut:16, sure:150, arkaplanSayi:35, dekorBoyut:18},
+};
+
+let G = {asama:1, hedefler:[], bulunan:[], puan:0, baslangic:0, sureInt:null};
+
+function selAsama(n,el){
+  G.asama=n;
+  document.querySelectorAll('.asama-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function rastgele(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+function oyunuBaslat(){
+  const ayar = ASAMALAR[G.asama];
+  G.bulunan=[]; G.puan=0;
+
+  const karistir=arr=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  G.hedefler = karistir(HEDEF_NESNELER).slice(0, ayar.hedefSayisi);
+
+  sahneyiOlustur();
+  hedefBannerGuncelle();
+
+  document.getElementById('hudBulunan').textContent = '0/'+G.hedefler.length;
+  document.getElementById('hudPuan').textContent = '0';
+
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById('screenGame').style.display='flex';
+
+  G.baslangic = Date.now();
+  if(G.sureInt) clearInterval(G.sureInt);
+  G.sureInt = setInterval(()=>{
+    const kalan = Math.max(0, ayar.sure - Math.floor((Date.now()-G.baslangic)/1000));
+    document.getElementById('hudSure').textContent = kalan+'sn';
+    document.getElementById('sureYazi').textContent = 'Kalan: '+kalan+' sn';
+    document.getElementById('sureIc').style.width = (kalan/ayar.sure*100)+'%';
+    if(kalan<=0){clearInterval(G.sureInt);oyunuBitir();}
+  },1000);
+}
+
+function sahneyiOlustur(){
+  const ayar = ASAMALAR[G.asama];
+  const sahne = document.getElementById('sahne');
+  sahne.innerHTML = '';
+
+  for(let i=0;i<60;i++){
+    const star = document.createElement('div');
+    star.className = 'bg-star';
+    const s = rastgele(1,3);
+    star.style.cssText = `width:${s}px;height:${s}px;left:${rastgele(0,100)}%;top:${rastgele(0,100)}%;opacity:${(rastgele(3,8)/10)};`;
+    sahne.appendChild(star);
+  }
+
+  for(let i=0;i<3;i++){
+    const neb = document.createElement('div');
+    neb.className = 'bg-nebula';
+    const colors = ['rgba(0,100,255,0.08)','rgba(100,0,200,0.08)','rgba(0,200,150,0.06)'];
+    neb.style.cssText = `width:${rastgele(100,200)}px;height:${rastgele(80,150)}px;left:${rastgele(0,80)}%;top:${rastgele(0,70)}%;background:${colors[i%3]};`;
+    sahne.appendChild(neb);
+  }
+
+  for(let i=0;i<3;i++){
+    const planet = document.createElement('div');
+    planet.className = 'bg-planet';
+    const planets = ['🌍','🪐','⚫','🌑','🌕'];
+    planet.textContent = planets[rastgele(0,planets.length-1)];
+    planet.style.cssText = `left:${rastgele(5,85)}%;top:${rastgele(5,75)}%;font-size:${rastgele(40,80)}px;`;
+    sahne.appendChild(planet);
+  }
+
+  const karistir=arr=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  const dekorlar = karistir([...DEKOR_NESNELER]);
+  for(let i=0;i<ayar.arkaplanSayi;i++){
+    const d = document.createElement('div');
+    d.style.cssText = `position:absolute;font-size:${ayar.dekorBoyut-rastgele(0,6)}px;left:${rastgele(2,92)}%;top:${rastgele(2,88)}%;opacity:${(rastgele(3,7)/10)};pointer-events:none;`;
+    d.textContent = dekorlar[i%dekorlar.length];
+    sahne.appendChild(d);
+  }
+
+  const kullanilan = [];
+  function cakismiyor(x,y,r){ return kullanilan.every(p=>Math.hypot(p.x-x,p.y-y)>r*2); }
+
+  G.hedefler.forEach((nesne, idx)=>{
+    let x,y,deneme=0;
+    do { x = rastgele(8,88); y = rastgele(8,85); deneme++; } while(!cakismiyor(x,y,ayar.boyut) && deneme<50);
+    kullanilan.push({x,y});
+
+    const el = document.createElement('div');
+    el.className = 'gizli-nesne';
+    el.textContent = nesne;
+    el.style.cssText = `left:${x}%;top:${y}%;font-size:${ayar.boyut}px;z-index:5;`;
+    el.dataset.nesne = nesne;
+    el.dataset.idx = idx;
+    el.onclick = function(e){ e.stopPropagation(); nesneye_tiklandi(nesne, idx, el, e); };
+    sahne.appendChild(el);
+  });
+}
+
+function nesneye_tiklandi(nesne, idx, el, e){
+  if(G.bulunan.includes(idx)) return;
+
+  const efekt = document.createElement('div');
+  efekt.className = 'tik-efekt';
+  const rect = document.getElementById('sahne').getBoundingClientRect();
+  efekt.style.left = (e.clientX - rect.left) + 'px';
+  efekt.style.top = (e.clientY - rect.top) + 'px';
+  document.getElementById('sahne').appendChild(efekt);
+  setTimeout(()=>efekt.remove(), 500);
+
+  G.bulunan.push(idx);
+  el.classList.add('bulundu');
+  G.puan += 100;
+  document.getElementById('hScore').textContent = G.puan;
+  document.getElementById('hudPuan').textContent = G.puan;
+  document.getElementById('hudBulunan').textContent = G.bulunan.length+'/'+G.hedefler.length;
+  document.getElementById('ipucuYazi').textContent = '✅ +100 puan!';
+  setTimeout(()=>document.getElementById('ipucuYazi').textContent='Nesneleri bul!', 1000);
+
+  hedefBannerGuncelle();
+
+  if(G.bulunan.length >= G.hedefler.length){ setTimeout(()=>oyunuBitir(), 500); }
+}
+
+function hedefBannerGuncelle(){
+  const banner = document.getElementById('hedefNesneler');
+  banner.innerHTML = '';
+  G.hedefler.forEach((n,i)=>{
+    const item = document.createElement('div');
+    item.className = 'hedef-nesne-item' + (G.bulunan.includes(i)?' bulundu':'');
+    item.textContent = n;
+    banner.appendChild(item);
+  });
+}
+
+function oyunuBitir(){
+  clearInterval(G.sureInt);
+  const sure = Math.floor((Date.now()-G.baslangic)/1000);
+  const oran = Math.round(G.bulunan.length/G.hedefler.length*100);
+  document.getElementById('sonucIcon').textContent = oran>=100?'🏆':oran>=60?'🎯':'🔭';
+  document.getElementById('sonucBaslik').textContent = oran>=100?'MÜKEMMEL!':oran>=60?'İYİ İŞ!':'DEVAM ET!';
+  document.getElementById('sBulunan').textContent = G.bulunan.length+'/'+G.hedefler.length;
+  document.getElementById('sSure').textContent = sure+'sn';
+  document.getElementById('sPuan').textContent = G.puan;
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById('screenSonuc').style.display='flex';
+}
+
+function menuye(){
+  clearInterval(G.sureInt);
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById('screenMenu').style.display='flex';
+}
+
+document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+document.getElementById('screenMenu').style.display='flex';
+</script>
+</body>
+</html>

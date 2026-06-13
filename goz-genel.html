@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genel Hareket – OKUBİT</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+:root{--bg:#060d1a;--accent:#00d4ff;--accent2:#0088bb;--green:#00ff88;--white:#e8f4ff;--grey:#6a8aaa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min-height:100vh;user-select:none;}
+#app{max-width:800px;margin:0 auto;padding:16px;min-height:100vh;display:flex;flex-direction:column;}
+.header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 12px;}
+.logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent);letter-spacing:3px;}
+.logo span{color:var(--white);}
+.screen{display:none;flex-direction:column;align-items:center;flex:1;}
+.game-title{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;text-align:center;margin:12px 0 4px;}
+.game-sub{color:var(--grey);font-size:0.8rem;letter-spacing:2px;text-align:center;margin-bottom:24px;}
+.menu-card{background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.15);border-radius:16px;padding:20px;width:100%;max-width:500px;margin-bottom:14px;}
+.menu-card h3{font-family:'Orbitron',sans-serif;font-size:0.68rem;color:var(--accent);letter-spacing:2px;margin-bottom:14px;opacity:0.8;}
+.hiz-wrap{display:flex;align-items:center;gap:12px;}
+.hiz-slider{flex:1;-webkit-appearance:none;height:6px;border-radius:3px;background:rgba(255,255,255,0.1);outline:none;}
+.hiz-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.hiz-deger{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);min-width:28px;text-align:center;}
+.sure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.sure-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px;cursor:pointer;text-align:center;color:var(--grey);font-size:0.85rem;}
+.sure-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
+.start-btn{width:100%;max-width:500px;padding:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;}
+.geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
+.egzersiz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:16px;}
+.hud-item{text-align:center;}
+.hud-lbl{font-size:0.6rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
+.hud-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-top:2px;}
+.alan{width:100%;max-width:700px;height:340px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;position:relative;overflow:hidden;margin-bottom:16px;}
+.nokta{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,212,255,0.8),0 0 40px rgba(0,212,255,0.4);transition:left 0.6s ease,top 0.6s ease;}
+.sure-bar-wrap{width:100%;max-width:700px;margin-bottom:8px;}
+.sure-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+.sure-bar-ic{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width 1s linear;}
+.bitti-kart{width:100%;max-width:440px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:28px 24px;text-align:center;margin:16px 0;}
+.bitti-icon{font-size:3rem;display:block;margin-bottom:10px;}
+.bitti-baslik{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;color:var(--green);margin-bottom:8px;}
+.bitti-alt{color:var(--grey);font-size:0.85rem;margin-bottom:20px;}
+.btn-row{display:flex;gap:10px;justify-content:center;}
+.btn-play{flex:1;max-width:200px;padding:13px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;}
+.btn-back{flex:1;max-width:160px;padding:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header"><div class="logo">OKU<span>BİT</span></div></div>
+
+  <!-- MENÜ -->
+  <div id="screenMenu" class="screen">
+    <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">🔀</div>
+    <div class="game-title">GENEL HAREKET</div>
+    <div class="game-sub">ÇOKLU YÖN GÖZ KASI EGZERSİZİ</div>
+    <div class="menu-card">
+      <h3>HIZ (1 = En Yavaş, 10 = En Hızlı)</h3>
+      <div class="hiz-wrap">
+        <input type="range" class="hiz-slider" id="hizSlider" min="1" max="10" value="3" oninput="document.getElementById('hizDeger').textContent=this.value">
+        <div class="hiz-deger" id="hizDeger">3</div>
+      </div>
+    </div>
+    <div class="menu-card">
+      <h3>SÜRE</h3>
+      <div class="sure-grid">
+        <div class="sure-btn sel" onclick="selSure(60,this)">1 Dakika</div>
+        <div class="sure-btn" onclick="selSure(120,this)">2 Dakika</div>
+        <div class="sure-btn" onclick="selSure(180,this)">3 Dakika</div>
+      </div>
+    </div>
+    <div class="menu-card">
+      <h3>NASIL YAPILIR?</h3>
+      <div style="font-size:0.82rem;color:var(--grey);line-height:1.8">
+        👁️ Başını <strong style="color:var(--white)">hareket ettirme</strong>, sadece gözlerinle takip et<br>
+        🔀 Nokta farklı yönlerde hareket eder<br>
+        😌 Her yeni konuma gözlerinle ulaş<br>
+        ⏱️ Süre bitince egzersiz tamamlanır
+      </div>
+    </div>
+    <button class="start-btn" onclick="baslat()">BAŞLAT ▶</button>
+    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+
+  <!-- EGZERSİZ -->
+  <div id="screenEgzersiz" class="screen">
+    <div class="egzersiz-hud">
+      <div class="hud-item"><div class="hud-lbl">Egzersiz</div><div class="hud-val">Genel</div></div>
+      <div class="hud-item"><div class="hud-lbl">Kalan Süre</div><div class="hud-val" id="hudSure">—</div></div>
+      <div class="hud-item"><div class="hud-lbl">Hız</div><div class="hud-val" id="hudHiz">—</div></div>
+    </div>
+    <div class="sure-bar-wrap"><div class="sure-bar"><div class="sure-bar-ic" id="sureIc" style="width:100%"></div></div></div>
+    <div class="alan" id="alan">
+      <div class="nokta" id="nokta"></div>
+    </div>
+    <button class="geri-btn" onclick="durdur()">⏹ Durdur</button>
+  </div>
+
+  <!-- BİTTİ -->
+  <div id="screenBitti" class="screen">
+    <div class="bitti-kart">
+      <span class="bitti-icon">✅</span>
+      <div class="bitti-baslik">EGZERSİZ TAMAM!</div>
+      <div class="bitti-alt" id="bittiAlt">Harika iş! Gözlerini dinlendir.</div>
+      <div class="btn-row">
+        <button class="btn-play" onclick="tekrar()">▶ TEKRAR</button>
+        <button class="btn-back" onclick="menuye()">MENÜ</button>
+      </div>
+    </div>
+    <a id="backBtn2" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+</div>
+
+<script>
+// ── PANELe DÖNÜŞ URL'İ ──
+(function() {
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  document.getElementById('backBtn').href = backUrl;
+  document.getElementById('backBtn2').href = backUrl;
+})();
+
+let G={hiz:3,sure:60,moveInt:null,sureInt:null,baslangic:0};
+function selSure(s,el){G.sure=s;document.querySelectorAll('.sure-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.style.display='none');document.getElementById(id).style.display='flex';}
+function baslat(){
+  G.hiz=parseInt(document.getElementById('hizSlider').value);
+  G.baslangic=Date.now();
+  document.getElementById('hudHiz').textContent=G.hiz+'/10';
+  document.getElementById('hudSure').textContent=G.sure+'sn';
+  showScreen('screenEgzersiz');
+  if(G.sureInt)clearInterval(G.sureInt);
+  G.sureInt=setInterval(()=>{
+    const kalan=Math.max(0,G.sure-Math.floor((Date.now()-G.baslangic)/1000));
+    document.getElementById('hudSure').textContent=kalan+'sn';
+    document.getElementById('sureIc').style.width=(kalan/G.sure*100)+'%';
+    if(kalan<=0){clearInterval(G.sureInt);clearInterval(G.moveInt);bitti();}
+  },500);
+  const aralik=Math.max(400, 2000-(G.hiz-1)*180);
+  const nokta=document.getElementById('nokta');
+  function yeniKonum(){
+    const x=10+Math.random()*80;
+    const y=10+Math.random()*80;
+    nokta.style.left=x+'%';
+    nokta.style.top=y+'%';
+  }
+  yeniKonum();
+  if(G.moveInt)clearInterval(G.moveInt);
+  G.moveInt=setInterval(yeniKonum, aralik);
+}
+function bitti(){const s=Math.floor((Date.now()-G.baslangic)/1000);document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';showScreen('screenBitti');}
+function durdur(){clearInterval(G.sureInt);clearInterval(G.moveInt);menuye();}
+function tekrar(){baslat();}
+function menuye(){clearInterval(G.sureInt);clearInterval(G.moveInt);showScreen('screenMenu');}
+showScreen('screenMenu');
+</script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ev Takibi – OKUBİT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+  :root {
+    --lacivert: #0a1628; --lacivert2: #0f2040; --lacivert3: #1a3560;
+    --accent: #00d4ff; --accent2: #0099cc; --green: #00ff88;
+    --red: #ff4466; --gold: #ffd700; --white: #e8f4ff; --grey: #8aa8cc;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--lacivert); font-family:'Nunito',sans-serif; color:var(--white); min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image: radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,0.6) 0%,transparent 100%), radial-gradient(1px 1px at 25% 40%,rgba(255,255,255,0.4) 0%,transparent 100%), radial-gradient(1px 1px at 40% 10%,rgba(255,255,255,0.5) 0%,transparent 100%), radial-gradient(1px 1px at 55% 70%,rgba(255,255,255,0.3) 0%,transparent 100%), radial-gradient(1px 1px at 70% 25%,rgba(255,255,255,0.6) 0%,transparent 100%), radial-gradient(1px 1px at 80% 55%,rgba(255,255,255,0.4) 0%,transparent 100%), radial-gradient(2px 2px at 35% 60%,rgba(0,212,255,0.3) 0%,transparent 100%); pointer-events:none; z-index:0; }
+  #app { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:16px; min-height:100vh; display:flex; flex-direction:column; }
+  .header { display:flex; justify-content:space-between; align-items:center; padding:12px 0 16px; }
+  .logo { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:900; color:var(--accent); letter-spacing:3px; text-shadow:0 0 20px rgba(0,212,255,0.5); }
+  .logo span { color:var(--white); }
+  .score-display { display:flex; align-items:center; gap:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:6px 14px; font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; color:var(--accent); }
+  .screen { display:none; flex-direction:column; align-items:center; flex:1; }
+  .screen.active { display:flex; }
+  .screen:not(.active) { pointer-events:none !important; visibility:hidden !important; }
+  .game-title { font-family:'Orbitron',sans-serif; font-size:clamp(1.4rem,5vw,2.2rem); font-weight:900; text-align:center; margin:24px 0 8px; color:var(--white); text-shadow:0 0 30px rgba(0,212,255,0.4); }
+  .game-subtitle { color:var(--grey); font-size:0.9rem; text-align:center; margin-bottom:32px; letter-spacing:1px; }
+  .menu-card { background:rgba(255,255,255,0.04); border:1px solid rgba(0,212,255,0.2); border-radius:16px; padding:24px; width:100%; max-width:480px; margin-bottom:16px; }
+  .menu-card h3 { font-family:'Orbitron',sans-serif; font-size:0.75rem; color:var(--accent); letter-spacing:2px; margin-bottom:16px; opacity:0.8; }
+  .level-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .level-btn { background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.25); border-radius:12px; padding:12px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--white); }
+  .level-btn:hover, .level-btn.selected { background:rgba(0,212,255,0.18); border-color:var(--accent); box-shadow:0 0 15px rgba(0,212,255,0.2); }
+  .level-btn .lv-num { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; color:var(--accent); display:block; }
+  .level-btn .lv-desc { font-size:0.72rem; color:var(--grey); margin-top:2px; }
+  .mod-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .mod-btn { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 8px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--grey); font-size:0.8rem; }
+  .mod-btn:hover, .mod-btn.selected { background:rgba(0,212,255,0.1); border-color:rgba(0,212,255,0.4); color:var(--white); }
+  .mod-btn .mod-icon { font-size:1.2rem; display:block; margin-bottom:4px; }
+  .answer-mode-row { display:flex; gap:8px; }
+  .answer-mode-btn { flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--grey); font-size:0.82rem; }
+  .answer-mode-btn:hover, .answer-mode-btn.selected { background:rgba(0,212,255,0.1); border-color:rgba(0,212,255,0.4); color:var(--white); }
+  .start-btn { width:100%; max-width:480px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--lacivert); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 20px rgba(0,212,255,0.3); margin-top:4px; }
+  .start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,212,255,0.4); }
+  .game-info-bar { display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:16px; padding:10px 16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; }
+  .info-item { text-align:center; }
+  .info-label { font-size:0.65rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
+  .info-value { font-family:'Orbitron',sans-serif; font-size:0.9rem; font-weight:700; color:var(--accent); margin-top:2px; }
+  .stage-msg { font-size:1rem; color:var(--grey); margin-bottom:12px; min-height:24px; text-align:center; font-weight:600; }
+  .house-scene { width:100%; max-width:500px; position:relative; margin-bottom:16px; }
+  .house-svg-wrap { display:flex; justify-content:center; align-items:flex-end; position:relative; height:240px; }
+  .house-svg { width:260px; height:220px; }
+  .house-body { fill:var(--lacivert3); stroke:rgba(0,212,255,0.5); stroke-width:2; }
+  .house-roof { fill:var(--lacivert2); stroke:rgba(0,212,255,0.6); stroke-width:2; }
+  .house-door { fill:var(--lacivert); stroke:rgba(0,212,255,0.8); stroke-width:2; }
+  .house-window { fill:rgba(0,212,255,0.15); stroke:rgba(0,212,255,0.6); stroke-width:1.5; }
+  .house-window.lit { fill:rgba(255,215,0,0.3); stroke:rgba(255,215,0,0.7); }
+  .ground-line { position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,rgba(0,212,255,0.4),transparent); }
+  .person-figure { position:absolute; bottom:2px; display:flex; flex-direction:column; align-items:center; pointer-events:none; transition:none; }
+  .person-head { width:18px; height:18px; border-radius:50%; background:var(--accent); margin-bottom:2px; box-shadow:0 0 10px rgba(0,212,255,0.6); }
+  .person-body { width:14px; height:22px; background:var(--accent2); border-radius:4px; box-shadow:0 0 8px rgba(0,212,255,0.4); }
+  .person-figure.exit .person-head { background:var(--red); box-shadow:0 0 10px rgba(255,68,102,0.6); }
+  .person-figure.exit .person-body { background:#cc2244; }
+  .action-indicator { position:absolute; top:20px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; padding:6px 14px; border-radius:20px; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; }
+  .action-indicator.enter { background:rgba(0,255,136,0.15); border:1px solid rgba(0,255,136,0.5); color:var(--green); }
+  .action-indicator.exit { background:rgba(255,68,102,0.15); border:1px solid rgba(255,68,102,0.5); color:var(--red); }
+  .action-indicator.show { opacity:1; }
+  .question-box { width:100%; max-width:480px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,212,255,0.25); border-radius:20px; padding:28px 24px; text-align:center; margin-bottom:20px; }
+  .question-icon { font-size:2.5rem; margin-bottom:12px; }
+  .question-text { font-size:1.1rem; font-weight:700; color:var(--white); margin-bottom:24px; line-height:1.5; }
+  .choices-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px; }
+  .choice-btn { padding:14px; background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.25); border-radius:12px; color:var(--white); font-size:1rem; font-weight:700; font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s; }
+  .choice-btn:hover { background:rgba(0,212,255,0.16); border-color:var(--accent); }
+  .choice-btn.correct { background:rgba(0,255,136,0.2); border-color:var(--green); color:var(--green); }
+  .choice-btn.wrong { background:rgba(255,68,102,0.2); border-color:var(--red); color:var(--red); }
+  .number-input-wrap { display:flex; gap:10px; justify-content:center; align-items:center; margin-bottom:8px; }
+  .number-input { width:100px; padding:12px; background:rgba(0,212,255,0.06); border:2px solid rgba(0,212,255,0.4); border-radius:12px; color:var(--white); font-size:1.4rem; font-family:'Orbitron',sans-serif; font-weight:700; text-align:center; outline:none; }
+  .submit-btn { padding:12px 24px; background:var(--accent2); border:none; border-radius:12px; color:var(--lacivert); font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; cursor:pointer; }
+  .dual-house-row { display:flex; gap:16px; width:100%; justify-content:center; margin-bottom:16px; }
+  .dual-house-wrap { flex:1; max-width:220px; text-align:center; }
+  .dual-house-label { font-size:0.75rem; color:var(--grey); letter-spacing:1px; margin-bottom:6px; }
+  .dual-question-row { display:flex; gap:12px; justify-content:center; margin-bottom:8px; }
+  .dual-q-box { flex:1; max-width:200px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,212,255,0.2); border-radius:14px; padding:14px; text-align:center; }
+  .dual-q-box .dq-label { font-size:0.72rem; color:var(--grey); margin-bottom:6px; }
+  .dual-q-box .dq-input { width:70px; padding:8px; background:rgba(0,212,255,0.06); border:2px solid rgba(0,212,255,0.3); border-radius:8px; color:var(--white); font-size:1.2rem; font-family:'Orbitron',sans-serif; font-weight:700; text-align:center; outline:none; }
+  .result-box { width:100%; max-width:480px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,212,255,0.2); border-radius:20px; padding:28px 24px; text-align:center; margin-bottom:20px; }
+  .result-icon { font-size:3rem; margin-bottom:12px; display:block; }
+  .result-title { font-family:'Orbitron',sans-serif; font-size:1.3rem; font-weight:900; margin-bottom:6px; }
+  .result-title.correct { color:var(--green); }
+  .result-title.wrong { color:var(--red); }
+  .result-detail { color:var(--grey); font-size:0.9rem; margin-bottom:20px; }
+  .result-points { font-family:'Orbitron',sans-serif; font-size:1.5rem; font-weight:700; color:var(--gold); margin-bottom:6px; }
+  .streak-msg { color:var(--accent); font-size:0.85rem; font-weight:600; min-height:20px; margin-bottom:16px; }
+  .stats-row { display:flex; justify-content:space-around; padding:14px 0; border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:20px; }
+  .stat-item { text-align:center; }
+  .stat-num { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; color:var(--accent); }
+  .stat-lbl { font-size:0.7rem; color:var(--grey); margin-top:2px; }
+  .action-row { display:flex; gap:10px; justify-content:center; }
+  .btn-next { flex:1; max-width:200px; padding:13px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:12px; color:var(--lacivert); font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; cursor:pointer; }
+  .btn-menu { flex:1; max-width:160px; padding:13px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:12px; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.75rem; font-weight:700; cursor:pointer; }
+  .waiting-msg { font-family:'Orbitron',sans-serif; font-size:0.85rem; color:var(--accent); letter-spacing:2px; text-align:center; animation:pulse 1.2s ease-in-out infinite; margin:16px 0; }
+  @keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+  .countdown-wrap { display:flex; justify-content:center; align-items:center; margin:8px 0; }
+  .countdown-circle { width:60px; height:60px; border-radius:50%; background:rgba(0,212,255,0.1); border:2px solid rgba(0,212,255,0.4); display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:1.4rem; font-weight:700; color:var(--accent); }
+  .geri-btn { margin-top:12px; color:rgba(138,168,204,0.8); font-size:0.8rem; text-decoration:none; display:block; text-align:center; padding:8px; background:none; border:none; cursor:pointer; font-family:'Nunito',sans-serif; }
+  .geri-btn:hover { color:var(--white); }
+  @media(max-width:480px) { .house-svg-wrap{height:200px} .house-svg{width:210px;height:180px} .dual-house-row{gap:8px} .dual-house-wrap{max-width:160px} }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo">OKU<span>BİT</span></div>
+    <div class="score-display"><span>⚡</span><span id="headerScore">0</span></div>
+  </div>
+
+  <!-- MENÜ -->
+  <div id="screenMenu" class="screen active">
+    <div class="game-title">🏠 Ev Takibi</div>
+    <div class="game-subtitle">ZİHİNSEL TAKİP OYUNU</div>
+    <div class="menu-card">
+      <h3>SEVİYE</h3>
+      <div class="level-grid">
+        <div class="level-btn selected" data-level="1" onclick="selectLevel(1,this)"><span class="lv-num">SEVİYE 1</span><span class="lv-desc">3–5 işlem · 2 sn</span></div>
+        <div class="level-btn" data-level="2" onclick="selectLevel(2,this)"><span class="lv-num">SEVİYE 2</span><span class="lv-desc">5–8 işlem · 1.5 sn</span></div>
+        <div class="level-btn" data-level="3" onclick="selectLevel(3,this)"><span class="lv-num">SEVİYE 3</span><span class="lv-desc">8–12 işlem · 1 sn</span></div>
+        <div class="level-btn" data-level="4" onclick="selectLevel(4,this)"><span class="lv-num">SEVİYE 4</span><span class="lv-desc">12–20 işlem · 0.5 sn</span></div>
+      </div>
+    </div>
+    <div class="menu-card">
+      <h3>OYUN MODU</h3>
+      <div class="mod-grid">
+        <div class="mod-btn selected" data-mod="1" onclick="selectMod(1,this)"><span class="mod-icon">🏠</span>Evde Kaç Kişi?</div>
+        <div class="mod-btn" data-mod="2" onclick="selectMod(2,this)"><span class="mod-icon">➡️</span>Toplam Giren?</div>
+        <div class="mod-btn" data-mod="3" onclick="selectMod(3,this)"><span class="mod-icon">⬅️</span>Toplam Çıkan?</div>
+        <div class="mod-btn" data-mod="4" onclick="selectMod(4,this)"><span class="mod-icon">🏘️</span>Çift Ev</div>
+      </div>
+    </div>
+    <div class="menu-card">
+      <h3>CEVAP MODU</h3>
+      <div class="answer-mode-row">
+        <div class="answer-mode-btn selected" data-am="choice" onclick="selectAnswerMode('choice',this)">🔤 Çoktan Seçmeli</div>
+        <div class="answer-mode-btn" data-am="input" onclick="selectAnswerMode('input',this)">✏️ Sayı Gir</div>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startGame()">OYUNU BAŞLAT ▶</button>
+    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+
+  <!-- OYUN -->
+  <div id="screenGame" class="screen">
+    <div class="game-info-bar">
+      <div class="info-item"><div class="info-label">Seviye</div><div class="info-value" id="infoLevel">1</div></div>
+      <div class="info-item"><div class="info-label">İşlem</div><div class="info-value" id="infoStep">0/0</div></div>
+      <div class="info-item"><div class="info-label">Seri</div><div class="info-value" id="infoStreak">0 🔥</div></div>
+    </div>
+    <div class="stage-msg" id="stageMsg">Hazırlanıyor...</div>
+    <div id="singleHouseWrap" class="house-scene">
+      <div class="house-svg-wrap" id="houseArea">
+        <svg class="house-svg" viewBox="0 0 260 220" id="houseSvg">
+          <polygon points="10,100 130,10 250,100" class="house-roof"/>
+          <rect x="20" y="100" width="220" height="110" class="house-body"/>
+          <rect x="40" y="115" width="50" height="40" rx="4" class="house-window" id="win1"/>
+          <rect x="170" y="115" width="50" height="40" rx="4" class="house-window" id="win2"/>
+          <rect x="105" y="155" width="50" height="55" rx="4" class="house-door" id="houseDoor"/>
+          <circle cx="148" cy="184" r="3" fill="rgba(0,212,255,0.8)"/>
+          <rect x="180" y="40" width="20" height="40" fill="var(--lacivert2)" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
+        </svg>
+        <div class="action-indicator" id="actionIndicator"></div>
+        <div class="ground-line"></div>
+      </div>
+    </div>
+    <div id="dualHouseWrap" style="display:none; width:100%">
+      <div class="dual-house-row">
+        <div class="dual-house-wrap">
+          <div class="dual-house-label">SOL EV</div>
+          <div class="house-svg-wrap" id="houseAreaL" style="height:160px">
+            <svg class="house-svg" viewBox="0 0 260 220" style="width:180px;height:150px">
+              <polygon points="10,100 130,10 250,100" class="house-roof"/>
+              <rect x="20" y="100" width="220" height="110" class="house-body"/>
+              <rect x="40" y="115" width="50" height="40" rx="4" class="house-window" id="winL1"/>
+              <rect x="170" y="115" width="50" height="40" rx="4" class="house-window" id="winL2"/>
+              <rect x="105" y="155" width="50" height="55" rx="4" class="house-door" id="doorL"/>
+              <circle cx="148" cy="184" r="3" fill="rgba(0,212,255,0.8)"/>
+            </svg>
+            <div class="action-indicator" id="actionIndicatorL"></div>
+            <div class="ground-line"></div>
+          </div>
+        </div>
+        <div class="dual-house-wrap">
+          <div class="dual-house-label">SAĞ EV</div>
+          <div class="house-svg-wrap" id="houseAreaR" style="height:160px">
+            <svg class="house-svg" viewBox="0 0 260 220" style="width:180px;height:150px">
+              <polygon points="10,100 130,10 250,100" class="house-roof"/>
+              <rect x="20" y="100" width="220" height="110" class="house-body"/>
+              <rect x="40" y="115" width="50" height="40" rx="4" class="house-window" id="winR1"/>
+              <rect x="170" y="115" width="50" height="40" rx="4" class="house-window" id="winR2"/>
+              <rect x="105" y="155" width="50" height="55" rx="4" class="house-door" id="doorR"/>
+              <circle cx="148" cy="184" r="3" fill="rgba(0,212,255,0.8)"/>
+            </svg>
+            <div class="action-indicator" id="actionIndicatorR"></div>
+            <div class="ground-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="countdown-wrap" id="countdownWrap" style="display:none"><div class="countdown-circle" id="countdownNum">3</div></div>
+    <div class="waiting-msg" id="waitingMsg" style="display:none">HAZIR OL...</div>
+    <button class="geri-btn" onclick="goMenu()" style="margin-top:auto">← Menüye Dön</button>
+  </div>
+
+  <!-- SORU -->
+  <div id="screenQuestion" class="screen">
+    <div class="game-info-bar" style="margin-bottom:20px">
+      <div class="info-item"><div class="info-label">Seviye</div><div class="info-value" id="qLevel">1</div></div>
+      <div class="info-item"><div class="info-label">Puan</div><div class="info-value" id="qScore">0</div></div>
+      <div class="info-item"><div class="info-label">Seri</div><div class="info-value" id="qStreak">0 🔥</div></div>
+    </div>
+    <div id="singleQBox" class="question-box">
+      <div class="question-icon">🤔</div>
+      <div class="question-text" id="questionText">Evde şu anda kaç kişi var?</div>
+      <div class="choices-grid" id="choicesGrid"></div>
+      <div class="number-input-wrap" id="numberInputWrap" style="display:none">
+        <input type="number" class="number-input" id="numberInput" min="0" max="99" placeholder="?">
+        <button class="submit-btn" onclick="submitNumberAnswer()">TAMAM</button>
+      </div>
+    </div>
+    <div id="dualQBox" style="display:none; width:100%; max-width:480px; text-align:center; margin-bottom:20px">
+      <div class="question-icon">🤔</div>
+      <div class="question-text" style="margin-bottom:16px">İki evde kaç kişi var?</div>
+      <div class="dual-question-row">
+        <div class="dual-q-box"><div class="dq-label">SOL EV</div><input type="number" class="dq-input" id="dqLeft" min="0" max="99" placeholder="?"></div>
+        <div class="dual-q-box"><div class="dq-label">SAĞ EV</div><input type="number" class="dq-input" id="dqRight" min="0" max="99" placeholder="?"></div>
+      </div>
+      <button class="submit-btn" style="margin-top:14px;width:100%;max-width:200px" onclick="submitDualAnswer()">CEVAPLA</button>
+    </div>
+  </div>
+
+  <!-- SONUÇ -->
+  <div id="screenResult" class="screen">
+    <div class="result-box" style="animation:fadeInUp 0.4s ease forwards">
+      <span class="result-icon" id="resultIcon">✅</span>
+      <div class="result-title" id="resultTitle">DOĞRU!</div>
+      <div class="result-detail" id="resultDetail"></div>
+      <div class="result-points" id="resultPoints"></div>
+      <div class="streak-msg" id="streakMsg"></div>
+      <div class="stats-row">
+        <div class="stat-item"><div class="stat-num" id="statCorrect">0</div><div class="stat-lbl">Doğru</div></div>
+        <div class="stat-item"><div class="stat-num" id="statWrong">0</div><div class="stat-lbl">Yanlış</div></div>
+        <div class="stat-item"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">Toplam Puan</div></div>
+      </div>
+      <div class="action-row">
+        <button class="btn-next" onclick="playAgain()">▶ TEKRAR OYNA</button>
+        <button class="btn-menu" onclick="goMenu()">MENÜ</button>
+      </div>
+    </div>
+    <a id="backBtn2" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+</div>
+
+<style>
+@keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+</style>
+
+<script>
+// ── PANELe DÖNÜŞ URL'İ ──
+(function() {
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  document.getElementById('backBtn').href = backUrl;
+  document.getElementById('backBtn2').href = backUrl;
+})();
+
+const S = { level:1, mod:1, answerMode:'choice', score:0, streak:0, correct:0, wrong:0, steps:[], currentStep:0, answer:0, answerL:0, answerR:0, startTime:0 };
+const LEVEL_CONFIG = { 1:{minSteps:3,maxSteps:5,maxPeople:2,animMs:2000}, 2:{minSteps:5,maxSteps:8,maxPeople:3,animMs:1500}, 3:{minSteps:8,maxSteps:12,maxPeople:5,animMs:1000}, 4:{minSteps:12,maxSteps:20,maxPeople:7,animMs:500} };
+
+function selectLevel(n,el){S.level=n;document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+function selectMod(n,el){S.mod=n;document.querySelectorAll('.mod-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+function selectAnswerMode(m,el){S.answerMode=m;document.querySelectorAll('.answer-mode-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+
+function generateScenario(cfg){const steps=[];const n=randInt(cfg.minSteps,cfg.maxSteps);let inside=0;for(let i=0;i<n;i++){const canExit=inside>0;const isEntry=!canExit||Math.random()>0.4;let count;if(isEntry){count=randInt(1,cfg.maxPeople);inside+=count;steps.push({type:'enter',count});}else{count=randInt(1,Math.min(inside,cfg.maxPeople));inside-=count;steps.push({type:'exit',count});}}if(inside<0)inside=0;return{steps,finalCount:inside};}
+function generateDualScenario(cfg){return{L:generateScenario(cfg),R:generateScenario(cfg)};}
+function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+function startGame(){
+  showScreen('screenGame');
+  updateHeaderScore();
+  S.currentStep=0;
+  const cfg=LEVEL_CONFIG[S.level];
+  document.getElementById('infoLevel').textContent=S.level;
+  document.getElementById('infoStreak').textContent=S.streak+' 🔥';
+  if(S.mod===4){
+    document.getElementById('singleHouseWrap').style.display='none';
+    document.getElementById('dualHouseWrap').style.display='block';
+    const dual=generateDualScenario(cfg);
+    S.stepsL=dual.L.steps; S.stepsR=dual.R.steps;
+    S.answerL=dual.L.finalCount; S.answerR=dual.R.finalCount;
+    S.steps=mergeDualSteps(dual.L.steps,dual.R.steps);
+    S.answer=null;
+  }else{
+    document.getElementById('singleHouseWrap').style.display='block';
+    document.getElementById('dualHouseWrap').style.display='none';
+    const sc=generateScenario(cfg);
+    S.steps=sc.steps; S.finalCount=sc.finalCount;
+    if(S.mod===1)S.answer=sc.finalCount;
+    else if(S.mod===2)S.answer=sc.steps.filter(s=>s.type==='enter').reduce((a,s)=>a+s.count,0);
+    else if(S.mod===3)S.answer=sc.steps.filter(s=>s.type==='exit').reduce((a,s)=>a+s.count,0);
+  }
+  runCountdown(3,()=>runSteps(cfg.animMs));
+}
+
+function mergeDualSteps(L,R){const merged=[];let li=0,ri=0;while(li<L.length||ri<R.length){if(li<L.length&&(ri>=R.length||Math.random()>0.5)){merged.push({...L[li],house:'L'});li++;}else{merged.push({...R[ri],house:'R'});ri++;}}return merged;}
+
+function runCountdown(n,cb){const wrap=document.getElementById('countdownWrap');const num=document.getElementById('countdownNum');wrap.style.display='flex';num.textContent=n;document.getElementById('stageMsg').textContent='Hazır ol!';if(n<=0){wrap.style.display='none';document.getElementById('stageMsg').textContent='Takip et!';cb();return;}setTimeout(()=>runCountdown(n-1,cb),700);}
+
+function runSteps(animMs){const cfg=LEVEL_CONFIG[S.level];if(S.currentStep>=S.steps.length){document.getElementById('stageMsg').textContent='Cevap zamanı!';setTimeout(showQuestion,600);return;}const step=S.steps[S.currentStep];document.getElementById('infoStep').textContent=(S.currentStep+1)+'/'+S.steps.length;updateWindowLights();if(S.mod===4){animateStepDual(step,animMs,()=>{S.currentStep++;setTimeout(()=>runSteps(animMs),animMs*0.3);});}else{animateStep(step,animMs,()=>{S.currentStep++;setTimeout(()=>runSteps(animMs),animMs*0.3);});}}
+
+function animateStep(step,animMs,onDone){const area=document.getElementById('houseArea');const indicator=document.getElementById('actionIndicator');const isEnter=step.type==='enter';const doorEl=document.getElementById('houseDoor');indicator.className='action-indicator '+(isEnter?'enter':'exit');indicator.textContent=(isEnter?'➡️ +':'⬅️ -')+step.count+' kişi '+(isEnter?'giriyor':'çıkıyor');indicator.classList.add('show');doorEl.style.fill='rgba(0,212,255,0.3)';for(let i=0;i<Math.min(step.count,4);i++)spawnPerson(area,isEnter,animMs,i*(animMs*0.15));setTimeout(()=>{indicator.classList.remove('show');doorEl.style.fill='';onDone();},animMs);}
+function animateStepDual(step,animMs,onDone){const isLeft=step.house==='L';const area=document.getElementById(isLeft?'houseAreaL':'houseAreaR');const indicator=document.getElementById(isLeft?'actionIndicatorL':'actionIndicatorR');const isEnter=step.type==='enter';indicator.className='action-indicator '+(isEnter?'enter':'exit');indicator.textContent=(isEnter?'+':'-')+step.count;indicator.classList.add('show');for(let i=0;i<Math.min(step.count,3);i++)spawnPerson(area,isEnter,animMs,i*(animMs*0.15));setTimeout(()=>{indicator.classList.remove('show');onDone();},animMs);}
+
+function spawnPerson(container,isEnter,dur,delay){const fig=document.createElement('div');fig.className='person-figure'+(isEnter?'':' exit');const head=document.createElement('div');head.className='person-head';const body=document.createElement('div');body.className='person-body';fig.appendChild(head);fig.appendChild(body);const cw=container.offsetWidth||300;const startX=isEnter?-60:cw/2-10;const endX=isEnter?cw/2-10:cw+60;fig.style.left=startX+'px';fig.style.bottom='2px';fig.style.transition='left '+dur+'ms linear '+delay+'ms, opacity '+dur*0.1+'ms ease '+delay+'ms';fig.style.opacity='0';container.appendChild(fig);requestAnimationFrame(()=>{requestAnimationFrame(()=>{fig.style.opacity='1';fig.style.left=endX+'px';});});setTimeout(()=>{fig.style.opacity='0';setTimeout(()=>fig.remove(),300);},delay+dur*0.85);}
+
+function updateWindowLights(){let inside=0;for(let i=0;i<S.currentStep;i++){const s=S.steps[i];if(s.type==='enter')inside+=s.count;else inside-=s.count;}inside=Math.max(0,inside);const lit=inside>0;const w1=document.getElementById('win1');const w2=document.getElementById('win2');if(w1)w1.classList.toggle('lit',lit);if(w2)w2.classList.toggle('lit',inside>2);}
+
+function showQuestion(){S.startTime=Date.now();showScreen('screenQuestion');document.getElementById('qLevel').textContent=S.level;document.getElementById('qScore').textContent=S.score;document.getElementById('qStreak').textContent=S.streak+' 🔥';if(S.mod===4){document.getElementById('singleQBox').style.display='none';document.getElementById('dualQBox').style.display='block';document.getElementById('dqLeft').value='';document.getElementById('dqRight').value='';}else{document.getElementById('singleQBox').style.display='block';document.getElementById('dualQBox').style.display='none';const texts={1:'Evde şu anda kaç kişi bulunmaktadır?',2:'Toplam kaç kişi eve girdi?',3:'Toplam kaç kişi evden çıktı?'};document.getElementById('questionText').textContent=texts[S.mod]||texts[1];if(S.answerMode==='choice'){document.getElementById('choicesGrid').style.display='grid';document.getElementById('numberInputWrap').style.display='none';buildChoices(S.answer);}else{document.getElementById('choicesGrid').style.display='none';document.getElementById('numberInputWrap').style.display='flex';document.getElementById('numberInput').value='';setTimeout(()=>document.getElementById('numberInput').focus(),100);}}}
+
+function buildChoices(correct){const grid=document.getElementById('choicesGrid');grid.innerHTML='';const opts=new Set([correct]);while(opts.size<4){let w=correct+randInt(-4,4);if(w<0)w=0;opts.add(w);}const arr=shuffle([...opts]);arr.forEach(val=>{const btn=document.createElement('button');btn.className='choice-btn';btn.textContent=val;btn.onclick=()=>checkAnswer(val,correct,btn);grid.appendChild(btn);});}
+
+function checkAnswer(given,correct,btn){document.querySelectorAll('.choice-btn').forEach(b=>b.onclick=null);const isCorrect=given===correct;if(btn)btn.classList.add(isCorrect?'correct':'wrong');if(!isCorrect)document.querySelectorAll('.choice-btn').forEach(b=>{if(parseInt(b.textContent)===correct)b.classList.add('correct');});setTimeout(()=>showResult(isCorrect,correct),800);}
+function submitNumberAnswer(){const val=parseInt(document.getElementById('numberInput').value);if(isNaN(val))return;showResult(val===S.answer,S.answer);}
+function submitDualAnswer(){const l=parseInt(document.getElementById('dqLeft').value);const r=parseInt(document.getElementById('dqRight').value);if(isNaN(l)||isNaN(r))return;showResultDual(l===S.answerL&&r===S.answerR);}
+
+function showResult(isCorrect,correct){const elapsed=((Date.now()-S.startTime)/1000).toFixed(1);let points=0;if(isCorrect){S.correct++;S.streak++;points=100;if(S.streak>=10)points+=250;else if(S.streak>=5)points+=100;else if(S.streak>=3)points+=50;S.score+=points;}else{S.wrong++;S.streak=0;}updateHeaderScore();showScreen('screenResult');document.getElementById('resultIcon').textContent=isCorrect?'🎉':'😞';document.getElementById('resultTitle').textContent=isCorrect?'DOĞRU!':'YANLIŞ!';document.getElementById('resultTitle').className='result-title '+(isCorrect?'correct':'wrong');document.getElementById('resultDetail').textContent=isCorrect?'Harika! Cevap: '+correct+' | Süre: '+elapsed+' sn':'Doğru cevap: '+correct+' kişi | Süre: '+elapsed+' sn';document.getElementById('resultPoints').textContent=isCorrect?'+'+points+' ⚡':'';const sm=document.getElementById('streakMsg');if(S.streak>=10)sm.textContent='🔥 10 Seri! +250 Bonus!';else if(S.streak>=5)sm.textContent='🔥 5 Seri! +100 Bonus!';else if(S.streak>=3)sm.textContent='🔥 3 Seri! +50 Bonus!';else sm.textContent='';document.getElementById('statCorrect').textContent=S.correct;document.getElementById('statWrong').textContent=S.wrong;document.getElementById('statTotal').textContent=S.score;}
+
+function showResultDual(isCorrect){let points=0;if(isCorrect){S.correct++;S.streak++;points=100;if(S.streak>=10)points+=250;else if(S.streak>=5)points+=100;else if(S.streak>=3)points+=50;S.score+=points;}else{S.wrong++;S.streak=0;}updateHeaderScore();showScreen('screenResult');document.getElementById('resultIcon').textContent=isCorrect?'🎉':'😞';document.getElementById('resultTitle').textContent=isCorrect?'DOĞRU!':'YANLIŞ!';document.getElementById('resultTitle').className='result-title '+(isCorrect?'correct':'wrong');document.getElementById('resultDetail').textContent=isCorrect?'Mükemmel! Sol: '+S.answerL+', Sağ: '+S.answerR:'Doğru → Sol: '+S.answerL+', Sağ: '+S.answerR;document.getElementById('resultPoints').textContent=isCorrect?'+'+points+' ⚡':'';const sm=document.getElementById('streakMsg');if(S.streak>=10)sm.textContent='🔥 10 Seri! +250 Bonus!';else if(S.streak>=5)sm.textContent='🔥 5 Seri! +100 Bonus!';else if(S.streak>=3)sm.textContent='🔥 3 Seri! +50 Bonus!';else sm.textContent='';document.getElementById('statCorrect').textContent=S.correct;document.getElementById('statWrong').textContent=S.wrong;document.getElementById('statTotal').textContent=S.score;}
+
+function playAgain(){startGame();}
+function goMenu(){showScreen('screenMenu');}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function updateHeaderScore(){document.getElementById('headerScore').textContent=S.score;}
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+document.getElementById('numberInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitNumberAnswer();});
+</script>
+</body>
+</html>

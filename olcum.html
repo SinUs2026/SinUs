@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OkuBit – Ücretsiz Seviye Testi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#f4f6f9;color:#1e293b;min-height:100vh}
+nav{background:#0a1628;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;color:white;text-decoration:none}
+.logo span{color:#60a5fa}
+.nav-link{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.88rem}
+
+.container{max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ADIM GÖSTERGESİ */
+.adim-gosterge{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:2.5rem}
+.adim{display:flex;flex-direction:column;align-items:center;gap:0.3rem}
+.adim-no{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;transition:all 0.3s}
+.adim-no.bekliyor{background:#e2e8f0;color:#94a3b8}
+.adim-no.aktif{background:#0a1628;color:white}
+.adim-no.tamamlandi{background:#16a34a;color:white}
+.adim-etiket{font-size:0.72rem;color:#94a3b8;white-space:nowrap}
+.adim-etiket.aktif{color:#0a1628;font-weight:600}
+.adim-cizgi{width:60px;height:2px;background:#e2e8f0;margin-bottom:1.2rem}
+.adim-cizgi.tamamlandi{background:#16a34a}
+
+/* KARTLAR */
+.kart{background:white;border-radius:20px;padding:2.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.06);margin-bottom:1.5rem}
+.kart-baslik{font-family:'Playfair Display',serif;font-size:1.6rem;color:#0a1628;margin-bottom:0.5rem}
+.kart-alt{color:#64748b;font-size:0.92rem;margin-bottom:1.5rem;line-height:1.6}
+
+/* BİLGİLENDİRME */
+.bilgi-kutu{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1rem}
+.bilgi-kutu h3{font-size:0.9rem;font-weight:700;color:#0369a1;margin-bottom:0.5rem}
+.bilgi-kutu p{font-size:0.85rem;color:#0c4a6e;line-height:1.6}
+.bilgi-liste{list-style:none;margin-top:0.5rem}
+.bilgi-liste li{font-size:0.85rem;color:#0c4a6e;padding:0.2rem 0;padding-left:1.2rem;position:relative}
+.bilgi-liste li::before{content:"✓";position:absolute;left:0;color:#0369a1;font-weight:700}
+
+/* FORM */
+.form-grup{margin-bottom:1.2rem}
+.form-grup label{display:block;font-size:0.83rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem}
+.form-grup input,.form-grup select{width:100%;padding:0.75rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s}
+.form-grup input:focus,.form-grup select:focus{border-color:#0a1628}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.opsiyonel{font-weight:400;color:#94a3b8;font-size:0.78rem}
+
+/* METİN OKUMA */
+.sure-bar{display:flex;align-items:center;justify-content:space-between;background:#0a1628;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem}
+.sure-label{color:rgba(255,255,255,0.7);font-size:0.82rem}
+.sure-deger{font-family:'Playfair Display',serif;font-size:2rem;color:white;font-weight:700}
+.sure-bilgi{color:rgba(255,255,255,0.5);font-size:0.75rem;text-align:right}
+.metin-alan{background:#fafafa;border:1.5px solid #f1f5f9;border-radius:12px;padding:1.5rem 2rem;font-size:1.05rem;line-height:1.9;color:#1e293b;margin-bottom:1.5rem;min-height:300px}
+.metin-alan p{margin-bottom:1rem}
+
+/* SORULAR */
+.soru-ilerleme{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.soru-bar{flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.soru-bar-dolu{height:100%;background:#0a1628;border-radius:3px;transition:width 0.3s}
+.soru-no{font-size:0.82rem;color:#64748b;white-space:nowrap}
+.soru-metin{font-size:1.05rem;font-weight:600;color:#0a1628;margin-bottom:1.2rem;line-height:1.5}
+.secenekler{display:flex;flex-direction:column;gap:0.6rem}
+.secenek{padding:0.85rem 1.2rem;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:0.92rem;transition:all 0.2s;text-align:left;background:white;font-family:'DM Sans',sans-serif}
+.secenek:hover{border-color:#0a1628;background:#f8fafc}
+.secenek.secildi{border-color:#0a1628;background:#f0f4ff;color:#0a1628;font-weight:600}
+.secenek.dogru{border-color:#16a34a;background:#f0fdf4;color:#15803d}
+.secenek.yanlis{border-color:#dc2626;background:#fef2f2;color:#dc2626}
+
+/* SONUÇ */
+.sonuc-baslik{text-align:center;margin-bottom:2rem}
+.sonuc-isim{font-family:'Playfair Display',serif;font-size:1.8rem;color:#0a1628;margin-bottom:0.3rem}
+.sonuc-tarih{color:#94a3b8;font-size:0.85rem}
+.sonuc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.sonuc-kart{border-radius:14px;padding:1.3rem;text-align:center}
+.sonuc-kart.mavi{background:#eff6ff;border:1.5px solid #bfdbfe}
+.sonuc-kart.yesil{background:#f0fdf4;border:1.5px solid #bbf7d0}
+.sonuc-kart-etiket{font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.3rem}
+.sonuc-kart-deger{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700}
+.sonuc-kart.mavi .sonuc-kart-deger{color:#1d4ed8}
+.sonuc-kart.yesil .sonuc-kart-deger{color:#15803d}
+.sonuc-kart-alt{font-size:0.78rem;color:#64748b;margin-top:0.2rem}
+.karsilastirma{background:#f8fafc;border-radius:14px;padding:1.3rem 1.5rem;margin-bottom:1.5rem}
+.karsilastirma-baslik{font-size:0.82rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem}
+.karsilastirma-satir{display:flex;align-items:center;gap:1rem;margin-bottom:0.6rem}
+.karsilastirma-etiket{font-size:0.85rem;color:#475569;width:160px;flex-shrink:0}
+.karsilastirma-bar-arka{flex:1;height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden}
+.karsilastirma-bar-on{height:100%;border-radius:5px;transition:width 1s ease}
+.karsilastirma-bar-on.ogrenci{background:#3b82f6}
+.karsilastirma-bar-on.ortalama{background:#94a3b8}
+.karsilastirma-deger{font-size:0.82rem;font-weight:700;width:60px;text-align:right}
+.mesaj-kutu{border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;text-align:center}
+.mesaj-kutu.iyi{background:#f0fdf4;border:1.5px solid #bbf7d0}
+.mesaj-kutu.orta{background:#fffbeb;border:1.5px solid #fde68a}
+.mesaj-kutu.dusuk{background:#fef2f2;border:1.5px solid #fecaca}
+.mesaj-kutu p{font-size:0.92rem;line-height:1.6}
+.asama-oneri{background:#f0f4ff;border:1.5px solid #c7d7fe;border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;text-align:center}
+.asama-oneri-etiket{font-size:0.78rem;color:#4338ca;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;margin-bottom:0.3rem}
+.asama-oneri-deger{font-family:'Playfair Display',serif;font-size:1.3rem;color:#0a1628;font-weight:700}
+
+/* BUTONLAR */
+.btn-ana{background:#0a1628;color:white;border:none;padding:0.9rem 2rem;border-radius:10px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:opacity 0.2s}
+.btn-ana:hover{opacity:0.9}
+.btn-ana.yesil{background:#16a34a}
+.btn-ana.turuncu{background:#ea580c}
+.btn-ikincil{background:#f1f5f9;color:#475569;border:none;padding:0.9rem 2rem;border-radius:10px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;margin-top:0.7rem}
+.btn-grup{display:flex;flex-direction:column;gap:0}
+
+/* YÜKLEME */
+.yukluyor-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.8);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+.yukluyor-overlay.aktif{display:flex}
+.spinner{width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#0a1628;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .sonuc-grid{grid-template-columns:1fr}
+  .adim-cizgi{width:30px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Oku<span>Bit</span></a>
+  <a href="index.html" class="nav-link">← Ana Sayfaya Dön</a>
+</nav>
+
+<div class="container">
+
+  <!-- ADIM GÖSTERGESİ -->
+  <div class="adim-gosterge" id="adim-gosterge">
+    <div class="adim">
+      <div class="adim-no aktif" id="adim-no-1">1</div>
+      <div class="adim-etiket aktif" id="adim-et-1">Bilgi</div>
+    </div>
+    <div class="adim-cizgi" id="cizgi-1"></div>
+    <div class="adim">
+      <div class="adim-no bekliyor" id="adim-no-2">2</div>
+      <div class="adim-etiket" id="adim-et-2">Form</div>
+    </div>
+    <div class="adim-cizgi" id="cizgi-2"></div>
+    <div class="adim">
+      <div class="adim-no bekliyor" id="adim-no-3">3</div>
+      <div class="adim-etiket" id="adim-et-3">Okuma</div>
+    </div>
+    <div class="adim-cizgi" id="cizgi-3"></div>
+    <div class="adim">
+      <div class="adim-no bekliyor" id="adim-no-4">4</div>
+      <div class="adim-etiket" id="adim-et-4">Sorular</div>
+    </div>
+    <div class="adim-cizgi" id="cizgi-4"></div>
+    <div class="adim">
+      <div class="adim-no bekliyor" id="adim-no-5">5</div>
+      <div class="adim-etiket" id="adim-et-5">Sonuç</div>
+    </div>
+  </div>
+
+  <!-- ADIM 1: BİLGİLENDİRME -->
+  <div id="adim1">
+    <div class="kart">
+      <div class="kart-baslik">📖 Ücretsiz Okuma Hızı Testi</div>
+      <div class="kart-alt">Çocuğunuzun okuma düzeyini bilimsel verilerle ölçün. Sadece 5 dakika sürer.</div>
+
+      <div class="bilgi-kutu">
+        <h3>🎯 Bu test ne ölçer?</h3>
+        <p>Dakikada kaç kelime okunduğunu ve okunanın ne kadar anlaşıldığını ölçer. Sonuçlar MEB ve uluslararası okuma araştırmalarıyla karşılaştırılır.</p>
+      </div>
+
+      <div class="bilgi-kutu" style="background:#f0fdf4;border-color:#bbf7d0">
+        <h3 style="color:#15803d">✅ Nasıl yapılmalı?</h3>
+        <ul class="bilgi-liste" style="color:#166534">
+          <li>Sakin ve sessiz bir ortamda yapın</li>
+          <li>Çocuğunuz metni kendi hızında sessizce okusun</li>
+          <li>Bitirince "Okumayı Bitirdim" butonuna bassın</li>
+          <li>Ardından anlama soruları gelecek, yardım etmeyin</li>
+        </ul>
+      </div>
+
+      <div class="bilgi-kutu" style="background:#fffbeb;border-color:#fde68a">
+        <h3 style="color:#b45309">⚠️ Nelere dikkat edilmeli?</h3>
+        <ul class="bilgi-liste" style="color:#92400e">
+          <li>Okuma sırasında metni göstermeyin veya yardım etmeyin</li>
+          <li>Süreyi durdurmayın, doğal okuma hızı ölçülüyor</li>
+          <li>Sorular gelince çocuk kendi başına cevaplamalı</li>
+        </ul>
+      </div>
+
+      <button class="btn-ana" onclick="adimGec(2)" style="margin-top:1rem">Teste Başla →</button>
+    </div>
+  </div>
+
+  <!-- ADIM 2: FORM -->
+  <div id="adim2" style="display:none">
+    <div class="kart">
+      <div class="kart-baslik">📋 Bilgi Formu</div>
+      <div class="kart-alt">Sonuçları doğru yorumlayabilmemiz için birkaç bilgiye ihtiyacımız var.</div>
+
+      <div class="form-grid">
+        <div class="form-grup">
+          <label>Ad</label>
+          <input type="text" id="f-ad" placeholder="Öğrencinin adı">
+        </div>
+        <div class="form-grup">
+          <label>Soyad</label>
+          <input type="text" id="f-soyad" placeholder="Öğrencinin soyadı">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-grup">
+          <label>Yaş</label>
+          <select id="f-yas">
+            <option value="">Seçin</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18+</option>
+          </select>
+        </div>
+        <div class="form-grup">
+          <label>Sınıf</label>
+          <select id="f-sinif">
+            <option value="">Seçin</option>
+            <option>1. Sınıf</option>
+            <option>2. Sınıf</option>
+            <option>3. Sınıf</option>
+            <option>4. Sınıf</option>
+            <option>5. Sınıf</option>
+            <option>6. Sınıf</option>
+            <option>7. Sınıf</option>
+            <option>8. Sınıf</option>
+            <option>9. Sınıf</option>
+            <option>10. Sınıf</option>
+            <option>11. Sınıf</option>
+            <option>12. Sınıf</option>
+            <option>Lise Mezunu</option>
+            <option>Üniversite Öğrencisi</option>
+            <option>Meslek Sahibi / Yetişkin</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grup">
+        <label>Okul Adı <span class="opsiyonel">(opsiyonel)</span></label>
+        <input type="text" id="f-okul" placeholder="Öğrencinin okulu">
+      </div>
+      <div class="form-grup">
+        <label>Veli Telefonu</label>
+        <input type="tel" id="f-telefon" placeholder="05xx xxx xx xx">
+      </div>
+
+      <button class="btn-ana" onclick="formDevam()" style="margin-top:0.5rem">Devam Et →</button>
+      <button class="btn-ikincil" onclick="adimGec(1)">← Geri</button>
+    </div>
+  </div>
+
+  <!-- ADIM 3: METİN OKUMA -->
+  <div id="adim3" style="display:none">
+    <div class="kart">
+      <div class="sure-bar">
+        <div>
+          <div class="sure-label">Geçen Süre</div>
+          <div class="sure-deger" id="sure-goster">0:00</div>
+        </div>
+        <div style="text-align:right">
+          <div class="sure-label">Durum</div>
+          <div style="color:#60a5fa;font-weight:600;font-size:0.9rem" id="sure-durum">Okuma devam ediyor...</div>
+        </div>
+      </div>
+
+      <div class="metin-alan" id="metin-alan">
+        <div style="text-align:center;color:#94a3b8;padding:2rem">⏳ Metin yükleniyor...</div>
+      </div>
+
+      <button class="btn-ana yesil" id="btn-bitir" onclick="okumaBitti()" style="display:none">
+        ✅ Okumayı Bitirdim
+      </button>
+    </div>
+  </div>
+
+  <!-- ADIM 4: ANLAMA SORULARI -->
+  <div id="adim4" style="display:none">
+    <div class="kart">
+      <div class="kart-baslik">🧠 Anlama Soruları</div>
+      <div class="kart-alt" id="soru-alt">Okuduğun metinle ilgili sorular. Kendi başına cevapla!</div>
+
+      <div class="soru-ilerleme">
+        <div class="soru-bar"><div class="soru-bar-dolu" id="soru-bar-dolu" style="width:0%"></div></div>
+        <div class="soru-no" id="soru-no">1 / 5</div>
+      </div>
+
+      <div id="soru-alan">
+        <div class="soru-metin" id="soru-metin"></div>
+        <div class="secenekler" id="secenekler"></div>
+      </div>
+
+      <button class="btn-ana" id="btn-sonraki" onclick="sonrakiSoru()" style="margin-top:1.2rem;display:none">
+        Sonraki Soru →
+      </button>
+    </div>
+  </div>
+
+  <!-- ADIM 5: SONUÇ -->
+  <div id="adim5" style="display:none">
+    <div class="kart">
+      <div class="sonuc-baslik">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem">🎉</div>
+        <div class="sonuc-isim" id="sonuc-isim"></div>
+        <div class="sonuc-tarih" id="sonuc-tarih"></div>
+      </div>
+
+      <div class="sonuc-grid">
+        <div class="sonuc-kart mavi">
+          <div class="sonuc-kart-etiket">Okuma Hızı</div>
+          <div class="sonuc-kart-deger" id="sonuc-hiz">-</div>
+          <div class="sonuc-kart-alt">kelime / dakika</div>
+        </div>
+        <div class="sonuc-kart yesil">
+          <div class="sonuc-kart-etiket">Anlama Oranı</div>
+          <div class="sonuc-kart-deger" id="sonuc-anlama">-</div>
+          <div class="sonuc-kart-alt">doğru cevap</div>
+        </div>
+      </div>
+
+      <div class="karsilastirma">
+        <div class="karsilastirma-baslik">📊 Yaş Grubunuzla Karşılaştırma</div>
+        <div class="karsilastirma-satir">
+          <div class="karsilastirma-etiket" id="k-isim">Öğrenci</div>
+          <div class="karsilastirma-bar-arka"><div class="karsilastirma-bar-on ogrenci" id="k-bar-ogrenci" style="width:0%"></div></div>
+          <div class="karsilastirma-deger mavi" id="k-deger-ogrenci" style="color:#1d4ed8">-</div>
+        </div>
+        <div class="karsilastirma-satir">
+          <div class="karsilastirma-etiket" id="k-sinif-label">Sınıf Ortalaması</div>
+          <div class="karsilastirma-bar-arka"><div class="karsilastirma-bar-on ortalama" id="k-bar-ortalama" style="width:0%"></div></div>
+          <div class="karsilastirma-deger" style="color:#64748b" id="k-deger-ortalama">-</div>
+        </div>
+      </div>
+
+      <div class="mesaj-kutu" id="mesaj-kutu">
+        <p id="mesaj-metin"></p>
+      </div>
+
+      <div class="asama-oneri">
+        <div class="asama-oneri-etiket">Önerilen Başlangıç Aşaması</div>
+        <div class="asama-oneri-deger" id="oneri-asama"></div>
+      </div>
+
+      <div class="btn-grup">
+        <button class="btn-ana turuncu" onclick="window.location.href='giris.html'">
+          🚀 30 Günlük Programı Başlat
+        </button>
+        <button class="btn-ikincil" onclick="window.location.href='index.html'">
+          Ana Sayfaya Dön
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- YÜKLEME -->
+<div class="yukluyor-overlay" id="yukluyor">
+  <div class="spinner"></div>
+  <div style="color:#64748b;font-size:0.9rem">Sonuçlar hesaplanıyor...</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://sfyjnwhblxldrzbrnyva.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmeWpud2hibHhsZHJ6YnJueXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NDc4NTYsImV4cCI6MjA5NjMyMzg1Nn0.3mrQ2JSX4InY89iUnoJUCnWefxHXHjgM059PeLQedew';
+
+// Yaş grubu → okuma ortalamaları (sessiz okuma)
+const NORMLAR = {
+  7:  { sinif: '1. Sınıf', ortalama: 60  },
+  8:  { sinif: '2. Sınıf', ortalama: 85  },
+  9:  { sinif: '3. Sınıf', ortalama: 110 },
+  10: { sinif: '4. Sınıf', ortalama: 140 },
+  11: { sinif: '5. Sınıf', ortalama: 170 },
+  12: { sinif: '6. Sınıf', ortalama: 185 },
+  13: { sinif: '7. Sınıf', ortalama: 200 },
+  14: { sinif: '8. Sınıf', ortalama: 215 }
+};
+
+// Örnek sorular (admin panelinden eklenecek, şimdilik sabit)
+const ORNEK_SORULAR = [
+  {
+    soru: "Hikayenin ana karakteri kimdir?",
+    secenekler: ["Bir çocuk", "Bir hayvan", "Bir öğretmen", "Bir kahraman"],
+    dogru: 0
+  },
+  {
+    soru: "Hikaye nerede geçmektedir?",
+    secenekler: ["Şehirde", "Ormanda", "Okulda", "Evde"],
+    dogru: 1
+  },
+  {
+    soru: "Hikayenin ana fikri nedir?",
+    secenekler: ["Dostluk önemlidir", "Çalışmak gerekir", "Doğayı sevmek", "Yardımlaşmak güzeldir"],
+    dogru: 3
+  },
+  {
+    soru: "Hikayede hangi duygu ön plana çıkmaktadır?",
+    secenekler: ["Korku", "Sevinç", "Üzüntü", "Öfke"],
+    dogru: 1
+  },
+  {
+    soru: "Hikayenin sonu nasıl biter?",
+    secenekler: ["Mutlu biter", "Hüzünlü biter", "Yarım kalır", "Soru işaretiyle biter"],
+    dogru: 0
+  }
+];
+
+let mevcutAdim = 1;
+let sureInterval = null;
+let baslangicSuresi = null;
+let gecenSure = 0;
+let mevcutMetin = null;
+let mevcutSoruIndex = 0;
+let dogруCevaplar = 0;
+let seciliCevap = null;
+let formBilgileri = {};
+
+function adimGec(adim) {
+  document.getElementById('adim' + mevcutAdim).style.display = 'none';
+  mevcutAdim = adim;
+  document.getElementById('adim' + mevcutAdim).style.display = 'block';
+  adimGostergeCiz(adim);
+  window.scrollTo(0, 0);
+}
+
+function adimGostergeCiz(aktif) {
+  for (let i = 1; i <= 5; i++) {
+    const no = document.getElementById('adim-no-' + i);
+    const et = document.getElementById('adim-et-' + i);
+    const cizgi = document.getElementById('cizgi-' + i);
+    if (i < aktif) {
+      no.className = 'adim-no tamamlandi';
+      no.textContent = '✓';
+      et.className = 'adim-etiket';
+      if (cizgi) cizgi.className = 'adim-cizgi tamamlandi';
+    } else if (i === aktif) {
+      no.className = 'adim-no aktif';
+      no.textContent = i;
+      et.className = 'adim-etiket aktif';
+    } else {
+      no.className = 'adim-no bekliyor';
+      no.textContent = i;
+      et.className = 'adim-etiket';
+      if (cizgi) cizgi.className = 'adim-cizgi';
+    }
+  }
+}
+
+function formDevam() {
+  const ad = document.getElementById('f-ad').value.trim();
+  const soyad = document.getElementById('f-soyad').value.trim();
+  const yas = document.getElementById('f-yas').value;
+  const sinif = document.getElementById('f-sinif').value;
+  const telefon = document.getElementById('f-telefon').value.trim();
+
+  if (!ad || !soyad) { alert('Ad ve soyad zorunludur.'); return; }
+  if (!yas) { alert('Lütfen yaş seçin.'); return; }
+  if (!sinif) { alert('Lütfen sınıf seçin.'); return; }
+  if (!telefon) { alert('Veli telefonu zorunludur.'); return; }
+
+  formBilgileri = {
+    ad_soyad: ad + ' ' + soyad,
+    yas: parseInt(yas),
+    sinif: sinif,
+    okul: document.getElementById('f-okul').value.trim(),
+    telefon: telefon
+  };
+
+  metinYukle();
+}
+
+async function metinYukle() {
+  adimGec(3);
+  const yas = formBilgileri.yas;
+  const yasGrubu = yas <= 8 ? 1 : yas <= 10 ? 2 : yas <= 12 ? 3 : 4;
+
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/olcum_metinleri?yas_grubu=eq.' + yasGrubu + '&limit=10', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const metinler = await res.json();
+
+    if (metinler && metinler.length > 0) {
+      mevcutMetin = metinler[Math.floor(Math.random() * metinler.length)];
+      const paragraflar = mevcutMetin.metin.split('\n').filter(p => p.trim());
+      document.getElementById('metin-alan').innerHTML = paragraflar.map(p => '<p>' + p + '</p>').join('');
+    } else {
+      // Örnek metin (gerçek metin yüklenene kadar)
+      mevcutMetin = {
+        baslik: 'Orman Arkadaşları',
+        metin: 'Bir zamanlar büyük bir ormanda küçük bir sincap yaşarmış. Adı Fındık\'mış. Fındık her sabah erken kalkar, ormanda koşar ve arkadaşlarıyla oyun oynarmış.\n\nBir gün Fındık, ormanda küçük bir kuş yavrusu bulmuş. Yuvasından düşmüş, kanadı biraz incinmişmiş. Fındık onu eve götürmüş, iyileşene kadar ona bakmış.\n\nGünler geçmiş, kuş iyileşmiş ve uçmaya başlamış. Ayrılmadan önce Fındık\'a teşekkür etmiş. O günden sonra ikisi en iyi arkadaş olmuşlar. Fındık koşarken kuş havada uçarak ona eşlik edermiş.',
+        kelime_sayisi: 98
+      };
+      const paragraflar = mevcutMetin.metin.split('\n').filter(p => p.trim());
+      document.getElementById('metin-alan').innerHTML = paragraflar.map(p => '<p>' + p + '</p>').join('');
+    }
+  } catch(e) {
+    mevcutMetin = { baslik: 'Test', metin: 'Metin yüklenemedi.', kelime_sayisi: 3 };
+    document.getElementById('metin-alan').innerHTML = '<p>Metin yüklenemedi. Lütfen internet bağlantınızı kontrol edin.</p>';
+  }
+
+  // Süreyi başlat
+  baslangicSuresi = Date.now();
+  document.getElementById('btn-bitir').style.display = 'block';
+  sureInterval = setInterval(() => {
+    gecenSure = Math.floor((Date.now() - baslangicSuresi) / 1000);
+    const dk = Math.floor(gecenSure / 60);
+    const sn = gecenSure % 60;
+    document.getElementById('sure-goster').textContent = dk + ':' + (sn < 10 ? '0' : '') + sn;
+  }, 1000);
+}
+
+function okumaBitti() {
+  clearInterval(sureInterval);
+  gecenSure = Math.floor((Date.now() - baslangicSuresi) / 1000);
+  document.getElementById('sure-durum').textContent = 'Tamamlandı!';
+  adimGec(4);
+  soruGoster(0);
+}
+
+function soruGoster(index) {
+  mevcutSoruIndex = index;
+  seciliCevap = null;
+  const soru = ORNEK_SORULAR[index];
+  const toplam = ORNEK_SORULAR.length;
+
+  document.getElementById('soru-no').textContent = (index + 1) + ' / ' + toplam;
+  document.getElementById('soru-bar-dolu').style.width = ((index / toplam) * 100) + '%';
+  document.getElementById('soru-metin').textContent = soru.soru;
+  document.getElementById('btn-sonraki').style.display = 'none';
+
+  const seceneklerDiv = document.getElementById('secenekler');
+  seceneklerDiv.innerHTML = '';
+  soru.secenekler.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'secenek';
+    btn.textContent = s;
+    btn.onclick = () => cevapSec(i, soru.dogru);
+    seceneklerDiv.appendChild(btn);
+  });
+}
+
+function cevapSec(secilen, dogru) {
+  if (seciliCevap !== null) return;
+  seciliCevap = secilen;
+  const butonlar = document.querySelectorAll('.secenek');
+  butonlar.forEach((btn, i) => {
+    if (i === dogru) btn.classList.add('dogru');
+    else if (i === secilen && secilen !== dogru) btn.classList.add('yanlis');
+  });
+  if (secilen === dogru) dogруCevaplar++;
+  document.getElementById('btn-sonraki').style.display = 'block';
+  if (mevcutSoruIndex === ORNEK_SORULAR.length - 1) {
+    document.getElementById('btn-sonraki').textContent = 'Sonuçları Gör →';
+  }
+}
+
+function sonrakiSoru() {
+  if (mevcutSoruIndex < ORNEK_SORULAR.length - 1) {
+    soruGoster(mevcutSoruIndex + 1);
+  } else {
+    sonucHesapla();
+  }
+}
+
+async function sonucHesapla() {
+  document.getElementById('yukluyor').classList.add('aktif');
+
+  const kelimeSayisi = mevcutMetin.kelime_sayisi || 100;
+  const dakika = gecenSure / 60;
+  const kelimeHizi = Math.round(kelimeSayisi / dakika);
+  const anlamaOrani = Math.round((dogруCevaplar / ORNEK_SORULAR.length) * 100);
+
+  const yas = formBilgileri.yas;
+  const norm = NORMLAR[yas] || NORMLAR[13];
+  const tavsiyeAsama = kelimeHizi < norm.ortalama * 0.7 ? 1 :
+                       kelimeHizi < norm.ortalama ? 2 :
+                       kelimeHizi < norm.ortalama * 1.3 ? 3 : 4;
+
+  // Supabase'e kaydet
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/olcum_sonuclari', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ...formBilgileri,
+        kelime_hizi: kelimeHizi,
+        anlama_orani: anlamaOrani,
+        tavsiye_asama: tavsiyeAsama
+      })
+    });
+  } catch(e) { console.log('Kayıt hatası:', e); }
+
+  document.getElementById('yukluyor').classList.remove('aktif');
+
+  // Sonuç ekranını doldur
+  document.getElementById('sonuc-isim').textContent = formBilgileri.ad_soyad + ' için Sonuçlar';
+  document.getElementById('sonuc-tarih').textContent = new Date().toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('sonuc-hiz').textContent = kelimeHizi;
+  document.getElementById('sonuc-anlama').textContent = '%' + anlamaOrani;
+
+  // Karşılaştırma
+  document.getElementById('k-isim').textContent = formBilgileri.ad_soyad.split(' ')[0];
+  document.getElementById('k-sinif-label').textContent = norm.sinif + ' Ortalaması';
+  document.getElementById('k-deger-ogrenci').textContent = kelimeHizi + ' k/dk';
+  document.getElementById('k-deger-ortalama').textContent = norm.ortalama + ' k/dk';
+  const maxBar = Math.max(kelimeHizi, norm.ortalama) * 1.2;
+  setTimeout(() => {
+    document.getElementById('k-bar-ogrenci').style.width = (kelimeHizi / maxBar * 100) + '%';
+    document.getElementById('k-bar-ortalama').style.width = (norm.ortalama / maxBar * 100) + '%';
+  }, 300);
+
+  // Mesaj
+  const mesajKutu = document.getElementById('mesaj-kutu');
+  const mesajMetin = document.getElementById('mesaj-metin');
+  const ad = formBilgileri.ad_soyad.split(' ')[0];
+  if (kelimeHizi >= norm.ortalama * 1.1) {
+    mesajKutu.className = 'mesaj-kutu iyi';
+    mesajMetin.textContent = ad + ', ' + norm.sinif + ' seviyesinin üzerinde okuyor! Dakikada ' + kelimeHizi + ' kelimeyle harika bir başlangıç noktasında. OKUBİT programıyla bu hızı çok daha ileriye taşıyabilir.';
+  } else if (kelimeHizi >= norm.ortalama * 0.8) {
+    mesajKutu.className = 'mesaj-kutu orta';
+    mesajMetin.textContent = ad + ', ' + norm.sinif + ' ortalamasına yakın okuyor. Dakikada ' + kelimeHizi + ' kelimeyle iyi bir noktada. OKUBİT\'in 30 günlük programıyla ortalamayı geçmek mümkün!';
+  } else {
+    mesajKutu.className = 'mesaj-kutu dusuk';
+    mesajMetin.textContent = ad + ', dakikada ' + kelimeHizi + ' kelime okuyor. ' + norm.sinif + ' ortalaması ' + norm.ortalama + ' kelime. OKUBİT programı tam bu durumlar için tasarlandı — 30 günde büyük gelişim mümkün!';
+  }
+
+  // Öneri aşama
+  const asamaAdlari = ['', '1. Aşama – Temel Okuma', '2. Aşama – Akıcı Okuma', '3. Aşama – Hız + Anlama', '4. Aşama – İleri Seviye'];
+  document.getElementById('oneri-asama').textContent = asamaAdlari[tavsiyeAsama];
+
+  adimGec(5);
+}
+</script>
+</body>
+</html>
