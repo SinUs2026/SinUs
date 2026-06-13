@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SinUs – Zihinsel Gelişim Platformu</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/logo-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/logo-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lacivert:#0a1628;
+  --mavi:#1a3a6b;
+  --acik-mavi:#2563a8;
+  --altin:#d4af37;
+  --altin-acik:#f0d98c;
+  --yesil:#16a34a;
+  --gri:#f4f6f9;
+  --yazi:#1e293b;
+  --yazi-acik:#64748b;
+  --beyaz:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;color:var(--yazi);background:var(--beyaz);overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,22,40,0.97);backdrop-filter:blur(10px);padding:0 5%;height:70px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--beyaz);letter-spacing:-0.5px;display:flex;align-items:center;gap:0.6rem}
+.logo-img{width:36px;height:36px;object-fit:contain}
+.logo span{color:var(--altin)}
+.nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
+.nav-links a{color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.9rem;transition:color 0.2s}
+.nav-links a:hover{color:var(--altin)}
+.nav-btn{background:var(--acik-mavi)!important;color:white!important;padding:0.5rem 1.4rem;border-radius:6px;font-weight:600!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:5px}
+.hamburger span{display:block;width:25px;height:2px;background:white;border-radius:2px}
+
+/* HERO */
+.hero{min-height:100vh;background:linear-gradient(135deg,var(--lacivert) 0%,var(--mavi) 60%,#1e4a8a 100%);display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;right:-20%;width:700px;height:700px;background:radial-gradient(circle,rgba(212,175,55,0.08) 0%,transparent 70%);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-20%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(96,165,250,0.06) 0%,transparent 70%);border-radius:50%}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;width:100%;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);color:var(--altin-acik);padding:0.4rem 1rem;border-radius:50px;font-size:0.82rem;font-weight:500;margin-bottom:1.5rem}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,4vw,3.4rem);font-weight:700;color:#fff;line-height:1.2;margin-bottom:1.2rem}
+.hero h1 em{font-style:normal;color:var(--altin)}
+.hero-slogan{color:rgba(255,255,255,0.55);font-size:0.95rem;font-style:italic;margin-bottom:0.8rem;letter-spacing:0.5px}
+.hero p{color:rgba(255,255,255,0.75);font-size:1.05rem;line-height:1.7;margin-bottom:1.5rem;font-weight:300}
+.hero-motto{color:rgba(212,175,55,0.8);font-size:0.88rem;font-style:italic;margin-bottom:2rem;letter-spacing:0.3px;border-left:2px solid rgba(212,175,55,0.4);padding-left:0.8rem}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{background:var(--altin);color:var(--lacivert);padding:0.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;text-decoration:none;display:inline-block;box-shadow:0 4px 20px rgba(212,175,55,0.3);transition:transform 0.2s}
+.btn-primary:hover{transform:translateY(-2px);background:var(--altin-acik)}
+.btn-secondary{background:transparent;color:white;padding:0.85rem 2rem;border-radius:8px;font-size:1rem;font-weight:500;text-decoration:none;border:1.5px solid rgba(255,255,255,0.35);display:inline-block;transition:all 0.2s}
+.btn-secondary:hover{border-color:white;background:rgba(255,255,255,0.08)}
+.hero-stats{display:flex;gap:2rem;margin-top:2.5rem}
+.stat{display:flex;flex-direction:column}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--altin)}
+.stat-label{font-size:0.78rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-top:0.2rem}
+
+/* Hero kart */
+.hero-card{background:rgba(255,255,255,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:20px;padding:2rem;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.card-title{color:white;font-weight:600;font-size:0.95rem}
+.card-day{background:rgba(212,175,55,0.15);color:var(--altin-acik);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.78rem;font-weight:600}
+.task-list{display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.5rem}
+.task-item{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:10px;font-size:0.88rem}
+.task-item.done{background:rgba(22,163,74,0.15);color:rgba(255,255,255,0.9)}
+.task-item.active{background:rgba(212,175,55,0.15);color:white;border:1px solid rgba(212,175,55,0.3)}
+.task-item.locked{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4)}
+.task-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0}
+.streak-bar{display:flex;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.7);font-size:0.82rem}
+.streak-dots{display:flex;gap:4px}
+.streak-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15)}
+.streak-dot.active{background:var(--altin)}
+
+/* SECTIONS */
+section{padding:80px 5%}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-label{display:inline-block;color:var(--acik-mavi);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:700;color:var(--lacivert);line-height:1.25;margin-bottom:1rem}
+.section-desc{color:var(--yazi-acik);font-size:1rem;line-height:1.7;max-width:580px}
+
+/* NASIL ÇALIŞIR */
+.nasil{background:var(--gri)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-top:3rem}
+.step{background:white;border-radius:16px;padding:2rem 1.5rem;box-shadow:0 2px 15px rgba(0,0,0,0.06);transition:transform 0.2s}
+.step:hover{transform:translateY(-4px)}
+.step-num{width:42px;height:42px;background:var(--lacivert);color:var(--altin);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;margin-bottom:1.2rem;font-family:'Playfair Display',serif;font-size:1.1rem}
+.step h3{font-size:1rem;font-weight:600;color:var(--lacivert);margin-bottom:0.5rem}
+.step p{font-size:0.88rem;color:var(--yazi-acik);line-height:1.6}
+
+/* AŞAMALAR */
+.asamalar-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;margin-top:3rem}
+.asama-kart{border-radius:16px;padding:2rem;transition:transform 0.2s}
+.asama-kart:hover{transform:translateY(-4px)}
+.asama-kart.a1{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe}
+.asama-kart.a2{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0}
+.asama-kart.a3{background:linear-gradient(135deg,#fefce8,#fef9c3);border:1px solid #fde68a}
+.asama-kart.a4{background:linear-gradient(135deg,#fdf4ff,#fae8ff);border:1px solid #e9d5ff}
+.asama-no{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;opacity:0.6}
+.asama-kart.a1 .asama-no{color:#1d4ed8}
+.asama-kart.a2 .asama-no{color:#15803d}
+.asama-kart.a3 .asama-no{color:#b45309}
+.asama-kart.a4 .asama-no{color:#7e22ce}
+.asama-baslik{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--lacivert);margin-bottom:0.5rem}
+.asama-hedef{font-size:0.82rem;color:var(--yazi-acik);margin-bottom:1rem;font-weight:500}
+.asama-liste{list-style:none;display:flex;flex-direction:column;gap:0.4rem}
+.asama-liste li{font-size:0.85rem;color:var(--yazi);display:flex;align-items:center;gap:0.5rem}
+.asama-liste li::before{content:'→';font-size:0.75rem;opacity:0.5}
+
+/* NEDEN SinUs */
+.neden{background:var(--lacivert)}
+.neden .section-title{color:white}
+.neden .section-label{color:var(--altin)}
+.neden .section-desc{color:rgba(255,255,255,0.65)}
+.ozellikler{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:3rem}
+.ozellik{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1.8rem;transition:background 0.2s}
+.ozellik:hover{background:rgba(255,255,255,0.08);border-color:rgba(212,175,55,0.2)}
+.ozellik-ikon{font-size:2rem;margin-bottom:1rem}
+.ozellik h3{font-size:1rem;font-weight:600;color:white;margin-bottom:0.5rem}
+.ozellik p{font-size:0.87rem;color:rgba(255,255,255,0.55);line-height:1.6}
+
+/* MOTTO BÖLÜMÜ */
+.motto-section{background:linear-gradient(135deg,#0a1628,#1a3a6b);padding:60px 5%;text-align:center}
+.motto-text{font-family:'Playfair Display',serif;font-size:clamp(1.3rem,2.5vw,2rem);color:white;font-style:italic;max-width:700px;margin:0 auto;line-height:1.6;opacity:0.9}
+.motto-cizgi{width:60px;height:2px;background:var(--altin);margin:1.5rem auto}
+.motto-alt{color:rgba(255,255,255,0.5);font-size:0.88rem;letter-spacing:1px;text-transform:uppercase}
+
+/* PAKETLER */
+.paketler-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:3rem;align-items:start}
+.paket{border-radius:16px;padding:2rem;border:2px solid #e2e8f0;background:white;transition:transform 0.2s;position:relative}
+.paket:hover{transform:translateY(-4px)}
+.paket.onerilen{border-color:var(--altin);box-shadow:0 8px 30px rgba(212,175,55,0.15)}
+.onerilen-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--altin);color:var(--lacivert);font-size:0.75rem;font-weight:700;padding:0.3rem 1rem;border-radius:20px;white-space:nowrap}
+.paket-isim{font-size:0.8rem;font-weight:600;color:var(--acik-mavi);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem}
+.paket-baslik{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--lacivert);margin-bottom:0.3rem}
+.paket-sure{font-size:0.82rem;color:var(--yazi-acik);margin-bottom:1.5rem}
+.paket-liste{list-style:none;margin-bottom:1.8rem;display:flex;flex-direction:column;gap:0.6rem}
+.paket-liste li{font-size:0.88rem;color:var(--yazi);display:flex;align-items:center;gap:0.6rem}
+.paket-liste li::before{content:'✓';color:var(--yesil);font-weight:700}
+.paket-btn{display:block;text-align:center;padding:0.8rem;border-radius:8px;font-weight:600;font-size:0.95rem;text-decoration:none;transition:all 0.2s}
+.paket-btn.primary{background:var(--altin);color:var(--lacivert)}
+.paket-btn.primary:hover{background:var(--altin-acik)}
+.paket-btn.outline{border:2px solid var(--acik-mavi);color:var(--acik-mavi)}
+.paket-btn.outline:hover{background:var(--acik-mavi);color:white}
+
+/* SSS */
+.sss{background:var(--gri)}
+.sss-liste{margin-top:3rem;display:flex;flex-direction:column;gap:1rem;max-width:800px}
+.sss-item{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.sss-soru{padding:1.2rem 1.5rem;font-weight:600;font-size:0.95rem;color:var(--lacivert);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.sss-soru::after{content:'+';font-size:1.3rem;color:var(--acik-mavi);transition:transform 0.2s}
+.sss-item.acik .sss-soru::after{transform:rotate(45deg)}
+.sss-cevap{max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 1.5rem;font-size:0.9rem;color:var(--yazi-acik);line-height:1.7}
+.sss-item.acik .sss-cevap{max-height:200px;padding-bottom:1.2rem}
+
+/* CTA */
+.cta{background:linear-gradient(135deg,var(--lacivert),var(--mavi));text-align:center;padding:80px 5%}
+.cta h2{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.8rem);color:white;margin-bottom:1rem}
+.cta p{color:rgba(255,255,255,0.65);font-size:1rem;margin-bottom:2rem;max-width:500px;margin-left:auto;margin-right:auto}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* GİRİŞ BÖLÜMÜ */
+.giris-bolum{background:#f4f6f9;padding:60px 5%;text-align:center}
+.giris-bolum h2{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--lacivert);margin-bottom:0.8rem}
+.giris-bolum p{color:#64748b;font-size:1rem;margin-bottom:2.5rem}
+.giris-kartlar{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap}
+.giris-kart{display:flex;flex-direction:column;align-items:center;gap:0.8rem;background:white;border:2px solid #e2e8f0;border-radius:16px;padding:2rem 2.5rem;text-decoration:none;transition:all 0.2s;min-width:180px}
+.giris-kart:hover{transform:translateY(-4px)}
+.giris-kart.ogrenci{background:var(--lacivert);border-color:var(--lacivert)}
+.giris-kart-ikon{font-size:2.5rem}
+.giris-kart-isim{font-weight:700;color:var(--lacivert);font-size:1rem}
+.giris-kart.ogrenci .giris-kart-isim{color:white}
+.giris-kart-alt{font-size:0.78rem;color:#64748b}
+.giris-kart.ogrenci .giris-kart-alt{color:rgba(255,255,255,0.6)}
+
+footer{background:#060e1a;color:rgba(255,255,255,0.5);text-align:center;padding:2rem 5%;font-size:0.85rem}
+footer strong{color:var(--altin)}
+
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .nav-links.mobil-acik{display:flex;flex-direction:column;position:fixed;top:70px;left:0;right:0;background:var(--lacivert);padding:1.5rem 5%;gap:1rem;border-top:1px solid rgba(255,255,255,0.1)}
+  .hero-inner{grid-template-columns:1fr}
+  .hero-card{display:none}
+  section{padding:60px 5%}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">
+    <img src="assets/logo-64.png" alt="SinUs Logo" class="logo-img">
+    Sin<span>Us</span>
+  </div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#nasil">Nasıl Çalışır?</a></li>
+    <li><a href="#asamalar">Aşamalar</a></li>
+    <li><a href="#paketler">Paketler</a></li>
+    <li><a href="#sss">SSS</a></li>
+    <li><a href="#giris" class="nav-btn">Giriş Yap</a></li>
+  </ul>
+  <div class="hamburger" onclick="menuToggle()" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">✨ Yeni Nesil Zihinsel Gelişim Platformu</div>
+      <h1>Zihnini<br><em>Keşfet.</em></h1>
+      <p>SinUs; okuma hızını, dikkatini, odaklanma ve anlama becerisini günlük kısa çalışmalarla geliştiren, ölçümlü ve bilimsel temelli bir zihinsel gelişim platformudur.</p>
+      <div class="hero-motto">"Her zihin keşfedilmeyi bekleyen bir evrendir."</div>
+      <div class="hero-btns">
+        <a href="#" class="btn-primary">🎯 Seviyeni Ölç – Ücretsiz</a>
+        <a href="#asamalar" class="btn-secondary">Sistemi İncele</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">4</span><span class="stat-label">Aşamalı Program</span></div>
+        <div class="stat"><span class="stat-num">30</span><span class="stat-label">Günlük İçerik</span></div>
+        <div class="stat"><span class="stat-num">20K+</span><span class="stat-label">Kelime Pratiği</span></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="card-header">
+        <span class="card-title">⚡ Bugünkü Görevler</span>
+        <span class="card-day">Gün 7 / 30</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item done"><div class="task-icon">✅</div><span>Meteor Takibi</span></div>
+        <div class="task-item done"><div class="task-icon">✅</div><span>Kelime Çalışması</span></div>
+        <div class="task-item active"><div class="task-icon">▶️</div><span>Okuma Hikâyesi</span></div>
+        <div class="task-item locked"><div class="task-icon">🔒</div><span>Anlama Soruları</span></div>
+        <div class="task-item locked"><div class="task-icon">🔒</div><span>Galaksi Tarama</span></div>
+      </div>
+      <div class="streak-bar">🔥 7 günlük seri
+        <div class="streak-dots">
+          <div class="streak-dot active"></div><div class="streak-dot active"></div><div class="streak-dot active"></div><div class="streak-dot active"></div><div class="streak-dot active"></div><div class="streak-dot active"></div><div class="streak-dot active"></div><div class="streak-dot"></div><div class="streak-dot"></div><div class="streak-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOTTO -->
+<div class="motto-section">
+  <p class="motto-text">"Her zihin keşfedilmeyi bekleyen bir evrendir."</p>
+  <div class="motto-cizgi"></div>
+  <p class="motto-alt">SinUs — Sinaps + Us · Güçlenen Zihinsel Bağlantılar</p>
+</div>
+
+<section class="nasil" id="nasil">
+  <div class="section-inner">
+    <span class="section-label">Sistem</span>
+    <h2 class="section-title">Nasıl Çalışır?</h2>
+    <p class="section-desc">Günde sadece 5–10 dakika. Kısa, sıralı ve bilimsel temelli görevlerle tutarlı gelişim.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h3>Seviyeni Ölç</h3><p>Yaş ve sınıf bilgisine göre tanılama testi yapılır. En uygun aşama belirlenir.</p></div>
+      <div class="step"><div class="step-num">2</div><h3>Her Gün 5–10 Dk</h3><p>Göz egzersizi, okuma çalışması, anlama soruları ve dikkat oyunu. Kısa ama etkili.</p></div>
+      <div class="step"><div class="step-num">3</div><h3>Enerji Kazan</h3><p>Her tamamlanan görev enerji getirir. Rozetler ve sıralama seni motive eder.</p></div>
+      <div class="step"><div class="step-num">4</div><h3>Gelişimini Takip Et</h3><p>Veli ve öğretmen grafiklerle ilerlemeyi anlık olarak görebilir.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="asamalar">
+  <div class="section-inner">
+    <span class="section-label">Program</span>
+    <h2 class="section-title">4 Aşamalı Sistem</h2>
+    <p class="section-desc">Her aşama 30 günlük program içerir. İstediğin aşamadan başlayabilirsin.</p>
+    <div class="asamalar-grid">
+      <div class="asama-kart a1"><div class="asama-no">1. Aşama</div><div class="asama-baslik">İlk Okuma</div><div class="asama-hedef">Okumayı yeni öğrenenler için</div><ul class="asama-liste"><li>Hece ve kelime birleştirme</li><li>Okuma özgüveni kazanma</li><li>Basit metin anlama</li><li>Göz egzersizleri</li></ul></div>
+      <div class="asama-kart a2"><div class="asama-no">2. Aşama</div><div class="asama-baslik">Akıcı Okuma</div><div class="asama-hedef">İlkokul grubu için</div><ul class="asama-liste"><li>Akıcılık geliştirme</li><li>Satır takibi güçlendirme</li><li>Okuma hızını artırma</li><li>Anlama oranını koruma</li></ul></div>
+      <div class="asama-kart a3"><div class="asama-no">3. Aşama</div><div class="asama-baslik">Hız + Anlama</div><div class="asama-hedef">Ortaokul grubu için</div><ul class="asama-liste"><li>Göz sıçramalarını geliştirme</li><li>Dikkat ve hafıza çalışmaları</li><li>Blok okuma teknikleri</li><li>LGS hazırlık desteği</li></ul></div>
+      <div class="asama-kart a4"><div class="asama-no">4. Aşama</div><div class="asama-baslik">Sınav Odaklı</div><div class="asama-hedef">Lise / Üniversite için</div><ul class="asama-liste"><li>Süreli paragraf okuma</li><li>Skimming ve scanning</li><li>Performans raporu</li><li>YKS / sınav stratejisi</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="neden">
+  <div class="section-inner">
+    <span class="section-label">Fark</span>
+    <h2 class="section-title">Neden SinUs?</h2>
+    <p class="section-desc">Yıllar boyunca yüzlerce öğrenciyle yapılan birebir çalışmaların bilimsel temelli dijital sisteme aktarılmış hali.</p>
+    <div class="ozellikler">
+      <div class="ozellik"><div class="ozellik-ikon">🌌</div><h3>Bilimsel Göz Egzersizleri</h3><p>Her aşamaya özel göz takip egzersizleri. Sinaptik bağlantıları güçlendiren yöntemlerle tasarlandı.</p></div>
+      <div class="ozellik"><div class="ozellik-ikon">📊</div><h3>Ölçümlü Gelişim</h3><p>Okuma hızı, anlama oranı, dikkat skoru. Her şey grafiklerle takip edilir.</p></div>
+      <div class="ozellik"><div class="ozellik-ikon">⚡</div><h3>Enerji Sistemi</h3><p>Puanlar, rozetler, günlük seri ve sıralama. Motivasyonu canlı tutar.</p></div>
+      <div class="ozellik"><div class="ozellik-ikon">👨‍👩‍👧</div><h3>Veli Takip Paneli</h3><p>Ebeveynler çocuklarının gelişimini anlık olarak görür.</p></div>
+      <div class="ozellik"><div class="ozellik-ikon">🏫</div><h3>Kurum Desteği</h3><p>Eğitim kurumları ve özel öğretmenler için özel panel ve yönetim sistemi.</p></div>
+      <div class="ozellik"><div class="ozellik-ikon">📱</div><h3>Her Cihazda Çalışır</h3><p>Tablet, telefon veya bilgisayar. Her yerden erişim.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="paketler">
+  <div class="section-inner">
+    <span class="section-label">Fiyatlar</span>
+    <h2 class="section-title">Paketler</h2>
+    <p class="section-desc">6 aylık erişim. İstediğin aşamadan başla, dilediğin zaman geliştir.</p>
+    <div class="paketler-grid">
+      <div class="paket"><div class="paket-isim">Başlangıç</div><div class="paket-baslik">Tek Aşama</div><div class="paket-sure">6 aylık erişim</div><ul class="paket-liste"><li>1 aşama tam erişim</li><li>30 günlük program</li><li>Göz egzersizleri</li><li>Enerji & rozetler</li><li>Gelişim grafikleri</li></ul><a href="#giris" class="paket-btn outline">Hemen Başla</a></div>
+      <div class="paket onerilen"><div class="onerilen-badge">⭐ En Çok Tercih Edilen</div><div class="paket-isim">Tam Program</div><div class="paket-baslik">4 Aşama</div><div class="paket-sure">6 aylık erişim + yenileme indirimi</div><ul class="paket-liste"><li>Tüm 4 aşama erişimi</li><li>120 günlük içerik</li><li>Veli takip paneli</li><li>Öncelikli destek</li><li>Seviye tespit testi</li></ul><a href="#giris" class="paket-btn primary">Hemen Başla</a></div>
+      <div class="paket"><div class="paket-isim">Kurumsal</div><div class="paket-baslik">Eğitim Kurumu</div><div class="paket-sure">Özel fiyatlandırma</div><ul class="paket-liste"><li>Özel yönetim paneli</li><li>Sınırsız öğrenci</li><li>Öğretmen erişimi</li><li>Detaylı raporlama</li><li>Öncelikli destek</li></ul><a href="#" class="paket-btn outline">Bilgi Al</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="sss" id="sss">
+  <div class="section-inner">
+    <span class="section-label">Sorular</span>
+    <h2 class="section-title">Sık Sorulan Sorular</h2>
+    <div class="sss-liste">
+      <div class="sss-item" onclick="sssToggle(this)"><div class="sss-soru">Hangi yaş grubu için uygundur?</div><div class="sss-cevap">SinUs, okumayı yeni öğrenen ilkokul birinci sınıftan lise ve üniversite öğrencilerine kadar geniş bir yaş aralığına hitap eder.</div></div>
+      <div class="sss-item" onclick="sssToggle(this)"><div class="sss-soru">Günde ne kadar zaman ayırmak gerekiyor?</div><div class="sss-cevap">Günlük program 5–10 dakika olarak tasarlanmıştır. Kısa ama düzenli çalışmalar uzun vadede büyük fark yaratır.</div></div>
+      <div class="sss-item" onclick="sssToggle(this)"><div class="sss-soru">Hangi aşamadan başlamalıyız?</div><div class="sss-cevap">Platforma ilk girişte ücretsiz seviye tespit testi yapılır. Sistem en uygun aşamayı otomatik olarak önerir.</div></div>
+      <div class="sss-item" onclick="sssToggle(this)"><div class="sss-soru">Veli çocuğunun gelişimini nasıl takip eder?</div><div class="sss-cevap">Veli, aynı kullanıcı adı ve şifre ile çocuğun paneline girerek tüm gelişim grafiklerini görebilir.</div></div>
+      <div class="sss-item" onclick="sssToggle(this)"><div class="sss-soru">Lisans süresi ne kadar?</div><div class="sss-cevap">Her paket 6 aylık erişim sağlar. Süre sonunda indirimli yenileme veya üst aşamaya geçiş seçeneği sunulur.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="section-inner">
+    <h2>Zihinsel Gelişim Yolculuğuna<br>Bugün Başla</h2>
+    <p>Ücretsiz seviye tespit testiyle başla. Uzmanlarımız sonucu seninle değerlendirsin.</p>
+    <div class="cta-btns">
+      <a href="#" class="btn-primary">🎯 Seviyeni Ölç – Ücretsiz</a>
+      <a href="#" class="btn-secondary">Kurumlar İçin Bilgi Al</a>
+    </div>
+  </div>
+</section>
+
+<!-- GİRİŞ -->
+<div class="giris-bolum" id="giris">
+  <div style="max-width:800px;margin:0 auto">
+    <p style="color:var(--acik-mavi);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem">PLATFORM</p>
+    <h2>Platforma Giriş</h2>
+    <p>Hesabınıza giriş yapmak için kullanıcı tipinizi seçin.</p>
+    <div class="giris-kartlar">
+      <a href="admin-giris.html" class="giris-kart" onmouseover="this.style.borderColor='#0a1628';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='#e2e8f0';this.style.transform='translateY(0)'">
+        <span class="giris-kart-ikon">🔐</span>
+        <span class="giris-kart-isim">Yönetici Girişi</span>
+        <span class="giris-kart-alt">Sistem yönetimi</span>
+      </a>
+      <a href="ogretmen-giris.html" class="giris-kart" onmouseover="this.style.borderColor='#2563a8';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='#e2e8f0';this.style.transform='translateY(0)'">
+        <span class="giris-kart-ikon">👨‍🏫</span>
+        <span class="giris-kart-isim">Öğretmen Girişi</span>
+        <span class="giris-kart-alt">Öğrenci takibi</span>
+      </a>
+      <a href="giris.html" class="giris-kart ogrenci">
+        <span class="giris-kart-ikon">🎓</span>
+        <span class="giris-kart-isim">Öğrenci Girişi</span>
+        <span class="giris-kart-alt">Derse başla</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>SinUs</strong> – Zihinsel Gelişim Platformu &nbsp;|&nbsp; Tüm hakları saklıdır © 2026</p>
+  <p style="margin-top:0.4rem;font-size:0.78rem;opacity:0.6">"Her zihin keşfedilmeyi bekleyen bir evrendir."</p>
+</footer>
+
+<script>
+function menuToggle(){document.getElementById('navLinks').classList.toggle('mobil-acik')}
+function sssToggle(el){el.classList.toggle('acik')}
+</script>
+</body>
+</html>
