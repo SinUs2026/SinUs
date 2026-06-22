@@ -300,7 +300,7 @@ tr:hover td{background:#f8fafc}
   <div id="sayfa-asama1-icerik" class="sayfa">
     <div class="ust-bar">
       <div><h1>1. Aşama İçerik Havuzu</h1><p>Harf tamamlama, kelime avı, mini hikâye ve diğer modüllerin içeriklerini yönetin.</p></div>
-      <button class="yeni-btn" onclick="modalAc('asama1')">+ Yeni İçerik Ekle</button>
+      <button class="yeni-btn" onclick="modalAc('asama1');a1FormGoster()">+ Yeni İçerik Ekle</button>
     </div>
     <div class="grup-aciklama">
       <strong>Modül Rehberi:</strong> Her modül için içerik havuzu buradan yönetilir. Sistem her seferinde havuzdan rastgele seçer. JSON formatında veri girilir.
@@ -485,7 +485,7 @@ tr:hover td{background:#f8fafc}
     <div class="form-grid">
       <div class="form-grup">
         <label>Modül</label>
-        <select id="a1-modul">
+        <select id="a1-modul" onchange="a1FormGoster()">
           <option value="harf_tamamlama">Harf Tamamlama</option>
           <option value="karisik_harf">Karışık Harf</option>
           <option value="kelime_merdiveni">Kelime Merdiveni</option>
@@ -509,11 +509,7 @@ tr:hover td{background:#f8fafc}
         </select>
       </div>
     </div>
-    <div class="form-grup">
-      <label>JSON Verisi</label>
-      <textarea id="a1-veri" placeholder='Örnek Harf Tamamlama: {"soru":"_al","cevap":"bal","secenekler":["bal","dal","sal","mal"]}&#10;&#10;Örnek Mini Hikâye: {"baslik":"Ali","metin":"Ali koştu.","sorular":[{"soru":"Kim koştu?","cevap":"Ali","secenekler":["Ali","Ayşe","Veli","Mehmet"]}]}' style="min-height:140px;font-family:monospace;font-size:0.82rem;"></textarea>
-      <div style="font-size:0.75rem;color:#94a3b8;margin-top:4px">Geçerli JSON formatında girin. Yukarıda örnekler var.</div>
-    </div>
+    <div id="a1-form-alani"></div>
     <div class="modal-btn-grup">
       <button class="btn-iptal" onclick="modalKapat('asama1')">İptal</button>
       <button class="btn-kaydet" id="btn-asama1-kaydet" onclick="asama1IcerikKaydet()">💾 Kaydet</button>
@@ -1044,15 +1040,49 @@ async function dersMetinleriYukle(){
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
 
+// ── 1. AŞAMA FORM ALANLARI ──
+function a1FormGoster(){
+  const modul=document.getElementById('a1-modul').value;
+  const alan=document.getElementById('a1-form-alani');
+  const formlar={
+    harf_tamamlama:`<div class="grup-aciklama" style="margin-bottom:1rem">Eksik harfli kelime sorusu.</div><div class="form-grup"><label>Soru (_ boş harf)</label><input type="text" id="f-soru" placeholder="Örn: _al"></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: bal"></div><div class="form-grup"><label>Şıklar (virgülle, 4 tane)</label><input type="text" id="f-secenekler" placeholder="Örn: bal,dal,sal,mal"></div>`,
+    karisik_harf:`<div class="form-grup"><label>Doğru Kelime</label><input type="text" id="f-kelime" placeholder="Örn: kalem"></div>`,
+    kelime_merdiveni:`<div class="form-grup"><label>Kelimeler (virgülle, kısa→uzun)</label><input type="text" id="f-kelimeler" placeholder="Örn: at,ata,atam,atama"></div>`,
+    azalan:`<div class="form-grup"><label>Kelimeler (virgülle, uzun→kısa)</label><input type="text" id="f-kelimeler" placeholder="Örn: atama,atam,ata,at"></div>`,
+    kelime_zinciri:`<div class="form-grup"><label>Kelimeler (virgülle, zincir sırayla)</label><input type="text" id="f-kelimeler" placeholder="Örn: arı,ırmak,kar,rüzgar"></div>`,
+    benzer_kelime:`<div class="form-grup"><label>1. Kelime</label><input type="text" id="f-kelime1" placeholder="Örn: kara"></div><div class="form-grup"><label>2. Kelime</label><input type="text" id="f-kelime2" placeholder="Örn: kara"></div><div class="form-grup"><label>1. Anlamı</label><input type="text" id="f-anlam1" placeholder="Örn: renk"></div><div class="form-grup"><label>2. Anlamı</label><input type="text" id="f-anlam2" placeholder="Örn: toprak"></div>`,
+    kelime_avi:`<div class="form-grup"><label>Hedef Kelime</label><input type="text" id="f-kelime" placeholder="Örn: kitap"></div><div class="form-grup"><label>Diğer Kelimeler (virgülle, 5 tane)</label><input type="text" id="f-diger" placeholder="Örn: kitabı,kitapçı,kitaptan,kita,kietap"></div>`,
+    hizli_gor:`<div class="form-grup"><label>Gösterilecek İfade</label><input type="text" id="f-ifade" placeholder="Örn: ba-la-ban"></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: balaban"></div>`,
+    tekerleme:`<div class="form-grup"><label>Satırlar (virgülle)</label><textarea id="f-satirlar" placeholder="Örn: Al,Al beni,Al beni git" style="min-height:80px;font-family:monospace"></textarea></div>`,
+    dogru_kelime:`<div class="form-grup"><label>Cümle (___ boşluk için)</label><input type="text" id="f-cumle" placeholder="Örn: Çocuk ___ koştu."></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: hizla"></div><div class="form-grup"><label>Şıklar (virgülle, 4 tane)</label><input type="text" id="f-secenekler" placeholder="Örn: hizla,yavas,guzel,buyuk"></div>`,
+    hafiza_okuma:`<div class="form-grup"><label>Kısa Metin</label><textarea id="f-metin" placeholder="Kısa metin..." style="min-height:80px"></textarea></div><div class="form-grup"><label>Soru</label><input type="text" id="f-soru" placeholder="Örn: Ali ne zaman kalktı?"></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: Sabah erken"></div><div class="form-grup"><label>Şıklar (virgülle, 4 tane)</label><input type="text" id="f-secenekler" placeholder="Örn: Sabah erken,Ogle,Aksam,Gece"></div>`,
+    mini_hikaye:`<div class="form-grup"><label>Başlık</label><input type="text" id="f-baslik" placeholder="Örn: Kucuk Ali"></div><div class="form-grup"><label>Hikaye Metni</label><textarea id="f-metin" placeholder="Kısa hikayeyi yazın..." style="min-height:100px"></textarea></div><div class="form-grup"><label>Soru</label><input type="text" id="f-soru" placeholder="Örn: Hikayenin kahramani kimdir?"></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: Ali"></div><div class="form-grup"><label>Şıklar (virgülle, 4 tane)</label><input type="text" id="f-secenekler" placeholder="Örn: Ali,Ayse,Veli,Can"></div>`
+  };
+  alan.innerHTML=formlar[modul]||'';
+}
+function a1VeriOlustur(modul){
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const liste=str=>str.split(',').map(s=>s.trim()).filter(Boolean);
+  if(modul==='harf_tamamlama') return {soru:g('f-soru'),cevap:g('f-cevap'),secenekler:liste(g('f-secenekler'))};
+  if(modul==='karisik_harf') return {kelime:g('f-kelime')};
+  if(modul==='kelime_merdiveni'||modul==='azalan'||modul==='kelime_zinciri') return {kelimeler:liste(g('f-kelimeler'))};
+  if(modul==='benzer_kelime') return {kelime1:g('f-kelime1'),kelime2:g('f-kelime2'),anlam1:g('f-anlam1'),anlam2:g('f-anlam2')};
+  if(modul==='kelime_avi') return {kelime:g('f-kelime'),diger:liste(g('f-diger'))};
+  if(modul==='hizli_gor') return {ifade:g('f-ifade'),cevap:g('f-cevap')};
+  if(modul==='tekerleme') return {satirlar:liste(g('f-satirlar'))};
+  if(modul==='dogru_kelime') return {cumle:g('f-cumle'),cevap:g('f-cevap'),secenekler:liste(g('f-secenekler'))};
+  if(modul==='hafiza_okuma') return {metin:g('f-metin'),soru:g('f-soru'),cevap:g('f-cevap'),secenekler:liste(g('f-secenekler'))};
+  if(modul==='mini_hikaye') return {baslik:g('f-baslik'),metin:g('f-metin'),sorular:[{soru:g('f-soru'),cevap:g('f-cevap'),secenekler:liste(g('f-secenekler'))}]};
+  return null;
+}
 // ── 1. AŞAMA İÇERİK ──
 async function asama1IcerikKaydet(){
   const modul=document.getElementById('a1-modul').value;
   const zorluk=parseInt(document.getElementById('a1-zorluk').value);
-  const veriStr=document.getElementById('a1-veri').value.trim();
-  if(!veriStr){bildirimGoster('⚠️ JSON verisi boş olamaz!','hata');return;}
-  let veri;
-  try{veri=JSON.parse(veriStr);}
-  catch(e){bildirimGoster('❌ Geçersiz JSON formatı! Kontrol edin.','hata');return;}
+  const veri=a1VeriOlustur(modul);
+  if(!veri){bildirimGoster('⚠️ Veri oluşturulamadı!','hata');return;}
+  const bosAlan=Object.values(veri).some(v=>(typeof v==='string'&&!v)||(Array.isArray(v)&&!v.length));
+  if(bosAlan){bildirimGoster('⚠️ Tüm alanları doldurun!','hata');return;}
   const btn=document.getElementById('btn-asama1-kaydet');btn.textContent='⏳ Kaydediliyor...';
   try{
     await supabase('POST','asama1_icerik',{modul,zorluk,veri,aktif:true});
