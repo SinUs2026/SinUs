@@ -360,10 +360,10 @@ tr:hover td{background:#f8fafc}
 
   <!-- ŞİFRE İŞLEMLERİ -->
   <div id="sayfa-sifre-islemleri" class="sayfa">
-    <div class="ust-bar"><div><h1>Şifre İşlemleri</h1><p>Öğrenci ve öğretmen şifrelerini sıfırlayın veya güncelleyin.</p></div></div>
+    <div class="ust-bar"><div><h1>Şifre İşlemleri</h1><p>Tüm kullanıcıları yönetin, şifre sıfırlayın, süre uzatın.</p></div></div>
     <div class="kart">
       <div class="kart-ust"><span class="kart-baslik">🔑 Kullanıcı Ara</span><input class="ara-input" type="text" placeholder="🔍 Kullanıcı adı ara..." id="sifre-ara-input" oninput="sifreKullaniciAra(this.value)"></div>
-      <div id="sifre-liste"><div class="bos-durum">Bir kullanıcı aramak için yukarıdaki kutuyu kullanın.</div></div>
+      <div id="sifre-liste"><div class="bos-durum">⏳ Yükleniyor...</div></div>
     </div>
   </div>
 
@@ -473,6 +473,33 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+<!-- ŞİFRE İŞLEMLERİ DÜZENLE MODALI -->
+<div class="modal" id="modal-sifre-duzenle">
+  <div class="modal-kutu genis">
+    <div class="modal-baslik">✏️ Kullanıcı Düzenle</div>
+    <input type="hidden" id="sd-id">
+    <div class="form-grid">
+      <div class="form-grup"><label>Ad</label><input type="text" id="sd-ad" placeholder="Ad"></div>
+      <div class="form-grup"><label>Soyad</label><input type="text" id="sd-soyad" placeholder="Soyad"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Telefon</label><input type="text" id="sd-telefon" placeholder="05xx xxx xx xx"></div>
+      <div class="form-grup"><label>İl</label><input type="text" id="sd-il" placeholder="Örn: İzmir"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>İlçe</label><input type="text" id="sd-ilce" placeholder="Örn: Gaziemir"></div>
+      <div class="form-grup"><label>Durum</label><select id="sd-aktif"><option value="true">✅ Aktif</option><option value="false">❌ Pasif</option></select></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Lisans Başlangıç</label><input type="date" id="sd-baslangic"></div>
+      <div class="form-grup"><label>Lisans Bitiş</label><input type="date" id="sd-bitis"></div>
+    </div>
+    <div class="modal-btn-grup">
+      <button class="btn-iptal" onclick="modalKapat('sifre-duzenle')">İptal</button>
+      <button class="btn-kaydet" onclick="sifreDuzenleKaydet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
 <!-- KURUM EKLE/DÜZENLE MODALI -->
 <div class="modal" id="modal-kurum">
   <div class="modal-kutu genis">
@@ -672,6 +699,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='ogrenciler') ogrencileriYukle();
   if(sayfa==='ogretmenler') ogretmenleriYukle();
   if(sayfa==='kurumlar') kurumlarıYukle();
+  if(sayfa==='sifre-islemleri') sifreIslemleriYukle();
 }
 
 function altMenuToggle(id,link){
@@ -1132,6 +1160,105 @@ async function dersMetinleriYukle(){
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
 
+// ── ŞİFRE İŞLEMLERİ ──
+async function sifreIslemleriYukle(aramaMetni=''){
+  const liste=document.getElementById('sifre-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  try{
+    let filtre='order=created_at.desc&limit=20';
+    if(aramaMetni) filtre=`kullanici_adi=ilike.*${aramaMetni}*&order=created_at.desc&limit=20`;
+    const kullanicilar=await supabase('GET','kullanicilar',null,filtre);
+    if(!kullanicilar.length){liste.innerHTML='<div class="bos-durum">Kullanıcı bulunamadı.</div>';return;}
+    const bugun=new Date();
+    liste.innerHTML=`<table>
+      <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Rol</th><th>Telefon</th><th>İl / İlçe</th><th>Lisans Başlangıç</th><th>Kalan Süre</th><th>Durum</th><th>İşlem</th></tr></thead>
+      <tbody>${kullanicilar.map(k=>{
+        let kalanGun='-';
+        if(k.lisans_bitis){
+          const fark=Math.ceil((new Date(k.lisans_bitis)-bugun)/(1000*60*60*24));
+          kalanGun=fark>0?fark+' gün':'<span style="color:#dc2626">Süresi doldu</span>';
+        }
+        const rolRenk=k.rol==='admin'?'#7c3aed':k.rol==='ogretmen'?'#2563a8':'#16a34a';
+        const rolAd=k.rol==='admin'?'Admin':k.rol==='ogretmen'?'Öğretmen':'Öğrenci';
+        return `<tr>
+          <td><strong>${k.ad||''} ${k.soyad||''}</strong></td>
+          <td>${k.kullanici_adi}</td>
+          <td><span style="background:${rolRenk};color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem">${rolAd}</span></td>
+          <td>${k.telefon||'-'}</td>
+          <td>${k.il||'-'} / ${k.ilce||'-'}</td>
+          <td>${k.lisans_baslangic||'-'}</td>
+          <td>${kalanGun}</td>
+          <td><span class="durum ${k.aktif?'aktif':'pasif'}">${k.aktif?'● Aktif':'● Pasif'}</span></td>
+          <td>
+            <button class="islem-btn duzenle" onclick="sifreDuzenle(${k.id})">Düzenle</button>
+            <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${k.id},'${k.kullanici_adi}')">Şifre</button>
+            <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${k.id})">Sil</button>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+function sifreAra(deger){
+  clearTimeout(window._sifreAraTimer);
+  window._sifreAraTimer=setTimeout(()=>sifreIslemleriYukle(deger),400);
+}
+
+async function kullaniciSifreSifirla(id,kullanici){
+  const yeniSifre=prompt(`"${kullanici}" için yeni şifre girin:`);
+  if(!yeniSifre)return;
+  try{
+    await supabase('PATCH','kullanicilar',{sifre:yeniSifre},'id=eq.'+id);
+    bildirimGoster('✅ Şifre güncellendi!','basari');
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function sifreDuzenle(id){
+  try{
+    const veri=await supabase('GET','kullanicilar',null,'id=eq.'+id);
+    const k=veri[0];
+    document.getElementById('sd-id').value=k.id;
+    document.getElementById('sd-ad').value=k.ad||'';
+    document.getElementById('sd-soyad').value=k.soyad||'';
+    document.getElementById('sd-telefon').value=k.telefon||'';
+    document.getElementById('sd-il').value=k.il||'';
+    document.getElementById('sd-ilce').value=k.ilce||'';
+    document.getElementById('sd-baslangic').value=k.lisans_baslangic||'';
+    document.getElementById('sd-bitis').value=k.lisans_bitis||'';
+    document.getElementById('sd-aktif').value=k.aktif?'true':'false';
+    modalAc('sifre-duzenle');
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function sifreDuzenleKaydet(){
+  const id=document.getElementById('sd-id').value;
+  const veri={
+    ad:document.getElementById('sd-ad').value.trim(),
+    soyad:document.getElementById('sd-soyad').value.trim(),
+    telefon:document.getElementById('sd-telefon').value.trim(),
+    il:document.getElementById('sd-il').value.trim(),
+    ilce:document.getElementById('sd-ilce').value.trim(),
+    lisans_baslangic:document.getElementById('sd-baslangic').value||null,
+    lisans_bitis:document.getElementById('sd-bitis').value||null,
+    aktif:document.getElementById('sd-aktif').value==='true'
+  };
+  try{
+    await supabase('PATCH','kullanicilar',veri,'id=eq.'+id);
+    bildirimGoster('✅ Kullanıcı güncellendi!','basari');
+    modalKapat('sifre-duzenle');
+    sifreIslemleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function kullaniciSil(id){
+  if(!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?'))return;
+  try{
+    await supabase('DELETE','kullanicilar',null,'id=eq.'+id);
+    bildirimGoster('🗑️ Kullanıcı silindi.','basari');
+    sifreIslemleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
 // ── KURUMLAR ──
 async function kurumlarıYukle(aramaMetni=''){
   const liste=document.getElementById('kurumlar-liste');
