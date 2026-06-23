@@ -229,14 +229,9 @@ tr:hover td{background:#f8fafc}
 
   <!-- KURUMLAR -->
   <div id="sayfa-kurumlar" class="sayfa">
-    <div class="ust-bar"><div><h1>Kurumlar</h1><p>Okul, kurs ve kurumsal anlaşmaları yönetin.</p></div></div>
-    <div class="kart">
-      <div class="yakinda">
-        <span class="ikon-buyuk">🏫</span>
-        <h3>Yakında</h3>
-        <p>Kurum yönetimi modülü geliştiriliyor.</p>
-      </div>
-    </div>
+    <div class="ust-bar"><div><h1>Kurumlar</h1><p>Sisteme erişim verilen kurumları yönetin.</p></div><button class="yeni-btn" onclick="modalAc('kurum');kurumModalSifirla()">+ Yeni Kurum Ekle</button></div>
+    <div class="kart" style="padding:1rem 1.5rem"><div style="display:flex;gap:1rem;align-items:center"><input class="ara-input" type="text" placeholder="🔍 Kurum ara..." id="kurum-ara-input" oninput="kurumAra(this.value)" style="max-width:320px"><span id="kurum-sayac" style="font-size:0.82rem;color:#94a3b8;margin-left:auto"></span></div></div>
+    <div class="kart"><div id="kurumlar-liste"><div class="bos-durum">⏳ Yükleniyor...</div></div></div>
   </div>
 
   <!-- HİKAYELER (Aşama/Seviye Metinleri) -->
@@ -478,6 +473,102 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+<!-- KURUM EKLE/DÜZENLE MODALI -->
+<div class="modal" id="modal-kurum">
+  <div class="modal-kutu genis">
+    <div class="modal-baslik" id="kurum-modal-baslik">🏫 Yeni Kurum Ekle</div>
+    <input type="hidden" id="k-id">
+    <div class="form-grid">
+      <div class="form-grup"><label>Kurum Adı</label><input type="text" id="k-kurum-adi" placeholder="Örn: Akıl Koleji"></div>
+      <div class="form-grup"><label>Yetkili Kişi</label><input type="text" id="k-yetkili" placeholder="Ad Soyad"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="k-kullanici" placeholder="kurum_adi"></div>
+      <div class="form-grup"><label>Şifre</label><input type="text" id="k-sifre" placeholder="Şifre belirle"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Telefon</label><input type="text" id="k-telefon" placeholder="05xx xxx xx xx"></div>
+      <div class="form-grup"><label>İl</label><input type="text" id="k-il" placeholder="Örn: İzmir"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>İlçe</label><input type="text" id="k-ilce" placeholder="Örn: Gaziemir"></div>
+      <div class="form-grup"><label>Durum</label><select id="k-aktif"><option value="true">✅ Aktif</option><option value="false">❌ Pasif</option></select></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Lisans Başlangıç</label><input type="date" id="k-baslangic"></div>
+      <div class="form-grup"><label>Lisans Bitiş</label><input type="date" id="k-bitis"></div>
+    </div>
+    <div class="modal-btn-grup">
+      <button class="btn-iptal" onclick="modalKapat('kurum')">İptal</button>
+      <button class="btn-kaydet" id="btn-kurum-kaydet" onclick="kurumKaydet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- KURUM EKLE/DÜZENLE MODALI -->
+<div class="modal" id="modal-kurum">
+  <div class="modal-kutu genis">
+    <div class="modal-baslik" id="kurum-modal-baslik">🏫 Yeni Kurum Ekle</div>
+    <input type="hidden" id="k-id">
+    <div class="form-grid">
+      <div class="form-grup"><label>Kurum Adı</label><input type="text" id="k-kurum-adi" placeholder="Örn: Akıl Koleji"></div>
+      <div class="form-grup"><label>Yetkili Kişi</label><input type="text" id="k-yetkili" placeholder="Ad Soyad"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="k-kullanici" placeholder="kurum_adi"></div>
+      <div class="form-grup"><label>Şifre</label><input type="text" id="k-sifre" placeholder="Şifre belirle"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Telefon</label><input type="text" id="k-telefon" placeholder="05xx xxx xx xx"></div>
+      <div class="form-grup"><label>İl</label><input type="text" id="k-il" placeholder="Örn: İzmir"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>İlçe</label><input type="text" id="k-ilce" placeholder="Örn: Gaziemir"></div>
+      <div class="form-grup"><label>Durum</label><select id="k-aktif"><option value="true">✅ Aktif</option><option value="false">❌ Pasif</option></select></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Lisans Başlangıç</label><input type="date" id="k-baslangic"></div>
+      <div class="form-grup"><label>Lisans Bitiş</label><input type="date" id="k-bitis"></div>
+    </div>
+    <div class="modal-btn-grup">
+      <button class="btn-iptal" onclick="modalKapat('kurum')">İptal</button>
+      <button class="btn-kaydet" id="btn-kurum-kaydet" onclick="kurumKaydet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- KURUM EKLE/DÜZENLE MODALI -->
+<div class="modal" id="modal-kurum">
+  <div class="modal-kutu genis">
+    <div class="modal-baslik" id="kurum-modal-baslik">🏫 Yeni Kurum Ekle</div>
+    <input type="hidden" id="k-id">
+    <div class="form-grid">
+      <div class="form-grup"><label>Kurum Adı</label><input type="text" id="k-kurum-adi" placeholder="Örn: Akıl Koleji"></div>
+      <div class="form-grup"><label>Yetkili Kişi</label><input type="text" id="k-yetkili" placeholder="Ad Soyad"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="k-kullanici" placeholder="kurum_adi"></div>
+      <div class="form-grup"><label>Şifre</label><input type="text" id="k-sifre" placeholder="Şifre belirle"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Telefon</label><input type="text" id="k-telefon" placeholder="05xx xxx xx xx"></div>
+      <div class="form-grup"><label>İl</label><input type="text" id="k-il" placeholder="Örn: İzmir"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>İlçe</label><input type="text" id="k-ilce" placeholder="Örn: Gaziemir"></div>
+      <div class="form-grup"><label>Durum</label><select id="k-aktif"><option value="true">✅ Aktif</option><option value="false">❌ Pasif</option></select></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Lisans Başlangıç</label><input type="date" id="k-baslangic"></div>
+      <div class="form-grup"><label>Lisans Bitiş</label><input type="date" id="k-bitis"></div>
+    </div>
+    <div class="modal-btn-grup">
+      <button class="btn-iptal" onclick="modalKapat('kurum')">İptal</button>
+      <button class="btn-kaydet" id="btn-kurum-kaydet" onclick="kurumKaydet()">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
 <!-- 1. AŞAMA İÇERİK EKLE MODALI -->
 <div class="modal" id="modal-asama1">
   <div class="modal-kutu genis">
@@ -580,6 +671,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='asama1-icerik') asama1IcerikYukle();
   if(sayfa==='ogrenciler') ogrencileriYukle();
   if(sayfa==='ogretmenler') ogretmenleriYukle();
+  if(sayfa==='kurumlar') kurumlarıYukle();
 }
 
 function altMenuToggle(id,link){
@@ -1040,6 +1132,68 @@ async function dersMetinleriYukle(){
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
 
+// ── KURUMLAR ──
+async function kurumlarıYukle(aramaMetni=''){
+  const liste=document.getElementById('kurumlar-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  try{
+    let filtre='order=created_at.desc&limit=50';
+    if(aramaMetni) filtre+=`&or=(kurum_adi.ilike.*${aramaMetni}*,yetkili_ad.ilike.*${aramaMetni}*,kullanici_adi.ilike.*${aramaMetni}*)`;
+    const veri=await supabase('GET','kurumlar',null,filtre);
+    document.getElementById('kurum-sayac').textContent=veri.length+' kurum';
+    if(!veri.length){liste.innerHTML='<div class="bos-durum">Henüz kurum eklenmemiş.</div>';return;}
+    liste.innerHTML=`<table><thead><tr><th>Kurum Adı</th><th>Yetkili</th><th>Telefon</th><th>İl / İlçe</th><th>Lisans Başlangıç</th><th>Lisans Bitiş</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${veri.map(k=>`<tr><td><strong>${k.kurum_adi}</strong></td><td>${k.yetkili_ad||'-'}</td><td>${k.telefon||'-'}</td><td>${k.il||'-'} / ${k.ilce||'-'}</td><td>${k.lisans_baslangic||'-'}</td><td>${k.lisans_bitis||'-'}</td><td><span class="durum ${k.aktif?'aktif':'pasif'}">${k.aktif?'● Aktif':'● Pasif'}</span></td><td><button class="islem-btn duzenle" onclick="kurumDuzenle(${k.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kurumSifreSifirla(${k.id},'${k.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kurumSil(${k.id})">Sil</button></td></tr>`).join('')}</tbody></table>`;
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+function kurumAra(deger){clearTimeout(window._kurumAraTimer);window._kurumAraTimer=setTimeout(()=>kurumlarıYukle(deger),400);}
+function kurumModalSifirla(){
+  document.getElementById('k-id').value='';
+  document.getElementById('kurum-modal-baslik').textContent='🏫 Yeni Kurum Ekle';
+  ['k-kurum-adi','k-yetkili','k-kullanici','k-sifre','k-telefon','k-il','k-ilce','k-baslangic','k-bitis'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('k-aktif').value='true';
+}
+async function kurumKaydet(){
+  const id=document.getElementById('k-id').value;
+  const veri={kurum_adi:document.getElementById('k-kurum-adi').value.trim(),yetkili_ad:document.getElementById('k-yetkili').value.trim(),kullanici_adi:document.getElementById('k-kullanici').value.trim(),sifre:document.getElementById('k-sifre').value.trim(),telefon:document.getElementById('k-telefon').value.trim(),il:document.getElementById('k-il').value.trim(),ilce:document.getElementById('k-ilce').value.trim(),lisans_baslangic:document.getElementById('k-baslangic').value||null,lisans_bitis:document.getElementById('k-bitis').value||null,aktif:document.getElementById('k-aktif').value==='true'};
+  if(!veri.kurum_adi||!veri.kullanici_adi){bildirimGoster('⚠️ Kurum adı ve kullanıcı adı zorunlu!','hata');return;}
+  if(!id&&!veri.sifre){bildirimGoster('⚠️ Şifre zorunlu!','hata');return;}
+  const btn=document.getElementById('btn-kurum-kaydet');btn.textContent='⏳ Kaydediliyor...';
+  try{
+    if(id){if(!veri.sifre)delete veri.sifre;await supabase('PATCH','kurumlar',veri,'id=eq.'+id);bildirimGoster('✅ Kurum güncellendi!','basari');}
+    else{await supabase('POST','kurumlar',veri);bildirimGoster('✅ Kurum eklendi!','basari');}
+    modalKapat('kurum');kurumlarıYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Kaydet';
+}
+async function kurumDuzenle(id){
+  try{
+    const veri=await supabase('GET','kurumlar',null,'id=eq.'+id);const k=veri[0];
+    document.getElementById('k-id').value=k.id;
+    document.getElementById('kurum-modal-baslik').textContent='✏️ Kurum Düzenle';
+    document.getElementById('k-kurum-adi').value=k.kurum_adi||'';
+    document.getElementById('k-yetkili').value=k.yetkili_ad||'';
+    document.getElementById('k-kullanici').value=k.kullanici_adi||'';
+    document.getElementById('k-sifre').value='';
+    document.getElementById('k-telefon').value=k.telefon||'';
+    document.getElementById('k-il').value=k.il||'';
+    document.getElementById('k-ilce').value=k.ilce||'';
+    document.getElementById('k-baslangic').value=k.lisans_baslangic||'';
+    document.getElementById('k-bitis').value=k.lisans_bitis||'';
+    document.getElementById('k-aktif').value=k.aktif?'true':'false';
+    modalAc('kurum');
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+async function kurumSifreSifirla(id,kullanici){
+  const yeniSifre=prompt(`"${kullanici}" için yeni şifre girin:`);
+  if(!yeniSifre)return;
+  try{await supabase('PATCH','kurumlar',{sifre:yeniSifre},'id=eq.'+id);bildirimGoster('✅ Şifre güncellendi!','basari');}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+async function kurumSil(id){
+  if(!confirm('Bu kurumu silmek istediğinize emin misiniz?'))return;
+  try{await supabase('DELETE','kurumlar',null,'id=eq.'+id);bildirimGoster('🗑️ Kurum silindi.','basari');kurumlarıYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
 // ── 1. AŞAMA FORM ALANLARI ──
 function a1FormGoster(){
   const modul=document.getElementById('a1-modul').value;
