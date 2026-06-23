@@ -946,33 +946,17 @@ async function ogretmenleriYukle(){
   const liste=document.getElementById('ogretmenler-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
   try{
-    const ogretmenler=await supabase('GET','kullanicilar',null,'rol=eq.ogretmen&order=id.desc');
-    ogretmenTablosuOlustur(ogretmenler,liste);
+    const ogretmenler=await supabase('GET','kullanicilar',null,'rol=eq.ogretmen&order=created_at.desc');
+    if(!ogretmenler.length){liste.innerHTML='<div class="bos-durum">Henüz öğretmen eklenmemiş.</div>';return;}
+    const bugun=new Date();
+    liste.innerHTML=`<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Telefon</th><th>İl / İlçe</th><th>Lisans Başlangıç</th><th>Kalan Süre</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${ogretmenler.map(o=>{
+      let kalanGun='-';
+      if(o.lisans_bitis){const fark=Math.ceil((new Date(o.lisans_bitis)-bugun)/(1000*60*60*24));kalanGun=fark>0?fark+' gün':'<span style="color:#dc2626">Süresi doldu</span>';}
+      return `<tr><td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi}</td><td>${o.telefon||'-'}</td><td>${o.il||'-'} / ${o.ilce||'-'}</td><td>${o.lisans_baslangic||'-'}</td><td>${kalanGun}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td><td><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td></tr>`;
+    }).join('')}</tbody></table>`;
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
-function ogretmenTablosuOlustur(ogretmenler,liste){
-  if(!ogretmenler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz öğretmen yok.</div>';return;}
-  liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Durum</th></tr></thead><tbody></tbody></table>';
-  const tbody=liste.querySelector('tbody');
-  ogretmenler.forEach(o=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>`;
-    tbody.appendChild(tr);
-  });
-}
-let ogretmenAramaZamanlayici=null;
-function ogretmenAra(q){
-  clearTimeout(ogretmenAramaZamanlayici);
-  const liste=document.getElementById('ogretmenler-liste');
-  if(!q.trim()){ogretmenleriYukle();return;}
-  liste.innerHTML='<div class="bos-durum">⏳ Aranıyor...</div>';
-  ogretmenAramaZamanlayici=setTimeout(async()=>{
-    try{
-      const ogretmenler=await supabase('GET','kullanicilar',null,'rol=eq.ogretmen&or=(ad.ilike.*'+encodeURIComponent(q)+'*,soyad.ilike.*'+encodeURIComponent(q)+'*,kullanici_adi.ilike.*'+encodeURIComponent(q)+'*)');
-      ogretmenTablosuOlustur(ogretmenler,liste);
-    }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
-  },400);
-}
+function ogretmenAra(q){clearTimeout(window._ogretmenAraTimer);window._ogretmenAraTimer=setTimeout(()=>ogretmenleriYukle(),400);}
 
 // ── ŞİFRE İŞLEMLERİ ──
 let sifreAramaZamanlayici=null;
