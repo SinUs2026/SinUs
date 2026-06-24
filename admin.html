@@ -1352,7 +1352,7 @@ async function asama1IcerikKaydet(){
   try{
     await supabase('POST','asama1_icerik',{modul,zorluk,veri,aktif:true});
     bildirimGoster('✅ İçerik kaydedildi!','basari');
-    modalKapat('asama1');
+    document.getElementById('modal-asama1').classList.remove('aktif');
     asama1IcerikYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
