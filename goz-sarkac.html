@@ -158,7 +158,8 @@ function baslat(){
   }
   G.animId=requestAnimationFrame(animate);
 }
-function bitti(){const s=Math.floor((Date.now()-G.baslangic)/1000);document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';showScreen('screenBitti');}
+function bitti(){const s=Math.floor((Date.now()-G.baslangic)/1000);document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';gorevTamamlandiSinyaliGonder(s);showScreen('screenBitti');}
+function gorevTamamlandiSinyaliGonder(sureSn){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=sureSn>=(G.sure*0.5)?10:2;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);menuye();}
 function tekrar(){baslat();}
 function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);showScreen('screenMenu');}
