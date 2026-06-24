@@ -617,7 +617,7 @@ function oyunuBitir(){
   document.getElementById('sDogru').textContent=G.dogru;
   document.getElementById('sYanlis').textContent=G.yanlis;
   document.getElementById('sPuan').textContent=G.puan;
-  showScreen('screenSonuc');
+  gorevTamamlandiSinyaliGonder();showScreen('screenSonuc');
 }
 
 function tekrar(){G.mevcutSoruIdx=0;G.dogru=0;G.yanlis=0;G.puan=0;showScreen('screenOyun');soruGoster();}
@@ -626,6 +626,7 @@ function menuye(){
   clearInterval(G.zincirInt);clearInterval(G.tekerlemeInt);
   showScreen('screenMenu');
 }
+function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function karistir(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 </script>

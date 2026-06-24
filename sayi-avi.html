@@ -407,7 +407,7 @@ function oyunuBitir() {
     document.getElementById('sToplamSure').textContent = oncekiEnIyi.toFixed(1) + ' sn';
   }
   if (!oncekiEnIyi || G.sure < oncekiEnIyi) { enIyiSureler[anahtarKey] = G.sure; }
-  showScreen('screenSonuc');
+  gorevTamamlandiSinyaliGonder();showScreen('screenSonuc');
 }
 
 function tekrarOyna() { oyunuBaslat(); }

@@ -277,11 +277,12 @@ function sonucGoster(isOk,dogru){
   document.getElementById('sDogru').textContent=G.dogru;
   document.getElementById('sYanlis').textContent=G.yanlis;
   document.getElementById('sPuan').textContent=G.puan;
-  showScreen('screenSonuc');
+  gorevTamamlandiSinyaliGonder();showScreen('screenSonuc');
 }
 
 function tekrar(){okumayaBasla();}
 function menuye(){clearInterval(G.sureInt);showScreen('screenAyar');}
+function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 metinleriYukle();
 </script>

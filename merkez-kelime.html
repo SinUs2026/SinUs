@@ -319,6 +319,7 @@ function durdurDevam(){
 }
 function bastanAl(){G.calisiyor=false;clearTimeout(G.timeout);G.mevcutIdx=0;document.getElementById('bittiOverlay').classList.remove('gorulur');document.getElementById('anaKelime').textContent='▶';document.getElementById('solKelime').textContent='';document.getElementById('sagKelime').textContent='';document.getElementById('durdurBtn').textContent='⏸ DURDUR';document.getElementById('durumMsg').textContent='BAŞLIYOR...';ilerlemeGuncelle();G.timeout=setTimeout(()=>{document.getElementById('durumMsg').textContent='';G.calisiyor=true;sonrakiKelime();},1000);}
 function menuye(){G.calisiyor=false;clearTimeout(G.timeout);showScreen('screenAyar');}
+function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 metinleriYukle();
 </script>

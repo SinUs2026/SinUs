@@ -362,7 +362,7 @@ function oyunuBitir() {
   document.getElementById('sDogru').textContent = G.dogru;
   document.getElementById('sYanlis').textContent = G.yanlis;
   document.getElementById('sPuan').textContent = G.puan;
-  showScreen('screenSonuc');
+  gorevTamamlandiSinyaliGonder();showScreen('screenSonuc');
 }
 
 function tekrarOyna() { oyunuBaslat(); }

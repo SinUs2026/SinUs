@@ -122,6 +122,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 
 let G={hiz:3,sure:60,moveInt:null,sureInt:null,baslangic:0};
 function selSure(s,el){G.sure=s;document.querySelectorAll('.sure-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.style.display='none');document.getElementById(id).style.display='flex';}
 function baslat(){
   G.hiz=parseInt(document.getElementById('hizSlider').value);
