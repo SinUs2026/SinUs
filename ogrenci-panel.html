@@ -352,7 +352,7 @@ function gorevListesiOlustur(){
     const g=mevcutGorevler[aktifIdx];
     const isim=g.tip==='asama1'?(MODUL_AD[g.modul]||g.modul):g.isim;
     const url=gorevUrl(g);
-    baslaDiv.innerHTML=`<a href="${url}" target="_blank" class="basla-btn" onclick="gorevAc(${aktifIdx},'${url}')">▶️ ${isim} — Başlat</a>`;
+    baslaDiv.innerHTML=`<a href="${url}" class="basla-btn" onclick="gorevAc(${aktifIdx},'${url}')">▶️ ${isim} — Başlat</a>`;
   }
 }
 
