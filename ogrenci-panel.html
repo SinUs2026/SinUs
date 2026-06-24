@@ -379,6 +379,7 @@ window.addEventListener('focus', kontrolEtTamamlandi);
 document.addEventListener('visibilitychange', () => {
   if(!document.hidden) kontrolEtTamamlandi();
 });
+setInterval(kontrolEtTamamlandi, 1000);
 
 function kontrolEtTamamlandi(){
   if(!ogrenci) return;
