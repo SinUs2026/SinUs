@@ -415,7 +415,7 @@ tr:hover td{background:#f8fafc}
     </div>
     <div class="form-grup"><label>Hikâye Başlığı</label><input type="text" id="h-baslik" placeholder="Hikâyenin başlığı..."></div>
     <div class="form-grup"><label>Hikâye Metni</label><textarea id="h-metin" placeholder="Hikâye metnini buraya yapıştırın..." oninput="kelimeSay()"></textarea><div class="sayac" id="kelime-sayac">0 kelime</div></div>
-    <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('hikaye')">İptal</button><button class="btn-kaydet" id="btn-hikaye-kaydet" onclick="hikayeKaydet()">💾 Kaydet</button></div>
+    <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle()" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div><div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('hikaye')">İptal</button><button class="btn-kaydet" id="btn-hikaye-kaydet" onclick="hikayeKaydet()">💾 Kaydet</button></div>
   </div>
 </div>
 
@@ -863,6 +863,7 @@ async function gunIcerigiYukle(asamaNo,gun){
 
 // ── MODAL YÖNETİMİ ──
 function modalAc(tip){document.getElementById('modal-'+tip).classList.add('acik');}
+function soruEkle(){const liste=document.getElementById('soru-listesi');const idx=liste.children.length+1;const div=document.createElement('div');div.style.cssText='display:flex;gap:6px;align-items:center';div.innerHTML='<input type="text" placeholder="Soru '+idx+'" style="flex:1;background:#1a2744;color:#e2e8f0;border:1px solid #2563a8;border-radius:6px;padding:6px 10px;font-size:0.85rem"><button type="button" onclick="this.parentElement.remove()" style="background:#7f1d1d;color:#fca5a5;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">✕</button>';liste.appendChild(div);}
 function modalKapat(tip){
   document.getElementById('modal-'+tip).classList.remove('acik');
   if(tip==='hikaye'){document.getElementById('h-baslik').value='';document.getElementById('h-metin').value='';document.getElementById('h-kelime').value='';document.getElementById('kelime-sayac').textContent='0 kelime';}
