@@ -164,13 +164,13 @@ function gorevTamamlandiSinyaliGonder(sureSn){
   const from = new URLSearchParams(window.location.search).get('from');
   if(from !== 'ogrenci') return;
   try{
-    const veri = localStorage.getItem('okubit_bekleyen_gorev');
+    const veri = localStorage.getItem('sinus_bekleyen_gorev');
     if(!veri) return;
     const b = JSON.parse(veri);
     const basarili = sureSn >= (G.sure * 0.5);
     b.tamamlandiMi = true;
     b.puan = basarili ? 10 : 2;
-    localStorage.setItem('okubit_bekleyen_gorev', JSON.stringify(b));
+    localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
   }catch(e){}
 }
 

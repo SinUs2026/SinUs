@@ -214,7 +214,7 @@ let tamamlananIdx=-1; // en son tamamlanan görevin indeksi
 // ── GİRİŞ KONTROL ──
 async function panelYukle(){
   // localStorage'dan kullanıcı al (giriş sayfası bunu yazıyor)
-  const kullaniciObj=localStorage.getItem('okubit_kullanici_obj');
+  const kullaniciObj=localStorage.getItem('sinus_kullanici_obj');
   if(!kullaniciObj){location.href='giris.html';return;}
 
   let kullanici;
@@ -303,7 +303,7 @@ async function programiYukle(){
 
     mevcutGorevler=data[0].gorevler;
     // Tamamlananları localStorage'dan al (sekmeler arası paylaşım için)
-    const keyTamamlanan='okubit_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
+    const keyTamamlanan='sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
     tamamlananIdx=parseInt(localStorage.getItem(keyTamamlanan)||'-1');
     gorevListesiOlustur();
 
@@ -365,7 +365,7 @@ function gorevAc(idx,url){
   // Hedef görevin anahtarını localStorage'a yaz, egzersiz bittiğinde bu key işaretlenecek
   const asama=ogrenci.asama||1;
   const gun=ogrenci.mevcut_gun||1;
-  const bekleyenKey='okubit_bekleyen_gorev';
+  const bekleyenKey='sinus_bekleyen_gorev';
   localStorage.setItem(bekleyenKey, JSON.stringify({
     kullanici: ogrenci.kullanici_adi,
     asama, gun, idx,
@@ -383,7 +383,7 @@ setInterval(kontrolEtTamamlandi, 1000);
 
 function kontrolEtTamamlandi(){
   if(!ogrenci) return;
-  const bekleyenKey='okubit_bekleyen_gorev';
+  const bekleyenKey='sinus_bekleyen_gorev';
   const veri=localStorage.getItem(bekleyenKey);
   if(!veri) return;
   try{
@@ -392,7 +392,7 @@ function kontrolEtTamamlandi(){
     const gun=ogrenci.mevcut_gun||1;
     if(b.kullanici===ogrenci.kullanici_adi && b.asama===asama && b.gun===gun && b.tamamlandiMi===true){
       // Görevi tamamlandı yap
-      const key='okubit_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
+      const key='sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
       const oncekiIdx=parseInt(localStorage.getItem(key)||'-1');
       if(b.idx>oncekiIdx){
         tamamlananIdx=b.idx;
@@ -444,8 +444,8 @@ async function siralamaYukle(){
 }
 
 function cikisYap(){
-  localStorage.removeItem('okubit_kullanici_obj');
-  sessionStorage.removeItem('okubit_kullanici');
+  localStorage.removeItem('sinus_kullanici_obj');
+  sessionStorage.removeItem('sinus_kullanici');
   location.href='giris.html';
 }
 

@@ -59,8 +59,8 @@ async function girisYap(){
     var d=await r.json();
     if(d&&d.length>0&&d[0].sifre===s){
       var u=d[0];
-      sessionStorage.setItem('okubit_kullanici',u.kullanici_adi);
-      localStorage.setItem('okubit_kullanici_obj',JSON.stringify(u));
+      sessionStorage.setItem('sinus_kullanici',u.kullanici_adi);
+      localStorage.setItem('sinus_kullanici_obj',JSON.stringify(u));
       basari.innerText='Giriş başarılı! Yönlendiriliyorsunuz...';
       basari.style.display='block';
       setTimeout(function(){
