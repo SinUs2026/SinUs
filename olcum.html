@@ -633,13 +633,13 @@ async function sonucHesapla() {
   const ad = formBilgileri.ad_soyad.split(' ')[0];
   if (kelimeHizi >= norm.ortalama * 1.1) {
     mesajKutu.className = 'mesaj-kutu iyi';
-    mesajMetin.textContent = ad + ', ' + norm.sinif + ' seviyesinin üzerinde okuyor! Dakikada ' + kelimeHizi + ' kelimeyle harika bir başlangıç noktasında. OKUBİT programıyla bu hızı çok daha ileriye taşıyabilir.';
+    mesajMetin.textContent = ad + ', ' + norm.sinif + ' seviyesinin üzerinde okuyor! Dakikada ' + kelimeHizi + ' kelimeyle harika bir başlangıç noktasında. SinUs programıyla bu hızı çok daha ileriye taşıyabilir.';
   } else if (kelimeHizi >= norm.ortalama * 0.8) {
     mesajKutu.className = 'mesaj-kutu orta';
-    mesajMetin.textContent = ad + ', ' + norm.sinif + ' ortalamasına yakın okuyor. Dakikada ' + kelimeHizi + ' kelimeyle iyi bir noktada. OKUBİT\'in 30 günlük programıyla ortalamayı geçmek mümkün!';
+    mesajMetin.textContent = ad + ', ' + norm.sinif + ' ortalamasına yakın okuyor. Dakikada ' + kelimeHizi + ' kelimeyle iyi bir noktada. SinUs\'in 30 günlük programıyla ortalamayı geçmek mümkün!';
   } else {
     mesajKutu.className = 'mesaj-kutu dusuk';
-    mesajMetin.textContent = ad + ', dakikada ' + kelimeHizi + ' kelime okuyor. ' + norm.sinif + ' ortalaması ' + norm.ortalama + ' kelime. OKUBİT programı tam bu durumlar için tasarlandı — 30 günde büyük gelişim mümkün!';
+    mesajMetin.textContent = ad + ', dakikada ' + kelimeHizi + ' kelime okuyor. ' + norm.sinif + ' ortalaması ' + norm.ortalama + ' kelime. SinUs programı tam bu durumlar için tasarlandı — 30 günde büyük gelişim mümkün!';
   }
 
   // Öneri aşama
