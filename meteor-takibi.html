@@ -547,8 +547,10 @@ function showResult(correct,pts) {
   document.getElementById('sTotal').textContent=G.score;
 }
 
-function playAgain() { loopActive=false; cancelAnimationFrame(G.animId); gc.onclick=null; gc.ontouchend=null; selectCount=0; selectedTargets=[]; startGame(); }
-function goMenu() { loopActive=false; cancelAnimationFrame(G.animId); gc.onclick=null; gc.ontouchend=null; selectCount=0; selectedTargets=[]; showScreen('screenMenu'); }
+function playAgain() {
+  sinusTamamlandiSinyalGonder(); loopActive=false; cancelAnimationFrame(G.animId); gc.onclick=null; gc.ontouchend=null; selectCount=0; selectedTargets=[]; startGame(); }
+function goMenu() {
+  sinusTamamlandiSinyalGonder(); loopActive=false; cancelAnimationFrame(G.animId); gc.onclick=null; gc.ontouchend=null; selectCount=0; selectedTargets=[]; showScreen('screenMenu'); }
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
