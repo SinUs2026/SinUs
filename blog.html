@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog - SinUs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--la:#0a1628;--la2:#111f3a;--la3:#162444;--ma:#2563a8;--ma2:#60a5fa;--al:#d4af37;--al2:#f0d060;--be:#f0f4ff;--gr:#8899bb;--ya:#c8d8f0}
+html{scroll-behavior:smooth}
+body{background:var(--la);color:var(--ya);font-family:'Inter',sans-serif;font-size:16px;line-height:1.7;overflow-x:hidden}
+#uzay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+section{position:relative;z-index:1;padding:6rem 2rem}
+.c{max-width:780px;margin:0 auto}
+.c-wide{max-width:1100px;margin:0 auto}
+.sl{font-size:0.72rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--al);margin-bottom:1rem}
+.st{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--be);line-height:1.2;margin-bottom:1.5rem}
+.bp{background:var(--al);color:var(--la);padding:0.9rem 2.2rem;border-radius:8px;font-weight:700;font-size:1rem;text-decoration:none;transition:all 0.2s;display:inline-block}
+.bp:hover{background:var(--al2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,175,55,0.3)}
+.bs{border:1px solid rgba(96,165,250,0.4);color:var(--ma2);padding:0.9rem 2.2rem;border-radius:8px;font-weight:500;font-size:1rem;text-decoration:none;transition:all 0.2s;display:inline-block}
+.bs:hover{border-color:var(--ma2);background:rgba(96,165,250,0.08)}
+.breadcrumb{font-size:0.78rem;color:var(--gr);margin-bottom:1.5rem}
+.breadcrumb a{color:var(--gr);text-decoration:none}.breadcrumb a:hover{color:var(--ma2)}
+.breadcrumb span{margin:0 0.5rem;opacity:0.4}
+.page-hero{padding:10rem 2rem 4rem;text-align:center}
+.page-hero .st{font-size:clamp(2rem,5vw,3.2rem)}
+.page-hero .ozet{font-size:1.1rem;color:var(--ya);opacity:0.8;max-width:620px;margin:0 auto;line-height:1.85}
+footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);padding:3rem 2rem 2rem}
+.fic{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem}
+.flo{font-size:1.5rem;font-weight:700;margin-bottom:0.8rem}.flo .s{color:var(--ma2)}.flo .u{color:var(--al)}
+.fsl{font-size:0.85rem;color:var(--gr);opacity:0.7;line-height:1.6}
+.fbas{font-size:0.75rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--al);opacity:0.7;margin-bottom:1rem}
+.fln{list-style:none;display:flex;flex-direction:column;gap:0.5rem}.fln a{font-size:0.88rem;color:var(--gr);text-decoration:none;transition:color 0.2s}.fln a:hover{color:var(--be)}
+.falt{border-top:1px solid rgba(96,165,250,0.08);padding-top:1.5rem;text-align:center;font-size:0.78rem;color:var(--gr);opacity:0.5;max-width:1100px;margin:0 auto}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 2.5rem;background:rgba(10,22,40,0.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(212,175,55,0.12);transition:border-color 0.3s}
+.logo{font-size:1.5rem;font-weight:700;text-decoration:none}.logo .s{color:var(--ma2)}.logo .u{color:var(--al)}
+.nl{display:flex;gap:0.2rem;list-style:none;align-items:center}
+.nl>li{position:relative}
+.nl>li>a{color:var(--gr);text-decoration:none;font-size:0.88rem;transition:color 0.2s;padding:0.5rem 0.9rem;border-radius:6px;display:flex;align-items:center;gap:0.3rem}
+.nl>li>a:hover{color:var(--be);background:rgba(255,255,255,0.04)}
+.nl>li.aktif>a{color:var(--be)}
+.dd-ok{font-size:0.6rem;transition:transform 0.2s;opacity:0.6}
+.nl>li:hover .dd-ok{transform:rotate(180deg)}
+.dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(10,22,40,0.97);border:1px solid rgba(96,165,250,0.15);border-radius:12px;padding:0.6rem;min-width:230px;opacity:0;visibility:hidden;transition:all 0.2s;backdrop-filter:blur(20px);box-shadow:0 20px 40px rgba(0,0,0,0.5)}
+.nl>li:hover .dropdown{opacity:1;visibility:visible;top:calc(100% + 4px)}
+.dropdown a{display:block;color:var(--ya);text-decoration:none;font-size:0.85rem;padding:0.65rem 1rem;border-radius:8px;transition:all 0.15s;white-space:nowrap}
+.dropdown a:hover{background:rgba(96,165,250,0.08);color:var(--be)}
+.dropdown a span{display:block;font-size:0.72rem;color:var(--gr);margin-top:0.1rem;font-weight:400}
+.dropdown-sep{height:1px;background:rgba(96,165,250,0.1);margin:0.4rem 0}
+.nr{display:flex;align-items:center;gap:0.8rem}
+.ng{display:flex;gap:0.4rem}.ng a{font-size:0.76rem;font-weight:500;padding:0.38rem 0.85rem;border-radius:5px;text-decoration:none;border:1px solid rgba(96,165,250,0.25);color:var(--ma2);transition:all 0.2s}.ng a:hover{background:rgba(96,165,250,0.1)}
+.ncta{background:var(--al);color:var(--la);padding:0.5rem 1.3rem;border-radius:6px;font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s}.ncta:hover{background:var(--al2);transform:translateY(-1px)}
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem;margin-top:3rem}
+.blog-kart{background:rgba(255,255,255,0.02);border:1px solid rgba(96,165,250,0.1);border-radius:16px;overflow:hidden;transition:all 0.3s;display:flex;flex-direction:column}
+.blog-kart:hover{border-color:rgba(96,165,250,0.3);transform:translateY(-5px)}
+.blog-ust{height:140px;background:linear-gradient(135deg,var(--la2),var(--la3));display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;overflow:hidden}
+.blog-ust::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--al),transparent)}
+.blog-govde{padding:1.8rem;flex:1;display:flex;flex-direction:column}
+.blog-etiket{font-size:0.7rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--ma2);margin-bottom:0.7rem}
+.blog-kart h2{font-size:1rem;font-weight:600;color:var(--be);line-height:1.4;margin-bottom:0.7rem}
+.blog-kart p{font-size:0.88rem;color:var(--gr);line-height:1.65;flex:1}
+.blog-meta{display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(96,165,250,0.08)}
+.blog-sure{font-size:0.75rem;color:var(--gr);opacity:0.7}
+.blog-ok{font-size:0.82rem;font-weight:600;color:var(--ma2);text-decoration:none;transition:color 0.2s}
+.blog-ok:hover{color:var(--al)}
+.blog-yakin{display:inline-block;font-size:0.65rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--al);background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);padding:0.2rem 0.6rem;border-radius:4px}
+.cta-blok{padding:5rem 2rem;text-align:center;background:var(--la3);border-top:1px solid rgba(212,175,55,0.1)}
+.cta-blok .st{margin-bottom:0.8rem}
+.cta-blok p{font-size:1rem;color:var(--gr);margin-bottom:2.5rem}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+@media(max-width:768px){nav{padding:1rem 1.5rem}.nl,.ng{display:none}.fic{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="uzay"></canvas>
+<nav id="nav">
+  <a href="index.html" class="logo"><span class="s">Sin</span><span class="u">Us</span></a>
+  <ul class="nl">
+    <li><a href="index.html">Ana Sayfa</a></li>
+    <li><a href="hakkimizda.html">Hakkimizda</a></li>
+    <li>
+      <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi <span class="dd-ok">&#9660;</span></a>
+      <div class="dropdown">
+        <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yas, seviye ve on kosullar</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="neden-almaliyim.html">Neden Almaliyim?<span>Faydalari ve sonuclar</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="platform.html">SinUs Platformu<span>Sistem nasil calisir?</span></a>
+      </div>
+    </li>
+    <li class="aktif"><a href="blog.html">Blog</a></li>
+    <li><a href="sss.html">SSS</a></li>
+    <li><a href="iletisim.html">Iletisim</a></li>
+  </ul>
+  <div class="nr">
+    <div class="ng">
+      <a href="admin.html">Yonetici</a>
+      <a href="ogretmen.html">Ogretmen</a>
+      <a href="ogrenci-panel.html">Ogrenci</a>
+    </div>
+    <a href="index.html#olcum" class="ncta">Ucretsiz Olc</a>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="c">
+    <p class="breadcrumb"><a href="index.html">Ana Sayfa</a><span>/</span>Blog</p>
+    <p class="sl">Blog</p>
+    <h1 class="st">Daha fazla verim icin<br>okumaya devam edin.</h1>
+    <p class="ozet">Okuma, dikkat, odak ve ogrenme uzerine yazilar. Her yazi, gelisiminizi hizlandiracak bir ipucu tasir.</p>
+  </div>
+</section>
+
+<section>
+  <div class="c-wide">
+    <p class="sl">Tum Yazilar</p>
+    <h2 class="st">Bilgi bankasi.</h2>
+    <div class="blog-grid">
+
+      <div class="blog-kart">
+        <div class="blog-ust">&#128065;</div>
+        <div class="blog-govde">
+          <div class="blog-etiket">Goz Sagligi</div>
+          <h2>Goz kaslari neden bu kadar onemli? Hizli okumada goz sagligi</h2>
+          <p>Okuma hizini artirmanin en temel adimi goz kaslarini dogru calistirmaktan geciyor. Peki gozler okurken nasil calisir?</p>
+          <div class="blog-meta">
+            <span class="blog-sure">5 dk okuma</span>
+            <a href="#" class="blog-ok">Oku &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blog-kart">
+        <div class="blog-ust">&#127919;</div>
+        <div class="blog-govde">
+          <div class="blog-etiket">Dikkat ve Odak</div>
+          <h2>Cocugunuz okurken akli neden baska yerde? Odak sorununa bilimsel bakis</h2>
+          <p>Dikkat daginikligi bir karakter sorunu degil, egitilebilir bir beceri meselesidir. Bilim ne diyor?</p>
+          <div class="blog-meta">
+            <span class="blog-sure">6 dk okuma</span>
+            <a href="#" class="blog-ok">Oku &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blog-kart">
+        <div class="blog-ust">&#128218;</div>
+        <div class="blog-govde">
+          <div class="blog-etiket">Ebeveyn Rehberi</div>
+          <h2>30 gunluk programdan maksimum verim almak icin 5 oneri</h2>
+          <p>Sistemi dogru kullanmak kadar sureci desteklemek de gelisimi dogrudan etkiliyor. Veli olarak ne yapabilirsiniz?</p>
+          <div class="blog-meta">
+            <span class="blog-sure">4 dk okuma</span>
+            <a href="#" class="blog-ok">Oku &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blog-kart">
+        <div class="blog-ust">&#9889;</div>
+        <div class="blog-govde">
+          <div class="blog-etiket">Okuma Teknikleri</div>
+          <h2>Tek tek kelime okumaktan blok okumaya gecis nasil olur?</h2>
+          <p>Cogu insan okurken tek tek kelime isler. Bu aliskanlik hem hizi hem anlama derinligini sinirlar. Nasil degistirirsiniz?</p>
+          <div class="blog-meta">
+            <span class="blog-sure">7 dk okuma</span>
+            <a href="#" class="blog-ok">Oku &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blog-kart">
+        <div class="blog-ust">&#128200;</div>
+        <div class="blog-govde">
+          <div class="blog-etiket">Veri ve Olcum</div>
+          <h2>Gelisim neden olculmeli? Sayilar olmadan ilerleme olmaz</h2>
+          <p>Hizli okuma egitiminde en gozardi edilen konu olcumdur. Oysa gelisim gorünür olmazsa surudurulemez.</p>
+          <div class="blog-meta">
+            <span class="blog-sure">5 dk okuma</span>
+            <a href="#" class="blog-ok">Oku &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blog-kart">
+        <div class="blog-ust">&#127774;</div>
+        <div class="blog-govde">
+          <div class="blog-etiket">Sinav Hazirlik</div>
+          <h2>YKS ve LGS'de paragraf sorularini daha hizli cozmenin yolu</h2>
+          <p>Sinav stresinin onemli bir kaynagi sure baskisidir. Okuma hizi bu stresi dogrudan etkiler.</p>
+          <div class="blog-meta">
+            <span class="blog-sure">6 dk okuma</span>
+            <span class="blog-yakin">Yakinda</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="cta-blok">
+  <div class="c">
+    <h2 class="st">Okumak icin en iyi yatirim<br>kendinize yaptiginizdir.</h2>
+    <p>Ucretsiz olcum ile baslangic noktanizi ogrenin.</p>
+    <div class="cta-btns">
+      <a href="index.html#olcum" class="bp">Ucretsiz Olcumu Basla</a>
+      <a href="sss.html" class="bs">Sik Sorulan Sorular</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fic">
+    <div>
+      <div class="flo"><span class="s">Sin</span><span class="u">Us</span></div>
+      <p class="fsl">Okuma Anlama Muhendisligi<br>Her zihin kesfedilmeyi bekleyen bir evrendir.</p>
+    </div>
+    <div>
+      <div class="fbas">Platform</div>
+      <ul class="fln">
+        <li><a href="hizli-okuma-nedir.html">Hizli Okuma Nedir?</a></li>
+        <li><a href="kimler-alabilir.html">Kimler Alabilir?</a></li>
+        <li><a href="neden-almaliyim.html">Neden Almaliyim?</a></li>
+        <li><a href="platform.html">SinUs Platformu</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="sss.html">SSS</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="fbas">Kurumsal</div>
+      <ul class="fln">
+        <li><a href="hakkimizda.html">Hakkimizda</a></li>
+        <li><a href="admin.html">Yonetici Paneli</a></li>
+        <li><a href="ogretmen.html">Ogretmen Paneli</a></li>
+        <li><a href="ogrenci-panel.html">Ogrenci Paneli</a></li>
+        <li><a href="iletisim.html">Iletisim</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="falt">&copy; 2026 SinUs &middot; Tum haklari saklidir &middot; Izmir, Turkiye</div>
+</footer>
+<script>
+const cv=document.getElementById('uzay');
+const cx=cv.getContext('2d');
+function rsz(){cv.width=window.innerWidth;cv.height=window.innerHeight}
+rsz();window.addEventListener('resize',()=>{rsz();initS()});
+let st=[],sh=[],fr=0;
+function initS(){st=[];for(let i=0;i<180;i++)st.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.4+0.3,ph:Math.random()*Math.PI*2,sp:Math.random()*0.004+0.001})}
+initS();
+function spwn(){if(Math.random()<0.01){const l=Math.random()<0.5;sh.push({x:l?-20:cv.width+20,y:Math.random()*cv.height*0.5,vx:(l?1:-1)*(Math.random()*7+5),vy:Math.random()*3+2,len:Math.random()*100+50,a:1})}}
+function drw(){cx.clearRect(0,0,cv.width,cv.height);fr++;
+[[0.2,0.3,220],[0.8,0.5,260],[0.5,0.1,200]].forEach(([rx,ry,h])=>{const x=rx*cv.width,y=ry*cv.height,r=160;const g=cx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'hsla('+h+',60%,45%,0.035)');g.addColorStop(1,'transparent');cx.fillStyle=g;cx.beginPath();cx.arc(x,y,r,0,Math.PI*2);cx.fill()});
+st.forEach(s=>{const a=(Math.sin(fr*s.sp+s.ph)+1)/2*0.75+0.1;cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle='rgba(255,255,255,'+a+')';cx.fill()});
+spwn();sh=sh.filter(s=>s.a>0.02);
+sh.forEach(s=>{const d=Math.hypot(s.vx,s.vy);const tx=s.x-s.vx*(s.len/d);const ty=s.y-s.vy*(s.len/d);const g=cx.createLinearGradient(tx,ty,s.x,s.y);g.addColorStop(0,'transparent');g.addColorStop(0.7,'rgba(212,175,55,'+(s.a*0.35)+')');g.addColorStop(1,'rgba(255,255,255,'+s.a+')');cx.strokeStyle=g;cx.lineWidth=1.6;cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(s.x,s.y);cx.stroke();s.x+=s.vx;s.y+=s.vy;s.a-=0.016});
+requestAnimationFrame(drw)}
+drw();
+window.addEventListener('scroll',()=>{document.getElementById('nav').style.borderBottomColor=window.scrollY>60?'rgba(212,175,55,0.25)':'rgba(212,175,55,0.12)'});
+</script>
+</body>
+</html>

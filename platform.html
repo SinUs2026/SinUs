@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SinUs Platformu - SinUs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--la:#0a1628;--la2:#111f3a;--la3:#162444;--ma:#2563a8;--ma2:#60a5fa;--al:#d4af37;--al2:#f0d060;--be:#f0f4ff;--gr:#8899bb;--ya:#c8d8f0}
+html{scroll-behavior:smooth}
+body{background:var(--la);color:var(--ya);font-family:'Inter',sans-serif;font-size:16px;line-height:1.7;overflow-x:hidden}
+#uzay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 2.5rem;background:rgba(10,22,40,0.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(212,175,55,0.12);transition:border-color 0.3s}
+.logo{font-size:1.5rem;font-weight:700;text-decoration:none}.logo .s{color:var(--ma2)}.logo .u{color:var(--al)}
+.nl{display:flex;gap:0.2rem;list-style:none;align-items:center}
+.nl>li{position:relative}
+.nl>li>a{color:var(--gr);text-decoration:none;font-size:0.88rem;transition:color 0.2s;padding:0.5rem 0.9rem;border-radius:6px;display:flex;align-items:center;gap:0.3rem}
+.nl>li>a:hover{color:var(--be);background:rgba(255,255,255,0.04)}
+.nl>li.aktif>a{color:var(--be)}
+.dd-ok{font-size:0.6rem;transition:transform 0.2s;opacity:0.6}
+.nl>li:hover .dd-ok{transform:rotate(180deg)}
+.dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(10,22,40,0.97);border:1px solid rgba(96,165,250,0.15);border-radius:12px;padding:0.6rem;min-width:230px;opacity:0;visibility:hidden;transition:all 0.2s;backdrop-filter:blur(20px);box-shadow:0 20px 40px rgba(0,0,0,0.5)}
+.nl>li:hover .dropdown{opacity:1;visibility:visible;top:calc(100% + 4px)}
+.dropdown a{display:block;color:var(--ya);text-decoration:none;font-size:0.85rem;padding:0.65rem 1rem;border-radius:8px;transition:all 0.15s;white-space:nowrap}
+.dropdown a:hover{background:rgba(96,165,250,0.08);color:var(--be)}
+.dropdown a span{display:block;font-size:0.72rem;color:var(--gr);margin-top:0.1rem;font-weight:400}
+.dropdown-sep{height:1px;background:rgba(96,165,250,0.1);margin:0.4rem 0}
+.nr{display:flex;align-items:center;gap:0.8rem}
+.ng{display:flex;gap:0.4rem}.ng a{font-size:0.76rem;font-weight:500;padding:0.38rem 0.85rem;border-radius:5px;text-decoration:none;border:1px solid rgba(96,165,250,0.25);color:var(--ma2);transition:all 0.2s}.ng a:hover{background:rgba(96,165,250,0.1)}
+.ncta{background:var(--al);color:var(--la);padding:0.5rem 1.3rem;border-radius:6px;font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s}.ncta:hover{background:var(--al2);transform:translateY(-1px)}
+section{position:relative;z-index:1;padding:6rem 2rem}
+.c{max-width:780px;margin:0 auto}
+.c-wide{max-width:1100px;margin:0 auto}
+.sl{font-size:0.72rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--al);margin-bottom:1rem}
+.st{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--be);line-height:1.2;margin-bottom:1.5rem}
+.bp{background:var(--al);color:var(--la);padding:0.9rem 2.2rem;border-radius:8px;font-weight:700;font-size:1rem;text-decoration:none;transition:all 0.2s;display:inline-block}
+.bp:hover{background:var(--al2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,175,55,0.3)}
+.bs{border:1px solid rgba(96,165,250,0.4);color:var(--ma2);padding:0.9rem 2.2rem;border-radius:8px;font-weight:500;font-size:1rem;text-decoration:none;transition:all 0.2s;display:inline-block}
+.bs:hover{border-color:var(--ma2);background:rgba(96,165,250,0.08)}
+.breadcrumb{font-size:0.78rem;color:var(--gr);margin-bottom:1.5rem}
+.breadcrumb a{color:var(--gr);text-decoration:none}.breadcrumb a:hover{color:var(--ma2)}
+.breadcrumb span{margin:0 0.5rem;opacity:0.4}
+
+/* HERO */
+.page-hero{padding:10rem 2rem 4rem;text-align:center}
+.page-hero .st{font-size:clamp(2rem,5vw,3.2rem)}
+.page-hero .ozet{font-size:1.1rem;color:var(--ya);opacity:0.8;max-width:620px;margin:0 auto;line-height:1.85}
+
+/* SUREC ZAMAN CIZGISI */
+.surec-bolum{background:var(--la2);border-top:1px solid rgba(96,165,250,0.08)}
+.surec-zaman{margin-top:3.5rem;position:relative;padding-left:1rem}
+.surec-zaman::before{content:'';position:absolute;left:27px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--al),var(--ma2),transparent)}
+.surec-adim{display:flex;gap:2rem;margin-bottom:2.8rem;position:relative}
+.surec-no{width:56px;height:56px;border-radius:50%;border:2px solid var(--al);display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;color:var(--al);flex-shrink:0;background:var(--la2);position:relative;z-index:1}
+.surec-icerik{padding-top:0.8rem;flex:1}
+.surec-icerik h3{font-size:1.05rem;font-weight:600;color:var(--be);margin-bottom:0.5rem}
+.surec-icerik p{font-size:0.92rem;color:var(--gr);line-height:1.7}
+.surec-ipucu{display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.8rem;font-size:0.8rem;color:var(--al);opacity:0.85;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.15);padding:0.35rem 0.8rem;border-radius:20px}
+
+/* GUNLUK AKIS */
+.gunluk-bolum{padding:5rem 2rem}
+.gunluk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:3rem}
+.gunluk-kart{background:rgba(255,255,255,0.02);border:1px solid rgba(96,165,250,0.1);border-radius:14px;padding:1.5rem;text-align:center;transition:all 0.3s;position:relative}
+.gunluk-kart:hover{transform:translateY(-4px);border-color:rgba(212,175,55,0.25)}
+.gunluk-kart::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--ma2),transparent);border-radius:14px 14px 0 0}
+.gunluk-ikon{font-size:1.8rem;margin-bottom:0.8rem;display:block}
+.gunluk-sure{font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--al);opacity:0.75;margin-bottom:0.4rem}
+.gunluk-kart h3{font-size:0.9rem;font-weight:600;color:var(--be);margin-bottom:0.3rem}
+.gunluk-kart p{font-size:0.8rem;color:var(--gr);line-height:1.5}
+
+/* ADAPTIF SISTEM */
+.adaptif-bolum{background:var(--la3);border-top:1px solid rgba(96,165,250,0.08)}
+.adaptif-ic{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.adaptif-tablo{display:flex;flex-direction:column;gap:0.8rem}
+.adaptif-satir{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid rgba(96,165,250,0.12);border-radius:10px;overflow:hidden;font-size:0.85rem}
+.adaptif-satir.baslik{background:rgba(96,165,250,0.06);font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gr)}
+.adaptif-hucre{padding:0.8rem 1rem;border-right:1px solid rgba(96,165,250,0.1)}
+.adaptif-hucre:last-child{border-right:none}
+.adaptif-hucre.iyi{color:var(--ma2)}.adaptif-hucre.dikkat{color:var(--al)}.adaptif-hucre.yav{color:var(--gr)}
+.adaptif-metin p{font-size:1rem;color:var(--ya);opacity:0.78;line-height:1.85;margin-bottom:1.2rem}
+.adaptif-ozellik{display:flex;align-items:flex-start;gap:0.8rem;margin-bottom:1rem}
+.adaptif-ikon{width:32px;height:32px;background:rgba(96,165,250,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0}
+.adaptif-yazi h4{font-size:0.9rem;font-weight:600;color:var(--be);margin-bottom:0.2rem}
+.adaptif-yazi p{font-size:0.82rem;color:var(--gr);line-height:1.5;margin-bottom:0;opacity:1}
+
+/* LİSANS */
+.lisans-bolum{padding:5rem 2rem}
+.lisans-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem}
+.lisans-kart{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.12);border-radius:16px;padding:2rem;position:relative}
+.lisans-kart.one-cikan{border-color:var(--al);background:rgba(212,175,55,0.03)}
+.lisans-rozet{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--al);color:var(--la);font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.25rem 1rem;border-radius:20px;white-space:nowrap}
+.lisans-bas{font-size:0.75rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--gr);margin-bottom:0.8rem}
+.lisans-kart h3{font-size:1.1rem;font-weight:700;color:var(--be);margin-bottom:1.2rem}
+.lisans-liste{list-style:none;display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.5rem}
+.lisans-liste li{font-size:0.88rem;color:var(--ya);opacity:0.82;display:flex;align-items:flex-start;gap:0.6rem;line-height:1.5}
+.lisans-liste li::before{content:'v';color:var(--ma2);font-weight:700;flex-shrink:0}
+.lisans-kart a{display:block;text-align:center;padding:0.8rem;border-radius:8px;font-weight:600;font-size:0.9rem;text-decoration:none;transition:all 0.2s;border:1px solid rgba(96,165,250,0.3);color:var(--ma2)}
+.lisans-kart a:hover{background:rgba(96,165,250,0.08)}
+.lisans-kart.one-cikan a{background:var(--al);color:var(--la);border-color:var(--al)}
+.lisans-kart.one-cikan a:hover{background:var(--al2)}
+
+/* PANELLER */
+.panel-bolum{background:var(--la2);border-top:1px solid rgba(96,165,250,0.08)}
+.panel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.panel-kart{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.1);border-radius:16px;padding:2rem;text-align:center;text-decoration:none;display:block;transition:all 0.3s;position:relative;overflow:hidden}
+.panel-kart::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:0;transition:opacity 0.3s}
+.panel-kart.yo::before{background:linear-gradient(to right,var(--al),var(--al2))}
+.panel-kart.og::before{background:linear-gradient(to right,var(--ma2),#a78bfa)}
+.panel-kart.os::before{background:linear-gradient(to right,#34d399,var(--ma2))}
+.panel-kart:hover{transform:translateY(-5px);border-color:rgba(96,165,250,0.25)}.panel-kart:hover::before{opacity:1}
+.panel-ikon{font-size:2rem;margin-bottom:1rem;display:block;animation:fl 3s ease-in-out infinite}
+.panel-kart:nth-child(2) .panel-ikon{animation-delay:0.5s}
+.panel-kart:nth-child(3) .panel-ikon{animation-delay:1s}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.panel-kart h3{font-size:1rem;font-weight:600;color:var(--be);margin-bottom:0.4rem}
+.panel-kart p{font-size:0.85rem;color:var(--gr);line-height:1.5;margin-bottom:1rem}
+.panel-ok{font-size:0.8rem;font-weight:600;color:var(--ma2);opacity:0;transform:translateY(4px);transition:all 0.3s;display:inline-block}
+.panel-kart:hover .panel-ok{opacity:1;transform:translateY(0)}
+
+/* SAYILAR */
+.sayilar{padding:4rem 2rem;border-top:1px solid rgba(96,165,250,0.08);border-bottom:1px solid rgba(96,165,250,0.08)}
+.say-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;max-width:900px;margin:0 auto;text-align:center}
+.say-sayi{font-size:2.5rem;font-weight:700;color:var(--al);line-height:1;margin-bottom:0.5rem}
+.say-acik{font-size:0.85rem;color:var(--gr);line-height:1.5}
+
+/* CTA */
+.cta-blok{padding:6rem 2rem;text-align:center;background:var(--la3);border-top:1px solid rgba(212,175,55,0.1)}
+.cta-blok .st{margin-bottom:0.8rem}
+.cta-blok p{font-size:1rem;color:var(--gr);margin-bottom:2.5rem;max-width:500px;margin-left:auto;margin-right:auto}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.fel-alinti{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(1.2rem,2.5vw,1.7rem);color:var(--be);max-width:620px;margin:0 auto 1rem;line-height:1.55;opacity:0.9}
+.fel-kaynak{font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--al);opacity:0.65;margin-bottom:3rem}
+
+/* FOOTER */
+footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);padding:3rem 2rem 2rem}
+.fic{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem}
+.flo{font-size:1.5rem;font-weight:700;margin-bottom:0.8rem}.flo .s{color:var(--ma2)}.flo .u{color:var(--al)}
+.fsl{font-size:0.85rem;color:var(--gr);opacity:0.7;line-height:1.6}
+.fbas{font-size:0.75rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--al);opacity:0.7;margin-bottom:1rem}
+.fln{list-style:none;display:flex;flex-direction:column;gap:0.5rem}.fln a{font-size:0.88rem;color:var(--gr);text-decoration:none;transition:color 0.2s}.fln a:hover{color:var(--be)}
+.falt{border-top:1px solid rgba(96,165,250,0.08);padding-top:1.5rem;text-align:center;font-size:0.78rem;color:var(--gr);opacity:0.5;max-width:1100px;margin:0 auto}
+
+@media(max-width:900px){.adaptif-ic,.lisans-grid,.panel-grid,.say-grid,.fic{grid-template-columns:1fr}}
+@media(max-width:768px){nav{padding:1rem 1.5rem}.nl,.ng{display:none}.adaptif-satir{grid-template-columns:1fr}.adaptif-hucre{border-right:none;border-bottom:1px solid rgba(96,165,250,0.1)}.adaptif-hucre:last-child{border-bottom:none}}
+</style>
+</head>
+<body>
+<canvas id="uzay"></canvas>
+
+<nav id="nav">
+  <a href="index.html" class="logo"><span class="s">Sin</span><span class="u">Us</span></a>
+  <ul class="nl">
+    <li><a href="index.html">Ana Sayfa</a></li>
+    <li><a href="hakkimizda.html">Hakkimizda</a></li>
+    <li class="aktif">
+      <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi <span class="dd-ok">&#9660;</span></a>
+      <div class="dropdown">
+        <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yas, seviye ve on kosullar</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="neden-almaliyim.html">Neden Almaliyim?<span>Faydalari ve sonuclar</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="platform.html">SinUs Platformu<span>Sistem nasil calisir?</span></a>
+      </div>
+    </li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="sss.html">SSS</a></li>
+    <li><a href="iletisim.html">Iletisim</a></li>
+  </ul>
+  <div class="nr">
+    <div class="ng">
+      <a href="admin.html">Yonetici</a>
+      <a href="ogretmen.html">Ogretmen</a>
+      <a href="ogrenci-panel.html">Ogrenci</a>
+    </div>
+    <a href="index.html#olcum" class="ncta">Ucretsiz Olc</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="c">
+    <p class="breadcrumb"><a href="index.html">Ana Sayfa</a><span>/</span><a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi</a><span>/</span>SinUs Platformu</p>
+    <p class="sl">Platform</p>
+    <h1 class="st">30 gun. Her gun olculur.<br>Her gun ilerler.</h1>
+    <p class="ozet">SinUs, rastgele egzersizler sunmaz. Baslangic noktanizi olcer, size ozel kalibre olur ve her gun sistematik olarak ilerletir. Gelisim grafige dokulur, hic bir sey gozden kacmaz.</p>
+  </div>
+</section>
+
+<!-- SUREC -->
+<section class="surec-bolum">
+  <div class="c-wide">
+    <p class="sl">Adim Adim</p>
+    <h2 class="st">SinUs'ta yolculuk<br>nasil baslar?</h2>
+    <div class="surec-zaman">
+      <div class="surec-adim">
+        <div class="surec-no">01</div>
+        <div class="surec-icerik">
+          <h3>Ucretsiz Olcum</h3>
+          <p>Kayit olmadan, hicbir satin alma yapmadan. Bir metin okursunuz, sistem okuma hizinizi hesaplar, anlama sorulari ile oranini cikarir. Ilk defa gercek bir baslangic noktaniz olur.</p>
+          <span class="surec-ipucu">Gunde 1 kez, kayit gerekmez</span>
+        </div>
+      </div>
+      <div class="surec-adim">
+        <div class="surec-no">02</div>
+        <div class="surec-icerik">
+          <h3>Kayit ve Baslangic Olcumu</h3>
+          <p>Programa kaydolduktan sonra daha kapsamli bir baslangic olcumu yapilir. Bu olcum sisteme sizin baslangiç hizinizi ve anlama oraninizi bildirir. Platform artik size ozel kalibre olmustur.</p>
+          <span class="surec-ipucu">Baslangic verisi grafige islenir</span>
+        </div>
+      </div>
+      <div class="surec-adim">
+        <div class="surec-no">03</div>
+        <div class="surec-icerik">
+          <h3>30 Gunluk Program Baslar</h3>
+          <p>Her gun yaklasik 10 aktivite siralı sekilde acilir. Goz egzersizleri, okuma teknikleri ve dikkat calismalari. Her aktivite minimum 1 dakika, sure dolmadan bir sonrakine gecilmez. Gün atlatma yoktur.</p>
+          <span class="surec-ipucu">Sirali, atlama yok, sistem yonlendirir</span>
+        </div>
+      </div>
+      <div class="surec-adim">
+        <div class="surec-no">04</div>
+        <div class="surec-icerik">
+          <h3>Gunu Bitir</h3>
+          <p>Tum aktiviteler tamamlaninca "Gunu Bitir" butonu aktif olur. Gunun hikayesi tam ekranda acilir, okursunuz, sistem hizinizi olcer. Ardindan 8-10 anlama sorusu sorulur, anlama oraniniz hesaplanir.</p>
+          <span class="surec-ipucu">Hiz + anlama birlikte kaydedilir</span>
+        </div>
+      </div>
+      <div class="surec-adim">
+        <div class="surec-no">05</div>
+        <div class="surec-icerik">
+          <h3>Adaptif Ilerleme</h3>
+          <p>Sistem sonuclara gore ertesi gunun egzersiz hizini otomatik ayarlar. Anlama %70 ve uzeri ise hiz artar. Dusukse dondurulur. Siz hic mudeahale etmeden sistem size gore sekillenir.</p>
+          <span class="surec-ipucu">Anlama %70+ ise hiz %20 artar</span>
+        </div>
+      </div>
+      <div class="surec-adim">
+        <div class="surec-no">06</div>
+        <div class="surec-icerik">
+          <h3>30 Gun Sonrasi</h3>
+          <p>Program tamamlandi. Tamamlanan egzersizler acik kalir, tekrar yapilabilir. Iki secenek sunulur: Ust asama programi veya Pratik Paketi ile ayni seviyede 30 gun daha. 6 aylik lisans boyunca erisim devam eder.</p>
+          <span class="surec-ipucu">Pratik Paketi %50 indirimli</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUNLUK AKIS -->
+<section class="gunluk-bolum">
+  <div class="c-wide">
+    <p class="sl">Gunluk Akis</p>
+    <h2 class="st">Bir gunde neler yapilir?</h2>
+    <p style="color:var(--gr);font-size:0.95rem;max-width:580px">Her gun ortalama 20-30 dakika. Sirayla, sistemin yonlendirmesiyle. Hic dusunmenize gerek yok.</p>
+    <div class="gunluk-grid">
+      <div class="gunluk-kart">
+        <span class="gunluk-ikon">&#128065;</span>
+        <div class="gunluk-sure">2-3 dk</div>
+        <h3>Goz Egzersizi</h3>
+        <p>Goz kasi guclendirme ve gorsel takip</p>
+      </div>
+      <div class="gunluk-kart">
+        <span class="gunluk-ikon">&#128065;</span>
+        <div class="gunluk-sure">2-3 dk</div>
+        <h3>Goz Egzersizi</h3>
+        <p>Gorsel alan genisleme calismalari</p>
+      </div>
+      <div class="gunluk-kart">
+        <span class="gunluk-ikon">&#128218;</span>
+        <div class="gunluk-sure">2-3 dk</div>
+        <h3>Okuma Teknigi</h3>
+        <p>Gunun metni, 1. teknik</p>
+      </div>
+      <div class="gunluk-kart">
+        <span class="gunluk-ikon">&#128218;</span>
+        <div class="gunluk-sure">2-3 dk</div>
+        <h3>Okuma Teknigi</h3>
+        <p>Ayni metin, farkli teknik</p>
+      </div>
+      <div class="gunluk-kart">
+        <span class="gunluk-ikon">&#127919;</span>
+        <div class="gunluk-sure">2-3 dk</div>
+        <h3>Dikkat Calismasi</h3>
+        <p>Odak ve secici dikkat egzersizi</p>
+      </div>
+      <div class="gunluk-kart" style="border-color:rgba(212,175,55,0.3);background:rgba(212,175,55,0.04)">
+        <span class="gunluk-ikon">&#9654;</span>
+        <div class="gunluk-sure" style="color:var(--al)">5-8 dk</div>
+        <h3 style="color:var(--al)">Gunu Bitir</h3>
+        <p>Metin okuma + hiz olcumu + anlama testi</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADAPTIF SİSTEM -->
+<section class="adaptif-bolum">
+  <div class="c-wide">
+    <div class="adaptif-ic">
+      <div>
+        <p class="sl">Adaptif Sistem</p>
+        <h2 class="st">Sistem size gore<br>sekillenir.</h2>
+        <div class="adaptif-tablo">
+          <div class="adaptif-satir baslik">
+            <div class="adaptif-hucre">Durum</div>
+            <div class="adaptif-hucre">Anlama</div>
+            <div class="adaptif-hucre">Sistem Ne Yapar?</div>
+          </div>
+          <div class="adaptif-satir">
+            <div class="adaptif-hucre iyi">Dengeli</div>
+            <div class="adaptif-hucre iyi">%70 ve uzeri</div>
+            <div class="adaptif-hucre iyi">Hizi %20 artirir</div>
+          </div>
+          <div class="adaptif-satir">
+            <div class="adaptif-hucre dikkat">Hiz fazla</div>
+            <div class="adaptif-hucre dikkat">%70 alti</div>
+            <div class="adaptif-hucre dikkat">Hizi dondurur, uyari verir</div>
+          </div>
+          <div class="adaptif-satir">
+            <div class="adaptif-hucre yav">Yavas ilerleme</div>
+            <div class="adaptif-hucre yav">%70 ve uzeri</div>
+            <div class="adaptif-hucre yav">Hizi %10 artirir</div>
+          </div>
+        </div>
+      </div>
+      <div class="adaptif-metin">
+        <p>SinUs'ta hiz ve anlama birbirinden ayri dusunulmez. Sistem her gunun sonunda iki degeri birlikte degerlendirir ve ertesi gun icin en uygun egzersiz hizini belirler.</p>
+        <p>Bu sayede hicbir ogrenci fazla zorlayici veya fazla kolay bir programla karsilasmaz. Sistem surekli dogru noktada tutar.</p>
+        <div class="adaptif-ozellik">
+          <div class="adaptif-ikon">&#128202;</div>
+          <div class="adaptif-yazi"><h4>Gunluk Grafik</h4><p>Her gunun hiz ve anlama verisi sutun grafige islenecek</p></div>
+        </div>
+        <div class="adaptif-ozellik">
+          <div class="adaptif-ikon">&#127774;</div>
+          <div class="adaptif-yazi"><h4>30 Gunluk Yolculuk</h4><p>Baslangic noktasindan 30. gune kadar tum ilerleme gorülür</p></div>
+        </div>
+        <div class="adaptif-ozellik">
+          <div class="adaptif-ikon">&#128196;</div>
+          <div class="adaptif-yazi"><h4>Veli Raporu</h4><p>Veli ogrenci sifresiyle sisteme girip her seyi gorebilir</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LİSANS MODELİ -->
+<section class="lisans-bolum">
+  <div class="c-wide">
+    <p class="sl">Lisans</p>
+    <h2 class="st">6 ay erisim,<br>30 gun program.</h2>
+    <div class="lisans-grid">
+      <div class="lisans-kart">
+        <div class="lisans-bas">Bireysel</div>
+        <h3>Kendi Hizinda Ilerle</h3>
+        <ul class="lisans-liste">
+          <li>6 aylik lisans erisimi</li>
+          <li>30 gunluk adaptif program</li>
+          <li>Goz, okuma ve dikkat egzersizleri</li>
+          <li>Gunluk hiz ve anlama olcumu</li>
+          <li>Gelisim grafigi</li>
+          <li>30 gun sonrasi Pratik Paketi imkani</li>
+        </ul>
+        <a href="index.html#olcum">Once Ucretsiz Olc</a>
+      </div>
+      <div class="lisans-kart one-cikan">
+        <div class="lisans-rozet">En Cok Tercih Edilen</div>
+        <div class="lisans-bas">Kocluk Programi</div>
+        <h3>Uzman Esliginde Ilerle</h3>
+        <ul class="lisans-liste">
+          <li>Bireysel plandaki her sey</li>
+          <li>Sertifikali SinUs egitmeni esliginde</li>
+          <li>Haftada 2 birebir seans</li>
+          <li>Kisisellestirilmis ilerleme takibi</li>
+          <li>Ogretmen panel erisimi</li>
+          <li>Veli gelisim raporu</li>
+        </ul>
+        <a href="iletisim.html">Kocluk Programina Basvur</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANELLER -->
+<section class="panel-bolum">
+  <div class="c-wide">
+    <p class="sl">Paneller</p>
+    <h2 class="st">Her kullanici icin<br>ayri bir giris.</h2>
+    <div class="panel-grid">
+      <a href="admin.html" class="panel-kart yo">
+        <span class="panel-ikon">&#9733;</span>
+        <h3>Yonetici Paneli</h3>
+        <p>Mufredrat yonetimi, icerik duzenleme, tum sistemin kontrolu</p>
+        <span class="panel-ok">Giris Yap &rarr;</span>
+      </a>
+      <a href="ogretmen.html" class="panel-kart og">
+        <span class="panel-ikon">&#9679;</span>
+        <h3>Ogretmen Paneli</h3>
+        <p>Ogrenci takibi, kocluk, ilerleme raporlari, birebir yonlendirme</p>
+        <span class="panel-ok">Giris Yap &rarr;</span>
+      </a>
+      <a href="ogrenci-panel.html" class="panel-kart os">
+        <span class="panel-ikon">&#9650;</span>
+        <h3>Ogrenci Paneli</h3>
+        <p>Gunluk program, egzersizler, gelisim grafigi, gunun hikayesi</p>
+        <span class="panel-ok">Giris Yap &rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- SAYILAR -->
+<section class="sayilar">
+  <div class="say-grid">
+    <div>
+      <div class="say-sayi">30</div>
+      <div class="say-acik">Gunluk sistematik<br>program</div>
+    </div>
+    <div>
+      <div class="say-sayi">10</div>
+      <div class="say-acik">Gunluk aktivite<br>ortalama</div>
+    </div>
+    <div>
+      <div class="say-sayi">6 ay</div>
+      <div class="say-acik">Lisans suresi<br>tam erisim</div>
+    </div>
+    <div>
+      <div class="say-sayi">%70</div>
+      <div class="say-acik">Anlama esigi<br>adaptif sistem</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-blok">
+  <div class="c">
+    <p class="fel-alinti">"Her zihin kesfedilmeyi bekleyen bir evrendir."</p>
+    <p class="fel-kaynak">— SinUs Marka Felsefesi</p>
+    <h2 class="st">Simdi baslayın.</h2>
+    <p>Ucretsiz olcum ile nerede oldugunuzu gorun. Kayit gerekmez.</p>
+    <div class="cta-btns">
+      <a href="index.html#olcum" class="bp">Ucretsiz Olcumu Basla</a>
+      <a href="iletisim.html" class="bs">Bize Ulasin</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fic">
+    <div>
+      <div class="flo"><span class="s">Sin</span><span class="u">Us</span></div>
+      <p class="fsl">Okuma Anlama Muhendisligi<br>Her zihin kesfedilmeyi bekleyen bir evrendir.</p>
+    </div>
+    <div>
+      <div class="fbas">Platform</div>
+      <ul class="fln">
+        <li><a href="hizli-okuma-nedir.html">Hizli Okuma Nedir?</a></li>
+        <li><a href="kimler-alabilir.html">Kimler Alabilir?</a></li>
+        <li><a href="neden-almaliyim.html">Neden Almaliyim?</a></li>
+        <li><a href="platform.html">SinUs Platformu</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="sss.html">SSS</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="fbas">Kurumsal</div>
+      <ul class="fln">
+        <li><a href="hakkimizda.html">Hakkimizda</a></li>
+        <li><a href="admin.html">Yonetici Paneli</a></li>
+        <li><a href="ogretmen.html">Ogretmen Paneli</a></li>
+        <li><a href="ogrenci-panel.html">Ogrenci Paneli</a></li>
+        <li><a href="iletisim.html">Iletisim</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="falt">&copy; 2026 SinUs &middot; Tum haklari saklidir &middot; Izmir, Turkiye</div>
+</footer>
+
+<script>
+const cv=document.getElementById('uzay');
+const cx=cv.getContext('2d');
+function rsz(){cv.width=window.innerWidth;cv.height=window.innerHeight}
+rsz();window.addEventListener('resize',()=>{rsz();initS()});
+let st=[],sh=[],fr=0;
+function initS(){st=[];for(let i=0;i<180;i++)st.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.4+0.3,ph:Math.random()*Math.PI*2,sp:Math.random()*0.004+0.001})}
+initS();
+function spwn(){if(Math.random()<0.01){const l=Math.random()<0.5;sh.push({x:l?-20:cv.width+20,y:Math.random()*cv.height*0.5,vx:(l?1:-1)*(Math.random()*7+5),vy:Math.random()*3+2,len:Math.random()*100+50,a:1})}}
+function drw(){cx.clearRect(0,0,cv.width,cv.height);fr++;
+[[0.2,0.3,220],[0.8,0.5,260],[0.5,0.1,200]].forEach(([rx,ry,h])=>{const x=rx*cv.width,y=ry*cv.height,r=160;const g=cx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'hsla('+h+',60%,45%,0.035)');g.addColorStop(1,'transparent');cx.fillStyle=g;cx.beginPath();cx.arc(x,y,r,0,Math.PI*2);cx.fill()});
+st.forEach(s=>{const a=(Math.sin(fr*s.sp+s.ph)+1)/2*0.75+0.1;cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle='rgba(255,255,255,'+a+')';cx.fill()});
+spwn();sh=sh.filter(s=>s.a>0.02);
+sh.forEach(s=>{const d=Math.hypot(s.vx,s.vy);const tx=s.x-s.vx*(s.len/d);const ty=s.y-s.vy*(s.len/d);const g=cx.createLinearGradient(tx,ty,s.x,s.y);g.addColorStop(0,'transparent');g.addColorStop(0.7,'rgba(212,175,55,'+(s.a*0.35)+')');g.addColorStop(1,'rgba(255,255,255,'+s.a+')');cx.strokeStyle=g;cx.lineWidth=1.6;cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(s.x,s.y);cx.stroke();s.x+=s.vx;s.y+=s.vy;s.a-=0.016});
+requestAnimationFrame(drw)}
+drw();
+window.addEventListener('scroll',()=>{document.getElementById('nav').style.borderBottomColor=window.scrollY>60?'rgba(212,175,55,0.25)':'rgba(212,175,55,0.12)'});
+</script>
+</body>
+</html>

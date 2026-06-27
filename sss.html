@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sik Sorulan Sorular - SinUs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--la:#0a1628;--la2:#111f3a;--la3:#162444;--ma:#2563a8;--ma2:#60a5fa;--al:#d4af37;--al2:#f0d060;--be:#f0f4ff;--gr:#8899bb;--ya:#c8d8f0}
+html{scroll-behavior:smooth}
+body{background:var(--la);color:var(--ya);font-family:'Inter',sans-serif;font-size:16px;line-height:1.7;overflow-x:hidden}
+#uzay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+section{position:relative;z-index:1;padding:6rem 2rem}
+.c{max-width:780px;margin:0 auto}
+.c-wide{max-width:1100px;margin:0 auto}
+.sl{font-size:0.72rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--al);margin-bottom:1rem}
+.st{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--be);line-height:1.2;margin-bottom:1.5rem}
+.bp{background:var(--al);color:var(--la);padding:0.9rem 2.2rem;border-radius:8px;font-weight:700;font-size:1rem;text-decoration:none;transition:all 0.2s;display:inline-block}
+.bp:hover{background:var(--al2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,175,55,0.3)}
+.bs{border:1px solid rgba(96,165,250,0.4);color:var(--ma2);padding:0.9rem 2.2rem;border-radius:8px;font-weight:500;font-size:1rem;text-decoration:none;transition:all 0.2s;display:inline-block}
+.bs:hover{border-color:var(--ma2);background:rgba(96,165,250,0.08)}
+.breadcrumb{font-size:0.78rem;color:var(--gr);margin-bottom:1.5rem}
+.breadcrumb a{color:var(--gr);text-decoration:none}.breadcrumb a:hover{color:var(--ma2)}
+.breadcrumb span{margin:0 0.5rem;opacity:0.4}
+.page-hero{padding:10rem 2rem 4rem;text-align:center}
+.page-hero .st{font-size:clamp(2rem,5vw,3.2rem)}
+.page-hero .ozet{font-size:1.1rem;color:var(--ya);opacity:0.8;max-width:620px;margin:0 auto;line-height:1.85}
+footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);padding:3rem 2rem 2rem}
+.fic{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem}
+.flo{font-size:1.5rem;font-weight:700;margin-bottom:0.8rem}.flo .s{color:var(--ma2)}.flo .u{color:var(--al)}
+.fsl{font-size:0.85rem;color:var(--gr);opacity:0.7;line-height:1.6}
+.fbas{font-size:0.75rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--al);opacity:0.7;margin-bottom:1rem}
+.fln{list-style:none;display:flex;flex-direction:column;gap:0.5rem}.fln a{font-size:0.88rem;color:var(--gr);text-decoration:none;transition:color 0.2s}.fln a:hover{color:var(--be)}
+.falt{border-top:1px solid rgba(96,165,250,0.08);padding-top:1.5rem;text-align:center;font-size:0.78rem;color:var(--gr);opacity:0.5;max-width:1100px;margin:0 auto}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 2.5rem;background:rgba(10,22,40,0.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(212,175,55,0.12);transition:border-color 0.3s}
+.logo{font-size:1.5rem;font-weight:700;text-decoration:none}.logo .s{color:var(--ma2)}.logo .u{color:var(--al)}
+.nl{display:flex;gap:0.2rem;list-style:none;align-items:center}
+.nl>li{position:relative}
+.nl>li>a{color:var(--gr);text-decoration:none;font-size:0.88rem;transition:color 0.2s;padding:0.5rem 0.9rem;border-radius:6px;display:flex;align-items:center;gap:0.3rem}
+.nl>li>a:hover{color:var(--be);background:rgba(255,255,255,0.04)}
+.nl>li.aktif>a{color:var(--be)}
+.dd-ok{font-size:0.6rem;transition:transform 0.2s;opacity:0.6}
+.nl>li:hover .dd-ok{transform:rotate(180deg)}
+.dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(10,22,40,0.97);border:1px solid rgba(96,165,250,0.15);border-radius:12px;padding:0.6rem;min-width:230px;opacity:0;visibility:hidden;transition:all 0.2s;backdrop-filter:blur(20px);box-shadow:0 20px 40px rgba(0,0,0,0.5)}
+.nl>li:hover .dropdown{opacity:1;visibility:visible;top:calc(100% + 4px)}
+.dropdown a{display:block;color:var(--ya);text-decoration:none;font-size:0.85rem;padding:0.65rem 1rem;border-radius:8px;transition:all 0.15s;white-space:nowrap}
+.dropdown a:hover{background:rgba(96,165,250,0.08);color:var(--be)}
+.dropdown a span{display:block;font-size:0.72rem;color:var(--gr);margin-top:0.1rem;font-weight:400}
+.dropdown-sep{height:1px;background:rgba(96,165,250,0.1);margin:0.4rem 0}
+.nr{display:flex;align-items:center;gap:0.8rem}
+.ng{display:flex;gap:0.4rem}.ng a{font-size:0.76rem;font-weight:500;padding:0.38rem 0.85rem;border-radius:5px;text-decoration:none;border:1px solid rgba(96,165,250,0.25);color:var(--ma2);transition:all 0.2s}.ng a:hover{background:rgba(96,165,250,0.1)}
+.ncta{background:var(--al);color:var(--la);padding:0.5rem 1.3rem;border-radius:6px;font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s}.ncta:hover{background:var(--al2);transform:translateY(-1px)}
+.sss-bolum{padding:3rem 2rem 6rem}
+.sss-kategori{margin-bottom:3.5rem}
+.sss-kat-bas{font-size:0.72rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--al);margin-bottom:1.5rem;padding-bottom:0.8rem;border-bottom:1px solid rgba(212,175,55,0.15)}
+.sss-item{border:1px solid rgba(96,165,250,0.1);border-radius:12px;margin-bottom:0.8rem;overflow:hidden;transition:border-color 0.2s}
+.sss-item:hover{border-color:rgba(96,165,250,0.25)}
+.sss-soru{width:100%;background:rgba(255,255,255,0.02);border:none;padding:1.3rem 1.5rem;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;transition:background 0.2s}
+.sss-soru:hover{background:rgba(255,255,255,0.04)}
+.sss-soru-metin{font-size:0.97rem;font-weight:600;color:var(--be);line-height:1.4}
+.sss-ikon{font-size:0.8rem;color:var(--al);flex-shrink:0;transition:transform 0.3s;opacity:0.7}
+.sss-item.acik .sss-ikon{transform:rotate(180deg)}
+.sss-cevap{display:none;padding:0 1.5rem 1.3rem;font-size:0.92rem;color:var(--ya);opacity:0.8;line-height:1.8}
+.sss-item.acik .sss-cevap{display:block}
+.sss-cevap a{color:var(--ma2);text-decoration:none}.sss-cevap a:hover{text-decoration:underline}
+.cta-blok{padding:5rem 2rem;text-align:center;background:var(--la3);border-top:1px solid rgba(212,175,55,0.1)}
+.cta-blok .st{margin-bottom:0.8rem}
+.cta-blok p{font-size:1rem;color:var(--gr);margin-bottom:2.5rem}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+@media(max-width:768px){nav{padding:1rem 1.5rem}.nl,.ng{display:none}.fic{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="uzay"></canvas>
+<nav id="nav">
+  <a href="index.html" class="logo"><span class="s">Sin</span><span class="u">Us</span></a>
+  <ul class="nl">
+    <li><a href="index.html">Ana Sayfa</a></li>
+    <li><a href="hakkimizda.html">Hakkimizda</a></li>
+    <li>
+      <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi <span class="dd-ok">&#9660;</span></a>
+      <div class="dropdown">
+        <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yas, seviye ve on kosullar</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="neden-almaliyim.html">Neden Almaliyim?<span>Faydalari ve sonuclar</span></a>
+        <div class="dropdown-sep"></div>
+        <a href="platform.html">SinUs Platformu<span>Sistem nasil calisir?</span></a>
+      </div>
+    </li>
+    <li><a href="blog.html">Blog</a></li>
+    <li  class='aktif'><a href="sss.html">SSS</a></li>
+    <li><a href="iletisim.html">Iletisim</a></li>
+  </ul>
+  <div class="nr">
+    <div class="ng">
+      <a href="admin.html">Yonetici</a>
+      <a href="ogretmen.html">Ogretmen</a>
+      <a href="ogrenci-panel.html">Ogrenci</a>
+    </div>
+    <a href="index.html#olcum" class="ncta">Ucretsiz Olc</a>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="c">
+    <p class="breadcrumb"><a href="index.html">Ana Sayfa</a><span>/</span>Sik Sorulan Sorular</p>
+    <p class="sl">SSS</p>
+    <h1 class="st">Aklinizdaki sorulara<br>cevaplar burada.</h1>
+    <p class="ozet">En sik sorulan sorulari derledik. Cevabini bulamazsan <a href="iletisim.html" style="color:var(--al)">bize ulasin</a>, 24 saat icinde donelim.</p>
+  </div>
+</section>
+
+<section class="sss-bolum">
+  <div class="c">
+
+    <div class="sss-kategori">
+      <div class="sss-kat-bas">Platform Hakkinda</div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">SinUs nedir, nasil bir platformdur?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">SinUs, okuma hizi, anlama derinligi, dikkat ve odak becerilerini birlikte gelistiren bilimsel temelli bir zihinsel gelisim platformudur. 30 gunluk adaptif bir program sunar; her gun egzersizler tamamlanir, gunun sonunda okuma hizi ve anlama orani olculur ve sistem ertesi gunu buna gore kalibre eder.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Programa nasil kayit olabilirim?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Once <a href="index.html#olcum">ucretsiz olcumu</a> yaparak baslangic noktanizi belirleyebilirsiniz. Ardindan bireysel program veya kocluk programi secerek kayit isleminizi tamamlayabilirsiniz. Detaylar icin <a href="iletisim.html">iletisim sayfasindan</a> bize ulasabilirsiniz.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Lisans ne kadar sure gecerli?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">SinUs lisansi, aktivasyon tarihinden itibaren 6 ay gecerlidir. 30 gunluk program bu 6 ay icinde tamamlanir. Ara verilen gunler sure kapsamina dahildir; program uzayabilir ama 6 ay dolunca erisim kapanir.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">30 gunu bitirdikten sonra ne olur?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Program tamamlandiginda iki secenek sunulur: Ust asamayi satin alarak yeni bir programa baslayabilirsiniz ya da ayni seviyede farkli metinlerle 30 gun daha devam eden Pratik Paketi'ni alabilirsiniz. Pratik Paketi mevcut lisans fiyatinin yuzde ellisi kadardir ve kalan 6 aylik sureye eklenir.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Kac cihazdan giris yapilabilir?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Her ogrenci hesabi maksimum 3 farkli cihazdan kullanilabilir. Bu sinir hesabin baska kisiler tarafindan kullanilmasini onlemek icin konulmustur.</div>
+      </div>
+    </div>
+
+    <div class="sss-kategori">
+      <div class="sss-kat-bas">Egzersizler ve Program</div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Gunluk program ne kadar surer?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Gunluk program ortalama 20-30 dakika surer. Her aktivite minimum 1 dakikadir ve sure dolmadan bir sonraki aktiviteye gecilmez. Gun sonu okuma ve anlama testi dahil toplam sure genellikle bu aralikta kalir.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Bir gun atlarsam ne olur?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Gun atlamak programi bozmaz; bir sonraki girisinizdeki gun devam eder. Ancak atlatilan gunler 6 aylik lisans suresinden duser. Duzzenlilik her seyden onemidir; kisa sureli aralar verilebilir ama uzun molalar programa zarar verir.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Egzersizleri tekrar yapabilir miyim?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Evet. Tamamlanan gunlerin egzersizleri acik kalir ve istediginiz zaman tekrar yapilabilir. Sadece yeni gun kilidi, bir onceki gun tamamlanmadan acilmaz.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Anlama oranim dusukse ne olur?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Anlama orani yuzde yetminin altina dustugunde sistem egzersiz hizini dondurur ve bir uyari gosterir. Bu, hizin anlayisini gectigini gosteriyor demektir. Sistem dengeli ilerlemeyi onceliklendirir; anlama olmadan hiz anlamsizdir.</div>
+      </div>
+    </div>
+
+    <div class="sss-kategori">
+      <div class="sss-kat-bas">Hedef Kitle</div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Kac yasindan itibaren kullanilabilir?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Akici okuyabilen herkes SinUs'u kullanabilir. Genellikle 9 yas ve uzeri ogrencilere uygundur. Ilkokul son sinif ve uzeri ogrenciler icin idealdir. Yetiskinler de dahil olmak uzere her yas grubundan kullanici faydalanabilir.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Daha once hizli okuma egitimi almak gerekiyor mu?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Hayir. SinUs herkesin baslangic noktasini olcer ve sifirdan baslar. Onceki deneyim avantaj saglar ama on kosul degildir. Sistem tam size gore kalibre olur.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Dikkat eksikligi veya disleksi olan cocuklar kullanabilir mi?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Bu durumlarda kocluk programi onerilir. Birebir ogretmen esliginde yapilan egzersizler cok daha etkili sonuclar verir. Bireysel programin kendi basina yeterli olmayabileceği bu durumlarda ogretmen yonlendirmesi kritik oneme sahiptir.</div>
+      </div>
+    </div>
+
+    <div class="sss-kategori">
+      <div class="sss-kat-bas">Ogretmen ve Veli</div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Veli cocugunun ilerlemesini gorebilir mi?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Evet. Veli, ogrencinin sifresiyle sisteme girebilir ve tum gelisim grafiklerini, gunluk okuma hizi ile anlama orani verilerini, sisteme giris sikligi ve duzzenlilik raporlarini gorebilir. Ayri bir veli paneli gerekmez.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Ogretmen olarak SinUs'u nasil kullanabilirim?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Ogretmenler basvuru formu doldurarak SinUs egitmeni olmak icin basvurabilir. Basari ile tamamlanan Zoom gorusmesi ve sozlesme imzalanmasinin ardindan ogretmen paneli acilir. Ogretmen kendi ogrencilerini takip edebilir, kocluk yapabilir ve lisans satabilir. Detaylar icin <a href="iletisim.html">bize ulasin</a>.</div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-soru" onclick="togSss(this)">
+          <span class="sss-soru-metin">Kocluk programi bireysel programdan ne kadar daha etkili?</span>
+          <span class="sss-ikon">&#9660;</span>
+        </button>
+        <div class="sss-cevap">Sahada edindigimiz deneyime gore kocluk esliginde yapilan program cok daha hizli ve kalici sonuclar verir. Ogretmen dogru teknigi gosterebildigi, hatali alisaknliklari duzzeltebildigi ve motivasyonu canli tutabilecegi icin ilerleme belirgin sekilde daha hizli olur.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="cta-blok">
+  <div class="c">
+    <h2 class="st">Sorunuz mu var?</h2>
+    <p>Burada cevap bulamadiysaniz bize yazin. En kisa surede geri donelim.</p>
+    <div class="cta-btns">
+      <a href="iletisim.html" class="bp">Bize Ulasin</a>
+      <a href="index.html#olcum" class="bs">Ucretsiz Olcumu Basla</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fic">
+    <div>
+      <div class="flo"><span class="s">Sin</span><span class="u">Us</span></div>
+      <p class="fsl">Okuma Anlama Muhendisligi<br>Her zihin kesfedilmeyi bekleyen bir evrendir.</p>
+    </div>
+    <div>
+      <div class="fbas">Platform</div>
+      <ul class="fln">
+        <li><a href="hizli-okuma-nedir.html">Hizli Okuma Nedir?</a></li>
+        <li><a href="kimler-alabilir.html">Kimler Alabilir?</a></li>
+        <li><a href="neden-almaliyim.html">Neden Almaliyim?</a></li>
+        <li><a href="platform.html">SinUs Platformu</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="sss.html">SSS</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="fbas">Kurumsal</div>
+      <ul class="fln">
+        <li><a href="hakkimizda.html">Hakkimizda</a></li>
+        <li><a href="admin.html">Yonetici Paneli</a></li>
+        <li><a href="ogretmen.html">Ogretmen Paneli</a></li>
+        <li><a href="ogrenci-panel.html">Ogrenci Paneli</a></li>
+        <li><a href="iletisim.html">Iletisim</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="falt">&copy; 2026 SinUs &middot; Tum haklari saklidir &middot; Izmir, Turkiye</div>
+</footer>
+
+<script>
+const cv=document.getElementById('uzay');
+const cx=cv.getContext('2d');
+function rsz(){cv.width=window.innerWidth;cv.height=window.innerHeight}
+rsz();window.addEventListener('resize',()=>{rsz();initS()});
+let st=[],sh=[],fr=0;
+function initS(){st=[];for(let i=0;i<180;i++)st.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.4+0.3,ph:Math.random()*Math.PI*2,sp:Math.random()*0.004+0.001})}
+initS();
+function spwn(){if(Math.random()<0.01){const l=Math.random()<0.5;sh.push({x:l?-20:cv.width+20,y:Math.random()*cv.height*0.5,vx:(l?1:-1)*(Math.random()*7+5),vy:Math.random()*3+2,len:Math.random()*100+50,a:1})}}
+function drw(){cx.clearRect(0,0,cv.width,cv.height);fr++;
+[[0.2,0.3,220],[0.8,0.5,260],[0.5,0.1,200]].forEach(([rx,ry,h])=>{const x=rx*cv.width,y=ry*cv.height,r=160;const g=cx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'hsla('+h+',60%,45%,0.035)');g.addColorStop(1,'transparent');cx.fillStyle=g;cx.beginPath();cx.arc(x,y,r,0,Math.PI*2);cx.fill()});
+st.forEach(s=>{const a=(Math.sin(fr*s.sp+s.ph)+1)/2*0.75+0.1;cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle='rgba(255,255,255,'+a+')';cx.fill()});
+spwn();sh=sh.filter(s=>s.a>0.02);
+sh.forEach(s=>{const d=Math.hypot(s.vx,s.vy);const tx=s.x-s.vx*(s.len/d);const ty=s.y-s.vy*(s.len/d);const g=cx.createLinearGradient(tx,ty,s.x,s.y);g.addColorStop(0,'transparent');g.addColorStop(0.7,'rgba(212,175,55,'+(s.a*0.35)+')');g.addColorStop(1,'rgba(255,255,255,'+s.a+')');cx.strokeStyle=g;cx.lineWidth=1.6;cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(s.x,s.y);cx.stroke();s.x+=s.vx;s.y+=s.vy;s.a-=0.016});
+requestAnimationFrame(drw)}
+drw();
+</script>
+<script>
+function togSss(btn){
+  const item = btn.closest('.sss-item');
+  const wasOpen = item.classList.contains('acik');
+  document.querySelectorAll('.sss-item.acik').forEach(el => el.classList.remove('acik'));
+  if(!wasOpen) item.classList.add('acik');
+}
+window.addEventListener('scroll',()=>{document.getElementById('nav').style.borderBottomColor=window.scrollY>60?'rgba(212,175,55,0.25)':'rgba(212,175,55,0.12)'});
+</script>
+</body>
+</html>
