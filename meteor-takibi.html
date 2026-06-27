@@ -520,7 +520,17 @@ function drawReveal(correct) {
   });
 }
 
+function sinusTamamlandiSinyalGonder(){
+  try{
+    const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
+    if(b&&b.tamamlandiMi===false){
+      b.tamamlandiMi=true;b.puan=15;
+      localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+    }
+  }catch(e){}
+}
 function showResult(correct,pts) {
+  sinusTamamlandiSinyalGonder();
   showScreen('screenResult');
   document.getElementById('rIcon').textContent=correct?'🎉':'☄️';
   document.getElementById('rTitle').textContent=correct?'DOĞRU!':'KAÇIRDIN!';
