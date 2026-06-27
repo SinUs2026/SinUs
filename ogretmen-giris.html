@@ -55,7 +55,8 @@ async function girisYap(){
     var r=await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?kullanici_adi=eq.'+encodeURIComponent(k)+'&rol=eq.ogretmen&aktif=eq.true&select=*',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     var d=await r.json();
     if(d&&d.length>0&&d[0].sifre===s){
-      sessionStorage.setItem('sinus_kullanici',d[0].kullanici_adi);
+      sessionStorage.setItem('sinus_kullanici_adi',d[0].kullanici_adi);
+      sessionStorage.setItem('sinus_kullanici_rol','ogretmen');
       localStorage.setItem('sinus_kullanici_obj',JSON.stringify(d[0]));
       basari.innerText='Giriş başarılı! Yönlendiriliyorsunuz...';
       basari.style.display='block';
