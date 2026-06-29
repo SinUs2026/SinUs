@@ -580,7 +580,10 @@ async function sonucKaydet(hiz,anlamaOrani,dogru,toplam){
         anlama_orani:anlamaOrani,
         dogru_sayisi:dogru,
         toplam_soru:toplam,
-        sure_dk:window._sure_dk||0
+        sure_dk:window._sure_dk||0,
+        tamamlanan_gun:gun,
+        kazanilan_puan:15,
+        tarih:new Date().toISOString().split('T')[0]
       })
     });
     // Öğrencinin okuma hızını güncelle
