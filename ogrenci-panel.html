@@ -598,6 +598,68 @@ function gunuBitirKapat(){
 
 // Başlat
 panelYukle();
+yolculukYukle();
+
+async function yolculukYukle(){
+  if(!ogrenci) { setTimeout(yolculukYukle, 500); return; }
+  const sarici = document.getElementById('yolculukSarici');
+  sarici.innerHTML = '';
+  let performans = {};
+  try {
+    const res = await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi)+'&asama=eq.'+(ogrenci.asama||1),{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const data = await res.json();
+    data.forEach(d=>{ performans[d.gun]=d; });
+  } catch(e){}
+
+  const mevcutGun = ogrenci.mevcut_gun||1;
+  for(let g=1; g<=30; g++){
+    const p = performans[g];
+    const tamamlandi = p && p.okuma_hizi;
+    const bugun = g===mevcutGun;
+
+    // Daire
+    const kutu = document.createElement('div');
+    kutu.style.cssText = 'display:flex;align-items:center;';
+
+    const daire = document.createElement('div');
+    daire.style.cssText = `
+      width:72px;text-align:center;
+    `;
+    daire.innerHTML = `
+      <div style="
+        width:52px;height:52px;border-radius:50%;margin:0 auto 6px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        font-size:0.7rem;font-weight:700;
+        ${tamamlandi
+          ? 'background:#0a1628;color:white;'
+          : bugun
+            ? 'background:#eff6ff;color:#2563a8;border:2px solid #2563a8;'
+            : 'background:#f1f5f9;color:#94a3b8;border:2px dashed #e2e8f0;'
+        }
+      ">
+        <span style="font-size:0.65rem;opacity:0.7">Gün</span>
+        <span style="font-size:0.85rem">${g}</span>
+      </div>
+      ${tamamlandi ? `
+        <div style="font-size:0.62rem;color:#0a1628;font-weight:600;line-height:1.4">
+          ${p.okuma_hizi} kpm<br>%${p.anlama_orani}
+        </div>` : `<div style="font-size:0.62rem;color:#cbd5e1">—</div>`}
+    `;
+    kutu.appendChild(daire);
+
+    // Ok (son hariç)
+    if(g<30){
+      const ok = document.createElement('div');
+      ok.style.cssText = 'color:#cbd5e1;font-size:0.8rem;margin-bottom:18px;flex-shrink:0;';
+      ok.textContent = '→';
+      kutu.appendChild(ok);
+    }
+
+    sarici.appendChild(kutu);
+  }
+}
 </script>
 
 <!-- GÜNÜ BİTİR OVERLAY -->
@@ -651,5 +713,15 @@ panelYukle();
     </div>
   </div>
 </div>
+<!-- GELİŞİM YOLCULUĞU -->
+<div style="max-width:1100px;margin:2rem auto;padding:0 5%">
+  <div style="background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05)">
+    <div style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.5rem">🗺️ Gelişim Yolculuğu</div>
+    <div style="overflow-x:auto;padding-bottom:1rem">
+      <div id="yolculukSarici" style="display:flex;align-items:flex-start;gap:0;min-width:max-content"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
