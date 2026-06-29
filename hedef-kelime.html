@@ -112,7 +112,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
       </div>
     </div>
     <button class="basla-btn" id="baslaBtn" onclick="oyunuBaslat()" disabled>▶ BAŞLAT</button>
-    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+    <a id="backBtn" href="#" class="geri-btn" onclick="sinusTamamlandiSinyalGonderVeDon()">← Panele Dön</a>
   </div>
 
   <!-- OYUN -->
@@ -158,7 +158,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 
 <script>
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 (function(){const from=new URLSearchParams(window.location.search).get('from');document.getElementById('backBtn').href=from==='admin'?'admin.html':'ogrenci-panel.html';})();
 
 const G={metinler:[],seciliMetin:null,hedefKelime:'',dogruSayi:0,dogru:0,yanlis:0,puan:0,tur:1,filtre:''};
@@ -237,6 +237,12 @@ function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.lo
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screenOyun').classList.contains('active'))cevapKontrol();});
 metinleriYukle();
+function sinusTamamlandiSinyalGonderVeDon(){
+  try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}
+  const from=new URLSearchParams(window.location.search).get('from');
+  setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);
+  return false;
+}
 </script>
 </body>
 </html>
