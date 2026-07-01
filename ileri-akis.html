@@ -193,7 +193,7 @@ body::before {
     </div>
 
     <button class="basla-btn" id="baslaBtn" onclick="oyunuBaslat()" disabled>▶ BAŞLAT</button>
-    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+    <a id="backBtn" href="#" class="geri-btn" onclick="sinusTamamlandiSinyalGonderVeDon()">← Panele Dön</a>
   </div>
 
   <!-- OYUN -->
@@ -398,6 +398,7 @@ function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.lo
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
 metinleriYukle();
+function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);}
 </script>
 </body>
 </html>
