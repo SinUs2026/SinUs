@@ -238,7 +238,8 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 
 (function() {
   const from = new URLSearchParams(window.location.search).get('from');
-  document.getElementById('backBtn').href = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  document.getElementById('backBtn').href='#';
+document.getElementById('backBtn').addEventListener('click',function(e){e.preventDefault();sinusTamamlandiSinyalGonderVeDon();});
 })();
 
 const G = {
