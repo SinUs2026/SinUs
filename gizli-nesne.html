@@ -309,6 +309,7 @@ function oyunuBitir(){
   document.getElementById('screenSonuc').style.display='flex';
 }
 
+function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);}
 function menuye(){
   clearInterval(G.sureInt);
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
