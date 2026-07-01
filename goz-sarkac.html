@@ -44,6 +44,14 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .btn-row{display:flex;gap:10px;justify-content:center;}
 .btn-play{flex:1;max-width:200px;padding:13px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;}
 .btn-back{flex:1;max-width:160px;padding:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;}
+.tam-ekran-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.3);border-radius:8px;color:var(--accent);font-size:1rem;cursor:pointer;font-family:'Nunito',sans-serif;z-index:10;display:flex;align-items:center;justify-content:center;}
+.tam-ekran-btn:hover{background:rgba(0,212,255,0.22);}
+body.tam-ekran-modu #screenEgzersiz{padding:0;}
+body.tam-ekran-modu .alan{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;border-radius:0;margin:0;z-index:1;}
+body.tam-ekran-modu .egzersiz-hud{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:460px;width:90%;background:rgba(6,13,26,0.75);backdrop-filter:blur(4px);}
+body.tam-ekran-modu .sure-bar-wrap{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:20;max-width:460px;width:90%;}
+body.tam-ekran-modu .mesaj{position:fixed;top:96px;left:0;right:0;z-index:20;}
+body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(6,13,26,0.75);border-radius:10px;padding:10px 20px;}
 </style>
 </head>
 <body>
@@ -92,6 +100,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
     </div>
     <div class="sure-bar-wrap"><div class="sure-bar"><div class="sure-bar-ic" id="sureIc" style="width:100%"></div></div></div>
     <div class="alan" id="alan">
+      <button class="tam-ekran-btn" onclick="tamEkranToggle()" title="Tam Ekran">⛶</button>
       <div class="sarkac-ip" id="sarkacIp"></div>
       <div class="nokta" id="nokta"></div>
     </div>
@@ -131,7 +140,7 @@ function baslat(){
   G.baslangic=Date.now();G.t=0;
   document.getElementById('hudHiz').textContent=G.hiz+'/10';
   document.getElementById('hudSure').textContent=G.sure+'sn';
-  showScreen('screenEgzersiz');
+  showScreen('screenEgzersiz');tamEkranGirmeyeCalis();
   const alan=document.getElementById('alan');
   const W=alan.offsetWidth||600, H=alan.offsetHeight||340;
   const ip=document.getElementById('sarkacIp');
@@ -159,12 +168,30 @@ function baslat(){
   }
   G.animId=requestAnimationFrame(animate);
 }
-function bitti(){const s=Math.floor((Date.now()-G.baslangic)/1000);document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';gorevTamamlandiSinyaliGonder(s);showScreen('screenBitti');}
+function bitti(){const s=Math.floor((Date.now()-G.baslangic)/1000);document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';gorevTamamlandiSinyaliGonder(s);showScreen('screenBitti');tamEkrandanCik();}
 function gorevTamamlandiSinyaliGonder(sureSn){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=sureSn>=(G.sure*0.5)?10:2;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);menuye();}
 function tekrar(){baslat();}
-function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);showScreen('screenMenu');}
-showScreen('screenMenu');
+function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);showScreen('screenMenu');tamEkrandanCik();}
+showScreen('screenMenu');tamEkrandanCik();
+function tamEkranGirmeyeCalis(){
+  const el = document.documentElement;
+  const istek = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if(istek){ istek.call(el).catch(()=>{}); }
+}
+function tamEkrandanCik(){
+  const cikis = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+  if(document.fullscreenElement && cikis){ cikis.call(document).catch(()=>{}); }
+}
+function tamEkranToggle(){
+  if(document.fullscreenElement){ tamEkrandanCik(); } else { tamEkranGirmeyeCalis(); }
+}
+document.addEventListener('fullscreenchange', ()=>{
+  document.body.classList.toggle('tam-ekran-modu', !!document.fullscreenElement);
+});
+document.addEventListener('webkitfullscreenchange', ()=>{
+  document.body.classList.toggle('tam-ekran-modu', !!document.webkitFullscreenElement);
+});
 </script>
 </body>
 </html>
