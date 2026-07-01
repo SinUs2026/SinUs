@@ -94,7 +94,6 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 .tip-goz{color:#15803d}
 .tip-odak{color:#1d4ed8}
 .tip-okuma{color:#b45309}
-.tip-asama1{color:#7e22ce}
 
 @media(max-width:768px){.grid{grid-template-columns:1fr}.ustbilgi{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -209,9 +208,8 @@ const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 
 const ASAMA_AD={1:'Okuma Temeli',2:'Akıcı Okuma',3:'Hız + Anlama',4:'Sınav Odaklı'};
-const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',asama1:'🔤'};
-const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği',asama1:'1. Aşama'};
-const MODUL_AD={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',kelime_merdiveni:'Kelime Merdiveni',azalan:'Azalan Kelime',kelime_zinciri:'Kelime Zinciri',benzer_kelime:'Benzer Kelime',kelime_avi:'Kelime Avı',hizli_gor:'Hızlı Gör-Söyle',tekerleme:'Tekerleme Piramit',dogru_kelime:'Doğru Kelimeyi Bul',hafiza_okuma:'Hafıza + Okuma',mini_hikaye:'Mini Hikâye'};
+const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
+const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği'};
 
 let ogrenci=null;
 let mevcutGorevler=[];
@@ -327,7 +325,7 @@ function gorevListesiOlustur(){
     const aktif=i===tamamlananIdx+1;
     const kilitli=i>tamamlananIdx+1;
 
-    const isim=g.tip==='asama1'?(MODUL_AD[g.modul]||g.modul):g.isim;
+    const isim=g.isim;
     const ikon=TIP_IKON[g.tip]||'📌';
 
     const div=document.createElement('div');
@@ -356,14 +354,13 @@ function gorevListesiOlustur(){
     baslaDiv.innerHTML='<button class="basla-btn tamamlandi-btn" onclick="gunuBitirAc()" style="background:#d4af37;color:#0a1628">📖 Günü Bitir — Okuma Ölçümü</button>';
   } else {
     const g=mevcutGorevler[aktifIdx];
-    const isim=g.tip==='asama1'?(MODUL_AD[g.modul]||g.modul):g.isim;
+    const isim=g.isim;
     const url=gorevUrl(g);
     baslaDiv.innerHTML=`<a href="${url}" class="basla-btn" onclick="gorevAc(${aktifIdx},'${url}')">▶️ ${isim} — Başlat</a>`;
   }
 }
 
 function gorevUrl(g){
-  if(g.tip==='asama1') return 'asama1.html?modul='+(g.modul||'')+'&from=ogrenci';
   return (g.dosya||'#')+'?from=ogrenci';
 }
 
