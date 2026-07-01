@@ -46,6 +46,8 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .btn-row{display:flex;gap:10px;justify-content:center;}
 .btn-play{flex:1;max-width:200px;padding:13px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;}
 .btn-back{flex:1;max-width:160px;padding:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;}
+.tam-ekran-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.3);border-radius:8px;color:var(--accent);font-size:1rem;cursor:pointer;font-family:'Nunito',sans-serif;z-index:10;display:flex;align-items:center;justify-content:center;}
+.tam-ekran-btn:hover{background:rgba(0,212,255,0.22);}
 </style>
 </head>
 <body>
@@ -106,6 +108,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
     <div class="mesaj" id="mesaj">Gözlerinle noktayı takip et →</div>
 
     <div class="alan" id="alan">
+      <button class="tam-ekran-btn" onclick="tamEkranToggle()" title="Tam Ekran">⛶</button>
       <div class="kilavuz"></div>
       <div class="nokta" id="nokta"></div>
     </div>
@@ -145,10 +148,23 @@ function selSure(s, el){
   el.classList.add('sel');
 }
 
-function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById(id).style.display='flex';
+}
+
+// ── TAM EKRAN ──
+function tamEkranGirmeyeCalis(){
+  const el = document.documentElement;
+  const istek = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if(istek){ istek.call(el).catch(()=>{}); }
+}
+function tamEkrandanCik(){
+  const cikis = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+  if(document.fullscreenElement && cikis){ cikis.call(document).catch(()=>{}); }
+}
+function tamEkranToggle(){
+  if(document.fullscreenElement){ tamEkrandanCik(); } else { tamEkranGirmeyeCalis(); }
 }
 
 function baslat(){
@@ -159,6 +175,7 @@ function baslat(){
   document.getElementById('hudHiz').textContent = G.hiz + '/10';
   document.getElementById('hudSure').textContent = G.sure + 'sn';
   showScreen('screenEgzersiz');
+  tamEkranGirmeyeCalis();
   if(G.sureInt) clearInterval(G.sureInt);
   G.sureInt = setInterval(()=>{
     const kalan = Math.max(0, G.sure - Math.floor((Date.now()-G.baslangic)/1000));
@@ -186,6 +203,7 @@ function bitti(){
   const sure = Math.floor((Date.now()-G.baslangic)/1000);
   document.getElementById('bittiAlt').textContent = sure + ' saniye tamamlandı. Harika iş! Gözlerini dinlendir.';
   showScreen('screenBitti');
+  tamEkrandanCik();
   gorevTamamlandiSinyaliGonder(sure);
 }
 
@@ -204,9 +222,9 @@ function gorevTamamlandiSinyaliGonder(sureSn){
   }catch(e){}
 }
 
-function durdur(){ clearInterval(G.sureInt); cancelAnimationFrame(G.animId); menuye(); }
+function durdur(){ clearInterval(G.sureInt); cancelAnimationFrame(G.animId); tamEkrandanCik(); menuye(); }
 function tekrar(){ baslat(); }
-function menuye(){ clearInterval(G.sureInt); cancelAnimationFrame(G.animId); showScreen('screenMenu'); }
+function menuye(){ clearInterval(G.sureInt); cancelAnimationFrame(G.animId); tamEkrandanCik(); showScreen('screenMenu'); }
 
 showScreen('screenMenu');
 </script>
