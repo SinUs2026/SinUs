@@ -153,6 +153,8 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
   const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
   document.getElementById('backBtn').href = backUrl;
   document.getElementById('backBtn2').href = backUrl;
+document.getElementById('backBtn').onclick = function(e){e.preventDefault();sinusTamamlandiSinyalGonderVeDon();};
+document.getElementById('backBtn2').onclick = function(e){e.preventDefault();sinusTamamlandiSinyalGonderVeDon();};
 })();
 
 const HEDEF_NESNELER = ['⭐','🚀','☄️','🌙','🪐','🛸','💫','🌟','🔭','🌌'];
