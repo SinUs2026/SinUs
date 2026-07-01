@@ -48,6 +48,14 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .btn-back{flex:1;max-width:160px;padding:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;}
 .tam-ekran-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.3);border-radius:8px;color:var(--accent);font-size:1rem;cursor:pointer;font-family:'Nunito',sans-serif;z-index:10;display:flex;align-items:center;justify-content:center;}
 .tam-ekran-btn:hover{background:rgba(0,212,255,0.22);}
+
+/* TAM EKRAN MODU: takip alanı tüm ekranı kaplasın */
+body.tam-ekran-modu #screenEgzersiz{padding:0;}
+body.tam-ekran-modu .alan{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;border-radius:0;margin:0;z-index:1;}
+body.tam-ekran-modu .egzersiz-hud{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:460px;width:90%;background:rgba(6,13,26,0.75);backdrop-filter:blur(4px);}
+body.tam-ekran-modu .sure-bar-wrap{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:20;max-width:460px;width:90%;}
+body.tam-ekran-modu .mesaj{position:fixed;top:96px;left:0;right:0;z-index:20;}
+body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(6,13,26,0.75);border-radius:10px;padding:10px 20px;}
 </style>
 </head>
 <body>
@@ -166,6 +174,12 @@ function tamEkrandanCik(){
 function tamEkranToggle(){
   if(document.fullscreenElement){ tamEkrandanCik(); } else { tamEkranGirmeyeCalis(); }
 }
+document.addEventListener('fullscreenchange', ()=>{
+  document.body.classList.toggle('tam-ekran-modu', !!document.fullscreenElement);
+});
+document.addEventListener('webkitfullscreenchange', ()=>{
+  document.body.classList.toggle('tam-ekran-modu', !!document.webkitFullscreenElement);
+});
 
 function baslat(){
   G.hiz = parseInt(document.getElementById('hizSlider').value);
