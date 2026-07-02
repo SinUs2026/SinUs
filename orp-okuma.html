@@ -118,40 +118,44 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 }
 .kelime-goster.gecis{opacity:0;}
 
-/* Normal harf */
-.harf-normal{
-  font-size:clamp(2rem,8vw,4rem);
-  color:rgba(232,244,255,0.75);
-}
-
 /* ORP harfi — altın, büyük, parlak */
 .harf-orp{
-  font-size:clamp(2.2rem,9vw,4.4rem);
   color:var(--gold);
   text-shadow:0 0 20px rgba(255,215,0,0.6), 0 0 40px rgba(255,215,0,0.3);
   font-weight:900;
 }
 
-/* Sabit nokta (pivot) modu — tek kelime gösterirken altın harf hep aynı yerde kalır */
+/* Sabit nokta (pivot) modu — altın harf hep aynı yerde kalır.
+   Taban font-size burada belirlenir, JS bu değeri gerektiğinde
+   küçülterek metnin ekrana sığmasını sağlar (satır kaymasın diye). */
 .kelime-goster.pivot-mode{
   flex-wrap:nowrap;
   width:100%;
   max-width:100%;
+  font-size:clamp(2rem,8vw,4rem);
 }
 .pivot-once{
   flex:1 1 0;
+  min-width:0;
   text-align:right;
-  font-size:clamp(2rem,8vw,4rem);
+  font-size:1em;
   color:rgba(232,244,255,0.75);
+  white-space:nowrap;
+  overflow:hidden;
 }
 .pivot-sonra{
   flex:1 1 0;
+  min-width:0;
   text-align:left;
-  font-size:clamp(2rem,8vw,4rem);
+  font-size:1em;
   color:rgba(232,244,255,0.75);
+  white-space:nowrap;
+  overflow:hidden;
 }
 .pivot-orp{
   flex:0 0 auto;
+  font-size:1.1em;
+  white-space:nowrap;
 }
 
 /* Süre çubuğu */
@@ -432,7 +436,25 @@ function oyunuBaslat() {
   },1000);
 }
 
-function sonrakiGrup() {
+// Pivot metni ekrana sığmıyorsa (satır kaymasın diye) yazı boyutunu otomatik küçült.
+// Taban boyuttan başlar, sol/sağ parçalar taştığı sürece kademeli küçültür.
+function pivotBoyutSigdir(el) {
+  const once = el.querySelector('.pivot-once');
+  const sonra = el.querySelector('.pivot-sonra');
+  if (!once || !sonra) return;
+
+  el.style.fontSize = '';
+  const tabanPx = parseFloat(getComputedStyle(el).fontSize);
+  let boyut = tabanPx;
+  const minBoyut = tabanPx * 0.4;
+
+  for (let i = 0; i < 20; i++) {
+    const tasiyorMu = once.scrollWidth > once.clientWidth + 1 || sonra.scrollWidth > sonra.clientWidth + 1;
+    if (!tasiyorMu || boyut <= minBoyut) break;
+    boyut = Math.max(minBoyut, boyut * 0.92);
+    el.style.fontSize = boyut + 'px';
+  }
+}
   if(!G.calisiyor) return;
   if(G.mevcutGrup>=G.gruplar.length){bitir();return;}
 
@@ -450,6 +472,7 @@ function sonrakiGrup() {
     el.innerHTML = (G.kelimeGrubu === 1)
       ? kelimePivotHtmlYap(grup)
       : kelimeGrubuPivotHtmlYap(grup, G.kelimeGrubu);
+    pivotBoyutSigdir(el);
     el.classList.remove('gecis');
   },70);
 
