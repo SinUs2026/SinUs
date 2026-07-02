@@ -702,7 +702,7 @@ async function hizKaydet(kod){
   try{await supabase('PATCH','egzersiz_ayarlari',{hiz,guncelleme:new Date().toISOString()},'egzersiz_kodu=eq.'+kod);egzersizHizlari[kod]=hiz;btn.textContent='✅ Kaydedildi';btn.className='btn-kaydet-hiz kaydedildi';setTimeout(()=>{btn.textContent='💾 Hızı Kaydet';btn.className='btn-kaydet-hiz';},2000);bildirimGoster('✅ Hız kaydedildi!','basari');}
   catch(e){bildirimGoster('❌ '+e.message,'hata');btn.textContent='💾 Hızı Kaydet';}
 }
-function egzersizBaslat(url,kod){const slider=document.getElementById('slider-'+kod);const hiz=slider?slider.value:5;window.open(url+'?hiz='+hiz+'&from=admin','_blank');}
+function egzersizBaslat(url,kod){const slider=document.getElementById('slider-'+kod);const hiz=slider?slider.value:5;window.open(url+'?hiz='+hiz+'&from=admin','sinus_egzersiz_onizleme');}
 
 // ── AŞAMA SAYFALARI (program yönetimini içine alır) ──
 // NOT: Aşama 1 kaldırıldı. Veritabanı uyumluluğu için eski asama numaraları (2,3,4)
