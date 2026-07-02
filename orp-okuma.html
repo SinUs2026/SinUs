@@ -49,7 +49,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .ayar-slider{flex:1;-webkit-appearance:none;height:6px;border-radius:3px;background:rgba(255,255,255,0.1);outline:none;cursor:pointer;}
 .ayar-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 8px rgba(0,212,255,0.5);}
 .ayar-deger{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);min-width:60px;text-align:right;}
-.grup-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.grup-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .grup-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px;cursor:pointer;text-align:center;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.9rem;font-weight:700;transition:all 0.2s;}
 .grup-btn:hover,.grup-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
 .basla-btn{width:100%;max-width:560px;padding:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;transition:all 0.2s;}
@@ -214,7 +214,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         <div class="grup-btn" onclick="selGrup(2,this)">2</div>
         <div class="grup-btn" onclick="selGrup(3,this)">3</div>
         <div class="grup-btn" onclick="selGrup(4,this)">4</div>
-        <div class="grup-btn" onclick="selGrup(5,this)">5</div>
       </div>
     </div>
 
@@ -328,27 +327,6 @@ function orpIndex(kelime) {
   return 4;
 }
 
-// Kelimeyi ORP harfi vurgulu HTML'e çevir
-function kelimeHtmlYap(kelime) {
-  const idx = orpIndex(kelime);
-  if (idx >= kelime.length) {
-    return `<span class="harf-normal">${kelime}</span>`;
-  }
-  const once = kelime.substring(0, idx);
-  const orp  = kelime.charAt(idx);
-  const sonra = kelime.substring(idx + 1);
-  return (once ? `<span class="harf-normal">${once}</span>` : '') +
-         `<span class="harf-orp">${orp}</span>` +
-         (sonra ? `<span class="harf-normal">${sonra}</span>` : '');
-}
-
-// Grup HTML — kelimeler arasına boşluk
-function grupHtmlYap(grup) {
-  return grup.split(' ')
-    .map(k => `<span style="margin:0 4px;display:inline-flex;align-items:baseline;">${kelimeHtmlYap(k)}</span>`)
-    .join('');
-}
-
 // Tek kelimeyi pivot (sabit nokta) modu için 3 parçaya ayır: önce | ORP harfi | sonra
 function kelimePivotHtmlYap(kelime) {
   const idx = orpIndex(kelime);
@@ -359,6 +337,35 @@ function kelimePivotHtmlYap(kelime) {
   const orp  = kelime.charAt(idx);
   const sonra = kelime.substring(idx + 1);
   return `<span class="pivot-once">${once}</span><span class="pivot-orp harf-orp">${orp}</span><span class="pivot-sonra">${sonra}</span>`;
+}
+
+// Çok kelimeli grup (2-4) için sabit nokta: her zaman 2. kelimenin belirli bir harfi.
+// 2 kelime → 2. kelimenin 2. harfi (0-based idx 1)
+// 3 ve 4 kelime → 2. kelimenin 3. harfi (0-based idx 2)
+function grupPivotHarfIndex(kelimeGrubu) {
+  return kelimeGrubu <= 2 ? 1 : 2;
+}
+
+function kelimeGrubuPivotHtmlYap(grup, kelimeGrubu) {
+  const kelimeler = grup.split(' ');
+  if (kelimeler.length === 1) return kelimePivotHtmlYap(kelimeler[0]);
+
+  const pivotIdx = Math.min(1, kelimeler.length - 1); // 2. kelime (yoksa mevcut son kelime)
+  const pivotKelime = kelimeler[pivotIdx];
+  const oncekiKelimeler = kelimeler.slice(0, pivotIdx);
+  const sonrakiKelimeler = kelimeler.slice(pivotIdx + 1);
+
+  let harfIdx = grupPivotHarfIndex(kelimeGrubu);
+  harfIdx = Math.max(0, Math.min(harfIdx, pivotKelime.length - 1));
+
+  const harfOnce = pivotKelime.substring(0, harfIdx);
+  const harfOrp = pivotKelime.charAt(harfIdx);
+  const harfSonra = pivotKelime.substring(harfIdx + 1);
+
+  const onceStr = oncekiKelimeler.length ? oncekiKelimeler.join(' ') + ' ' + harfOnce : harfOnce;
+  const sonraStr = sonrakiKelimeler.length ? harfSonra + ' ' + sonrakiKelimeler.join(' ') : harfSonra;
+
+  return `<span class="pivot-once">${onceStr}</span><span class="pivot-orp harf-orp">${harfOrp}</span><span class="pivot-sonra">${sonraStr}</span>`;
 }
 
 async function metinleriYukle() {
@@ -436,21 +443,13 @@ function sonrakiGrup() {
   // Geçiş efekti
   el.classList.add('gecis');
   setTimeout(()=>{
-    if (G.kelimeGrubu === 1) {
-      // Sabit nokta (pivot) modu — tek kelime, altın harf hep ekranda aynı yerde
-      el.classList.add('pivot-mode');
-      el.style.fontSize = '';
-      el.innerHTML = kelimePivotHtmlYap(grup);
-    } else {
-      // Eski davranış — birden fazla kelime, sabit nokta yok
-      el.classList.remove('pivot-mode');
-      el.innerHTML = grupHtmlYap(grup);
-      // Grup boyutuna göre font ayarı
-      const toplamUzunluk = grup.length;
-      if (toplamUzunluk <= 5) el.style.fontSize = '';
-      else if (toplamUzunluk <= 12) el.style.fontSize = '0.85em';
-      else el.style.fontSize = '0.7em';
-    }
+    // Sabit nokta (pivot) modu — 1 kelimede kelimenin kendi ORP harfi,
+    // 2-4 kelimede her zaman 2. kelimenin belirli harfi sabit nokta olur.
+    el.classList.add('pivot-mode');
+    el.style.fontSize = '';
+    el.innerHTML = (G.kelimeGrubu === 1)
+      ? kelimePivotHtmlYap(grup)
+      : kelimeGrubuPivotHtmlYap(grup, G.kelimeGrubu);
     el.classList.remove('gecis');
   },70);
 
