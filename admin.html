@@ -151,12 +151,11 @@ tr:hover td{background:#f8fafc}
       </ul>
     </li>
     <li>
-      <a href="#" onclick="altMenuToggle('asama-alt',this)"><span class="ikon">🏆</span> Aşama / Seviyeler <span class="ok">▶</span></a>
+      <a href="#" onclick="altMenuToggle('asama-alt',this)"><span class="ikon">🏆</span> Seviyeler <span class="ok">▶</span></a>
       <ul class="alt-menu" id="asama-alt">
-        <li><a href="#" onclick="asamaSayfasiAc(1,this)">1️⃣ 1. Aşama / Seviye</a></li>
-        <li><a href="#" onclick="asamaSayfasiAc(2,this)">2️⃣ 2. Aşama / Seviye</a></li>
-        <li><a href="#" onclick="asamaSayfasiAc(3,this)">3️⃣ 3. Aşama / Seviye</a></li>
-        <li><a href="#" onclick="asamaSayfasiAc(4,this)">4️⃣ 4. Aşama / Seviye</a></li>
+        <li><a href="#" onclick="asamaSayfasiAc(2,this)">1️⃣ Seviye-1</a></li>
+        <li><a href="#" onclick="asamaSayfasiAc(3,this)">2️⃣ Seviye-2</a></li>
+        <li><a href="#" onclick="asamaSayfasiAc(4,this)">3️⃣ Seviye-3</a></li>
       </ul>
     </li>
     <li>
@@ -196,14 +195,14 @@ tr:hover td{background:#f8fafc}
     <div class="kart">
       <div class="kart-ust"><span class="kart-baslik">👥 Öğrenci Listesi</span><input class="ara-input" type="text" placeholder="🔍 Öğrenci ara..." oninput="ara(this.value)"></div>
       <table id="tablo">
-        <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Aşama</th><th>Gün</th><th>Enerji</th><th>Lisans Bitiş</th><th>Durum</th><th>İşlem</th></tr></thead>
+        <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Lisans Bitiş</th><th>Durum</th><th>İşlem</th></tr></thead>
         <tbody id="tablo-govde">
-          <tr><td>Zeynep Kaya</td><td>zeynep2015</td><td><span class="asama-badge a2">2. Aşama</span></td><td>14/30</td><td>⚡ 412</td><td>15.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Mehmet Arslan</td><td>mehmet_a</td><td><span class="asama-badge a2">2. Aşama</span></td><td>12/30</td><td>⚡ 389</td><td>20.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Elif Şahin</td><td>elif_s</td><td><span class="asama-badge a3">3. Aşama</span></td><td>8/30</td><td>⚡ 301</td><td>01.08.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Ali Demir</td><td>ali2016</td><td><span class="asama-badge a2">2. Aşama</span></td><td>7/30</td><td>⚡ 248</td><td>10.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Ayşe Tekin</td><td>ayse_t</td><td><span class="asama-badge a1">1. Aşama</span></td><td>21/30</td><td>⚡ 201</td><td>05.06.2026</td><td><span class="durum bekliyor">● Süresi Bitiyor</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Can Yıldız</td><td>can_y</td><td><span class="asama-badge a4">4. Aşama</span></td><td>3/30</td><td>⚡ 89</td><td>01.05.2026</td><td><span class="durum pasif">● Pasif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
+          <tr><td>Zeynep Kaya</td><td>zeynep2015</td><td><span class="asama-badge a2">Seviye-1</span></td><td>14/30</td><td>⚡ 412</td><td>15.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
+          <tr><td>Mehmet Arslan</td><td>mehmet_a</td><td><span class="asama-badge a2">Seviye-1</span></td><td>12/30</td><td>⚡ 389</td><td>20.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
+          <tr><td>Elif Şahin</td><td>elif_s</td><td><span class="asama-badge a3">Seviye-2</span></td><td>8/30</td><td>⚡ 301</td><td>01.08.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
+          <tr><td>Ali Demir</td><td>ali2016</td><td><span class="asama-badge a2">Seviye-1</span></td><td>7/30</td><td>⚡ 248</td><td>10.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
+          <tr><td>Ayşe Tekin</td><td>ayse_t</td><td><span class="asama-badge a2">Seviye-1 ⚠️</span></td><td>21/30</td><td>⚡ 201</td><td>05.06.2026</td><td><span class="durum bekliyor">● Süresi Bitiyor</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
+          <tr><td>Can Yıldız</td><td>can_y</td><td><span class="asama-badge a4">Seviye-3</span></td><td>3/30</td><td>⚡ 89</td><td>01.05.2026</td><td><span class="durum pasif">● Pasif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
         </tbody>
       </table>
     </div>
@@ -241,7 +240,7 @@ tr:hover td{background:#f8fafc}
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
         <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Aşama:</label>
           <select id="filtre-asama" onchange="hikayeleriYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
-            <option value="">Tümü</option><option value="1">1. Aşama</option><option value="2">2. Aşama</option><option value="3">3. Aşama</option><option value="4">4. Aşama</option>
+            <option value="">Tümü</option><option value="2">Seviye-1</option><option value="3">Seviye-2</option><option value="4">Seviye-3</option>
           </select></div>
         <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Gün:</label>
           <select id="filtre-gun" onchange="hikayeleriYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
@@ -285,48 +284,10 @@ tr:hover td{background:#f8fafc}
     <div class="kart"><div id="ders-liste"><div class="bos-durum">⏳ Metinler yükleniyor...</div></div></div>
   </div>
 
-  <!-- AŞAMA SAYFALARI (1-4) -->
-  <div id="sayfa-asama-1" class="sayfa"></div>
+  <!-- SEVİYE SAYFALARI (eski asama numaraları 2,3,4 = Seviye 1,2,3) -->
   <div id="sayfa-asama-2" class="sayfa"></div>
   <div id="sayfa-asama-3" class="sayfa"></div>
   <div id="sayfa-asama-4" class="sayfa"></div>
-
-  <!-- 1. AŞAMA İÇERİK (modül havuzu - sadece 1. aşama için) -->
-  <div id="sayfa-asama1-icerik" class="sayfa">
-    <div class="ust-bar">
-      <div><h1>1. Aşama İçerik Havuzu</h1><p>Harf tamamlama, kelime avı, mini hikâye ve diğer modüllerin içeriklerini yönetin.</p></div>
-      <button class="yeni-btn" onclick="modalAc('asama1');setTimeout(()=>a1FormGoster(),50)">+ Yeni İçerik Ekle</button>
-    </div>
-    <div class="grup-aciklama">
-      <strong>Modül Rehberi:</strong> Her modül için içerik havuzu buradan yönetilir. Sistem her seferinde havuzdan rastgele seçer. JSON formatında veri girilir.
-    </div>
-    <div class="kart" style="padding:1rem 1.5rem">
-      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
-        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Modül:</label>
-          <select id="filtre-asama1-modul" onchange="asama1IcerikYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
-            <option value="">Tümü</option>
-            <option value="harf_tamamlama">Harf Tamamlama</option>
-            <option value="karisik_harf">Karışık Harf</option>
-            <option value="kelime_merdiveni">Kelime Merdiveni</option>
-            <option value="azalan">Azalan Kelime</option>
-            <option value="kelime_zinciri">Kelime Zinciri</option>
-            <option value="benzer_kelime">Benzer Kelime</option>
-            <option value="kelime_avi">Kelime Avı</option>
-            <option value="hizli_gor">Hızlı Gör-Söyle</option>
-            <option value="tekerleme">Tekerleme Piramit</option>
-            <option value="dogru_kelime">Doğru Kelimeyi Bul</option>
-            <option value="hafiza_okuma">Hafıza + Okuma</option>
-            <option value="mini_hikaye">Mini Hikâye</option>
-          </select></div>
-        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Zorluk:</label>
-          <select id="filtre-asama1-zorluk" onchange="asama1IcerikYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
-            <option value="">Tümü</option><option value="1">Kolay (1)</option><option value="2">Orta (2)</option><option value="3">Zor (3)</option>
-          </select></div>
-        <span id="asama1-sayac" style="font-size:0.82rem;color:#94a3b8;margin-left:auto"></span>
-      </div>
-    </div>
-    <div class="kart"><div id="asama1-liste"><div class="bos-durum">⏳ İçerikler yükleniyor...</div></div></div>
-  </div>
 
   <!-- OKUMA TEKNİĞİ EGZERSİZ SAYFASI (tek şablon, dinamik) -->
   <div id="sayfa-okuma-teknigi" class="sayfa">
@@ -382,7 +343,7 @@ tr:hover td{background:#f8fafc}
       <div class="form-grup"><label>Şifre</label><input type="password" id="og-sifre" placeholder="Şifre belirle"></div>
     </div>
     <div class="form-grid">
-      <div class="form-grup"><label>Aşama</label><select id="og-asama"><option value="1">1. Aşama – İlk Okuma</option><option value="2">2. Aşama – Akıcı Okuma</option><option value="3">3. Aşama – Hız + Anlama</option><option value="4">4. Aşama – Sınav Odaklı</option></select></div>
+      <div class="form-grup"><label>Seviye</label><select id="og-asama"><option value="2">Seviye-1 – Akıcı Okuma</option><option value="3">Seviye-2 – Hız + Anlama</option><option value="4">Seviye-3 – Sınav Odaklı</option></select></div>
       <div class="form-grup"><label>Lisans Süresi</label><select id="og-lisans"><option value="6">6 Ay</option><option value="3">3 Ay</option><option value="12">1 Yıl</option></select></div>
     </div>
     <div class="form-grup"><label>Telefon</label><input type="text" id="og-telefon" placeholder="Veli/öğrenci telefonu"></div>
@@ -409,7 +370,7 @@ tr:hover td{background:#f8fafc}
   <div class="modal-kutu genis">
     <div class="modal-baslik">📚 Yeni Hikâye Ekle</div>
     <div class="form-grid-3">
-      <div class="form-grup"><label>Aşama</label><select id="h-asama"><option value="1">1. Aşama</option><option value="2">2. Aşama</option><option value="3">3. Aşama</option><option value="4">4. Aşama</option></select></div>
+      <div class="form-grup"><label>Seviye</label><select id="h-asama"><option value="2">Seviye-1</option><option value="3">Seviye-2</option><option value="4">Seviye-3</option></select></div>
       <div class="form-grup"><label>Gün</label><select id="h-gun"><script>for(var i=1;i<=30;i++) document.write('<option value="'+i+'">'+i+'. Gün</option>')</script></select></div>
       <div class="form-grup"><label>Kelime Sayısı</label><input type="number" id="h-kelime" placeholder="Örn: 180" min="50" max="500"></div>
     </div>
@@ -596,44 +557,6 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
-<!-- 1. AŞAMA İÇERİK EKLE MODALI -->
-<div class="modal" id="modal-asama1">
-  <div class="modal-kutu genis">
-    <div class="modal-baslik">🔤 Yeni 1. Aşama İçeriği Ekle</div>
-    <div class="form-grid">
-      <div class="form-grup">
-        <label>Modül</label>
-        <select id="a1-modul" onchange="a1FormGoster()">
-          <option value="harf_tamamlama">Harf Tamamlama</option>
-          <option value="karisik_harf">Karışık Harf</option>
-          <option value="kelime_merdiveni">Kelime Merdiveni</option>
-          <option value="azalan">Azalan Kelime</option>
-          <option value="kelime_zinciri">Kelime Zinciri</option>
-          <option value="benzer_kelime">Benzer Kelime</option>
-          <option value="kelime_avi">Kelime Avı</option>
-          <option value="hizli_gor">Hızlı Gör-Söyle</option>
-          <option value="tekerleme">Tekerleme Piramit</option>
-          <option value="dogru_kelime">Doğru Kelimeyi Bul</option>
-          <option value="hafiza_okuma">Hafıza + Okuma</option>
-          <option value="mini_hikaye">Mini Hikâye</option>
-        </select>
-      </div>
-      <div class="form-grup">
-        <label>Zorluk Seviyesi</label>
-        <select id="a1-zorluk">
-          <option value="1">1 – Kolay</option>
-          <option value="2">2 – Orta</option>
-          <option value="3">3 – Zor</option>
-        </select>
-      </div>
-    </div>
-    <div id="a1-form-alani"></div>
-    <div class="modal-btn-grup">
-      <button class="btn-iptal" onclick="modalKapat('asama1')">İptal</button>
-      <button class="btn-kaydet" id="btn-asama1-kaydet" onclick="asama1IcerikKaydet()">💾 Kaydet</button>
-    </div>
-  </div>
-</div>
 
 <div class="bildirim" id="bildirim"></div>
 
@@ -650,7 +573,6 @@ const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 const GRUP_ADLARI={1:'Grup 1 – 1-2. Sınıf',2:'Grup 2 – 3-4. Sınıf',3:'Grup 3 – 5-6. Sınıf',4:'Grup 4 – 7-8. Sınıf',5:'Grup 5 – Lise',6:'Grup 6 – Yetişkin'};
 const ZORLUK_ADLARI={basit:'Basit',orta:'Orta',zor:'Zor',cok_zor:'Çok Zor'};
-const MODUL_ADLARI={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',kelime_merdiveni:'Kelime Merdiveni',azalan:'Azalan Kelime',kelime_zinciri:'Kelime Zinciri',benzer_kelime:'Benzer Kelime',kelime_avi:'Kelime Avı',hizli_gor:'Hızlı Gör-Söyle',tekerleme:'Tekerleme Piramit',dogru_kelime:'Doğru Kelimeyi Bul',hafiza_okuma:'Hafıza + Okuma',mini_hikaye:'Mini Hikâye'};
 
 // ── EGZERSİZ TANIMLARI (3 kategori: okuma, goz, odak) ──
 const EGZERSIZLER={
@@ -667,7 +589,6 @@ const EGZERSIZLER={
     {kod:'yukari-asagi',isim:'Yukarı-Aşağı',ikon:'↕️',aciklama:'Dikey göz kası egzersizi.',url:'goz-yukari-asagi.html'},
     {kod:'sekil-takibi',isim:'Şekil Takibi',ikon:'⬡',aciklama:'Geometrik şekil takibi.',url:'goz-sekil.html'},
     {kod:'genel-hareket',isim:'Genel Hareket',ikon:'🌀',aciklama:'Çok yönlü göz kası egzersizi.',url:'goz-genel.html'},
-    {kod:'zoom',isim:'Genişleme-Daralma',ikon:'🔍',aciklama:'Siliyer kas egzersizi.',url:'goz-zoom.html'},
     {kod:'sarkac',isim:'Sarkaç Takibi',ikon:'🕰️',aciklama:'Ritmik göz kası egzersizi.',url:'goz-sarkac.html'}
   ],
   odak:[
@@ -700,8 +621,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='hikayeler') hikayeleriYukle();
   if(sayfa==='olcum-metinleri') olcumMetinleriYukle();
   if(sayfa==='ders-metinleri') dersMetinleriYukle();
-  if(sayfa==='asama1-icerik') asama1IcerikYukle();
-  if(sayfa==='ogrenciler') ogrencileriYukle();
+    if(sayfa==='ogrenciler') ogrencileriYukle();
   if(sayfa==='ogretmenler') ogretmenleriYukle();
   if(sayfa==='kurumlar') kurumlarıYukle();
   if(sayfa==='sifre-islemleri') sifreIslemleriYukle();
@@ -785,6 +705,9 @@ async function hizKaydet(kod){
 function egzersizBaslat(url,kod){const slider=document.getElementById('slider-'+kod);const hiz=slider?slider.value:5;window.open(url+'?hiz='+hiz+'&from=admin','_blank');}
 
 // ── AŞAMA SAYFALARI (program yönetimini içine alır) ──
+// NOT: Aşama 1 kaldırıldı. Veritabanı uyumluluğu için eski asama numaraları (2,3,4)
+// korunuyor, sadece görünen isim Seviye-1/2/3 olarak eşleniyor.
+const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
 function asamaSayfasiAc(asamaNo,link){
   document.querySelectorAll('.sayfa').forEach(s=>s.classList.remove('aktif'));
   document.querySelectorAll('.sidebar-menu li > a').forEach(a=>a.classList.remove('aktif'));
@@ -793,15 +716,9 @@ function asamaSayfasiAc(asamaNo,link){
   sayfa.classList.add('aktif');
   if(link) link.classList.add('aktif');
 
-  let ekstraLink='';
-  if(asamaNo===1){
-    ekstraLink=`<button class="islem-btn program" style="padding:0.6rem 1.2rem;font-size:0.85rem" onclick="sayfaGoster('asama1-icerik')">🔤 1. Aşama İçerik Havuzunu Yönet</button>`;
-  }
-
   sayfa.innerHTML=`
     <div class="ust-bar">
-      <div><h1>${asamaNo}. Aşama / Seviye</h1><p>Günlere göre programı düzenleyin. Bir güne tıklayarak içeriğini görüntüleyip düzenleyebilirsiniz.</p></div>
-      ${ekstraLink}
+      <div><h1>${SEVIYE_ADI[asamaNo]||asamaNo+'. Aşama'}</h1><p>Günlere göre programı düzenleyin. Bir güne tıklayarak içeriğini görüntüleyip düzenleyebilirsiniz.</p></div>
     </div>
     <div class="kart">
       <div class="kart-baslik" style="margin-bottom:1rem">📅 30 Günlük Program</div>
@@ -846,7 +763,7 @@ function gunDetayAc(asamaNo,gun,btnEl){
   gunIcerigiYukle(asamaNo,gun);
 }
 
-const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',asama1:'🔤'};
+const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
 async function gunIcerigiYukle(asamaNo,gun){
   const el=document.getElementById('gun-icerik-'+asamaNo+'-'+gun);
   try{
@@ -856,7 +773,7 @@ async function gunIcerigiYukle(asamaNo,gun){
       return;
     }
     el.innerHTML=data[0].gorevler.map(g=>{
-      const isim=g.tip==='asama1'?(MODUL_ADLARI[g.modul]||g.modul):g.isim;
+      const isim=g.isim;
       return `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.9rem;background:#f8fafc;border-radius:8px;font-size:0.88rem;margin-bottom:0.5rem">
         <span>${TIP_IKON[g.tip]||'📌'}</span>
         <span style="flex:1;font-weight:600">${isim}</span>
@@ -875,7 +792,6 @@ function modalKapat(tip){
   if(tip==='olcum'){document.getElementById('o-baslik').value='';document.getElementById('o-metin').value='';document.getElementById('o-kelime').value='';document.getElementById('olcum-kelime-sayac').textContent='0 kelime';}
   if(tip==='ders'){document.getElementById('d-baslik').value='';document.getElementById('d-metin').value='';document.getElementById('d-kelime').value='';document.getElementById('ders-kelime-sayac').textContent='0 kelime';}
   if(tip==='ders-duzenle'){document.getElementById('dd-baslik').value='';document.getElementById('dd-metin').value='';document.getElementById('dd-kelime').value='';document.getElementById('ders-duzenle-kelime-sayac').textContent='0 kelime';}
-  if(tip==='asama1'){document.getElementById('a1-veri').value='';}
   if(tip==='ogrenci'){document.getElementById('og-ad').value='';document.getElementById('og-soyad').value='';document.getElementById('og-kullanici').value='';document.getElementById('og-sifre').value='';document.getElementById('og-telefon').value='';}
   if(tip==='ogretmen'){document.getElementById('ogr-ad').value='';document.getElementById('ogr-soyad').value='';document.getElementById('ogr-kullanici').value='';document.getElementById('ogr-sifre').value='';}
 }
@@ -916,7 +832,7 @@ function ogrenciTablosuOlustur(ogrenciler,liste){
   const tbody=liste.querySelector('tbody');
   ogrenciler.forEach(o=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="asama-badge ${renkler[o.asama]||'a1'}">${o.asama||1}. Aşama</span></td><td>${o.mevcut_gun||1}/30</td><td>⚡ ${o.enerji||0}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>`;
+    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Aşama ⚠️'}</span></td><td>${o.mevcut_gun||1}/30</td><td>⚡ ${o.enerji||0}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1029,7 +945,7 @@ async function hikayeleriYukle(){
     hikayeler.forEach(h=>{
       const tarih=h.created_at?new Date(h.created_at).toLocaleDateString('tr-TR'):'-';
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td><span class="asama-badge ${renkler[h.asama]}">${h.asama}. Aşama</span></td><td>${h.gun}. Gün</td><td><strong>${h.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${h.metin.substring(0,100)}...</div></td><td>${h.kelime_sayisi||'-'}</td><td>${tarih}</td><td><button class="islem-btn sil" onclick="hikayeSil(${h.id})">🗑️ Sil</button></td>`;
+      tr.innerHTML=`<td><span class="asama-badge ${renkler[h.asama]}">${SEVIYE_ADI[h.asama]||h.asama+'. Aşama ⚠️'}</span></td><td>${h.gun}. Gün</td><td><strong>${h.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${h.metin.substring(0,100)}...</div></td><td>${h.kelime_sayisi||'-'}</td><td>${tarih}</td><td><button class="islem-btn sil" onclick="hikayeSil(${h.id})">🗑️ Sil</button></td>`;
       tbody.appendChild(tr);
     });
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
@@ -1311,101 +1227,6 @@ async function kurumSil(id){
   try{await supabase('DELETE','kurumlar',null,'id=eq.'+id);bildirimGoster('🗑️ Kurum silindi.','basari');kurumlarıYukle();}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
-// ── 1. AŞAMA FORM ALANLARI ──
-function a1FormGoster(){
-  const modul=document.getElementById('a1-modul').value;
-  const alan=document.getElementById('a1-form-alani');
-  const formlar={
-    harf_tamamlama:`<div class="grup-aciklama" style="margin-bottom:1rem">Eksik harfli kelime sorusu.</div><div class="form-grup"><label>Soru (_ boş harf)</label><input type="text" id="f-soru" placeholder="Örn: _al"></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: bal"></div><div class="form-grup"><label>Şıklar (virgülle, 4 tane)</label><input type="text" id="f-secenekler" placeholder="Örn: bal,dal,sal,mal"></div>`,
-    karisik_harf:`<div class="form-grup"><label>Doğru Kelime</label><input type="text" id="f-kelime" placeholder="Örn: kalem"></div>`,
-    kelime_merdiveni:`<div class="form-grup"><label>Kelimeler (virgülle, kısa→uzun)</label><input type="text" id="f-kelimeler" placeholder="Örn: at,ata,atam,atama"></div>`,
-    azalan:`<div class="form-grup"><label>Kelimeler (virgülle, uzun→kısa)</label><input type="text" id="f-kelimeler" placeholder="Örn: atama,atam,ata,at"></div>`,
-    kelime_zinciri:`<div class="form-grup"><label>Kelimeler (virgülle, zincir sırayla)</label><input type="text" id="f-kelimeler" placeholder="Örn: arı,ırmak,kar,rüzgar"></div>`,
-    benzer_kelime:`<div class="form-grup"><label>1. Kelime</label><input type="text" id="f-kelime1" placeholder="Örn: kara"></div><div class="form-grup"><label>2. Kelime</label><input type="text" id="f-kelime2" placeholder="Örn: kara"></div><div class="form-grup"><label>1. Anlamı</label><input type="text" id="f-anlam1" placeholder="Örn: renk"></div><div class="form-grup"><label>2. Anlamı</label><input type="text" id="f-anlam2" placeholder="Örn: toprak"></div>`,
-    kelime_avi:`<div class="form-grup"><label>Hedef Kelime</label><input type="text" id="f-kelime" placeholder="Örn: kitap"></div><div class="form-grup"><label>Diğer Kelimeler (virgülle, 5 tane)</label><input type="text" id="f-diger" placeholder="Örn: kitabı,kitapçı,kitaptan,kita,kietap"></div>`,
-    hizli_gor:`<div class="form-grup"><label>Gösterilecek İfade</label><input type="text" id="f-ifade" placeholder="Örn: ba-la-ban"></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: balaban"></div>`,
-    tekerleme:`<div class="form-grup"><label>Satırlar (virgülle)</label><textarea id="f-satirlar" placeholder="Örn: Al,Al beni,Al beni git" style="min-height:80px;font-family:monospace"></textarea></div>`,
-    dogru_kelime:`<div class="form-grup"><label>Cümle (___ boşluk için)</label><input type="text" id="f-cumle" placeholder="Örn: Çocuk ___ koştu."></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: hizla"></div><div class="form-grup"><label>Şıklar (virgülle, 4 tane)</label><input type="text" id="f-secenekler" placeholder="Örn: hizla,yavas,guzel,buyuk"></div>`,
-    hafiza_okuma:`<div class="form-grup"><label>Kısa Metin</label><textarea id="f-metin" placeholder="Kısa metin..." style="min-height:80px"></textarea></div><div class="form-grup"><label>Soru</label><input type="text" id="f-soru" placeholder="Örn: Ali ne zaman kalktı?"></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: Sabah erken"></div><div class="form-grup"><label>Şıklar (virgülle, 4 tane)</label><input type="text" id="f-secenekler" placeholder="Örn: Sabah erken,Ogle,Aksam,Gece"></div>`,
-    mini_hikaye:`<div class="form-grup"><label>Başlık</label><input type="text" id="f-baslik" placeholder="Örn: Kucuk Ali"></div><div class="form-grup"><label>Hikaye Metni</label><textarea id="f-metin" placeholder="Kısa hikayeyi yazın..." style="min-height:100px"></textarea></div><div class="form-grup"><label>Soru</label><input type="text" id="f-soru" placeholder="Örn: Hikayenin kahramani kimdir?"></div><div class="form-grup"><label>Doğru Cevap</label><input type="text" id="f-cevap" placeholder="Örn: Ali"></div><div class="form-grup"><label>Şıklar (virgülle, 4 tane)</label><input type="text" id="f-secenekler" placeholder="Örn: Ali,Ayse,Veli,Can"></div>`
-  };
-  alan.innerHTML=formlar[modul]||'';
-}
-function a1VeriOlustur(modul){
-  const g=id=>document.getElementById(id)?.value?.trim()||'';
-  const liste=str=>str.split(',').map(s=>s.trim()).filter(Boolean);
-  if(modul==='harf_tamamlama') return {soru:g('f-soru'),cevap:g('f-cevap'),secenekler:liste(g('f-secenekler'))};
-  if(modul==='karisik_harf') return {kelime:g('f-kelime')};
-  if(modul==='kelime_merdiveni'||modul==='azalan'||modul==='kelime_zinciri') return {kelimeler:liste(g('f-kelimeler'))};
-  if(modul==='benzer_kelime') return {kelime1:g('f-kelime1'),kelime2:g('f-kelime2'),anlam1:g('f-anlam1'),anlam2:g('f-anlam2')};
-  if(modul==='kelime_avi') return {kelime:g('f-kelime'),diger:liste(g('f-diger'))};
-  if(modul==='hizli_gor') return {ifade:g('f-ifade'),cevap:g('f-cevap')};
-  if(modul==='tekerleme') return {satirlar:liste(g('f-satirlar'))};
-  if(modul==='dogru_kelime') return {cumle:g('f-cumle'),cevap:g('f-cevap'),secenekler:liste(g('f-secenekler'))};
-  if(modul==='hafiza_okuma') return {metin:g('f-metin'),soru:g('f-soru'),cevap:g('f-cevap'),secenekler:liste(g('f-secenekler'))};
-  if(modul==='mini_hikaye') return {baslik:g('f-baslik'),metin:g('f-metin'),sorular:[{soru:g('f-soru'),cevap:g('f-cevap'),secenekler:liste(g('f-secenekler'))}]};
-  return null;
-}
-// ── 1. AŞAMA İÇERİK ──
-async function asama1IcerikKaydet(){
-  const modul=document.getElementById('a1-modul').value;
-  const zorluk=parseInt(document.getElementById('a1-zorluk').value);
-  const veri=a1VeriOlustur(modul);
-  if(!veri){bildirimGoster('⚠️ Veri oluşturulamadı!','hata');return;}
-  const bosAlan=Object.values(veri).some(v=>(typeof v==='string'&&!v)||(Array.isArray(v)&&!v.length));
-  if(bosAlan){bildirimGoster('⚠️ Tüm alanları doldurun!','hata');return;}
-  const btn=document.getElementById('btn-asama1-kaydet');btn.textContent='⏳ Kaydediliyor...';
-  try{
-    await supabase('POST','asama1_icerik',{modul,zorluk,veri,aktif:true});
-    bildirimGoster('✅ İçerik kaydedildi!','basari');
-    modalKapat('asama1');
-    asama1IcerikYukle();
-  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
-  btn.textContent='💾 Kaydet';
-}
-
-async function asama1IcerikSil(id){
-  if(!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
-  try{await supabase('DELETE','asama1_icerik',null,'id=eq.'+id);bildirimGoster('🗑️ İçerik silindi.','basari');asama1IcerikYukle();}
-  catch(e){bildirimGoster('❌ '+e.message,'hata');}
-}
-
-async function asama1AktifToggle(id,mevcutDurum){
-  try{
-    await supabase('PATCH','asama1_icerik',{aktif:!mevcutDurum},'id=eq.'+id);
-    bildirimGoster('✅ Durum güncellendi!','basari');
-    asama1IcerikYukle();
-  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
-}
-
-async function asama1IcerikYukle(){
-  const liste=document.getElementById('asama1-liste');
-  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
-  let filtre='order=modul,zorluk';
-  const modul=document.getElementById('filtre-asama1-modul').value;
-  const zorluk=document.getElementById('filtre-asama1-zorluk').value;
-  if(modul) filtre+='&modul=eq.'+modul;
-  if(zorluk) filtre+='&zorluk=eq.'+zorluk;
-  try{
-    const icerikler=await supabase('GET','asama1_icerik',null,filtre);
-    document.getElementById('asama1-sayac').textContent=icerikler.length+' içerik';
-    if(!icerikler.length){liste.innerHTML='<div class="bos-durum">📭 Bu filtrede içerik bulunamadı.<br><small>Sağ üstteki "+ Yeni İçerik Ekle" butonunu kullanın.</small></div>';return;}
-    liste.innerHTML='<table><thead><tr><th>Modül</th><th>Zorluk</th><th>Veri Önizleme</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="asama1-tbody"></tbody></table>';
-    const tbody=document.getElementById('asama1-tbody');
-    icerikler.forEach(ic=>{
-      const tr=document.createElement('tr');
-      const veriOnizleme=JSON.stringify(ic.veri).substring(0,80)+(JSON.stringify(ic.veri).length>80?'...':'');
-      tr.innerHTML=`
-        <td><span class="modul-badge">${MODUL_ADLARI[ic.modul]||ic.modul}</span></td>
-        <td><span class="asama-badge ${ic.zorluk===1?'a1':ic.zorluk===2?'a2':'a3'}">${ic.zorluk}. Seviye</span></td>
-        <td><div class="json-onizleme">${veriOnizleme}</div></td>
-        <td><span class="durum ${ic.aktif?'aktif':'pasif'}" style="cursor:pointer" onclick="asama1AktifToggle(${ic.id},${ic.aktif})">${ic.aktif?'● Aktif':'● Pasif'}</span></td>
-        <td style="white-space:nowrap"><button class="islem-btn sil" onclick="asama1IcerikSil(${ic.id})">🗑️ Sil</button></td>`;
-      tbody.appendChild(tr);
-    });
-  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
-}
-
 function ara(q){document.querySelectorAll('#tablo-govde tr').forEach(r=>{r.style.display=r.innerText.toLowerCase().includes(q.toLowerCase())?'':'none';});}
 </script>
 </body>
