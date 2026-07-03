@@ -376,7 +376,7 @@ tr:hover td{background:#f8fafc}
     </div>
     <div class="form-grup"><label>Hikâye Başlığı</label><input type="text" id="h-baslik" placeholder="Hikâyenin başlığı..."></div>
     <div class="form-grup"><label>Hikâye Metni</label><textarea id="h-metin" placeholder="Hikâye metnini buraya yapıştırın..." oninput="kelimeSay()"></textarea><div class="sayac" id="kelime-sayac">0 kelime</div></div>
-    <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle()" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div><div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('hikaye')">İptal</button><button class="btn-kaydet" id="btn-hikaye-kaydet" onclick="hikayeKaydet()">💾 Kaydet</button></div>
+    <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div><div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('hikaye')">İptal</button><button class="btn-kaydet" id="btn-hikaye-kaydet" onclick="hikayeKaydet()">💾 Kaydet</button></div>
   </div>
 </div>
 
@@ -389,6 +389,7 @@ tr:hover td{background:#f8fafc}
     </div>
     <div class="form-grup"><label>Metin Başlığı</label><input type="text" id="o-baslik" placeholder="Metnin başlığı..."></div>
     <div class="form-grup"><label>Metin</label><textarea id="o-metin" placeholder="Ölçüm metnini buraya yapıştırın..." oninput="olcumKelimeSay()"></textarea><div class="sayac" id="olcum-kelime-sayac">0 kelime</div></div>
+    <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi-olcum" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi-olcum')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('olcum')">İptal</button><button class="btn-kaydet" id="btn-olcum-kaydet" onclick="olcumMetniKaydet()">💾 Kaydet</button></div>
   </div>
 </div>
@@ -416,6 +417,7 @@ tr:hover td{background:#f8fafc}
     </div>
     <div class="form-grup"><label>Metin Başlığı</label><input type="text" id="d-baslik" placeholder="Metnin başlığı..."></div>
     <div class="form-grup"><label>Metin</label><textarea id="d-metin" placeholder="Ders metnini buraya yapıştırın..." oninput="dersKelimeSay()"></textarea><div class="sayac" id="ders-kelime-sayac">0 kelime</div></div>
+    <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi-ders" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi-ders')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ders')">İptal</button><button class="btn-kaydet" id="btn-ders-kaydet" onclick="dersMetniKaydet()">💾 Kaydet</button></div>
   </div>
 </div>
@@ -461,70 +463,6 @@ tr:hover td{background:#f8fafc}
     </div>
   </div>
 </div>
-<!-- KURUM EKLE/DÜZENLE MODALI -->
-<div class="modal" id="modal-kurum">
-  <div class="modal-kutu genis">
-    <div class="modal-baslik" id="kurum-modal-baslik">🏫 Yeni Kurum Ekle</div>
-    <input type="hidden" id="k-id">
-    <div class="form-grid">
-      <div class="form-grup"><label>Kurum Adı</label><input type="text" id="k-kurum-adi" placeholder="Örn: Akıl Koleji"></div>
-      <div class="form-grup"><label>Yetkili Kişi</label><input type="text" id="k-yetkili" placeholder="Ad Soyad"></div>
-    </div>
-    <div class="form-grid">
-      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="k-kullanici" placeholder="kurum_adi"></div>
-      <div class="form-grup"><label>Şifre</label><input type="text" id="k-sifre" placeholder="Şifre belirle"></div>
-    </div>
-    <div class="form-grid">
-      <div class="form-grup"><label>Telefon</label><input type="text" id="k-telefon" placeholder="05xx xxx xx xx"></div>
-      <div class="form-grup"><label>İl</label><input type="text" id="k-il" placeholder="Örn: İzmir"></div>
-    </div>
-    <div class="form-grid">
-      <div class="form-grup"><label>İlçe</label><input type="text" id="k-ilce" placeholder="Örn: Gaziemir"></div>
-      <div class="form-grup"><label>Durum</label><select id="k-aktif"><option value="true">✅ Aktif</option><option value="false">❌ Pasif</option></select></div>
-    </div>
-    <div class="form-grid">
-      <div class="form-grup"><label>Lisans Başlangıç</label><input type="date" id="k-baslangic"></div>
-      <div class="form-grup"><label>Lisans Bitiş</label><input type="date" id="k-bitis"></div>
-    </div>
-    <div class="modal-btn-grup">
-      <button class="btn-iptal" onclick="modalKapat('kurum')">İptal</button>
-      <button class="btn-kaydet" id="btn-kurum-kaydet" onclick="kurumKaydet()">💾 Kaydet</button>
-    </div>
-  </div>
-</div>
-
-<!-- KURUM EKLE/DÜZENLE MODALI -->
-<div class="modal" id="modal-kurum">
-  <div class="modal-kutu genis">
-    <div class="modal-baslik" id="kurum-modal-baslik">🏫 Yeni Kurum Ekle</div>
-    <input type="hidden" id="k-id">
-    <div class="form-grid">
-      <div class="form-grup"><label>Kurum Adı</label><input type="text" id="k-kurum-adi" placeholder="Örn: Akıl Koleji"></div>
-      <div class="form-grup"><label>Yetkili Kişi</label><input type="text" id="k-yetkili" placeholder="Ad Soyad"></div>
-    </div>
-    <div class="form-grid">
-      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="k-kullanici" placeholder="kurum_adi"></div>
-      <div class="form-grup"><label>Şifre</label><input type="text" id="k-sifre" placeholder="Şifre belirle"></div>
-    </div>
-    <div class="form-grid">
-      <div class="form-grup"><label>Telefon</label><input type="text" id="k-telefon" placeholder="05xx xxx xx xx"></div>
-      <div class="form-grup"><label>İl</label><input type="text" id="k-il" placeholder="Örn: İzmir"></div>
-    </div>
-    <div class="form-grid">
-      <div class="form-grup"><label>İlçe</label><input type="text" id="k-ilce" placeholder="Örn: Gaziemir"></div>
-      <div class="form-grup"><label>Durum</label><select id="k-aktif"><option value="true">✅ Aktif</option><option value="false">❌ Pasif</option></select></div>
-    </div>
-    <div class="form-grid">
-      <div class="form-grup"><label>Lisans Başlangıç</label><input type="date" id="k-baslangic"></div>
-      <div class="form-grup"><label>Lisans Bitiş</label><input type="date" id="k-bitis"></div>
-    </div>
-    <div class="modal-btn-grup">
-      <button class="btn-iptal" onclick="modalKapat('kurum')">İptal</button>
-      <button class="btn-kaydet" id="btn-kurum-kaydet" onclick="kurumKaydet()">💾 Kaydet</button>
-    </div>
-  </div>
-</div>
-
 <!-- KURUM EKLE/DÜZENLE MODALI -->
 <div class="modal" id="modal-kurum">
   <div class="modal-kutu genis">
@@ -788,12 +726,55 @@ async function gunIcerigiYukle(asamaNo,gun){
 
 // ── MODAL YÖNETİMİ ──
 function modalAc(tip){document.getElementById('modal-'+tip).classList.add('acik');}
-function soruEkle(){const liste=document.getElementById('soru-listesi');const idx=liste.children.length+1;const div=document.createElement('div');div.style.cssText='display:flex;gap:6px;align-items:center';div.innerHTML='<input type="text" placeholder="Soru '+idx+'" style="flex:1;background:#1a2744;color:#e2e8f0;border:1px solid #2563a8;border-radius:6px;padding:6px 10px;font-size:0.85rem"><button type="button" onclick="this.parentElement.remove()" style="background:#7f1d1d;color:#fca5a5;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">✕</button>';liste.appendChild(div);}
+let soruSayaci=0;
+function soruEkle(listeId){
+  const liste=document.getElementById(listeId);
+  soruSayaci++;
+  const grupAdi='dogru-'+soruSayaci;
+  const div=document.createElement('div');
+  div.className='soru-karti';
+  div.style.cssText='border:1px solid #2563a8;border-radius:8px;padding:10px 12px;background:#1a2744;display:flex;flex-direction:column;gap:8px';
+  div.innerHTML=`
+    <div style="display:flex;gap:6px;align-items:center">
+      <input type="text" class="soru-metni" placeholder="Soru metni..." style="flex:1;background:#0f1c33;color:#e2e8f0;border:1px solid #2563a8;border-radius:6px;padding:6px 10px;font-size:0.85rem">
+      <button type="button" onclick="this.closest('.soru-karti').remove()" style="background:#7f1d1d;color:#fca5a5;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      ${[0,1,2,3].map(i=>`
+        <label style="display:flex;gap:8px;align-items:center;font-size:0.82rem;color:#cbd5e1">
+          <input type="radio" name="${grupAdi}" value="${i}" style="accent-color:#16a34a">
+          <input type="text" class="secenek-metni" placeholder="Şık ${i+1}" style="flex:1;background:#0f1c33;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:5px 9px;font-size:0.82rem">
+        </label>
+      `).join('')}
+      <div style="font-size:0.72rem;color:#94a3b8">👆 Doğru cevabı işaretleyin</div>
+    </div>
+  `;
+  liste.appendChild(div);
+}
+function soruVerileriniTopla(listeId){
+  const kartlar=document.querySelectorAll('#'+listeId+' .soru-karti');
+  const sorular=[];
+  let hata=null;
+  kartlar.forEach((kart,i)=>{
+    if(hata) return;
+    const soruMetni=kart.querySelector('.soru-metni').value.trim();
+    const secenekInputs=kart.querySelectorAll('.secenek-metni');
+    const secenekler=Array.from(secenekInputs).map(inp=>inp.value.trim());
+    const isaretli=kart.querySelector('input[type=radio]:checked');
+    if(!soruMetni && secenekler.every(s=>!s)) return;
+    if(!soruMetni){hata='Soru '+(i+1)+': soru metni boş olamaz.';return;}
+    if(secenekler.some(s=>!s)){hata='Soru '+(i+1)+': tüm şıklar doldurulmalı.';return;}
+    if(!isaretli){hata='Soru '+(i+1)+': doğru cevap işaretlenmemiş.';return;}
+    sorular.push({soru:soruMetni,secenekler,dogru:parseInt(isaretli.value)});
+  });
+  if(hata) throw new Error(hata);
+  return sorular;
+}
 function modalKapat(tip){
   document.getElementById('modal-'+tip).classList.remove('acik');
-  if(tip==='hikaye'){document.getElementById('h-baslik').value='';document.getElementById('h-metin').value='';document.getElementById('h-kelime').value='';document.getElementById('kelime-sayac').textContent='0 kelime';}
-  if(tip==='olcum'){document.getElementById('o-baslik').value='';document.getElementById('o-metin').value='';document.getElementById('o-kelime').value='';document.getElementById('olcum-kelime-sayac').textContent='0 kelime';}
-  if(tip==='ders'){document.getElementById('d-baslik').value='';document.getElementById('d-metin').value='';document.getElementById('d-kelime').value='';document.getElementById('ders-kelime-sayac').textContent='0 kelime';}
+  if(tip==='hikaye'){document.getElementById('h-baslik').value='';document.getElementById('h-metin').value='';document.getElementById('h-kelime').value='';document.getElementById('kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi').innerHTML='';}
+  if(tip==='olcum'){document.getElementById('o-baslik').value='';document.getElementById('o-metin').value='';document.getElementById('o-kelime').value='';document.getElementById('olcum-kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi-olcum').innerHTML='';}
+  if(tip==='ders'){document.getElementById('d-baslik').value='';document.getElementById('d-metin').value='';document.getElementById('d-kelime').value='';document.getElementById('ders-kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi-ders').innerHTML='';}
   if(tip==='ders-duzenle'){document.getElementById('dd-baslik').value='';document.getElementById('dd-metin').value='';document.getElementById('dd-kelime').value='';document.getElementById('ders-duzenle-kelime-sayac').textContent='0 kelime';}
   if(tip==='ogrenci'){document.getElementById('og-ad').value='';document.getElementById('og-soyad').value='';document.getElementById('og-kullanici').value='';document.getElementById('og-sifre').value='';document.getElementById('og-telefon').value='';}
   if(tip==='ogretmen'){document.getElementById('ogr-ad').value='';document.getElementById('ogr-soyad').value='';document.getElementById('ogr-kullanici').value='';document.getElementById('ogr-sifre').value='';}
@@ -921,8 +902,11 @@ async function hikayeKaydet(){
   const kelime=document.getElementById('h-kelime').value;
   if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
   if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
   const btn=document.getElementById('btn-hikaye-kaydet');btn.textContent='⏳ Kaydediliyor...';
-  try{await supabase('POST','hikayeler',{asama:parseInt(asama),gun:parseInt(gun),baslik,metin,kelime_sayisi:parseInt(kelime)||0});bildirimGoster('✅ Hikâye kaydedildi!','basari');modalKapat('hikaye');hikayeleriYukle();}
+  try{await supabase('POST','hikayeler',{asama:parseInt(asama),gun:parseInt(gun),baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular});bildirimGoster('✅ Hikâye kaydedildi!','basari');modalKapat('hikaye');hikayeleriYukle();}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
 }
@@ -960,8 +944,11 @@ async function olcumMetniKaydet(){
   const metin=document.getElementById('o-metin').value.trim(),kelime=document.getElementById('o-kelime').value;
   if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
   if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi-olcum');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
   const btn=document.getElementById('btn-olcum-kaydet');btn.textContent='⏳ Kaydediliyor...';
-  try{await supabase('POST','olcum_metinleri',{yas_grubu:parseInt(grup),baslik,metin,kelime_sayisi:parseInt(kelime)||0});bildirimGoster('✅ Metin kaydedildi!','basari');modalKapat('olcum');olcumMetinleriYukle();}
+  try{await supabase('POST','olcum_metinleri',{yas_grubu:parseInt(grup),baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular});bildirimGoster('✅ Metin kaydedildi!','basari');modalKapat('olcum');olcumMetinleriYukle();}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
 }
@@ -1018,8 +1005,11 @@ async function dersMetniKaydet(){
   const metin=document.getElementById('d-metin').value.trim(),kelime=document.getElementById('d-kelime').value;
   if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
   if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi-ders');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
   const btn=document.getElementById('btn-ders-kaydet');btn.textContent='⏳ Kaydediliyor...';
-  try{await supabase('POST','ders_metinleri',{zorluk,baslik,metin,kelime_sayisi:parseInt(kelime)||0});bildirimGoster('✅ Ders metni kaydedildi!','basari');modalKapat('ders');dersMetinleriYukle();}
+  try{await supabase('POST','ders_metinleri',{zorluk,baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular});bildirimGoster('✅ Ders metni kaydedildi!','basari');modalKapat('ders');dersMetinleriYukle();}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
 }
