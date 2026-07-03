@@ -496,7 +496,7 @@ function menuye() { G.calisiyor = false; clearTimeout(G.timeout); showScreen('sc
 function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
 metinleriYukle();
-function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);}
+function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');let hedef='index.html';if(from==='ogrenci')hedef='ogrenci-panel.html';else if(from==='admin')hedef='admin.html';setTimeout(()=>{window.location.href=hedef;},200);}
 </script>
 </body>
 </html>
