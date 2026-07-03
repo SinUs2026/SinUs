@@ -705,7 +705,7 @@ async function hizKaydet(kod){
   try{await supabase('PATCH','egzersiz_ayarlari',{hiz,guncelleme:new Date().toISOString()},'egzersiz_kodu=eq.'+kod);egzersizHizlari[kod]=hiz;btn.textContent='✅ Kaydedildi';btn.className='btn-kaydet-hiz kaydedildi';setTimeout(()=>{btn.textContent='💾 Hızı Kaydet';btn.className='btn-kaydet-hiz';},2000);bildirimGoster('✅ Hız kaydedildi!','basari');}
   catch(e){bildirimGoster('❌ '+e.message,'hata');btn.textContent='💾 Hızı Kaydet';}
 }
-function egzersizBaslat(url,kod){const slider=document.getElementById('slider-'+kod);const hiz=slider?slider.value:5;window.open(url+'?hiz='+hiz+'&from=admin','sinus_egzersiz_onizleme');}
+function egzersizBaslat(url,kod){const slider=document.getElementById('slider-'+kod);const hiz=slider?slider.value:5;window.location.href=url+'?hiz='+hiz+'&from=admin';}
 
 // ── AŞAMA SAYFALARI (program yönetimini içine alır) ──
 // NOT: Aşama 1 kaldırıldı. Veritabanı uyumluluğu için eski asama numaraları (2,3,4)
@@ -759,7 +759,7 @@ function gunDetayAc(asamaNo,gun,btnEl){
     <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1.5px solid #f1f5f9">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <span class="kart-baslik">${gun}. Günün Programı</span>
-        <a href="program-yonetimi.html?from=admin&asama=${asamaNo}&gun=${gun}" target="_blank" class="islem-btn program">✏️ Bu Günü Düzenle</a>
+        <a href="program-yonetimi.html?from=admin&asama=${asamaNo}&gun=${gun}" class="islem-btn program">✏️ Bu Günü Düzenle</a>
       </div>
       <div id="gun-icerik-${asamaNo}-${gun}"><div class="bos-durum">⏳ Yükleniyor...</div></div>
     </div>`;
