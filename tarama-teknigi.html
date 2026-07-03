@@ -376,29 +376,42 @@ function duraklariOlustur(satirlar) {
 
 function oyunuBaslat() {
   if (!G.seciliMetin) return;
-  metinGoster(G.seciliMetin.metin);
-  const satirlar = satirlariHesapla();
-  G.duraklar = duraklariOlustur(satirlar);
   G.mevcutDurak = -1;
   G.calisiyor = false;
 
+  // Önce ekranı görünür yap, metni bas — satır ölçümü ancak ekran görünürken doğru çalışır
   showScreen('screenOyun');
-  document.getElementById('hudMetin').textContent = G.seciliMetin.baslik.substring(0, 15) + (G.seciliMetin.baslik.length > 15 ? '...' : '');
-  document.getElementById('hudHiz').textContent = G.kpm + ' KPM';
-  document.getElementById('oyunHizSlider').value = G.kpm;
-  document.getElementById('oyunHizDeger').textContent = G.kpm + ' KPM';
-  document.getElementById('oyunSesBtn').classList.toggle('acik', G.sesAcik);
-  document.getElementById('oyunSesBtn').textContent = G.sesAcik ? '🎵 Metronom: Açık' : '🔇 Metronom: Kapalı';
-  document.getElementById('bittiOverlay').classList.remove('gorulur');
-  document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
-  ilerlemeGuncelle();
+  metinGoster(G.seciliMetin.metin);
 
-  document.getElementById('durumMsg').textContent = 'BAŞLIYOR...';
-  G.timeout = setTimeout(() => {
-    document.getElementById('durumMsg').textContent = '';
-    G.calisiyor = true;
-    ilerletDurak();
-  }, 1000);
+  // Font tam yüklenmeden ölçüm yapılırsa satırlar yanlış hesaplanabilir; garantiye alalım
+  const olcumVeBaslangic = () => {
+    const satirlar = satirlariHesapla();
+    G.duraklar = duraklariOlustur(satirlar);
+
+    document.getElementById('hudMetin').textContent = G.seciliMetin.baslik.substring(0, 15) + (G.seciliMetin.baslik.length > 15 ? '...' : '');
+    document.getElementById('hudHiz').textContent = G.kpm + ' KPM';
+    document.getElementById('oyunHizSlider').value = G.kpm;
+    document.getElementById('oyunHizDeger').textContent = G.kpm + ' KPM';
+    document.getElementById('oyunSesBtn').classList.toggle('acik', G.sesAcik);
+    document.getElementById('oyunSesBtn').textContent = G.sesAcik ? '🎵 Metronom: Açık' : '🔇 Metronom: Kapalı';
+    document.getElementById('bittiOverlay').classList.remove('gorulur');
+    document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
+    ilerlemeGuncelle();
+
+    document.getElementById('durumMsg').textContent = 'BAŞLIYOR...';
+    G.timeout = setTimeout(() => {
+      document.getElementById('durumMsg').textContent = '';
+      G.calisiyor = true;
+      ilerletDurak();
+    }, 1000);
+  };
+
+  // Font tam yüklenmişse hemen, yüklenmemişse yüklenince ölç
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(olcumVeBaslangic);
+  } else {
+    setTimeout(olcumVeBaslangic, 50);
+  }
 }
 
 function ilerletDurak() {
