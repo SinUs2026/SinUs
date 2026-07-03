@@ -102,12 +102,11 @@ nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:cente
   <div class="secici-kart">
     <div class="secici-row">
       <div class="secici-grup">
-        <label>Aşama</label>
+        <label>Seviye</label>
         <select class="secici-select" id="secAsama">
-          <option value="1">1. Aşama – Okuma Temeli</option>
-          <option value="2">2. Aşama – Akıcı Okuma</option>
-          <option value="3">3. Aşama – Hız + Anlama</option>
-          <option value="4">4. Aşama – Sınav Odaklı</option>
+          <option value="2">Seviye-1</option>
+          <option value="3">Seviye-2</option>
+          <option value="4">Seviye-3</option>
         </select>
       </div>
       <div class="secici-grup">
@@ -126,8 +125,8 @@ nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:cente
     <div class="hizli-grid">
       <button class="hizli-btn" onclick="sablonUygula('temel')">🔤 Göz Egzersizi Temel<span>Sağ-Sol + Yukarı-Aşağı</span></button>
       <button class="hizli-btn" onclick="sablonUygula('akici')">📖 Akıcılık Programı<span>Göz + Akan Kelime + ORP</span></button>
-      <button class="hizli-btn" onclick="sablonUygula('hiz')">🚀 Hız Programı<span>Göz + Parça + İleri Akış</span></button>
-      <button class="hizli-btn" onclick="sablonUygula('anlama')">🧠 Anlama Programı<span>Göz + Ana Fikir + Hedef</span></button>
+      <button class="hizli-btn" onclick="sablonUygula('hiz')">🚀 Hız Programı<span>Göz + Sayı Avı + İleri Akış</span></button>
+      <button class="hizli-btn" onclick="sablonUygula('anlama')">🧠 Anlama Programı<span>Göz + Merkez Nokta + Tarama Tekniği</span></button>
     </div>
   </div>
 
@@ -186,15 +185,15 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const EGZERSIZLER={
   goz:[{dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip'},{dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip'},{dosya:'goz-sekil.html',isim:'Şekil Takibi'},{dosya:'goz-genel.html',isim:'Genel Hareket'},{dosya:'goz-sarkac.html',isim:'Sarkaç Takibi'}],
   odak:[{dosya:'meteor-takibi.html',isim:'Meteor Takibi'},{dosya:'ev-takibi.html',isim:'Ev Takibi'},{dosya:'sayi-avi.html',isim:'Sayı Avı'},{dosya:'merkez-nokta.html',isim:'Merkez Nokta'},{dosya:'gizli-nesne.html',isim:'Gizli Nesne'}],
-  okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'parca-yakalama.html',isim:'Parça Yakalama'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'ana-fikir.html',isim:'Ana Fikir Avcısı'},{dosya:'hedef-kelime.html',isim:'Hedef Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'}]
+  okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin (Silinen Cümle)'},{dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'},{dosya:'tarama-teknigi.html',isim:'Tarama Tekniği'},{dosya:'beliren-metin.html',isim:'Beliren Metin'}]
 };
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
 const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği'};
 const SABLONLAR={
   temel:[{tip:'goz',dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip',sure:2},{tip:'goz',dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip',sure:2}],
   akici:[{tip:'goz',dosya:'goz-sarkac.html',isim:'Sarkaç Takibi',sure:2},{tip:'odak',dosya:'meteor-takibi.html',isim:'Meteor Takibi',sure:3},{tip:'okuma',dosya:'akan-kelime.html',isim:'Akan Kelime',sure:5},{tip:'okuma',dosya:'orp-okuma.html',isim:'ORP Okuma',sure:5}],
-  hiz:[{tip:'goz',dosya:'goz-sarkac.html',isim:'Sarkaç Takibi',sure:2},{tip:'odak',dosya:'sayi-avi.html',isim:'Sayı Avı',sure:3},{tip:'okuma',dosya:'parca-yakalama.html',isim:'Parça Yakalama',sure:5},{tip:'okuma',dosya:'ileri-akis.html',isim:'İleri Akış',sure:5}],
-  anlama:[{tip:'goz',dosya:'goz-genel.html',isim:'Genel Hareket',sure:2},{tip:'odak',dosya:'merkez-nokta.html',isim:'Merkez Nokta',sure:3},{tip:'okuma',dosya:'ana-fikir.html',isim:'Ana Fikir Avcısı',sure:5},{tip:'okuma',dosya:'hedef-kelime.html',isim:'Hedef Kelime',sure:5}]
+  hiz:[{tip:'goz',dosya:'goz-sarkac.html',isim:'Sarkaç Takibi',sure:2},{tip:'odak',dosya:'sayi-avi.html',isim:'Sayı Avı',sure:3},{tip:'okuma',dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)',sure:5},{tip:'okuma',dosya:'ileri-akis.html',isim:'İleri Akış',sure:5}],
+  anlama:[{tip:'goz',dosya:'goz-genel.html',isim:'Genel Hareket',sure:2},{tip:'odak',dosya:'merkez-nokta.html',isim:'Merkez Nokta',sure:3},{tip:'okuma',dosya:'tarama-teknigi.html',isim:'Tarama Tekniği',sure:5},{tip:'okuma',dosya:'orp-okuma.html',isim:'ORP Okuma',sure:5}]
 };
 
 let mevcutGorevler=[];
@@ -214,7 +213,8 @@ function tipSec(tip){
 async function programYukle(){
   const asama=document.getElementById('secAsama').value;
   const gun=document.getElementById('secGun').value;
-  document.getElementById('programBaslik').textContent=asama+'. Aşama · '+gun+'. Gün';
+  const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
+  document.getElementById('programBaslik').textContent=(SEVIYE_ADI[asama]||asama+'. Aşama')+' · '+gun+'. Gün';
   document.getElementById('kaydetBtn').disabled=false;
   document.getElementById('hizliDoldurKart').style.display='block';
   try{
