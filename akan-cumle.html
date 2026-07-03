@@ -26,6 +26,8 @@ body::before {
 .header { display:flex; justify-content:space-between; align-items:center; padding:8px 0 16px; }
 .logo { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; color:var(--accent); letter-spacing:3px; }
 .logo span { color:var(--white); }
+.ust-geri-btn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:var(--white); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1.05rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; }
+.ust-geri-btn:hover { background:rgba(255,255,255,0.16); border-color:var(--accent); color:var(--accent); }
 .mod-pill { background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:5px 14px; font-size:0.78rem; color:var(--accent); font-weight:700; }
 .screen { display:none; flex-direction:column; align-items:center; flex:1; }
 .screen.active { display:flex; }
@@ -147,7 +149,10 @@ body::before {
 <body>
 <div id="app">
   <div class="header">
-    <div class="logo">Sin<span>Us</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="ust-geri-btn" onclick="sinusTamamlandiSinyalGonderVeDon()" title="Panele Dön">←</button>
+      <div class="logo">Sin<span>Us</span></div>
+    </div>
     <div class="mod-pill">📜 Akan Cümle</div>
   </div>
 
@@ -174,12 +179,12 @@ body::before {
       <h3>HIZ AYARI</h3>
       <div class="ayar-satir">
         <span class="ayar-etiket">KPM (Kelime/Dakika)</span>
-        <input type="range" class="ayar-slider" id="hizSlider" min="100" max="1000" step="10" value="150"
+        <input type="range" class="ayar-slider" id="hizSlider" min="50" max="1000" step="50" value="150"
           oninput="hizGuncelle(this.value)">
         <span class="ayar-deger" id="hizDeger">150 KPM</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--grey);margin-top:-4px">
-        <span>100 (Yavaş)</span><span>500 (Orta)</span><span>1000 (Hızlı)</span>
+        <span>50 (Yavaş)</span><span>500 (Orta)</span><span>1000 (Hızlı)</span>
       </div>
     </div>
 
@@ -222,7 +227,7 @@ body::before {
 
     <div class="oyun-hiz-row">
       <span class="oyun-hiz-lbl">Hız:</span>
-      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="100" max="1000" step="10" value="150"
+      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="50" max="1000" step="50" value="150"
         oninput="oyunHizGuncelle(this.value)">
       <span class="oyun-hiz-deger" id="oyunHizDeger">150 KPM</span>
     </div>
