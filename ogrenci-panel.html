@@ -361,7 +361,13 @@ function gorevListesiOlustur(){
 }
 
 function gorevUrl(g){
-  return (g.dosya||'#')+'?from=ogrenci';
+  let url=(g.dosya||'#')+'?from=ogrenci';
+  if(g.hiz!==undefined && g.hiz!==null){
+    url+='&hiz='+g.hiz+'&kilitli=1';
+    if(g.sure!==undefined && g.sure!==null) url+='&sure='+g.sure;
+    if(g.metin_id!==undefined && g.metin_id!==null) url+='&metin_id='+g.metin_id;
+  }
+  return url;
 }
 
 function gorevAc(idx,url){
