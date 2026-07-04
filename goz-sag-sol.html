@@ -70,7 +70,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
     <div class="game-title">SAĞ-SOL TAKİP</div>
     <div class="game-sub">YATAY GÖZ KASI EGZERSİZİ</div>
 
-    <div class="menu-card">
+    <div class="menu-card" id="kartHiz">
       <h3>HIZ (1 = En Yavaş, 10 = En Hızlı)</h3>
       <div class="hiz-wrap">
         <input type="range" class="hiz-slider" id="hizSlider" min="1" max="10" value="3" oninput="document.getElementById('hizDeger').textContent=this.value">
@@ -78,7 +78,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       </div>
     </div>
 
-    <div class="menu-card">
+    <div class="menu-card" id="kartSure">
       <h3>SÜRE</h3>
       <div class="sure-grid">
         <div class="sure-btn sel" onclick="selSure(60,this)">1 Dakika</div>
@@ -97,7 +97,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       </div>
     </div>
 
-    <button class="start-btn" onclick="baslat()">BAŞLAT ▶</button>
+    <button class="start-btn" id="mainStartBtn" onclick="baslat()">BAŞLAT ▶</button>
     <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
   </div>
 
@@ -121,7 +121,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       <div class="nokta" id="nokta"></div>
     </div>
 
-    <button class="geri-btn" onclick="durdur()">⏹ Durdur</button>
+    <button class="geri-btn" id="durdurBtn" onclick="durdur()">⏹ Durdur</button>
   </div>
 
   <!-- BİTTİ -->
@@ -130,7 +130,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       <span class="bitti-icon">✅</span>
       <div class="bitti-baslik">EGZERSİZ TAMAM!</div>
       <div class="bitti-alt" id="bittiAlt">Harika iş! Gözlerini dinlendir.</div>
-      <div class="btn-row">
+      <div class="btn-row" id="bittiBtnRow">
         <button class="btn-play" onclick="tekrar()">▶ TEKRAR</button>
         <button class="btn-back" onclick="menuye()">MENÜ</button>
       </div>
@@ -149,6 +149,23 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
 })();
 
 let G = {hiz:3, sure:60, animId:null, sureInt:null, baslangic:0, x:0, yon:1};
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci hız/süre seçemez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz'));
+const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika olarak gelir
+
+function kilitliModuBaslat(){
+  document.getElementById('kartHiz').style.display='none';
+  document.getElementById('kartSure').style.display='none';
+  if(!isNaN(HIZ_PARAM)) G.hiz = Math.min(10, Math.max(1, HIZ_PARAM));
+  if(!isNaN(SURE_PARAM_DK)) G.sure = SURE_PARAM_DK * 60;
+  document.getElementById('backBtn').style.display='none';
+  document.getElementById('durdurBtn').style.display='none';
+  document.getElementById('bittiBtnRow').innerHTML = '';
+}
+if(KILITLI){ kilitliModuBaslat(); }
 
 function selSure(s, el){
   G.sure = s;
@@ -182,7 +199,7 @@ document.addEventListener('webkitfullscreenchange', ()=>{
 });
 
 function baslat(){
-  G.hiz = parseInt(document.getElementById('hizSlider').value);
+  if(!KILITLI){ G.hiz = parseInt(document.getElementById('hizSlider').value); }
   G.baslangic = Date.now();
   G.x = 10;
   G.yon = 1;
@@ -219,6 +236,11 @@ function bitti(){
   showScreen('screenBitti');
   tamEkrandanCik();
   gorevTamamlandiSinyaliGonder(sure);
+  if(KILITLI){
+    const from = new URLSearchParams(window.location.search).get('from');
+    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+  }
 }
 
 // ── PANELe TAMAMLANMA SİNYALİ ──
