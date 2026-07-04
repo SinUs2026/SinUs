@@ -102,6 +102,7 @@
   .countdown-circle { width:60px; height:60px; border-radius:50%; background:rgba(0,212,255,0.1); border:2px solid rgba(0,212,255,0.4); display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:1.4rem; font-weight:700; color:var(--accent); }
   .geri-btn { margin-top:12px; color:rgba(138,168,204,0.8); font-size:0.8rem; text-decoration:none; display:block; text-align:center; padding:8px; background:none; border:none; cursor:pointer; font-family:'Nunito',sans-serif; }
   .geri-btn:hover { color:var(--white); }
+  .kilitli-sure-bar { width:100%; max-width:480px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,215,0,0.3); border-radius:12px; padding:8px 14px; margin-bottom:14px; text-align:center; font-size:0.8rem; color:var(--gold); font-weight:700; }
   @media(max-width:480px) { .house-svg-wrap{height:200px} .house-svg{width:210px;height:180px} .dual-house-row{gap:8px} .dual-house-wrap{max-width:160px} }
 </style>
 </head>
@@ -141,12 +142,13 @@
         <div class="answer-mode-btn" data-am="input" onclick="selectAnswerMode('input',this)">✏️ Sayı Gir</div>
       </div>
     </div>
-    <button class="start-btn" onclick="startGame()">OYUNU BAŞLAT ▶</button>
+    <button class="start-btn" id="mainStartBtn" onclick="startGame()">OYUNU BAŞLAT ▶</button>
     <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
   </div>
 
   <!-- OYUN -->
   <div id="screenGame" class="screen">
+    <div class="kilitli-sure-bar" id="kilitliSureBar" style="display:none">⏱ Kalan süre: <span id="kilitliSureKalan">—</span></div>
     <div class="game-info-bar">
       <div class="info-item"><div class="info-label">Seviye</div><div class="info-value" id="infoLevel">1</div></div>
       <div class="info-item"><div class="info-label">İşlem</div><div class="info-value" id="infoStep">0/0</div></div>
@@ -204,7 +206,7 @@
     </div>
     <div class="countdown-wrap" id="countdownWrap" style="display:none"><div class="countdown-circle" id="countdownNum">3</div></div>
     <div class="waiting-msg" id="waitingMsg" style="display:none">HAZIR OL...</div>
-    <button class="geri-btn" onclick="goMenu()" style="margin-top:auto">← Menüye Dön</button>
+    <button class="geri-btn" id="menuDonBtn" onclick="goMenu()" style="margin-top:auto">← Menüye Dön</button>
   </div>
 
   <!-- SORU -->
@@ -247,7 +249,7 @@
         <div class="stat-item"><div class="stat-num" id="statWrong">0</div><div class="stat-lbl">Yanlış</div></div>
         <div class="stat-item"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">Toplam Puan</div></div>
       </div>
-      <div class="action-row">
+      <div class="action-row" id="resultActionRow">
         <button class="btn-next" onclick="playAgain()">▶ TEKRAR OYNA</button>
         <button class="btn-menu" onclick="goMenu()">MENÜ</button>
       </div>
@@ -271,6 +273,74 @@
 
 const S = { level:1, mod:1, answerMode:'choice', score:0, streak:0, correct:0, wrong:0, steps:[], currentStep:0, answer:0, answerL:0, answerR:0, startTime:0 };
 const LEVEL_CONFIG = { 1:{minSteps:3,maxSteps:5,maxPeople:2,animMs:2000}, 2:{minSteps:5,maxSteps:8,maxPeople:3,animMs:1500}, 3:{minSteps:8,maxSteps:12,maxPeople:5,animMs:1000}, 4:{minSteps:12,maxSteps:20,maxPeople:7,animMs:500} };
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci seviye/mod seçemez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz'));
+const SURE_PARAM = parseInt(_kParams.get('sure')); // dakika
+let kilitliBitisZamani = null;
+let kilitliSureInterval = null;
+
+function kilitliModuBaslat(){
+  document.querySelectorAll('#screenMenu .menu-card').forEach(k=>k.style.display='none');
+  if(!isNaN(HIZ_PARAM)) S.level = Math.min(4, Math.max(1, HIZ_PARAM));
+  S.mod = 1;
+  S.answerMode = 'choice';
+  document.getElementById('backBtn').style.display='none';
+  document.getElementById('menuDonBtn').style.display='none';
+  document.getElementById('resultActionRow').innerHTML = '<button class="btn-next" style="max-width:100%" onclick="kilitliDevamEt()">▶ DEVAM ET</button>';
+  const startBtn = document.getElementById('mainStartBtn');
+  startBtn.textContent = '▶ BAŞLA';
+  startBtn.onclick = function(){
+    if(!isNaN(SURE_PARAM)) kilitliSureyiBaslat(SURE_PARAM);
+    startGame();
+  };
+}
+
+function kilitliSureyiBaslat(dakika){
+  kilitliBitisZamani = Date.now() + dakika*60000;
+  document.getElementById('kilitliSureBar').style.display='block';
+  clearInterval(kilitliSureInterval);
+  kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
+  kilitliSureGuncelle();
+}
+
+function kilitliSureGuncelle(){
+  if(kilitliBitisZamani===null) return;
+  const kalanMs = kilitliBitisZamani - Date.now();
+  if(kalanMs <= 0){
+    document.getElementById('kilitliSureKalan').textContent='0:00';
+    clearInterval(kilitliSureInterval);
+    return;
+  }
+  const dk = Math.floor(kalanMs/60000);
+  const sn = Math.floor((kalanMs%60000)/1000);
+  document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
+}
+
+function kilitliSureBittiMi(){
+  return kilitliBitisZamani !== null && Date.now() >= kilitliBitisZamani;
+}
+
+function kilitliDevamEt(){
+  if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
+  startGame();
+}
+
+function kilitliGoreviBitir(){
+  clearInterval(kilitliSureInterval);
+  gorevTamamlandiSinyaliGonder();
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  showScreen('screenMenu');
+  document.getElementById('screenMenu').innerHTML = `
+    <div class="game-title">✅ Süre Doldu!</div>
+    <div class="game-subtitle">Görev tamamlandı, panele dönebilirsin.</div>
+    <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+}
+
+if(KILITLI){ kilitliModuBaslat(); }
 
 function selectLevel(n,el){S.level=n;document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
 function selectMod(n,el){S.mod=n;document.querySelectorAll('.mod-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
@@ -328,9 +398,13 @@ function checkAnswer(given,correct,btn){document.querySelectorAll('.choice-btn')
 function submitNumberAnswer(){const val=parseInt(document.getElementById('numberInput').value);if(isNaN(val))return;showResult(val===S.answer,S.answer);}
 function submitDualAnswer(){const l=parseInt(document.getElementById('dqLeft').value);const r=parseInt(document.getElementById('dqRight').value);if(isNaN(l)||isNaN(r))return;showResultDual(l===S.answerL&&r===S.answerR);}
 
-function showResult(isCorrect,correct){const elapsed=((Date.now()-S.startTime)/1000).toFixed(1);let points=0;if(isCorrect){S.correct++;S.streak++;points=100;if(S.streak>=10)points+=250;else if(S.streak>=5)points+=100;else if(S.streak>=3)points+=50;S.score+=points;}else{S.wrong++;S.streak=0;}updateHeaderScore();showScreen('screenResult');document.getElementById('resultIcon').textContent=isCorrect?'🎉':'😞';document.getElementById('resultTitle').textContent=isCorrect?'DOĞRU!':'YANLIŞ!';document.getElementById('resultTitle').className='result-title '+(isCorrect?'correct':'wrong');document.getElementById('resultDetail').textContent=isCorrect?'Harika! Cevap: '+correct+' | Süre: '+elapsed+' sn':'Doğru cevap: '+correct+' kişi | Süre: '+elapsed+' sn';document.getElementById('resultPoints').textContent=isCorrect?'+'+points+' ⚡':'';const sm=document.getElementById('streakMsg');if(S.streak>=10)sm.textContent='🔥 10 Seri! +250 Bonus!';else if(S.streak>=5)sm.textContent='🔥 5 Seri! +100 Bonus!';else if(S.streak>=3)sm.textContent='🔥 3 Seri! +50 Bonus!';else sm.textContent='';document.getElementById('statCorrect').textContent=S.correct;document.getElementById('statWrong').textContent=S.wrong;document.getElementById('statTotal').textContent=S.score;}
+function showResult(isCorrect,correct){const elapsed=((Date.now()-S.startTime)/1000).toFixed(1);let points=0;if(isCorrect){S.correct++;S.streak++;points=100;if(S.streak>=10)points+=250;else if(S.streak>=5)points+=100;else if(S.streak>=3)points+=50;S.score+=points;}else{S.wrong++;S.streak=0;}updateHeaderScore();showScreen('screenResult');document.getElementById('resultIcon').textContent=isCorrect?'🎉':'😞';document.getElementById('resultTitle').textContent=isCorrect?'DOĞRU!':'YANLIŞ!';document.getElementById('resultTitle').className='result-title '+(isCorrect?'correct':'wrong');document.getElementById('resultDetail').textContent=isCorrect?'Harika! Cevap: '+correct+' | Süre: '+elapsed+' sn':'Doğru cevap: '+correct+' kişi | Süre: '+elapsed+' sn';document.getElementById('resultPoints').textContent=isCorrect?'+'+points+' ⚡':'';const sm=document.getElementById('streakMsg');if(S.streak>=10)sm.textContent='🔥 10 Seri! +250 Bonus!';else if(S.streak>=5)sm.textContent='🔥 5 Seri! +100 Bonus!';else if(S.streak>=3)sm.textContent='🔥 3 Seri! +50 Bonus!';else sm.textContent='';document.getElementById('statCorrect').textContent=S.correct;document.getElementById('statWrong').textContent=S.wrong;document.getElementById('statTotal').textContent=S.score;
+  if(KILITLI){ if(kilitliSureBittiMi()) setTimeout(kilitliGoreviBitir,900); }
+}
 
-function showResultDual(isCorrect){let points=0;if(isCorrect){S.correct++;S.streak++;points=100;if(S.streak>=10)points+=250;else if(S.streak>=5)points+=100;else if(S.streak>=3)points+=50;S.score+=points;}else{S.wrong++;S.streak=0;}updateHeaderScore();showScreen('screenResult');document.getElementById('resultIcon').textContent=isCorrect?'🎉':'😞';document.getElementById('resultTitle').textContent=isCorrect?'DOĞRU!':'YANLIŞ!';document.getElementById('resultTitle').className='result-title '+(isCorrect?'correct':'wrong');document.getElementById('resultDetail').textContent=isCorrect?'Mükemmel! Sol: '+S.answerL+', Sağ: '+S.answerR:'Doğru → Sol: '+S.answerL+', Sağ: '+S.answerR;document.getElementById('resultPoints').textContent=isCorrect?'+'+points+' ⚡':'';const sm=document.getElementById('streakMsg');if(S.streak>=10)sm.textContent='🔥 10 Seri! +250 Bonus!';else if(S.streak>=5)sm.textContent='🔥 5 Seri! +100 Bonus!';else if(S.streak>=3)sm.textContent='🔥 3 Seri! +50 Bonus!';else sm.textContent='';document.getElementById('statCorrect').textContent=S.correct;document.getElementById('statWrong').textContent=S.wrong;document.getElementById('statTotal').textContent=S.score;}
+function showResultDual(isCorrect){let points=0;if(isCorrect){S.correct++;S.streak++;points=100;if(S.streak>=10)points+=250;else if(S.streak>=5)points+=100;else if(S.streak>=3)points+=50;S.score+=points;}else{S.wrong++;S.streak=0;}updateHeaderScore();showScreen('screenResult');document.getElementById('resultIcon').textContent=isCorrect?'🎉':'😞';document.getElementById('resultTitle').textContent=isCorrect?'DOĞRU!':'YANLIŞ!';document.getElementById('resultTitle').className='result-title '+(isCorrect?'correct':'wrong');document.getElementById('resultDetail').textContent=isCorrect?'Mükemmel! Sol: '+S.answerL+', Sağ: '+S.answerR:'Doğru → Sol: '+S.answerL+', Sağ: '+S.answerR;document.getElementById('resultPoints').textContent=isCorrect?'+'+points+' ⚡':'';const sm=document.getElementById('streakMsg');if(S.streak>=10)sm.textContent='🔥 10 Seri! +250 Bonus!';else if(S.streak>=5)sm.textContent='🔥 5 Seri! +100 Bonus!';else if(S.streak>=3)sm.textContent='🔥 3 Seri! +50 Bonus!';else sm.textContent='';document.getElementById('statCorrect').textContent=S.correct;document.getElementById('statWrong').textContent=S.wrong;document.getElementById('statTotal').textContent=S.score;
+  if(KILITLI){ if(kilitliSureBittiMi()) setTimeout(kilitliGoreviBitir,900); }
+}
 
 function playAgain(){startGame();}
 function goMenu(){gorevTamamlandiSinyaliGonder();showScreen('screenMenu');}
