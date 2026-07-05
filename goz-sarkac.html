@@ -63,14 +63,14 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
     <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">🕰️</div>
     <div class="game-title">SARKAÇ TAKİBİ</div>
     <div class="game-sub">RİTMİK GÖZ KASI EGZERSİZİ</div>
-    <div class="menu-card">
+    <div class="menu-card" id="kartHiz">
       <h3>HIZ (1 = En Yavaş, 10 = En Hızlı)</h3>
       <div class="hiz-wrap">
         <input type="range" class="hiz-slider" id="hizSlider" min="1" max="10" value="3" oninput="document.getElementById('hizDeger').textContent=this.value">
         <div class="hiz-deger" id="hizDeger">3</div>
       </div>
     </div>
-    <div class="menu-card">
+    <div class="menu-card" id="kartSure">
       <h3>SÜRE</h3>
       <div class="sure-grid">
         <div class="sure-btn sel" onclick="selSure(60,this)">1 Dakika</div>
@@ -87,7 +87,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
         ⏱️ Süre bitince egzersiz tamamlanır
       </div>
     </div>
-    <button class="start-btn" onclick="baslat()">BAŞLAT ▶</button>
+    <button class="start-btn" id="mainStartBtn" onclick="baslat()">BAŞLAT ▶</button>
     <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
   </div>
 
@@ -104,7 +104,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       <div class="sarkac-ip" id="sarkacIp"></div>
       <div class="nokta" id="nokta"></div>
     </div>
-    <button class="geri-btn" onclick="durdur()">⏹ Durdur</button>
+    <button class="geri-btn" id="durdurBtn" onclick="durdur()">⏹ Durdur</button>
   </div>
 
   <!-- BİTTİ -->
@@ -113,7 +113,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       <span class="bitti-icon">✅</span>
       <div class="bitti-baslik">EGZERSİZ TAMAM!</div>
       <div class="bitti-alt" id="bittiAlt">Harika iş! Gözlerini dinlendir.</div>
-      <div class="btn-row">
+      <div class="btn-row" id="bittiBtnRow">
         <button class="btn-play" onclick="tekrar()">▶ TEKRAR</button>
         <button class="btn-back" onclick="menuye()">MENÜ</button>
       </div>
@@ -132,20 +132,34 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
 })();
 
 let G={hiz:3,sure:60,animId:null,sureInt:null,baslangic:0,t:0};
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci hız/süre seçemez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz'));
+const SURE_PARAM_DK = parseInt(_kParams.get('sure'));
+
+function kilitliModuBaslat(){
+  document.getElementById('kartHiz').style.display='none';
+  document.getElementById('kartSure').style.display='none';
+  if(!isNaN(HIZ_PARAM)) G.hiz = Math.min(10, Math.max(1, HIZ_PARAM));
+  if(!isNaN(SURE_PARAM_DK)) G.sure = SURE_PARAM_DK * 60;
+  document.getElementById('backBtn').style.display='none';
+  document.getElementById('durdurBtn').style.display='none';
+  document.getElementById('bittiBtnRow').innerHTML = '';
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
 function selSure(s,el){G.sure=s;document.querySelectorAll('.sure-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
-function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.style.display='none');document.getElementById(id).style.display='flex';}
+
 function baslat(){
-  G.hiz=parseInt(document.getElementById('hizSlider').value);
+  if(!KILITLI){ G.hiz=parseInt(document.getElementById('hizSlider').value); }
   G.baslangic=Date.now();G.t=0;
   document.getElementById('hudHiz').textContent=G.hiz+'/10';
   document.getElementById('hudSure').textContent=G.sure+'sn';
-  showScreen('screenEgzersiz');tamEkranGirmeyeCalis();
-  const alan=document.getElementById('alan');
-  const W=alan.offsetWidth||600, H=alan.offsetHeight||340;
-  const ip=document.getElementById('sarkacIp');
-  const ipUzunluk=H*0.75;
-  ip.style.height=ipUzunluk+'px';
+  showScreen('screenEgzersiz');
+  tamEkranGirmeyeCalis();
   if(G.sureInt)clearInterval(G.sureInt);
   G.sureInt=setInterval(()=>{
     const kalan=Math.max(0,G.sure-Math.floor((Date.now()-G.baslangic)/1000));
@@ -153,10 +167,21 @@ function baslat(){
     document.getElementById('sureIc').style.width=(kalan/G.sure*100)+'%';
     if(kalan<=0){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);bitti();}
   },500);
+
+  const alan=document.getElementById('alan');
   const nokta=document.getElementById('nokta');
+  const ip=document.getElementById('sarkacIp');
   const hf=G.hiz*0.008;
   const maxAci=Math.PI/3;
+
+  // ÖNEMLİ: W/H artık HER KAREDE yeniden ölçülüyor (bir kere sabitlenip saklanmıyor).
+  // Böylece tam ekrana geçiş anında (ölçüler asenkron değiştiğinde) sarkaç eski küçük
+  // boyuta göre değil, o anki gerçek boyuta göre hesaplanıyor.
   function animate(){
+    const W=alan.clientWidth||600, H=alan.clientHeight||340;
+    const ipUzunluk=H*0.75;
+    ip.style.height=ipUzunluk+'px';
+
     G.t+=hf;
     const aci=maxAci*Math.sin(G.t);
     const noktaX=W/2+Math.sin(aci)*ipUzunluk;
@@ -168,12 +193,24 @@ function baslat(){
   }
   G.animId=requestAnimationFrame(animate);
 }
-function bitti(){const s=Math.floor((Date.now()-G.baslangic)/1000);document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';gorevTamamlandiSinyaliGonder(s);showScreen('screenBitti');tamEkrandanCik();}
+
+function bitti(){
+  const s=Math.floor((Date.now()-G.baslangic)/1000);
+  document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';
+  gorevTamamlandiSinyaliGonder(s);
+  showScreen('screenBitti');
+  tamEkrandanCik();
+  if(KILITLI){
+    const from = new URLSearchParams(window.location.search).get('from');
+    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+  }
+}
 function gorevTamamlandiSinyaliGonder(sureSn){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=sureSn>=(G.sure*0.5)?10:2;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
-function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);menuye();}
+function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();menuye();}
 function tekrar(){baslat();}
-function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);showScreen('screenMenu');tamEkrandanCik();}
-showScreen('screenMenu');tamEkrandanCik();
+function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();showScreen('screenMenu');}
+showScreen('screenMenu');
 function tamEkranGirmeyeCalis(){
   const el = document.documentElement;
   const istek = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
