@@ -159,7 +159,7 @@ body::before {
     <div class="game-title">İLERİ AKIŞ</div>
     <div class="game-sub">REGRESYON AZALTMA EGZERSİZİ</div>
 
-    <div class="ayar-kart">
+    <div class="ayar-kart" id="kartMetinSec">
       <h3>METİN SEÇ</h3>
       <div class="filtre-row">
         <button class="filtre-btn aktif" onclick="filtreUygula('',this)">Tümü</button>
@@ -173,16 +173,16 @@ body::before {
       </div>
     </div>
 
-    <div class="ayar-kart">
+    <div class="ayar-kart" id="kartHiz">
       <h3>HIZ AYARI</h3>
       <div class="ayar-satir">
         <span class="ayar-etiket">KPM (Kelime/Dakika)</span>
-        <input type="range" class="ayar-slider" id="hizSlider" min="100" max="1000" step="10" value="150"
+        <input type="range" class="ayar-slider" id="hizSlider" min="50" max="1000" step="50" value="150"
           oninput="hizGuncelle(this.value)">
         <span class="ayar-deger" id="hizDeger">150 KPM</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--grey);margin-top:-4px">
-        <span>100 (Yavaş)</span><span>500 (Orta)</span><span>1000 (Hızlı)</span>
+        <span>50 (Yavaş)</span><span>500 (Orta)</span><span>1000 (Hızlı)</span>
       </div>
     </div>
 
@@ -211,20 +211,20 @@ body::before {
       <div class="bitti-overlay" id="bittiOverlay">
         <div class="bitti-icon">🚀</div>
         <div class="bitti-yazi">METİN TAMAMLANDI!</div>
-        <div class="bitti-btn-row">
+        <div class="bitti-btn-row" id="bittiBtnRow">
           <button class="btn-bitti btn-bitti-tekrar" onclick="bastanAl()">↺ TEKRAR</button>
           <button class="btn-bitti btn-bitti-menu" onclick="menuye()">☰ MENÜ</button>
         </div>
       </div>
     </div>
 
-    <div class="kontrol-bar">
+    <div class="kontrol-bar" id="kontrolBar">
       <button class="btn-k btn-k-bastan" onclick="bastanAl()">↺</button>
       <button class="btn-k btn-k-durdur" id="durdurBtn" onclick="durdurDevam()">⏸</button>
-      <button class="btn-k btn-k-menu" onclick="menuye()">☰</button>
-      <div class="hiz-mini-row">
+      <button class="btn-k btn-k-menu" id="menuBtn" onclick="menuye()">☰</button>
+      <div class="hiz-mini-row" id="oyunHizRow">
         <span class="hiz-mini-lbl">Hız:</span>
-        <input type="range" class="hiz-mini-slider" id="oyunHizSlider" min="100" max="1000" step="10" value="150"
+        <input type="range" class="hiz-mini-slider" id="oyunHizSlider" min="50" max="1000" step="50" value="150"
           oninput="oyunHizGuncelle(this.value)">
         <span class="hiz-mini-deger" id="oyunHizDeger">150 KPM</span>
       </div>
@@ -251,6 +251,36 @@ const G = {
   baslangicZamani:0,
   duraklananPozisyon:0
 };
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci hızı değiştiremez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz'));
+const METIN_ID_PARAM = _kParams.get('metin_id');
+
+function kilitliModuBaslat(){
+  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
+  document.getElementById('kartHiz').style.display='none';
+  if(METIN_ID_PARAM){
+    document.getElementById('kartMetinSec').style.display='none';
+  }
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
+async function kilitliMetinYukle(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/ders_metinleri?id=eq.'+METIN_ID_PARAM,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const data=await res.json();
+    if(data.length){
+      G.seciliMetin=data[0];
+      document.getElementById('baslaBtn').disabled=false;
+    }else{
+      document.getElementById('metinListe').innerHTML='<div style="text-align:center;color:var(--red);padding:20px">❌ Atanan metin bulunamadı</div>';
+    }
+  }catch(e){
+    document.getElementById('metinListe').innerHTML='<div style="text-align:center;color:var(--red);padding:20px">❌ Metin yüklenemedi</div>';
+  }
+}
 
 async function metinleriYukle() {
   try {
@@ -291,6 +321,7 @@ function oyunuBaslat() {
   metinIc.textContent=G.seciliMetin.metin;
 
   showScreen('screenOyun');
+  if(KILITLI){ document.getElementById('oyunHizRow').style.display='none'; }
 
   // Başlangıç pozisyonu: okuma çizgisi ortada (yüksekliğin %45'i)
   const pencere=document.getElementById('metinPencere');
@@ -354,6 +385,7 @@ function animasyonBaslat() {
     if(G.pozisyon>=metinYukseklik+pencereY) {
       G.calisiyor=false;
       document.getElementById('bittiOverlay').classList.add('gorulur');
+      if(KILITLI){ setTimeout(sinusTamamlandiSinyalGonderVeDon, 1500); }
       return;
     }
 
@@ -398,7 +430,8 @@ function menuye(){G.calisiyor=false;cancelAnimationFrame(G.animId);showScreen('s
 function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
-metinleriYukle();
+if(KILITLI && METIN_ID_PARAM){ kilitliMetinYukle(); } else { metinleriYukle(); }
+
 function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);}
 </script>
 </body>
