@@ -26,6 +26,9 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .sure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .sure-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px;cursor:pointer;text-align:center;color:var(--grey);font-size:0.85rem;}
 .sure-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
+.nokta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.nokta-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px 6px;cursor:pointer;text-align:center;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;transition:all 0.2s;}
+.nokta-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
 .start-btn{width:100%;max-width:500px;padding:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;}
 .geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
 .egzersiz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:16px;}
@@ -33,8 +36,8 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .hud-lbl{font-size:0.6rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
 .hud-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-top:2px;}
 .alan{width:100%;max-width:700px;height:340px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;position:relative;overflow:hidden;margin-bottom:16px;}
-.kilavuz-v{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(0,212,255,0.08);}
-.nokta{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--accent);left:50%;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,212,255,0.8),0 0 40px rgba(0,212,255,0.4);}
+.nokta-isaret{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(0,212,255,0.3);transform:translate(-50%,-50%);}
+.nokta{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,212,255,0.8),0 0 40px rgba(0,212,255,0.4);z-index:2;}
 .sure-bar-wrap{width:100%;max-width:700px;margin-bottom:8px;}
 .sure-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
 .sure-bar-ic{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width 1s linear;}
@@ -65,14 +68,14 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
     <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">↕️</div>
     <div class="game-title">YUKARI-AŞAĞI TAKİP</div>
     <div class="game-sub">DİKEY GÖZ KASI EGZERSİZİ</div>
-    <div class="menu-card">
+    <div class="menu-card" id="kartHiz">
       <h3>HIZ (1 = En Yavaş, 10 = En Hızlı)</h3>
       <div class="hiz-wrap">
         <input type="range" class="hiz-slider" id="hizSlider" min="1" max="10" value="3" oninput="document.getElementById('hizDeger').textContent=this.value">
         <div class="hiz-deger" id="hizDeger">3</div>
       </div>
     </div>
-    <div class="menu-card">
+    <div class="menu-card" id="kartSure">
       <h3>SÜRE</h3>
       <div class="sure-grid">
         <div class="sure-btn sel" onclick="selSure(60,this)">1 Dakika</div>
@@ -80,16 +83,26 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
         <div class="sure-btn" onclick="selSure(180,this)">3 Dakika</div>
       </div>
     </div>
+    <div class="menu-card" id="kartNokta">
+      <h3>NOKTA SAYISI (Z Şeklinde Sütun Taraması)</h3>
+      <div class="nokta-grid">
+        <div class="nokta-btn sel" onclick="selNokta(2,this)">2</div>
+        <div class="nokta-btn" onclick="selNokta(4,this)">4</div>
+        <div class="nokta-btn" onclick="selNokta(6,this)">6</div>
+        <div class="nokta-btn" onclick="selNokta(8,this)">8</div>
+      </div>
+    </div>
     <div class="menu-card">
       <h3>NASIL YAPILIR?</h3>
       <div style="font-size:0.82rem;color:var(--grey);line-height:1.8">
         👁️ Başını <strong style="color:var(--white)">hareket ettirme</strong>, sadece gözlerinle takip et<br>
-        ↕️ Nokta yukarı aşağı gidip gelir<br>
+        ↕️ Nokta yukarıdan aşağı iner, sonra çapraz bir sonraki sütunun üstüne geçer<br>
+        📖 Son sütuna ulaşınca aynı yoldan geri döner<br>
         😌 Rahat ve düzenli bir ritimde takip et<br>
         ⏱️ Süre bitince egzersiz tamamlanır
       </div>
     </div>
-    <button class="start-btn" onclick="baslat()">BAŞLAT ▶</button>
+    <button class="start-btn" id="mainStartBtn" onclick="baslat()">BAŞLAT ▶</button>
     <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
   </div>
 
@@ -101,13 +114,13 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       <div class="hud-item"><div class="hud-lbl">Hız</div><div class="hud-val" id="hudHiz">—</div></div>
     </div>
     <div class="sure-bar-wrap"><div class="sure-bar"><div class="sure-bar-ic" id="sureIc" style="width:100%"></div></div></div>
-    <div class="mesaj">Gözlerinle noktayı takip et ↕</div>
+    <div class="mesaj" id="mesaj">Gözlerinle noktayı takip et ↕</div>
     <div class="alan" id="alan">
       <button class="tam-ekran-btn" onclick="tamEkranToggle()" title="Tam Ekran">⛶</button>
-      <div class="kilavuz-v"></div>
+      <div id="noktaIsaretleri"></div>
       <div class="nokta" id="nokta"></div>
     </div>
-    <button class="geri-btn" onclick="durdur()">⏹ Durdur</button>
+    <button class="geri-btn" id="durdurBtn" onclick="durdur()">⏹ Durdur</button>
   </div>
 
   <!-- BİTTİ -->
@@ -116,7 +129,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       <span class="bitti-icon">✅</span>
       <div class="bitti-baslik">EGZERSİZ TAMAM!</div>
       <div class="bitti-alt" id="bittiAlt">Harika iş! Gözlerini dinlendir.</div>
-      <div class="btn-row">
+      <div class="btn-row" id="bittiBtnRow">
         <button class="btn-play" onclick="tekrar()">▶ TEKRAR</button>
         <button class="btn-back" onclick="menuye()">MENÜ</button>
       </div>
@@ -134,60 +147,37 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
   document.getElementById('backBtn2').href = backUrl;
 })();
 
-let G={hiz:3,sure:60,animId:null,sureInt:null,baslangic:0,y:15,yon:1};
+let G = {
+  hiz:3, sure:60, noktaSayisi:2,
+  noktalar:[{x:50,y:12},{x:50,y:88}],
+  pos:{x:50,y:12}, mevcutIdx:0, yonIdx:1,
+  animId:null, sureInt:null, baslangic:0
+};
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci hız/süre seçemez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz'));
+const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika olarak gelir
+const NOKTA_PARAM = parseInt(_kParams.get('nokta')); // 2/4/6/8 — opsiyonel, admin panelinde henüz seçici yok
+
+function kilitliModuBaslat(){
+  document.getElementById('kartHiz').style.display='none';
+  document.getElementById('kartSure').style.display='none';
+  document.getElementById('kartNokta').style.display='none';
+  if(!isNaN(HIZ_PARAM)) G.hiz = Math.min(10, Math.max(1, HIZ_PARAM));
+  if(!isNaN(SURE_PARAM_DK)) G.sure = SURE_PARAM_DK * 60;
+  if([2,4,6,8].includes(NOKTA_PARAM)) G.noktaSayisi = NOKTA_PARAM;
+  document.getElementById('backBtn').style.display='none';
+  document.getElementById('durdurBtn').style.display='none';
+  document.getElementById('bittiBtnRow').innerHTML = '';
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
 function selSure(s,el){G.sure=s;document.querySelectorAll('.sure-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
-function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
+function selNokta(n,el){G.noktaSayisi=n;document.querySelectorAll('.nokta-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.style.display='none');document.getElementById(id).style.display='flex';}
-function baslat(){
-  G.hiz=parseInt(document.getElementById('hizSlider').value);
-  G.baslangic=Date.now();G.y=15;G.yon=1;
-  document.getElementById('hudHiz').textContent=G.hiz+'/10';
-  document.getElementById('hudSure').textContent=G.sure+'sn';
-  showScreen('screenEgzersiz');tamEkranGirmeyeCalis();
-  if(G.sureInt)clearInterval(G.sureInt);
-  G.sureInt=setInterval(()=>{
-    const kalan=Math.max(0,G.sure-Math.floor((Date.now()-G.baslangic)/1000));
-    document.getElementById('hudSure').textContent=kalan+'sn';
-    document.getElementById('sureIc').style.width=(kalan/G.sure*100)+'%';
-    if(kalan<=0){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);bitti();}
-  },500);
-  const nokta=document.getElementById('nokta');
-  const hf=G.hiz*0.15;
-  function animate(){
-    G.y+=G.yon*hf;
-    if(G.y>=88){G.y=88;G.yon=-1;}
-    if(G.y<=12){G.y=12;G.yon=1;}
-    nokta.style.top=G.y+'%';
-    G.animId=requestAnimationFrame(animate);
-  }
-  G.animId=requestAnimationFrame(animate);
-}
-function bitti(){
-  const s=Math.floor((Date.now()-G.baslangic)/1000);
-  document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';
-  showScreen('screenBitti');tamEkrandanCik();
-  gorevTamamlandiSinyaliGonder(s);
-}
 
-// ── PANELe TAMAMLANMA SİNYALİ ──
-function gorevTamamlandiSinyaliGonder(sureSn){
-  const from = new URLSearchParams(window.location.search).get('from');
-  if(from !== 'ogrenci') return;
-  try{
-    const veri = localStorage.getItem('sinus_bekleyen_gorev');
-    if(!veri) return;
-    const b = JSON.parse(veri);
-    const basarili = sureSn >= (G.sure * 0.5);
-    b.tamamlandiMi = true;
-    b.puan = basarili ? 10 : 2;
-    localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
-  }catch(e){}
-}
-
-function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);menuye();}
-function tekrar(){baslat();}
-function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);showScreen('screenMenu');tamEkrandanCik();}
-showScreen('screenMenu');tamEkrandanCik();
 // ── TAM EKRAN ──
 function tamEkranGirmeyeCalis(){
   const el = document.documentElement;
@@ -207,6 +197,117 @@ document.addEventListener('fullscreenchange', ()=>{
 document.addEventListener('webkitfullscreenchange', ()=>{
   document.body.classList.toggle('tam-ekran-modu', !!document.webkitFullscreenElement);
 });
+
+// Sütunların yatay (%) konumlarını hesaplar. Tek sütunsa (2 nokta) ortada, 10%-90% arası eşit dağıtılır.
+function sutunYuzdeleri(sutunSayisi){
+  if(sutunSayisi <= 1) return [50];
+  const arr=[];
+  for(let i=0;i<sutunSayisi;i++) arr.push(10 + (80*i)/(sutunSayisi-1));
+  return arr;
+}
+
+// Z şeklinde tarama sırası: her sütunda üst->alt, sonra çapraz bir sonraki sütunun üstüne geçer.
+// noktaSayisi=2 → 1 sütun (klasik dikey takip), 4→2 sütun, 6→3 sütun, 8→4 sütun.
+function noktalariOlustur(noktaSayisi){
+  const sutunSayisi = Math.max(1, Math.round(noktaSayisi/2));
+  const xler = sutunYuzdeleri(sutunSayisi);
+  const noktalar = [];
+  xler.forEach(x=>{
+    noktalar.push({x, y:12});
+    noktalar.push({x, y:88});
+  });
+  return noktalar;
+}
+
+function noktaIsaretleriCiz(){
+  const kapsayici = document.getElementById('noktaIsaretleri');
+  kapsayici.innerHTML = G.noktalar.map(p=>`<div class="nokta-isaret" style="left:${p.x}%;top:${p.y}%"></div>`).join('');
+}
+
+function baslat(){
+  if(!KILITLI){ G.hiz = parseInt(document.getElementById('hizSlider').value); }
+  G.noktalar = noktalariOlustur(G.noktaSayisi);
+  G.mevcutIdx = 0;
+  G.yonIdx = 1;
+  G.pos = {x:G.noktalar[0].x, y:G.noktalar[0].y};
+  G.baslangic = Date.now();
+  document.getElementById('hudHiz').textContent = G.hiz + '/10';
+  document.getElementById('hudSure').textContent = G.sure + 'sn';
+  showScreen('screenEgzersiz');
+  noktaIsaretleriCiz();
+  tamEkranGirmeyeCalis();
+  if(G.sureInt) clearInterval(G.sureInt);
+  G.sureInt = setInterval(()=>{
+    const kalan = Math.max(0, G.sure - Math.floor((Date.now()-G.baslangic)/1000));
+    document.getElementById('hudSure').textContent = kalan + 'sn';
+    document.getElementById('sureIc').style.width = (kalan/G.sure*100) + '%';
+    if(kalan <= 0){ clearInterval(G.sureInt); cancelAnimationFrame(G.animId); bitti(); }
+  }, 500);
+  animasyonBaslat();
+}
+
+function animasyonBaslat(){
+  const nokta = document.getElementById('nokta');
+  // NOT: Hız skalası güncellendi — eski "4. kademe" hızı artık "1. kademe" oldu,
+  // diğer kademeler aynı oranla (x4) hızlandırıldı (eskiden G.hiz*0.15 idi).
+  const hizFaktoru = G.hiz * 0.6;
+  nokta.style.left = G.pos.x + '%';
+  nokta.style.top = G.pos.y + '%';
+
+  function animate(){
+    const hedefIdx = G.mevcutIdx + G.yonIdx;
+    const hedef = G.noktalar[hedefIdx];
+    const dx = hedef.x - G.pos.x;
+    const dy = hedef.y - G.pos.y;
+    const mesafe = Math.hypot(dx, dy);
+    if(mesafe <= hizFaktoru){
+      G.pos.x = hedef.x; G.pos.y = hedef.y;
+      G.mevcutIdx = hedefIdx;
+      if(G.mevcutIdx === G.noktalar.length-1) G.yonIdx = -1;
+      else if(G.mevcutIdx === 0) G.yonIdx = 1;
+    } else {
+      G.pos.x += (dx/mesafe) * hizFaktoru;
+      G.pos.y += (dy/mesafe) * hizFaktoru;
+    }
+    nokta.style.left = G.pos.x + '%';
+    nokta.style.top = G.pos.y + '%';
+    G.animId = requestAnimationFrame(animate);
+  }
+  G.animId = requestAnimationFrame(animate);
+}
+
+function bitti(){
+  const s = Math.floor((Date.now()-G.baslangic)/1000);
+  document.getElementById('bittiAlt').textContent = s + ' saniye tamamlandı. Harika iş! Gözlerini dinlendir.';
+  showScreen('screenBitti');
+  tamEkrandanCik();
+  gorevTamamlandiSinyaliGonder(s);
+  if(KILITLI){
+    const from = new URLSearchParams(window.location.search).get('from');
+    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+  }
+}
+
+// ── PANELe TAMAMLANMA SİNYALİ ──
+function gorevTamamlandiSinyaliGonder(sureSn){
+  const from = new URLSearchParams(window.location.search).get('from');
+  if(from !== 'ogrenci') return;
+  try{
+    const veri = localStorage.getItem('sinus_bekleyen_gorev');
+    if(!veri) return;
+    const b = JSON.parse(veri);
+    const basarili = sureSn >= (G.sure * 0.5);
+    b.tamamlandiMi = true;
+    b.puan = basarili ? 10 : 2;
+    localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+  }catch(e){}
+}
+
+function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();menuye();}
+function tekrar(){baslat();}
+function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();showScreen('screenMenu');}
+showScreen('screenMenu');
 </script>
 </body>
 </html>
