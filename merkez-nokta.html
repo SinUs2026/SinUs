@@ -57,6 +57,8 @@ body::before {
 .start-btn { width:100%; max-width:480px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 24px rgba(0,212,255,0.3); }
 .start-btn:hover { transform:translateY(-2px); }
 
+.kilitli-sure-pill { background:rgba(255,215,0,0.08); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px; padding:6px 14px; margin-bottom:10px; text-align:center; font-family:'Orbitron',sans-serif; font-size:0.8rem; font-weight:700; color:var(--gold); width:100%; max-width:480px; }
+
 .game-hud { display:flex; justify-content:space-between; width:100%; padding:10px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-bottom:16px; }
 .hud-item { text-align:center; }
 .hud-lbl { font-size:0.6rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
@@ -132,7 +134,7 @@ body::before {
     <div class="game-title">MERKEZ NOKTA</div>
     <div class="game-sub">PERİFERİK GÖRÜŞ EGZERSİZİ</div>
 
-    <div class="menu-card">
+    <div class="menu-card" id="kartMod">
       <h3>MOD</h3>
       <div class="mod-grid">
         <div class="mod-btn sel" onclick="selMod('sayi',this)"><span class="mi">🔢</span>Sayı Modu</div>
@@ -140,7 +142,15 @@ body::before {
       </div>
     </div>
 
-    <div class="menu-card">
+    <div class="menu-card" id="kartTaraf">
+      <h3>TARAF SAYISI</h3>
+      <div class="mod-grid">
+        <div class="mod-btn sel" onclick="selTarafSayisi(1,this)"><span class="mi">1️⃣</span>Tek Taraf</div>
+        <div class="mod-btn" onclick="selTarafSayisi(2,this)"><span class="mi">2️⃣</span>Çift Taraf (Zor)</div>
+      </div>
+    </div>
+
+    <div class="menu-card" id="kartAsama">
       <h3>AŞAMA — Mesafe & Süre</h3>
       <div class="asama-grid">
         <div class="asama-btn sel" onclick="selAsama(1,this)"><span class="as-n">1</span><span class="as-d">Yakın<br>1.5 sn</span></div>
@@ -155,17 +165,19 @@ body::before {
       <div style="font-size:0.83rem;color:var(--grey);line-height:1.7">
         👁️ Ortadaki mavi noktaya bak, gözünü <strong style="color:var(--white)">oradan ayırma</strong><br>
         ⚡ Sağda veya solda kısa süreliğine bir değer belirir<br>
+        2️⃣ "Çift Taraf" modunda <strong style="color:var(--white)">aynı anda hem sağda hem solda</strong> farklı birer değer belirir, ikisini de hatırlaman gerekir<br>
         🎯 Periferik görüşünle gördüğün değeri seç<br>
         📈 Her doğruda mesafe artar
       </div>
     </div>
 
-    <button class="start-btn" onclick="oyunuBaslat()">BAŞLAT ▶</button>
+    <button class="start-btn" id="mainStartBtn" onclick="oyunuBaslat()">BAŞLAT ▶</button>
     <a id="backBtn" href="#" style="margin-top:12px;color:var(--grey);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;">← Panele Dön</a>
   </div>
 
   <!-- OYUN -->
   <div id="screenGame" class="screen">
+    <div class="kilitli-sure-pill" id="kilitliSurePill" style="display:none">⏱ Toplam Kalan Süre: <span id="kilitliSureKalan">—</span></div>
     <div class="game-hud">
       <div class="hud-item"><div class="hud-lbl">Tur</div><div class="hud-val" id="hudTur">1/10</div></div>
       <div class="hud-item"><div class="hud-lbl">Doğru</div><div class="hud-val" id="hudDogru">0</div></div>
@@ -185,7 +197,8 @@ body::before {
       <div class="merkez-cizgi-h"></div>
       <div class="merkez-cizgi-v"></div>
       <div class="merkez-nokta"></div>
-      <div class="beliren-deger" id="betilenDeger"></div>
+      <div class="beliren-deger" id="betilenDegerSol"></div>
+      <div class="beliren-deger" id="betilenDegerSag"></div>
     </div>
 
     <div class="geri-bildirim" id="geriBildirim"></div>
@@ -194,7 +207,7 @@ body::before {
       <div class="cevap-soru" id="cevapSoru"></div>
       <div class="cevap-grid" id="cevapGrid"></div>
     </div>
-    <button onclick="menuye()" style="margin-top:8px;background:none;border:none;color:var(--grey);font-size:0.78rem;cursor:pointer;font-family:'Nunito',sans-serif;">← Menüye Dön</button>
+    <button id="menuBtn" onclick="menuye()" style="margin-top:8px;background:none;border:none;color:var(--grey);font-size:0.78rem;cursor:pointer;font-family:'Nunito',sans-serif;">← Menüye Dön</button>
   </div>
 
   <!-- SONUÇ -->
@@ -207,7 +220,7 @@ body::before {
         <div><div class="stat-n" id="sYanlis">0</div><div class="stat-l">Yanlış</div></div>
         <div><div class="stat-n" id="sPuan">0</div><div class="stat-l">Puan</div></div>
       </div>
-      <div class="btn-row">
+      <div class="btn-row" id="btnRow">
         <button class="btn-play" onclick="tekrarOyna()">▶ TEKRAR</button>
         <button class="btn-back" onclick="menuye()">MENÜ</button>
       </div>
@@ -216,10 +229,14 @@ body::before {
 </div>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ ──
+// ── PANELe DÖNÜŞ URL'İ + TAMAMLANMA SİNYALİ ──
+// (Önceden backBtn hiçbir sinyal göndermeden direkt yönlendiriyordu — düzeltildi.)
 (function() {
-  const from = new URLSearchParams(window.location.search).get('from');
-  document.getElementById('backBtn').href = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  document.getElementById('backBtn').href = '#';
+  document.getElementById('backBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    sinusTamamlandiSinyalGonderVeDon();
+  });
 })();
 
 const ASAMALAR = {
@@ -232,11 +249,68 @@ const ASAMALAR = {
 const TURLAR = 10;
 
 const G = {
-  mod: 'sayi', asama: 1, tur: 0, dogru: 0, yanlis: 0, seri: 0, puan: 0,
-  mevcutDeger: '', mevcutTaraf: 'sag', cevapBekleniyor: false, timeout: null
+  mod: 'sayi', asama: 1, tarafSayisi: 1, tur: 0, dogru: 0, yanlis: 0, seri: 0, puan: 0,
+  mevcutTaraflar: [], soruIndex: 0, cevapBekleniyor: false, timeout: null
 };
 
-function selMod(m, el) { G.mod = m; document.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci ayar seçemez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz')); // 1-4 arası aşama olarak yorumlanır
+const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika — toplam görev süresi
+const MOD_PARAM = _kParams.get('mod'); // opsiyonel: sayi / harf
+const TARAF_PARAM = parseInt(_kParams.get('taraf')); // opsiyonel: 1 / 2
+let kilitliBitisZamani = null;
+let kilitliSureInterval = null;
+
+function kilitliModuBaslat(){
+  document.getElementById('kartMod').style.display='none';
+  document.getElementById('kartTaraf').style.display='none';
+  document.getElementById('kartAsama').style.display='none';
+  document.getElementById('backBtn').style.display='none';
+  document.getElementById('menuBtn').style.display='none';
+  if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
+  if(MOD_PARAM==='sayi'||MOD_PARAM==='harf') G.mod = MOD_PARAM;
+  if(TARAF_PARAM===1||TARAF_PARAM===2) G.tarafSayisi = TARAF_PARAM;
+  document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
+  document.getElementById('mainStartBtn').onclick = function(){
+    if(!isNaN(SURE_PARAM_DK)) kilitliSureyiBaslat(SURE_PARAM_DK);
+    oyunuBaslat();
+  };
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
+function kilitliSureyiBaslat(dakika){
+  kilitliBitisZamani = Date.now() + dakika*60000;
+  document.getElementById('kilitliSurePill').style.display='block';
+  clearInterval(kilitliSureInterval);
+  kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
+  kilitliSureGuncelle();
+}
+function kilitliSureGuncelle(){
+  if(kilitliBitisZamani===null) return;
+  const kalanMs = kilitliBitisZamani - Date.now();
+  if(kalanMs<=0){ document.getElementById('kilitliSureKalan').textContent='0:00'; clearInterval(kilitliSureInterval); return; }
+  const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
+  document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
+}
+function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
+
+function kilitliGoreviBitir(){
+  clearInterval(kilitliSureInterval);
+  gorevTamamlandiSinyaliGonder();
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  showScreen('screenMenu');
+  document.getElementById('screenMenu').innerHTML = `
+    <div style="font-size:2.5rem;margin-top:8px;margin-bottom:4px">✅</div>
+    <div class="game-title">SÜRE DOLDU!</div>
+    <div class="game-sub">Görev tamamlandı, panele dönebilirsin.</div>
+    <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+}
+
+function selMod(m, el) { G.mod = m; document.querySelectorAll('#kartMod .mod-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
+function selTarafSayisi(n, el) { G.tarafSayisi = n; document.querySelectorAll('#kartTaraf .mod-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
 function selAsama(n, el) { G.asama = n; document.querySelectorAll('.asama-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
 
 function rastgeleDeger() {
@@ -283,27 +357,58 @@ function sonrakiTur() {
   document.getElementById('cevapAlan').style.display = 'none';
   document.getElementById('geriBildirim').textContent = '';
 
-  G.mevcutDeger = rastgeleDeger();
-  G.mevcutTaraf = Math.random() > 0.5 ? 'sag' : 'sol';
-
   const alan = document.getElementById('oyunAlan');
-  const el = document.getElementById('betilenDeger');
   const genislik = alan.offsetWidth;
   const yukseklik = alan.offsetHeight;
   const maxMesafe = genislik * 0.42;
   const mesafePx = Math.min(genislik * ayar.mesafe, maxMesafe);
-  const x = G.mevcutTaraf === 'sag' ? genislik/2 + mesafePx : genislik/2 - mesafePx;
-  const y = yukseklik/2 + (Math.random() - 0.5) * 40;
+  const solEl = document.getElementById('betilenDegerSol');
+  const sagEl = document.getElementById('betilenDegerSag');
+  solEl.classList.remove('gorulur');
+  sagEl.classList.remove('gorulur');
 
-  el.style.left = Math.max(20, Math.min(genislik-20, x)) + 'px';
-  el.style.top = Math.max(20, Math.min(yukseklik-20, y)) + 'px';
-  el.style.transform = 'translate(-50%,-50%)';
-  el.style.fontSize = G.asama <= 2 ? '1.8rem' : '1.4rem';
-  el.textContent = G.mevcutDeger;
-  el.classList.add('gorulur');
+  if (G.tarafSayisi === 2) {
+    // ÇİFT TARAF MODU: aynı anda hem solda hem sağda FARKLI birer değer belirir.
+    let d1 = rastgeleDeger();
+    let d2 = rastgeleDeger();
+    while (d2 === d1) d2 = rastgeleDeger();
+    G.mevcutTaraflar = [ {taraf:'sol', deger:d1}, {taraf:'sag', deger:d2} ];
+
+    solEl.style.left = Math.max(20, genislik/2 - mesafePx) + 'px';
+    solEl.style.top = Math.max(20, Math.min(yukseklik-20, yukseklik/2 + (Math.random()-0.5)*40)) + 'px';
+    solEl.style.transform = 'translate(-50%,-50%)';
+    solEl.style.fontSize = G.asama <= 2 ? '1.8rem' : '1.4rem';
+    solEl.textContent = d1;
+
+    sagEl.style.left = Math.min(genislik-20, genislik/2 + mesafePx) + 'px';
+    sagEl.style.top = Math.max(20, Math.min(yukseklik-20, yukseklik/2 + (Math.random()-0.5)*40)) + 'px';
+    sagEl.style.transform = 'translate(-50%,-50%)';
+    sagEl.style.fontSize = G.asama <= 2 ? '1.8rem' : '1.4rem';
+    sagEl.textContent = d2;
+
+    solEl.classList.add('gorulur');
+    sagEl.classList.add('gorulur');
+  } else {
+    const deger = rastgeleDeger();
+    const taraf = Math.random() > 0.5 ? 'sag' : 'sol';
+    G.mevcutTaraflar = [ {taraf, deger} ];
+
+    const x = taraf === 'sag' ? genislik/2 + mesafePx : genislik/2 - mesafePx;
+    const y = yukseklik/2 + (Math.random() - 0.5) * 40;
+    const el = taraf === 'sag' ? sagEl : solEl;
+    el.style.left = Math.max(20, Math.min(genislik-20, x)) + 'px';
+    el.style.top = Math.max(20, Math.min(yukseklik-20, y)) + 'px';
+    el.style.transform = 'translate(-50%,-50%)';
+    el.style.fontSize = G.asama <= 2 ? '1.8rem' : '1.4rem';
+    el.textContent = deger;
+    el.classList.add('gorulur');
+  }
+
+  G.soruIndex = 0;
 
   G.timeout = setTimeout(() => {
-    el.classList.remove('gorulur');
+    solEl.classList.remove('gorulur');
+    sagEl.classList.remove('gorulur');
     setTimeout(() => cevapSor(), 200);
   }, ayar.sure);
 }
@@ -311,11 +416,15 @@ function sonrakiTur() {
 function cevapSor() {
   if (G.tur > TURLAR) return;
   G.cevapBekleniyor = true;
+  const guncel = G.mevcutTaraflar[G.soruIndex];
   const cevapAlan = document.getElementById('cevapAlan');
   const soru = document.getElementById('cevapSoru');
   const grid = document.getElementById('cevapGrid');
-  soru.innerHTML = G.mevcutTaraf === 'sag' ? '➡️ Sağda ne gördün?' : '⬅️ Solda ne gördün?';
-  const secenekler = yanlisDegerler(G.mevcutDeger);
+  const tarafEtiket = guncel.taraf === 'sag' ? '➡️ Sağda ne gördün?' : '⬅️ Solda ne gördün?';
+  soru.innerHTML = G.mevcutTaraflar.length > 1
+    ? tarafEtiket + ' <span style="opacity:0.6;font-size:0.75rem">(' + (G.soruIndex+1) + '/2)</span>'
+    : tarafEtiket;
+  const secenekler = yanlisDegerler(guncel.deger);
   grid.innerHTML = '';
   secenekler.forEach(s => {
     const btn = document.createElement('button');
@@ -331,7 +440,8 @@ function cevapKontrol(secilen, btn) {
   if (!G.cevapBekleniyor) return;
   G.cevapBekleniyor = false;
   document.querySelectorAll('.cevap-btn').forEach(b => b.onclick = null);
-  const dogru = secilen === G.mevcutDeger;
+  const guncel = G.mevcutTaraflar[G.soruIndex];
+  const dogru = secilen === guncel.deger;
   const gb = document.getElementById('geriBildirim');
   if (dogru) {
     btn.classList.add('dogru');
@@ -342,28 +452,62 @@ function cevapKontrol(secilen, btn) {
     gb.className = 'geri-bildirim dogru';
   } else {
     btn.classList.add('yanlis');
-    document.querySelectorAll('.cevap-btn').forEach(b => { if (b.textContent === G.mevcutDeger) b.classList.add('dogru'); });
+    document.querySelectorAll('.cevap-btn').forEach(b => { if (b.textContent === guncel.deger) b.classList.add('dogru'); });
     G.yanlis++; G.seri = 0;
-    gb.textContent = '✗ Yanlış! Doğrusu: ' + G.mevcutDeger;
+    gb.textContent = '✗ Yanlış! Doğrusu: ' + guncel.deger;
     gb.className = 'geri-bildirim yanlis';
   }
   document.getElementById('hudDogru').textContent = G.dogru;
   document.getElementById('hudSeri').textContent = G.seri + ' 🔥';
   document.getElementById('hudPuan').textContent = G.puan;
   document.getElementById('hScore').textContent = G.puan;
-  setTimeout(() => sonrakiTur(), 1000);
+
+  G.soruIndex++;
+  if (G.soruIndex < G.mevcutTaraflar.length) {
+    setTimeout(() => cevapSor(), 1000);
+  } else {
+    setTimeout(() => sonrakiTur(), 1000);
+  }
 }
 
 function oyunuBitir() {
   document.getElementById('ilerlemeDolu').style.width = '100%';
   const oran = Math.round(G.dogru / TURLAR * 100);
+
+  // ÖNEMLİ DÜZELTME: Bu fonksiyon önceden burada çağrılıyordu ama HİÇBİR YERDE TANIMLI DEĞİLDİ —
+  // JavaScript hatası fırlatıp sonuç ekranının hiç açılmamasına sebep oluyordu. Şimdi tanımlandı.
+  gorevTamamlandiSinyaliGonder();
+
+  if(KILITLI){
+    if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
+    setTimeout(oyunuBaslat, 1200);
+    return;
+  }
+
   document.getElementById('sonucIcon').textContent = oran >= 80 ? '🎯' : oran >= 60 ? '👁️' : '💪';
   document.getElementById('sonucBaslik').textContent = oran >= 80 ? 'MÜKEMMEL!' : oran >= 60 ? 'İYİ İŞ!' : 'DEVAM ET!';
   document.getElementById('sDogru').textContent = G.dogru;
   document.getElementById('sYanlis').textContent = G.yanlis;
   document.getElementById('sPuan').textContent = G.puan;
-  gorevTamamlandiSinyaliGonder();showScreen('screenSonuc');
+  showScreen('screenSonuc');
 }
+
+// ── PANELe TAMAMLANMA SİNYALİ (yönlendirmeden, sadece işaretler) ──
+function gorevTamamlandiSinyaliGonder(){
+  const from = new URLSearchParams(window.location.search).get('from');
+  if(from !== 'ogrenci') return;
+  try{
+    const veri = localStorage.getItem('sinus_bekleyen_gorev');
+    if(!veri) return;
+    const b = JSON.parse(veri);
+    if(b.tamamlandiMi===false){
+      b.tamamlandiMi = true;
+      b.puan = 10;
+      localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+    }
+  }catch(e){}
+}
+function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);}
 
 function tekrarOyna() { oyunuBaslat(); }
 function menuye() { showScreen('screenMenu'); }
