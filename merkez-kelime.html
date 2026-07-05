@@ -146,7 +146,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="game-title">MERKEZ KELİME</div>
     <div class="game-sub">GÖRME ALANI GENİŞLETME</div>
 
-    <div class="ayar-kart">
+    <div class="ayar-kart" id="kartMetinSec">
       <h3>METİN SEÇ</h3>
       <div class="filtre-row">
         <button class="filtre-btn aktif" onclick="filtreUygula('',this)">Tümü</button>
@@ -160,11 +160,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       </div>
     </div>
 
-    <div class="ayar-kart">
+    <div class="ayar-kart" id="kartHiz">
       <h3>HIZ AYARI</h3>
       <div class="ayar-satir">
         <span class="ayar-etiket">KPM (Kelime/Dakika)</span>
-        <input type="range" class="ayar-slider" id="hizSlider" min="100" max="1000" step="10" value="150" oninput="hizGuncelle(this.value)">
+        <input type="range" class="ayar-slider" id="hizSlider" min="50" max="1000" step="50" value="150" oninput="hizGuncelle(this.value)">
         <span class="ayar-deger" id="hizDeger">150 KPM</span>
       </div>
     </div>
@@ -218,12 +218,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="kontrol-row">
       <button class="btn-kontrol btn-bastan" onclick="bastanAl()">↺ BAŞTAN</button>
       <button class="btn-kontrol btn-durdur" id="durdurBtn" onclick="durdurDevam()">⏸ DURDUR</button>
-      <button class="btn-kontrol btn-menu" onclick="menuye()">☰ MENÜ</button>
+      <button class="btn-kontrol btn-menu" id="menuBtn" onclick="menuye()">☰ MENÜ</button>
     </div>
 
-    <div class="oyun-hiz-row">
+    <div class="oyun-hiz-row" id="oyunHizRow">
       <span class="oyun-hiz-lbl">Hız:</span>
-      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="100" max="1000" step="10" value="150" oninput="oyunHizGuncelle(this.value)">
+      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="50" max="1000" step="50" value="150" oninput="oyunHizGuncelle(this.value)">
       <span class="oyun-hiz-deger" id="oyunHizDeger">150 KPM</span>
     </div>
   </div>
@@ -232,9 +232,45 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 <script>
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
-(function(){const from=new URLSearchParams(window.location.search).get('from');document.getElementById('backBtn').href=from==='admin'?'admin.html':'ogrenci-panel.html';})();
+
+// ── PANELe DÖNÜŞ + TAMAMLANMA SİNYALİ ──
+// (Önceden burada sinyal HİÇ gönderilmiyordu — backBtn sadece yönlendiriyordu. Düzeltildi.)
+(function(){
+  document.getElementById('backBtn').href='#';
+  document.getElementById('backBtn').addEventListener('click',function(e){e.preventDefault();sinusTamamlandiSinyalGonderVeDon();});
+})();
 
 const G={metinler:[],seciliMetin:null,kpm:150,kelimeler:[],mevcutIdx:0,calisiyor:false,timeout:null,filtre:''};
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci hızı değiştiremez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz'));
+const METIN_ID_PARAM = _kParams.get('metin_id');
+
+function kilitliModuBaslat(){
+  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
+  document.getElementById('kartHiz').style.display='none';
+  if(METIN_ID_PARAM){
+    document.getElementById('kartMetinSec').style.display='none';
+  }
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
+async function kilitliMetinYukle(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/ders_metinleri?id=eq.'+METIN_ID_PARAM,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const data=await res.json();
+    if(data.length){
+      G.seciliMetin=data[0];
+      document.getElementById('baslaBtn').disabled=false;
+    }else{
+      document.getElementById('metinListe').innerHTML='<div style="text-align:center;color:var(--red);padding:20px">❌ Atanan metin bulunamadı</div>';
+    }
+  }catch(e){
+    document.getElementById('metinListe').innerHTML='<div style="text-align:center;color:var(--red);padding:20px">❌ Metin yüklenemedi</div>';
+  }
+}
 
 async function metinleriYukle(){
   try{
@@ -267,6 +303,7 @@ function oyunuBaslat(){
   G.kelimeler=G.seciliMetin.metin.trim().split(/\s+/).filter(k=>k.length>0);
   G.mevcutIdx=0;G.calisiyor=false;
   showScreen('screenOyun');
+  if(KILITLI){ document.getElementById('oyunHizRow').style.display='none'; }
   document.getElementById('hudMetin').textContent=G.seciliMetin.baslik.substring(0,15)+(G.seciliMetin.baslik.length>15?'...':'');
   document.getElementById('hudHiz').textContent=G.kpm+' KPM';
   document.getElementById('oyunHizSlider').value=G.kpm;
@@ -311,7 +348,14 @@ function ilerlemeGuncelle(){
   document.getElementById('hudKelime').textContent=mevcut+'/'+toplam;
 }
 
-function bitir(){G.calisiyor=false;clearTimeout(G.timeout);document.getElementById('bittiOverlay').classList.add('gorulur');document.getElementById('durumMsg').textContent='TAMAMLANDI! ⭐';}
+function bitir(){
+  G.calisiyor=false;clearTimeout(G.timeout);
+  document.getElementById('bittiOverlay').classList.add('gorulur');
+  document.getElementById('durumMsg').textContent='TAMAMLANDI! ⭐';
+  if(KILITLI){
+    setTimeout(sinusTamamlandiSinyalGonderVeDon, 1500);
+  }
+}
 function durdurDevam(){
   if(G.mevcutIdx>=G.kelimeler.length){bastanAl();return;}
   if(G.calisiyor){G.calisiyor=false;clearTimeout(G.timeout);document.getElementById('durdurBtn').textContent='▶ DEVAM';document.getElementById('durumMsg').textContent='DURAKLATILDI';}
@@ -319,9 +363,11 @@ function durdurDevam(){
 }
 function bastanAl(){G.calisiyor=false;clearTimeout(G.timeout);G.mevcutIdx=0;document.getElementById('bittiOverlay').classList.remove('gorulur');document.getElementById('anaKelime').textContent='▶';document.getElementById('solKelime').textContent='';document.getElementById('sagKelime').textContent='';document.getElementById('durdurBtn').textContent='⏸ DURDUR';document.getElementById('durumMsg').textContent='BAŞLIYOR...';ilerlemeGuncelle();G.timeout=setTimeout(()=>{document.getElementById('durumMsg').textContent='';G.calisiyor=true;sonrakiKelime();},1000);}
 function menuye(){G.calisiyor=false;clearTimeout(G.timeout);showScreen('screenAyar');}
-function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-metinleriYukle();
+
+if(KILITLI && METIN_ID_PARAM){ kilitliMetinYukle(); } else { metinleriYukle(); }
+
+function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');let hedef='index.html';if(from==='ogrenci')hedef='ogrenci-panel.html';else if(from==='admin')hedef='admin.html';setTimeout(()=>{window.location.href=hedef;},200);}
 </script>
 </body>
 </html>
