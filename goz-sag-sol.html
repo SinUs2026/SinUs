@@ -26,6 +26,9 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .sure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .sure-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px;cursor:pointer;text-align:center;color:var(--grey);font-size:0.85rem;}
 .sure-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
+.nokta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.nokta-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px 6px;cursor:pointer;text-align:center;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;transition:all 0.2s;}
+.nokta-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
 .start-btn{width:100%;max-width:500px;padding:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;}
 .geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
 .egzersiz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:16px;}
@@ -34,7 +37,8 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .hud-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-top:2px;}
 .alan{width:100%;max-width:700px;height:300px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;position:relative;overflow:hidden;margin-bottom:16px;}
 .kilavuz{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(0,212,255,0.08);}
-.nokta{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--accent);top:50%;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,212,255,0.8),0 0 40px rgba(0,212,255,0.4);transition:none;}
+.nokta-isaret{position:absolute;top:50%;width:6px;height:6px;border-radius:50%;background:rgba(0,212,255,0.25);transform:translate(-50%,-50%);}
+.nokta{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--accent);top:50%;transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,212,255,0.8),0 0 40px rgba(0,212,255,0.4);transition:none;z-index:2;}
 .sure-bar-wrap{width:100%;max-width:700px;margin-bottom:8px;}
 .sure-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
 .sure-bar-ic{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width 1s linear;}
@@ -87,11 +91,22 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       </div>
     </div>
 
+    <div class="menu-card" id="kartNokta">
+      <h3>NOKTA SAYISI (Satır Üzerinde Kaç Duraklama?)</h3>
+      <div class="nokta-grid">
+        <div class="nokta-btn sel" onclick="selNokta(2,this)">2</div>
+        <div class="nokta-btn" onclick="selNokta(4,this)">4</div>
+        <div class="nokta-btn" onclick="selNokta(6,this)">6</div>
+        <div class="nokta-btn" onclick="selNokta(8,this)">8</div>
+      </div>
+    </div>
+
     <div class="menu-card">
       <h3>NASIL YAPILIR?</h3>
       <div style="font-size:0.82rem;color:var(--grey);line-height:1.8">
         👁️ Başını <strong style="color:var(--white)">hareket ettirme</strong>, sadece gözlerinle takip et<br>
-        ↔️ Nokta sağa sola gidip gelir<br>
+        ↔️ Nokta seçtiğin sayıda durak arasında sırayla gidip gelir<br>
+        📖 Daha fazla durak, satır üzerindeki okuma sıçramalarını (saccade) daha çok taklit eder<br>
         😌 Rahat ve düzenli bir ritimde takip et<br>
         ⏱️ Süre bitince egzersiz tamamlanır
       </div>
@@ -118,6 +133,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
     <div class="alan" id="alan">
       <button class="tam-ekran-btn" onclick="tamEkranToggle()" title="Tam Ekran">⛶</button>
       <div class="kilavuz"></div>
+      <div id="noktaIsaretleri"></div>
       <div class="nokta" id="nokta"></div>
     </div>
 
@@ -148,19 +164,22 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
   document.getElementById('backBtn2').href = backUrl;
 })();
 
-let G = {hiz:3, sure:60, animId:null, sureInt:null, baslangic:0, x:0, yon:1};
+let G = {hiz:3, sure:60, noktaSayisi:2, noktalar:[10,90], mevcutIdx:0, yonIdx:1, animId:null, sureInt:null, baslangic:0, x:10};
 
 // ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci hız/süre seçemez) ──
 const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika olarak gelir
+const NOKTA_PARAM = parseInt(_kParams.get('nokta')); // 2/4/6/8 — opsiyonel, admin panelinde henüz seçici yok
 
 function kilitliModuBaslat(){
   document.getElementById('kartHiz').style.display='none';
   document.getElementById('kartSure').style.display='none';
+  document.getElementById('kartNokta').style.display='none';
   if(!isNaN(HIZ_PARAM)) G.hiz = Math.min(10, Math.max(1, HIZ_PARAM));
   if(!isNaN(SURE_PARAM_DK)) G.sure = SURE_PARAM_DK * 60;
+  if([2,4,6,8].includes(NOKTA_PARAM)) G.noktaSayisi = NOKTA_PARAM;
   document.getElementById('backBtn').style.display='none';
   document.getElementById('durdurBtn').style.display='none';
   document.getElementById('bittiBtnRow').innerHTML = '';
@@ -170,6 +189,12 @@ if(KILITLI){ kilitliModuBaslat(); }
 function selSure(s, el){
   G.sure = s;
   document.querySelectorAll('.sure-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function selNokta(n, el){
+  G.noktaSayisi = n;
+  document.querySelectorAll('.nokta-btn').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');
 }
 
@@ -198,14 +223,30 @@ document.addEventListener('webkitfullscreenchange', ()=>{
   document.body.classList.toggle('tam-ekran-modu', !!document.webkitFullscreenElement);
 });
 
+// Satır üzerinde eşit aralıklı N nokta üretir (10% - 90% arası)
+function noktalariOlustur(n){
+  if(n<=1) return [10];
+  const arr=[];
+  for(let i=0;i<n;i++) arr.push(10 + (80*i)/(n-1));
+  return arr;
+}
+
+function noktaIsaretleriCiz(){
+  const kapsayici = document.getElementById('noktaIsaretleri');
+  kapsayici.innerHTML = G.noktalar.map(x=>`<div class="nokta-isaret" style="left:${x}%"></div>`).join('');
+}
+
 function baslat(){
   if(!KILITLI){ G.hiz = parseInt(document.getElementById('hizSlider').value); }
+  G.noktalar = noktalariOlustur(G.noktaSayisi);
+  G.mevcutIdx = 0;
+  G.yonIdx = 1;
+  G.x = G.noktalar[0];
   G.baslangic = Date.now();
-  G.x = 10;
-  G.yon = 1;
   document.getElementById('hudHiz').textContent = G.hiz + '/10';
   document.getElementById('hudSure').textContent = G.sure + 'sn';
   showScreen('screenEgzersiz');
+  noktaIsaretleriCiz();
   tamEkranGirmeyeCalis();
   if(G.sureInt) clearInterval(G.sureInt);
   G.sureInt = setInterval(()=>{
@@ -219,11 +260,23 @@ function baslat(){
 
 function animasyonBaslat(){
   const nokta = document.getElementById('nokta');
-  const hizFaktoru = G.hiz * 0.15;
+  // NOT: Hız skalası güncellendi — eski "4. kademe" hızı artık "1. kademe" oldu,
+  // diğer kademeler aynı oranla (x4) hızlandırıldı (eskiden G.hiz*0.15 idi).
+  const hizFaktoru = G.hiz * 0.6;
+  nokta.style.left = G.x + '%';
+
   function animate(){
-    G.x += G.yon * hizFaktoru;
-    if(G.x >= 90){ G.x = 90; G.yon = -1; }
-    if(G.x <= 10){ G.x = 10; G.yon = 1; }
+    const hedefIdx = G.mevcutIdx + G.yonIdx;
+    const hedefX = G.noktalar[hedefIdx];
+    const fark = hedefX - G.x;
+    if(Math.abs(fark) <= hizFaktoru){
+      G.x = hedefX;
+      G.mevcutIdx = hedefIdx;
+      if(G.mevcutIdx === G.noktalar.length-1) G.yonIdx = -1;
+      else if(G.mevcutIdx === 0) G.yonIdx = 1;
+    } else {
+      G.x += Math.sign(fark) * hizFaktoru;
+    }
     nokta.style.left = G.x + '%';
     G.animId = requestAnimationFrame(animate);
   }
