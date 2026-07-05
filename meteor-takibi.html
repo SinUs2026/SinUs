@@ -84,12 +84,19 @@ body {
 .start-btn { width:100%; max-width:440px; padding:15px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:0.95rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 24px rgba(0,212,255,0.3); margin-top:4px; }
 .start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,212,255,0.4); }
 
-#screenGame { padding:0; position:relative; }
+#screenGame { padding:0; position:relative; flex-direction:column; }
 
-.game-hud { position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:flex-start; padding:12px; z-index:10; pointer-events:none; }
-.hud-pill { background:rgba(6,13,26,0.8); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:6px 12px; text-align:center; }
+/* ── ÜST BİLGİ ŞERİDİ (artık oyun alanının ÜSTÜNDE, normal akışta — üst üste binmiyor) ── */
+.oyun-ust-bar { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 4px 10px; flex-shrink:0; }
+.hud-pill { background:rgba(255,255,255,0.04); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:6px 12px; text-align:center; flex:1; }
 .hud-lbl { font-size:0.6rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
 .hud-val { font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; color:var(--accent); }
+
+.kilitli-sure-pill { background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.3) !important; }
+.kilitli-sure-pill .hud-val { color:var(--gold) !important; }
+
+/* ── OYUN ALANI: ekranın büyük kısmını kaplayan sınırlı "kare" ── */
+.oyun-alani { position:relative; flex:1; margin:0 2px 4px; border:1.5px solid rgba(0,212,255,0.25); border-radius:20px; overflow:hidden; background:rgba(255,255,255,0.015); min-height:0; }
 
 #gameCanvas { position:absolute; inset:0; width:100%; height:100%; cursor:crosshair; pointer-events:none; }
 
@@ -101,7 +108,7 @@ body {
 .countdown-big { font-family:'Orbitron',sans-serif; font-size:3rem; font-weight:900; color:var(--gold); text-shadow:0 0 30px rgba(255,215,0,0.5); animation:countPulse 0.9s ease-in-out infinite; }
 @keyframes countPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
 
-.select-banner { position:absolute; top:60px; left:50%; transform:translateX(-50%); background:rgba(6,13,26,0.92); border:1.5px solid rgba(0,212,255,0.5); border-radius:14px; padding:10px 24px; text-align:center; z-index:25; pointer-events:none; white-space:nowrap; }
+.select-banner { position:absolute; top:14px; left:50%; transform:translateX(-50%); background:rgba(6,13,26,0.92); border:1.5px solid rgba(0,212,255,0.5); border-radius:14px; padding:10px 24px; text-align:center; z-index:25; pointer-events:none; white-space:nowrap; }
 .select-banner-title { font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; color:var(--gold); letter-spacing:1px; }
 .select-banner-sub { font-size:0.75rem; color:var(--grey); margin-top:2px; }
 
@@ -145,7 +152,7 @@ body {
     <div class="game-title">METEOR TAKİBİ</div>
     <div class="game-sub">SMOOTH PURSUIT TRACKING</div>
 
-    <div class="menu-card">
+    <div class="menu-card" id="kartSeviye">
       <h3>SEVİYE</h3>
       <div class="level-grid">
         <div class="lv-btn sel" onclick="selLv(1,this)"><span class="lv-n">1</span><span class="lv-d">3 meteor<br>5sn</span></div>
@@ -156,7 +163,7 @@ body {
       </div>
     </div>
 
-    <div class="menu-card">
+    <div class="menu-card" id="kartMod">
       <h3>OYUN MODU</h3>
       <div class="mod-grid">
         <div class="mod-btn sel" onclick="selMod(1,this)"><span class="mi">☄️</span>Tek Meteor</div>
@@ -166,32 +173,35 @@ body {
       </div>
     </div>
 
-    <button class="start-btn" onclick="startGame()">BAŞLAT ▶</button>
+    <button class="start-btn" id="mainStartBtn" onclick="startGame()">BAŞLAT ▶</button>
     <a id="backBtn" href="#" style="margin-top:12px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;">← Panele Dön</a>
   </div>
 
   <!-- OYUN -->
   <div id="screenGame" class="screen">
-    <div class="game-hud">
+    <div class="oyun-ust-bar">
       <div class="hud-pill"><div class="hud-lbl">Seviye</div><div class="hud-val" id="hudLv">1</div></div>
       <div class="hud-pill"><div class="hud-lbl">Aşama</div><div class="hud-val" id="hudPhase">—</div></div>
       <div class="hud-pill"><div class="hud-lbl">Seri</div><div class="hud-val" id="hudStreak">0 🔥</div></div>
+      <div class="hud-pill kilitli-sure-pill" id="kilitliSurePill" style="display:none"><div class="hud-lbl">Kalan Süre</div><div class="hud-val" id="kilitliSureKalan">—</div></div>
     </div>
-    <canvas id="gameCanvas"></canvas>
-    <div class="timer-bar-wrap" id="timerBarWrap" style="display:none">
-      <div class="timer-bar-fill" id="timerBar" style="width:100%"></div>
-    </div>
-    <div class="game-overlay" id="gameOverlay">
-      <div class="overlay-box" id="overlayBox">
-        <div class="overlay-icon" id="oIcon">☄️</div>
-        <div class="overlay-title" id="oTitle">HAZIR OL</div>
-        <div class="overlay-desc" id="oDesc"></div>
-        <div class="countdown-big" id="oCount" style="display:none"></div>
+    <div class="oyun-alani" id="oyunAlani">
+      <canvas id="gameCanvas"></canvas>
+      <div class="timer-bar-wrap" id="timerBarWrap" style="display:none">
+        <div class="timer-bar-fill" id="timerBar" style="width:100%"></div>
       </div>
-    </div>
-    <div class="select-banner" id="selectBanner" style="display:none">
-      <div class="select-banner-title">🎯 HANGİSİYDİ?</div>
-      <div class="select-banner-sub" id="selectBannerSub">Takip ettiğin meteoru seç</div>
+      <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-box" id="overlayBox">
+          <div class="overlay-icon" id="oIcon">☄️</div>
+          <div class="overlay-title" id="oTitle">HAZIR OL</div>
+          <div class="overlay-desc" id="oDesc"></div>
+          <div class="countdown-big" id="oCount" style="display:none"></div>
+        </div>
+      </div>
+      <div class="select-banner" id="selectBanner" style="display:none">
+        <div class="select-banner-title">🎯 HANGİSİYDİ?</div>
+        <div class="select-banner-sub" id="selectBannerSub">Takip ettiğin meteoru seç</div>
+      </div>
     </div>
   </div>
 
@@ -208,7 +218,7 @@ body {
         <div><div class="stat-n" id="sWrong">0</div><div class="stat-l">Yanlış</div></div>
         <div><div class="stat-n" id="sTotal">0</div><div class="stat-l">Puan</div></div>
       </div>
-      <div class="btn-row">
+      <div class="btn-row" id="btnRow">
         <button class="btn-play" onclick="playAgain()">▶ TEKRAR</button>
         <button class="btn-back" onclick="goMenu()">MENÜ</button>
       </div>
@@ -223,6 +233,56 @@ body {
   const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
   document.getElementById('backBtn').href = backUrl;
 })();
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci seviye/mod seçemez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz'));
+const SURE_PARAM_DK = parseInt(_kParams.get('sure'));
+let kilitliBitisZamani = null;
+let kilitliSureInterval = null;
+
+function kilitliModuBaslat(){
+  document.getElementById('kartSeviye').style.display='none';
+  document.getElementById('kartMod').style.display='none';
+  document.getElementById('backBtn').style.display='none';
+  if(!isNaN(HIZ_PARAM)) G.level = Math.min(5, Math.max(1, HIZ_PARAM));
+  G.mod = 1;
+  document.getElementById('mainStartBtn').textContent='▶ BAŞLA';
+  document.getElementById('mainStartBtn').onclick = function(){
+    if(!isNaN(SURE_PARAM_DK)) kilitliSureyiBaslat(SURE_PARAM_DK);
+    startGame();
+  };
+}
+
+function kilitliSureyiBaslat(dakika){
+  kilitliBitisZamani = Date.now() + dakika*60000;
+  document.getElementById('kilitliSurePill').style.display='block';
+  clearInterval(kilitliSureInterval);
+  kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
+  kilitliSureGuncelle();
+}
+function kilitliSureGuncelle(){
+  if(kilitliBitisZamani===null) return;
+  const kalanMs = kilitliBitisZamani - Date.now();
+  if(kalanMs<=0){ document.getElementById('kilitliSureKalan').textContent='0:00'; clearInterval(kilitliSureInterval); return; }
+  const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
+  document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
+}
+function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
+
+function kilitliGoreviBitir(){
+  clearInterval(kilitliSureInterval);
+  sinusTamamlandiSinyalGonder();
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  showScreen('screenMenu');
+  document.getElementById('screenMenu').innerHTML = `
+    <div class="meteor-preview">✅</div>
+    <div class="game-title">SÜRE DOLDU!</div>
+    <div class="game-sub">Görev tamamlandı, panele dönebilirsin.</div>
+    <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+}
 
 // ── YILDIZ ARKA PLAN ──
 (function() {
@@ -249,6 +309,8 @@ body {
 // ── OYUN DURUMU ──
 const G = { level:1, mod:1, score:0, streak:0, correct:0, wrong:0, meteors:[], target:[], phase:'', animId:null, timerStart:0, timerDur:0, canvasW:0, canvasH:0 };
 
+if(KILITLI){ kilitliModuBaslat(); }
+
 const LEVELS = {
   1:{count:3,speedMul:0.6,dur:5000},
   2:{count:5,speedMul:1.0,dur:8000},
@@ -268,7 +330,7 @@ const gc = document.getElementById('gameCanvas');
 const gctx = gc.getContext('2d');
 
 function resizeGameCanvas() {
-  const wrap = document.getElementById('screenGame');
+  const wrap = document.getElementById('oyunAlani');
   gc.width = wrap.offsetWidth || window.innerWidth;
   gc.height = wrap.offsetHeight || window.innerHeight;
   G.canvasW = gc.width; G.canvasH = gc.height;
@@ -344,7 +406,11 @@ function hexAlpha(hex,alpha) {
 let loopActive = false;
 function gameLoop() {
   if (!loopActive) return;
-  G.meteors.forEach(updateMeteor);
+  // ÖNEMLİ: meteorlar sadece 'tracking' aşamasında hareket eder.
+  // Açıklama ve geri sayım sırasında sabit dururlar (yazı arkasında kaybolmasınlar diye).
+  if (G.phase === 'tracking') {
+    G.meteors.forEach(updateMeteor);
+  }
   drawFrame();
   if (G.phase==='tracking') {
     const elapsed = Date.now()-G.timerStart;
@@ -399,6 +465,7 @@ function showOverlay() {
   }
 
   setOverlay('☄️','TAKİP ET',desc,null);
+  // Açıklama gösterilirken meteorlar sabit — sadece çizim döngüsü başlar, hareket yok (bkz. gameLoop).
   loopActive=true; G.phase='show_target'; gameLoop();
   setTimeout(()=>runCountdown(3),2000);
 }
@@ -412,6 +479,7 @@ function setOverlay(icon,title,desc,count) {
 }
 
 function runCountdown(n) {
+  G.phase='countdown';
   if (n<=0) { document.getElementById('gameOverlay').style.display='none'; startTracking(); return; }
   setOverlay('','',`<span style="color:var(--grey);font-size:0.8rem">Meteoru gözünle takip et!</span>`,n);
   document.getElementById('oIcon').textContent=''; document.getElementById('oTitle').textContent='';
@@ -531,6 +599,14 @@ function sinusTamamlandiSinyalGonder(){
 }
 function showResult(correct,pts) {
   sinusTamamlandiSinyalGonder();
+
+  if (KILITLI) {
+    if (kilitliSureBittiMi()) { setTimeout(kilitliGoreviBitir, 400); return; }
+    // Süre bitmediyse öğrenciye tur seçtirmeden otomatik yeni tur başlat.
+    setTimeout(playAgain, 1200);
+    return;
+  }
+
   showScreen('screenResult');
   document.getElementById('rIcon').textContent=correct?'🎉':'☄️';
   document.getElementById('rTitle').textContent=correct?'DOĞRU!':'KAÇIRDIN!';
