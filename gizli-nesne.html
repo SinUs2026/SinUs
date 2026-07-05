@@ -27,6 +27,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .asama-btn .as-d{font-size:0.62rem;line-height:1.4;}
 .start-btn{width:100%;max-width:480px;padding:15px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;}
 .geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
+.kilitli-sure-pill{background:rgba(255,215,0,0.08);border:1.5px solid rgba(255,215,0,0.3);border-radius:12px;padding:6px 14px;margin-bottom:10px;text-align:center;font-family:'Orbitron',sans-serif;font-size:0.8rem;font-weight:700;color:var(--gold);width:100%;max-width:600px;}
 .game-hud{display:flex;justify-content:space-between;width:100%;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:10px;}
 .hud-item{text-align:center;}
 .hud-lbl{font-size:0.58rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
@@ -75,7 +76,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
     <div class="game-title">GİZLİ NESNE</div>
     <div class="game-sub">UZAY KEŞİF MİSYONU</div>
 
-    <div class="menu-card">
+    <div class="menu-card" id="kartAsama">
       <h3>AŞAMA</h3>
       <div class="asama-grid">
         <div class="asama-btn sel" onclick="selAsama(1,this)"><span class="as-n">1</span><span class="as-d">3 nesne<br>Büyük</span></div>
@@ -95,12 +96,13 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
       </div>
     </div>
 
-    <button class="start-btn" onclick="oyunuBaslat()">BAŞLAT ▶</button>
+    <button class="start-btn" id="mainStartBtn" onclick="oyunuBaslat()">BAŞLAT ▶</button>
     <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
   </div>
 
   <!-- OYUN -->
   <div id="screenGame" class="screen">
+    <div class="kilitli-sure-pill" id="kilitliSurePill" style="display:none">⏱ Toplam Kalan Süre: <span id="kilitliSureKalan">—</span></div>
     <div class="game-hud">
       <div class="hud-item"><div class="hud-lbl">Bulunan</div><div class="hud-val" id="hudBulunan">0/0</div></div>
       <div class="hud-item"><div class="hud-lbl">Süre</div><div class="hud-val" id="hudSure">—</div></div>
@@ -124,7 +126,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
       <div class="sahne" id="sahne"></div>
     </div>
 
-    <button class="geri-btn" onclick="menuye()">← Menüye Dön</button>
+    <button class="geri-btn" id="menuBtn" onclick="menuye()">← Menüye Dön</button>
   </div>
 
   <!-- SONUÇ -->
@@ -137,7 +139,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
         <div><div class="stat-n" id="sSure">0</div><div class="stat-l">Süre</div></div>
         <div><div class="stat-n" id="sPuan">0</div><div class="stat-l">Puan</div></div>
       </div>
-      <div class="btn-row">
+      <div class="btn-row" id="btnRow">
         <button class="btn-play" onclick="oyunuBaslat()">▶ TEKRAR</button>
         <button class="btn-back" onclick="menuye()">MENÜ</button>
       </div>
@@ -168,6 +170,58 @@ const ASAMALAR = {
 };
 
 let G = {asama:1, hedefler:[], bulunan:[], puan:0, baslangic:0, sureInt:null};
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci aşama seçemez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz')); // 1-4 arası aşama olarak yorumlanır
+const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika — toplam görev süresi
+let kilitliBitisZamani = null;
+let kilitliSureInterval = null;
+
+function kilitliModuBaslat(){
+  document.getElementById('kartAsama').style.display='none';
+  document.getElementById('backBtn').style.display='none';
+  document.getElementById('menuBtn').style.display='none';
+  document.getElementById('btnRow').innerHTML = '';
+  if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
+  document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
+  document.getElementById('mainStartBtn').onclick = function(){
+    if(!isNaN(SURE_PARAM_DK)) kilitliSureyiBaslat(SURE_PARAM_DK);
+    oyunuBaslat();
+  };
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
+function kilitliSureyiBaslat(dakika){
+  kilitliBitisZamani = Date.now() + dakika*60000;
+  document.getElementById('kilitliSurePill').style.display='block';
+  clearInterval(kilitliSureInterval);
+  kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
+  kilitliSureGuncelle();
+}
+function kilitliSureGuncelle(){
+  if(kilitliBitisZamani===null) return;
+  const kalanMs = kilitliBitisZamani - Date.now();
+  if(kalanMs<=0){ document.getElementById('kilitliSureKalan').textContent='0:00'; clearInterval(kilitliSureInterval); return; }
+  const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
+  document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
+}
+function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
+
+function kilitliGoreviBitir(){
+  clearInterval(kilitliSureInterval);
+  gorevTamamlandiSinyaliGonder();
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById('screenMenu').style.display='flex';
+  document.getElementById('screenMenu').innerHTML = `
+    <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">✅</div>
+    <div class="game-title">SÜRE DOLDU!</div>
+    <div class="game-sub">Görev tamamlandı, panele dönebilirsin.</div>
+    <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+}
 
 function selAsama(n,el){
   G.asama=n;
@@ -302,6 +356,18 @@ function oyunuBitir(){
   clearInterval(G.sureInt);
   const sure = Math.floor((Date.now()-G.baslangic)/1000);
   const oran = Math.round(G.bulunan.length/G.hedefler.length*100);
+
+  // ÖNEMLİ: Önceden bu fonksiyon hiçbir tamamlanma sinyali göndermiyordu —
+  // sadece "Panele Dön" linkine tıklanırsa gönderiliyordu. Artık oyun bittiğinde
+  // (öğrenci başka bir yere tıklasa bile) görev otomatik "tamamlandı" işaretleniyor.
+  gorevTamamlandiSinyaliGonder();
+
+  if(KILITLI){
+    if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
+    setTimeout(oyunuBaslat, 1200);
+    return;
+  }
+
   document.getElementById('sonucIcon').textContent = oran>=100?'🏆':oran>=60?'🎯':'🔭';
   document.getElementById('sonucBaslik').textContent = oran>=100?'MÜKEMMEL!':oran>=60?'İYİ İŞ!':'DEVAM ET!';
   document.getElementById('sBulunan').textContent = G.bulunan.length+'/'+G.hedefler.length;
@@ -309,6 +375,22 @@ function oyunuBitir(){
   document.getElementById('sPuan').textContent = G.puan;
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById('screenSonuc').style.display='flex';
+}
+
+// ── PANELe TAMAMLANMA SİNYALİ (yönlendirmeden, sadece işaretler) ──
+function gorevTamamlandiSinyaliGonder(){
+  const from = new URLSearchParams(window.location.search).get('from');
+  if(from !== 'ogrenci') return;
+  try{
+    const veri = localStorage.getItem('sinus_bekleyen_gorev');
+    if(!veri) return;
+    const b = JSON.parse(veri);
+    if(b.tamamlandiMi===false){
+      b.tamamlandiMi = true;
+      b.puan = 10;
+      localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+    }
+  }catch(e){}
 }
 
 function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);}
