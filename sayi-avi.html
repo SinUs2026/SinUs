@@ -86,6 +86,8 @@ body::before {
 .start-btn { width:100%; max-width:480px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 24px rgba(0,212,255,0.3); }
 .start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,212,255,0.4); }
 
+.kilitli-sure-pill { background:rgba(255,215,0,0.08); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px; padding:6px 14px; margin-bottom:10px; text-align:center; font-family:'Orbitron',sans-serif; font-size:0.8rem; font-weight:700; color:var(--gold); width:100%; max-width:600px; }
+
 .game-hud { display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:16px; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px; }
 .hud-item { text-align:center; }
 .hud-lbl { font-size:0.62rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
@@ -200,7 +202,7 @@ body::before {
     <div class="game-title">SAYI AVI</div>
     <div class="game-sub">GÖRSEL TARAMA EGZERSİZİ</div>
 
-    <div class="menu-card">
+    <div class="menu-card" id="kartAsama">
       <h3>AŞAMA</h3>
       <div class="asama-grid">
         <div class="asama-btn sel" onclick="selAsama(1,this)">
@@ -232,12 +234,13 @@ body::before {
       </div>
     </div>
 
-    <button class="start-btn" onclick="oyunuBaslat()">BAŞLAT ▶</button>
+    <button class="start-btn" id="mainStartBtn" onclick="oyunuBaslat()">BAŞLAT ▶</button>
     <a id="backBtn" href="#" style="margin-top:12px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;">← Panele Dön</a>
   </div>
 
   <!-- OYUN -->
   <div id="screenGame" class="screen">
+    <div class="kilitli-sure-pill" id="kilitliSurePill" style="display:none">⏱ Toplam Kalan Süre: <span id="kilitliSureKalan">—</span></div>
     <div class="game-hud">
       <div class="hud-item"><div class="hud-lbl">Aşama</div><div class="hud-val" id="hudAsama">1</div></div>
       <div class="hud-item"><div class="hud-lbl">Süre</div><div class="hud-val" id="hudSure">0.0</div></div>
@@ -276,7 +279,7 @@ body::before {
         <div><div class="stat-n" id="sBulunan">0</div><div class="stat-l">Bulunan</div></div>
         <div><div class="stat-n" id="sPuan">0</div><div class="stat-l">Puan</div></div>
       </div>
-      <div class="btn-row">
+      <div class="btn-row" id="btnRow">
         <button class="btn-play" onclick="tekrarOyna()">▶ TEKRAR</button>
         <button class="btn-back" onclick="menuye()">MENÜ</button>
       </div>
@@ -304,6 +307,55 @@ const G = {
   asama: 1, hedefler: [], mevcutHedefIndex: 0, sayilar: [],
   bulunanlar: 0, baslangicZamani: 0, interval: null, puan: 0, toplamPuan: 0, sure: 0
 };
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci aşama seçemez) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz')); // 1-4 arası aşama olarak yorumlanır
+const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika — toplam görev süresi
+let kilitliBitisZamani = null;
+let kilitliSureInterval = null;
+
+function kilitliModuBaslat(){
+  document.getElementById('kartAsama').style.display='none';
+  document.getElementById('backBtn').style.display='none';
+  if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
+  document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
+  document.getElementById('mainStartBtn').onclick = function(){
+    if(!isNaN(SURE_PARAM_DK)) kilitliSureyiBaslat(SURE_PARAM_DK);
+    oyunuBaslat();
+  };
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
+function kilitliSureyiBaslat(dakika){
+  kilitliBitisZamani = Date.now() + dakika*60000;
+  document.getElementById('kilitliSurePill').style.display='block';
+  clearInterval(kilitliSureInterval);
+  kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
+  kilitliSureGuncelle();
+}
+function kilitliSureGuncelle(){
+  if(kilitliBitisZamani===null) return;
+  const kalanMs = kilitliBitisZamani - Date.now();
+  if(kalanMs<=0){ document.getElementById('kilitliSureKalan').textContent='0:00'; clearInterval(kilitliSureInterval); return; }
+  const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
+  document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
+}
+function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
+
+function kilitliGoreviBitir(){
+  clearInterval(kilitliSureInterval);
+  gorevTamamlandiSinyaliGonder();
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  showScreen('screenMenu');
+  document.getElementById('screenMenu').innerHTML = `
+    <div style="font-size:2.5rem;margin-top:16px;margin-bottom:4px">✅</div>
+    <div class="game-title">SÜRE DOLDU!</div>
+    <div class="game-sub">Görev tamamlandı, panele dönebilirsin.</div>
+    <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+}
 
 function selAsama(n, el) {
   G.asama = n;
@@ -333,6 +385,7 @@ function oyunuBaslat() {
   sayilariOlustur();
   showScreen('screenGame');
   G.baslangicZamani = Date.now();
+  if(G.interval) clearInterval(G.interval);
   G.interval = setInterval(() => {
     G.sure = (Date.now() - G.baslangicZamani) / 1000;
     document.getElementById('hudSure').textContent = G.sure.toFixed(1) + ' sn';
@@ -358,8 +411,15 @@ function sayiyaTıkla(e) {
   const sayi = parseInt(el.dataset.sayi);
   const hedef = G.hedefler[G.mevcutHedefIndex];
   if (sayi === hedef) {
-    el.classList.add('bulunan');
-    el.removeEventListener('click', sayiyaTıkla);
+    // ÖNEMLİ DÜZELTME: Bu sayı ızgarada birden fazla kutucukta görünebiliyor
+    // (aynı hedef 3 kez tekrarlanıyor). Eskiden sadece TIKLANAN kutucuk işaretleniyordu,
+    // diğer kopyalar aktif kalıyordu. Hedef değiştikten sonra bu unutulmuş kopyalardan
+    // birine tıklanınca "yanlış" (kırmızı) görünüyordu — kullanıcı kafası karışıyordu.
+    // Artık aynı sayının TÜM kopyaları aynı anda "bulundu" olarak işaretleniyor.
+    document.querySelectorAll('.sayi-item[data-sayi="'+sayi+'"]').forEach(kopya=>{
+      kopya.classList.add('bulunan');
+      kopya.removeEventListener('click', sayiyaTıkla);
+    });
     G.bulunanlar++;
     G.mevcutHedefIndex++;
     document.getElementById('hudBulunan').textContent = G.bulunanlar + '/' + G.hedefler.length;
@@ -388,6 +448,18 @@ function oyunuBitir() {
   G.puan = Math.max(100, temelPuan - sureCezasi + (G.bulunanlar * 50));
   G.toplamPuan += G.puan;
   document.getElementById('hScore').textContent = G.toplamPuan;
+
+  // ÖNEMLİ DÜZELTME: Bu fonksiyon önceden burada çağrılıyordu ama HİÇBİR YERDE TANIMLI DEĞİLDİ —
+  // bu satır JavaScript hatası fırlatıp fonksiyonun geri kalanının (sonuç ekranının açılması,
+  // panele tamamlanma sinyali gönderilmesi dahil) hiç çalışmamasına sebep oluyordu. Şimdi tanımlandı.
+  gorevTamamlandiSinyaliGonder();
+
+  if(KILITLI){
+    if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
+    setTimeout(oyunuBaslat, 1200);
+    return;
+  }
+
   const anahtarKey = 'asama' + G.asama;
   const oncekiEnIyi = enIyiSureler[anahtarKey] || null;
   document.getElementById('sonucSure').textContent = G.sure.toFixed(1) + ' sn';
@@ -407,7 +479,23 @@ function oyunuBitir() {
     document.getElementById('sToplamSure').textContent = oncekiEnIyi.toFixed(1) + ' sn';
   }
   if (!oncekiEnIyi || G.sure < oncekiEnIyi) { enIyiSureler[anahtarKey] = G.sure; }
-  gorevTamamlandiSinyaliGonder();showScreen('screenSonuc');
+  showScreen('screenSonuc');
+}
+
+// ── PANELe TAMAMLANMA SİNYALİ (yönlendirmeden, sadece işaretler) ──
+function gorevTamamlandiSinyaliGonder(){
+  const from = new URLSearchParams(window.location.search).get('from');
+  if(from !== 'ogrenci') return;
+  try{
+    const veri = localStorage.getItem('sinus_bekleyen_gorev');
+    if(!veri) return;
+    const b = JSON.parse(veri);
+    if(b.tamamlandiMi===false){
+      b.tamamlandiMi = true;
+      b.puan = 10;
+      localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+    }
+  }catch(e){}
 }
 
 function tekrarOyna() { oyunuBaslat(); }
