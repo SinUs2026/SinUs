@@ -366,6 +366,7 @@ function gorevUrl(g){
     url+='&hiz='+g.hiz+'&kilitli=1';
     if(g.sure!==undefined && g.sure!==null) url+='&sure='+g.sure;
     if(g.metin_id!==undefined && g.metin_id!==null) url+='&metin_id='+g.metin_id;
+    if(g.tema!==undefined && g.tema!==null) url+='&tema='+encodeURIComponent(g.tema);
   }
   return url;
 }
