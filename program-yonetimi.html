@@ -154,11 +154,19 @@ nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:cente
       <div id="ekleForm">
         <div class="form-grup" id="formGrupEgzersiz" style="display:none">
           <label>Egzersiz</label>
-          <select class="form-select" id="secEgzersiz"></select>
+          <select class="form-select" id="secEgzersiz" onchange="egzersizDegisti()"></select>
         </div>
         <div class="form-grup" id="formGrupMetin" style="display:none">
           <label>Metin (Okuma Tekniği)</label>
           <select class="form-select" id="secMetin"><option value="">⏳ Yükleniyor...</option></select>
+        </div>
+        <div class="form-grup" id="formGrupTema" style="display:none">
+          <label>Tema (Blok Okuma)</label>
+          <select class="form-select" id="secTema">
+            <option value="sevgi">Sevgi</option>
+            <option value="kitap">Kitap</option>
+            <option value="doga">Doğa</option>
+          </select>
         </div>
         <div class="form-grup" id="formGrupHiz" style="display:none">
           <label>Hız / Seviye <span id="hizDeger" style="float:right;color:#2563a8;font-weight:700"></span></label>
@@ -194,7 +202,7 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const EGZERSIZLER={
   goz:[{dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip'},{dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip'},{dosya:'goz-sekil.html',isim:'Şekil Takibi'},{dosya:'goz-genel.html',isim:'Genel Hareket'},{dosya:'goz-sarkac.html',isim:'Sarkaç Takibi'}],
   odak:[{dosya:'meteor-takibi.html',isim:'Meteor Takibi'},{dosya:'ev-takibi.html',isim:'Ev Takibi'},{dosya:'sayi-avi.html',isim:'Sayı Avı'},{dosya:'merkez-nokta.html',isim:'Merkez Nokta'},{dosya:'gizli-nesne.html',isim:'Gizli Nesne'}],
-  okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin (Silinen Cümle)'},{dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'},{dosya:'tarama-teknigi.html',isim:'Tarama Tekniği'},{dosya:'beliren-metin.html',isim:'Beliren Metin'}]
+  okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin (Silinen Cümle)'},{dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'},{dosya:'tarama-teknigi.html',isim:'Tarama Tekniği'},{dosya:'beliren-metin.html',isim:'Beliren Metin'},{dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca'},{dosya:'blok-okuma.html',isim:'Blok Okuma'}]
 };
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
 const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği'};
@@ -210,6 +218,15 @@ const HIZ_ARALIK={
   odak:{min:1,max:10,adim:1,varsayilan:5,birim:''},
   okuma:{min:50,max:1000,adim:50,varsayilan:300,birim:' KPM'}
 };
+// Bazı okuma teknikleri KPM kullanmaz, kendi özel hız ölçeğine sahiptir — bu dosyalar için üsttekini geçersiz kılar.
+const OZEL_HIZ_ARALIK={
+  'kelime-bulmaca.html':{min:1,max:3,adim:1,varsayilan:1,birim:' (seviye)'},
+  'blok-okuma.html':{min:200,max:2000,adim:100,varsayilan:800,birim:' ms'}
+};
+// Bu dosyalar ders_metinleri tablosundan metin seçmez (kendi sabit içerikleri var).
+const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html'];
+// Sadece bu dosya için "Tema" seçici gösterilir.
+const TEMA_GEREKEN_DOSYALAR=['blok-okuma.html'];
 
 let mevcutGorevler=[];
 let secilenTip=null;
@@ -235,21 +252,32 @@ function tipSec(tip){
   document.getElementById('tip'+tip.charAt(0).toUpperCase()+tip.slice(1)).classList.add('secili');
   document.getElementById('formGrupEgzersiz').style.display='block';
   document.getElementById('formGrupHiz').style.display='block';
-  document.getElementById('formGrupMetin').style.display = tip==='okuma' ? 'block' : 'none';
   if(tip==='okuma' && !window._metinlerYuklendi){ metinleriFormaYukle(); }
   document.getElementById('ekleGorevBtn').disabled=false;
   const sec=document.getElementById('secEgzersiz');sec.innerHTML='';
   (EGZERSIZLER[tip]||[]).forEach(e=>{const opt=document.createElement('option');opt.value=e.dosya;opt.textContent=e.isim;sec.appendChild(opt);});
-  const aralik=HIZ_ARALIK[tip];
+  egzersizDegisti();
+}
+
+// Egzersiz seçimi değiştiğinde (veya tipSec sonrası ilk kez) hız aralığını ve
+// metin/tema alanlarının görünürlüğünü seçilen SPESİFİK dosyaya göre ayarlar.
+function egzersizDegisti(){
+  const dosya=document.getElementById('secEgzersiz').value;
+  const aralik=OZEL_HIZ_ARALIK[dosya]||HIZ_ARALIK[secilenTip];
   document.getElementById('hizSlider').min=aralik.min;
   document.getElementById('hizSlider').max=aralik.max;
   document.getElementById('hizSlider').step=aralik.adim;
   document.getElementById('hizSlider').value=aralik.varsayilan;
   document.getElementById('hizDeger').textContent=aralik.varsayilan+aralik.birim;
+
+  const metinGerekli = secilenTip==='okuma' && !METIN_GEREKMEYEN_DOSYALAR.includes(dosya);
+  document.getElementById('formGrupMetin').style.display = metinGerekli ? 'block' : 'none';
+  document.getElementById('formGrupTema').style.display = TEMA_GEREKEN_DOSYALAR.includes(dosya) ? 'block' : 'none';
 }
 
 function hizGuncelle(){
-  const aralik=HIZ_ARALIK[secilenTip]||HIZ_ARALIK.goz;
+  const dosya=document.getElementById('secEgzersiz').value;
+  const aralik=OZEL_HIZ_ARALIK[dosya]||HIZ_ARALIK[secilenTip]||HIZ_ARALIK.goz;
   document.getElementById('hizDeger').textContent=document.getElementById('hizSlider').value+aralik.birim;
 }
 
@@ -285,7 +313,8 @@ function listeGuncelle(){
     const hizBirim=(HIZ_ARALIK[g.tip]||{}).birim||'';
     const hizGosterim=(g.hiz!==undefined&&g.hiz!==null)?`<span class="badge" style="background:#f1f5f9;color:#475569">🎚 ${g.hiz}${hizBirim}</span>`:'';
     const metinGosterim=g.metin_id?`<span class="badge" style="background:#fefce8;color:#b45309">📖 ${g.metin_baslik||('#'+g.metin_id)}</span>`:'';
-    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${metinGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
+    const temaGosterim=g.tema?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🎨 ${g.tema}</span>`:'';
+    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${metinGosterim} ${temaGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
     liste.appendChild(div);
   });
   ozetGuncelle();
@@ -303,17 +332,21 @@ function ozetGuncelle(){
 function gorevEkle(){
   if(!secilenTip) return;
   const sure=parseInt(document.getElementById('ekSure').value)||3;
-  const hiz=parseInt(document.getElementById('hizSlider').value)||HIZ_ARALIK[secilenTip].varsayilan;
   const dosya=document.getElementById('secEgzersiz').value;
+  const varsayilanAralik=OZEL_HIZ_ARALIK[dosya]||HIZ_ARALIK[secilenTip];
+  const hiz=parseInt(document.getElementById('hizSlider').value)||varsayilanAralik.varsayilan;
   const egz=(EGZERSIZLER[secilenTip]||[]).find(e=>e.dosya===dosya);
   const gorev={tip:secilenTip,dosya,isim:egz?egz.isim:dosya,sure,hiz};
-  if(secilenTip==='okuma'){
+  if(secilenTip==='okuma' && !METIN_GEREKMEYEN_DOSYALAR.includes(dosya)){
     const metinId=document.getElementById('secMetin').value;
     if(metinId){
       const m=metinListesiForm.find(x=>String(x.id)===String(metinId));
       gorev.metin_id=parseInt(metinId);
       gorev.metin_baslik=m?m.baslik:'';
     }
+  }
+  if(TEMA_GEREKEN_DOSYALAR.includes(dosya)){
+    gorev.tema=document.getElementById('secTema').value;
   }
   mevcutGorevler.push(gorev);listeGuncelle();bildirimGoster('✅ Görev eklendi!','basari');
 }
