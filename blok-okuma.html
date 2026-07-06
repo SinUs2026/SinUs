@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Blok Okuma | SinUs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0a1628;
+    --navy-deep:#060d18;
+    --blue:#2563a8;
+    --blue-light:#60a5fa;
+    --gold:#d4af37;
+    --text:#eaf2ff;
+    --text-dim:#7d93b3;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html,body{
+    height:100%;
+    background:var(--navy-deep);
+    overflow:hidden;
+    font-family:'Inter',system-ui,sans-serif;
+  }
+
+  #sahne{
+    position:relative;
+    width:100%;
+    height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(ellipse at 50% 45%, rgba(37,99,168,0.16), transparent 60%),
+      var(--navy);
+    overflow:hidden;
+  }
+
+  /* Sabit bakış noktası — egzersiz boyunca hiç hareket etmeyen tek referans nokta */
+  #bakis-noktasi{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:6px;
+    height:6px;
+    margin:-3px 0 0 -3px;
+    border-radius:50%;
+    background:var(--gold);
+    opacity:0.55;
+    box-shadow:0 0 10px 2px rgba(212,175,55,0.35);
+    z-index:3;
+    pointer-events:none;
+    transition:opacity 0.4s ease;
+  }
+  #sahne.calisiyor #bakis-noktasi{ opacity:0.18; }
+
+  #kutu{
+    position:relative;
+    width:min(90vw, 720px);
+    max-width:90vw;
+    padding:64px 56px;
+    border-radius:20px;
+    border:1px solid rgba(96,165,250,0.18);
+    background:rgba(15,28,49,0.35);
+    box-shadow:0 0 0 1px rgba(255,255,255,0.02), 0 30px 80px rgba(0,0,0,0.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    z-index:2;
+    overflow:hidden;
+  }
+
+  #ifade{
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    color:var(--text);
+    font-size:44px;
+    line-height:1.3;
+    letter-spacing:0.2px;
+    opacity:0;
+    transition:opacity 0.16s ease;
+    white-space:nowrap;
+  }
+  #ifade.gorunur{opacity:1;}
+
+  #baslangic-ekrani{
+    position:absolute;
+    inset:0;
+    z-index:5;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:28px;
+    background:var(--navy);
+  }
+  #baslangic-ekrani.gizli{display:none;}
+
+  #baslangic-ekrani h1{
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:26px;
+    color:var(--text);
+  }
+  #baslangic-ekrani .alt-baslik{
+    color:var(--text-dim);
+    font-size:14px;
+    margin-top:-16px;
+  }
+
+  .kontrol-grubu{
+    display:flex;
+    gap:14px;
+    align-items:center;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+
+  select, button{
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:14px;
+    border-radius:10px;
+    border:1px solid rgba(96,165,250,0.25);
+    background:rgba(255,255,255,0.03);
+    color:var(--text);
+    padding:10px 16px;
+    cursor:pointer;
+    outline:none;
+  }
+  select:hover, button:hover{border-color:var(--blue-light);}
+  select:focus-visible, button:focus-visible{border-color:var(--gold); box-shadow:0 0 0 2px rgba(212,175,55,0.25);}
+
+  button.birincil{
+    background:var(--gold);
+    color:var(--navy-deep);
+    font-weight:600;
+    border:none;
+  }
+  button.birincil:hover{background:#e6c25a;}
+
+  #geri-link-baslangic{
+    color:var(--text-dim);
+    font-size:13px;
+    text-decoration:none;
+    padding:6px 10px;
+  }
+  #geri-link-baslangic:hover{color:var(--text);}
+
+  /* Egzersiz sırasında üstte gizli/soluk kontrol çubuğu */
+  #ust-cubuk{
+    position:absolute;
+    top:0;left:0;right:0;
+    z-index:4;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 22px;
+    opacity:0;
+    transition:opacity 0.3s ease;
+    pointer-events:none;
+  }
+  #sahne:hover #ust-cubuk, #sahne.durduruldu #ust-cubuk{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  #ust-cubuk .tema-etiketi{
+    color:var(--text-dim);
+    font-size:13px;
+    letter-spacing:0.5px;
+  }
+  #ust-cubuk .kilitli-sure-etiketi{
+    color:var(--gold);
+    font-size:13px;
+    letter-spacing:0.5px;
+    margin-left:14px;
+  }
+
+  #ust-cubuk .araclar{display:flex; gap:10px;}
+  #ust-cubuk button, #ust-cubuk a{
+    padding:8px 14px;
+    font-size:13px;
+    background:rgba(6,13,24,0.7);
+    backdrop-filter:blur(6px);
+    color:var(--text-dim);
+    text-decoration:none;
+    border-radius:10px;
+    border:1px solid rgba(96,165,250,0.25);
+  }
+  #ust-cubuk a:hover{color:var(--text);border-color:var(--blue-light);}
+
+  /* Alt kısımda çok soluk, dikkat dağıtmayan ilerleme çizgisi */
+  #ilerleme-cizgisi{
+    position:absolute;
+    bottom:0;left:0;
+    height:2px;
+    background:var(--blue-light);
+    opacity:0.25;
+    z-index:4;
+    transition:width 0.1s linear;
+  }
+
+  #bitis-ekrani{
+    position:absolute;
+    inset:0;
+    z-index:6;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    background:rgba(6,13,24,0.92);
+    backdrop-filter:blur(4px);
+  }
+  #bitis-ekrani.gorunur{display:flex;}
+  #bitis-ekrani h2{
+    font-family:'Poppins',sans-serif;
+    color:var(--text);
+    font-size:24px;
+    font-weight:600;
+  }
+
+  @media (max-width:600px){
+    #kutu{padding:32px 20px; width:92vw;}
+    #ust-cubuk{padding:10px 14px;}
+    #ust-cubuk .tema-etiketi{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="sahne">
+
+  <div id="bakis-noktasi"></div>
+
+  <div id="ust-cubuk">
+    <span>
+      <span class="tema-etiketi" id="tema-etiketi">Tema: —</span>
+      <span class="kilitli-sure-etiketi" id="kilitli-sure-etiketi" style="display:none">⏱ Toplam: <span id="kilitliSureKalan">—</span></span>
+    </span>
+    <div class="araclar">
+      <button id="btn-durdur" title="Duraklat">Duraklat</button>
+      <button id="btn-tam-ekran" title="Tam ekran">Tam Ekran</button>
+      <a href="#" id="btn-panele-don" title="Panele Dön">← Panele Dön</a>
+    </div>
+  </div>
+
+  <div id="kutu">
+    <div id="ifade"></div>
+  </div>
+
+  <div id="ilerleme-cizgisi" style="width:0%"></div>
+
+  <!-- Başlangıç / ayar ekranı -->
+  <div id="baslangic-ekrani">
+    <h1>Blok Okuma Egzersizi</h1>
+    <div class="alt-baslik">Gözünü tek noktada sabit tut, kelime gruplarını bütün olarak algıla.</div>
+
+    <div class="kontrol-grubu">
+      <select id="secim-tema"></select>
+      <select id="secim-sure">
+        <option value="1000">1000 ms (yavaş)</option>
+        <option value="800" selected>800 ms</option>
+        <option value="600">600 ms</option>
+        <option value="400">400 ms (hızlı)</option>
+      </select>
+    </div>
+
+    <button class="birincil" id="btn-baslat">Egzersizi Başlat</button>
+    <a href="#" id="geri-link-baslangic">← Panele Dön</a>
+  </div>
+
+  <!-- Bitiş ekranı -->
+  <div id="bitis-ekrani">
+    <h2>Egzersiz tamamlandı</h2>
+    <div class="kontrol-grubu" id="bitis-kontrol-grubu">
+      <button class="birincil" id="btn-tekrar">Tekrar Başlat</button>
+      <button id="btn-yeni-tema">Yeni Tema Seç</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   TEMA VERİLERİ
+   ------------------------------------------------------------
+   Her tema, kelime sayısı aşamalarına göre sıralı ifade
+   dizilerinden oluşur: 1 → 2 → 3 → 4 → 5 → 4 → 3 → 2 → 1
+   Yeni tema eklemek için aynı yapıda bir obje ekleyip
+   TEMALAR listesine dahil etmeniz yeterlidir.
+   İleride bu veri admin panelinden Supabase'e taşınabilir;
+   şimdilik sabit (statik) dizi olarak tutulmaktadır.
+   ============================================================ */
+
+  const TEMALAR = {
+
+    sevgi: {
+      ad: "Sevgi",
+      asamalar: [
+        ["Sevgi","İyilik","Saygı","Nezaket","Merhamet"],
+        ["Mutlu ol","İyi düşün","Nazik konuş","Yardım et","Gülümse bugün"],
+        ["Sevgi paylaş her","İyilik umut olur","Kalbini temiz tut","İnsanları olduğu kabul","Güzel söz söyle"],
+        ["Her gün iyilik yap","Sevgi kalpleri birleştirir daima","Nezaket herkese iyi gelir","Gülümsemek umut vermeye başlar","İnsan sevgisi dünyayı güzelleştirir"],
+        ["Her yeni gün umut taşır","İyilik yapan mutlu yaşar daima","Sevgi paylaştıkça daha çok büyür","Güzel davranış herkesçe hatırlanır","Kalbinde sevgi daima yeşersin","Merhamet insanı gerçekten yüceltir","İnsanlara içten sevgiyle yaklaş bugün","Nazik insanlar güzel izler bırakır","Hoşgörü dostluk kapılarını her zaman açar","İyilik küçük adımlarla bile başlar"],
+        ["Hoşgörü dostluk kapılarını açar","Nazik insanlar güzel izler bırakır","İnsanlara sevgiyle yaklaş bugün","Merhamet insanı gerçekten yüceltir","Kalbinde sevgi daima yeşersin"],
+        ["Güzel davranış hatırlanır","Sevgi daha büyür","Her gün iyilik","Kalbini temiz tut","İyilik umut olur"],
+        ["Gülümse bugün","Yardım et","Nazik konuş","İyi düşün","Mutlu ol"],
+        ["Merhamet","Nezaket","Saygı","İyilik","Sevgi"]
+      ]
+    },
+
+    kitap: {
+      ad: "Kitap",
+      asamalar: [
+        ["Kitap","Bilgi","Merak","Okuma","Öğrenme"],
+        ["Kitap aç bugün","Bilgiye değer ver","Merakını takip et","Her gün biraz oku","Öğrenmek hiç bitmez"],
+        ["Bir kitap yeni bir dünya","Bilgi güç verir insana","Merak öğrenmenin ilk adımı","Her sayfa yeni bir bilgi","Okumak zihni özgür bırakır"],
+        ["Kitap okuyan insan hep gelişir","Bilgiyi paylaşmak onu çoğaltır","Merak eden çocuk hep öğrenir","Her gün okumak alışkanlık olur","Öğrenme isteği hayat boyu sürer"],
+        ["Bir kitap bazen bir yol gösterir","Bilgi biriktikçe insan güçlenir gerçekten","Merak eden zihin hiç durmaz asla","Her sayfa çevirmek yeni bir kapı","Okuma alışkanlığı küçük adımlarla başlar","Bilgiye aç olan insan hep ilerler","Kitaplar sessizce en iyi öğretmen olur","Öğrenmek isteyen insan hiç yorulmaz","Merak sürdükçe öğrenme de sürer","Her kitap kapandığında yeni biri doğar"],
+        ["Kitaplar sessizce en iyi öğretmen olur","Bilgiye aç olan insan hep ilerler","Merak sürdükçe öğrenme de sürer","Her kitap kapandığında yeni biri doğar","Okuma alışkanlığı küçük adımlarla başlar"],
+        ["Bir sayfa yeni bir bilgi","Merak eden hep öğrenir","Kitap okuyan gelişir","Bilgi paylaşınca çoğalır","Öğrenme hiç bitmez"],
+        ["Her gün biraz oku","Merakını takip et","Bilgiye değer ver","Öğrenmek güzeldir","Kitap aç bugün"],
+        ["Öğrenme","Okuma","Merak","Bilgi","Kitap"]
+      ]
+    },
+
+    doga: {
+      ad: "Doğa",
+      asamalar: [
+        ["Doğa","Huzur","Denge","Temizlik","Yaşam"],
+        ["Doğaya değer ver","Huzuru doğada bul","Dengeyi koru daima","Doğayı temiz tut","Yaşamı birlikte koru"],
+        ["Doğa bize huzur verir","Her ağaç bir nefes","Temiz kalan doğa yaşar","Denge bozulursa hepsi biter","Doğayı koruyan geleceği korur"],
+        ["Doğada yürümek zihni dinlendirir","Her yaprak bir hayat taşır","Temiz kalan sular hayat verir","Dengeyi bozmadan yaşamak gerekir","Doğayı seven onu hep korur"],
+        ["Bir ağaç dikmek geleceğe umuttur","Doğada geçen zaman zihni onarır gerçekten","Her canlı bu dengede bir yerde durur","Temiz bırakılan doğa nesillere miras kalır","Yaşamak için doğaya saygı duymak gerekir","Doğayı izlemek bile insana huzur verir","Küçük bir adım büyük bir fark yaratır","Suyu, toprağı, havayı korumak hepimizin görevi","Denge bozulmadan yaşam da sürebilir ancak","Doğaya kulak veren onunla uyum içinde yaşar"],
+        ["Doğayı izlemek bile insana huzur verir","Temiz bırakılan doğa nesillere miras kalır","Denge bozulmadan yaşam da sürebilir ancak","Her canlı bu dengede bir yerde durur","Doğaya kulak veren onunla uyum içinde yaşar"],
+        ["Bir ağaç bir umuttur","Doğa zihni dinlendirir","Temiz su hayat verir","Denge çok önemlidir","Doğaya saygı duy"],
+        ["Huzuru doğada bul","Dengeyi koru daima","Doğayı temiz tut","Yaşamı birlikte koru","Doğaya değer ver"],
+        ["Yaşam","Temizlik","Denge","Huzur","Doğa"]
+      ]
+    }
+
+  };
+
+  /* ============================================================
+     MOTOR
+     ============================================================ */
+
+  const sahne = document.getElementById('sahne');
+  const ifadeEl = document.getElementById('ifade');
+  const ilerlemeCizgisi = document.getElementById('ilerleme-cizgisi');
+  const temaEtiketi = document.getElementById('tema-etiketi');
+
+  const baslangicEkrani = document.getElementById('baslangic-ekrani');
+  const bitisEkrani = document.getElementById('bitis-ekrani');
+  const secimTema = document.getElementById('secim-tema');
+  const secimSure = document.getElementById('secim-sure');
+
+  let dizi = [];       // seçilen temanın düz (flatten) ifade listesi
+  let index = 0;
+  let sure = 800;
+  let zamanlayici = null;
+  let duraklatildi = false;
+  let kalanSure = 0;
+  let adimBaslangic = 0;
+
+  // ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev) ──
+  // NOT: "hiz" parametresi burada tur-başına-kelime-gösterim süresini (ms) belirtir,
+  // "sure" (dakika) ise toplam görev süresidir — bu ikisi birbirinden bağımsızdır.
+  const _params = new URLSearchParams(window.location.search);
+  const KILITLI = _params.get('kilitli') === '1';
+  const HIZ_PARAM = parseInt(_params.get('hiz'));
+  const SURE_PARAM_DK = parseInt(_params.get('sure'));
+  const TEMA_PARAM = _params.get('tema');
+  const FROM_PARAM = _params.get('from');
+  let kilitliBitisZamani = null;
+  let kilitliSureInterval = null;
+
+  function sinusPanelUrl(){ return FROM_PARAM === 'admin' ? 'admin.html' : 'ogrenci-panel.html'; }
+
+  // ÖNEMLİ DÜZELTME: Bu dosyada önceden "Panele Dön" linki ve tamamlanma sinyali
+  // HİÇ YOKTU — egzersiz bitince öğrenci panelindeki görev asla ilerlemiyordu.
+  function gorevTamamlandiSinyaliGonder(){
+    try{
+      const veri = localStorage.getItem('sinus_bekleyen_gorev');
+      if(!veri) return;
+      const b = JSON.parse(veri);
+      if(b.tamamlandiMi===false){ b.tamamlandiMi=true; b.puan=10; localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b)); }
+    }catch(e){}
+  }
+  function sinusTamamlandiSinyalGonderVeDon(){
+    gorevTamamlandiSinyaliGonder();
+    setTimeout(()=>{ window.location.href = sinusPanelUrl(); }, 200);
+  }
+  document.getElementById('btn-panele-don').addEventListener('click', function(e){ e.preventDefault(); sinusTamamlandiSinyalGonderVeDon(); });
+  document.getElementById('geri-link-baslangic').addEventListener('click', function(e){ e.preventDefault(); sinusTamamlandiSinyalGonderVeDon(); });
+
+  // Select kutusunu temalarla doldur
+  Object.keys(TEMALAR).forEach(anahtar => {
+    const opt = document.createElement('option');
+    opt.value = anahtar;
+    opt.textContent = TEMALAR[anahtar].ad;
+    secimTema.appendChild(opt);
+  });
+
+  function diziyiOlustur(temaAnahtari){
+    const tema = TEMALAR[temaAnahtari];
+    return tema.asamalar.flat();
+  }
+
+  const kutuEl = document.getElementById('kutu');
+  const MAKS_PUNTO = 52;
+  const MIN_PUNTO = 15;
+
+  // İfadeyi kutunun genişliğine göre tek satıra sığacak şekilde boyutlandırır
+  function yaziyiSigdir(){
+    const kullanilabilirGenislik = kutuEl.clientWidth - 8; // küçük bir güvenlik payı
+    let punto = Math.min(MAKS_PUNTO, Math.round(kutuEl.clientWidth * 0.09));
+    ifadeEl.style.fontSize = punto + 'px';
+
+    while(ifadeEl.scrollWidth > kullanilabilirGenislik && punto > MIN_PUNTO){
+      punto -= 1;
+      ifadeEl.style.fontSize = punto + 'px';
+    }
+  }
+
+  function adimGoster(){
+    if(index >= dizi.length){
+      egzersiziBitir();
+      return;
+    }
+
+    ifadeEl.classList.remove('gorunur');
+
+    setTimeout(() => {
+      ifadeEl.textContent = dizi[index];
+      yaziyiSigdir();
+      ifadeEl.classList.add('gorunur');
+      ilerlemeCizgisi.style.width = ((index+1) / dizi.length * 100) + '%';
+      index++;
+      adimBaslangic = Date.now();
+      kalanSure = sure;
+      zamanlayici = setTimeout(adimGoster, sure);
+    }, 60);
+  }
+
+  function egzersiziBaslat(){
+    const temaAnahtari = secimTema.value;
+    if(!KILITLI){ sure = parseInt(secimSure.value, 10); }
+    dizi = diziyiOlustur(temaAnahtari);
+    index = 0;
+    duraklatildi = false;
+
+    temaEtiketi.textContent = 'Tema: ' + TEMALAR[temaAnahtari].ad;
+    baslangicEkrani.classList.add('gizli');
+    bitisEkrani.classList.remove('gorunur');
+    sahne.classList.add('calisiyor');
+    ilerlemeCizgisi.style.width = '0%';
+
+    adimGoster();
+  }
+
+  function egzersiziBitir(){
+    clearTimeout(zamanlayici);
+    sahne.classList.remove('calisiyor');
+    ifadeEl.classList.remove('gorunur');
+
+    gorevTamamlandiSinyaliGonder();
+
+    if(KILITLI){
+      if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
+      setTimeout(egzersiziBaslat, 1200);
+      return;
+    }
+
+    bitisEkrani.classList.add('gorunur');
+  }
+
+  function duraklat(){
+    if(duraklatildi) return;
+    duraklatildi = true;
+    clearTimeout(zamanlayici);
+    kalanSure = sure - (Date.now() - adimBaslangic);
+    sahne.classList.add('durduruldu');
+    document.getElementById('btn-durdur').textContent = 'Devam Et';
+  }
+
+  function devamEt(){
+    if(!duraklatildi) return;
+    duraklatildi = false;
+    sahne.classList.remove('durduruldu');
+    document.getElementById('btn-durdur').textContent = 'Duraklat';
+    zamanlayici = setTimeout(adimGoster, Math.max(kalanSure, 50));
+  }
+
+  // ── KİLİTLİ MOD YARDIMCI FONKSİYONLARI ──
+  function kilitliSureyiBaslat(dakika){
+    kilitliBitisZamani = Date.now() + dakika*60000;
+    document.getElementById('kilitli-sure-etiketi').style.display = 'inline';
+    clearInterval(kilitliSureInterval);
+    kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
+    kilitliSureGuncelle();
+  }
+  function kilitliSureGuncelle(){
+    if(kilitliBitisZamani===null) return;
+    const kalanMs = kilitliBitisZamani - Date.now();
+    if(kalanMs<=0){ document.getElementById('kilitliSureKalan').textContent='0:00'; clearInterval(kilitliSureInterval); return; }
+    const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
+    document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
+  }
+  function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
+
+  function kilitliGoreviBitir(){
+    clearInterval(kilitliSureInterval);
+    clearTimeout(zamanlayici);
+    gorevTamamlandiSinyaliGonder();
+    sahne.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px;width:100%">
+        <div style="font-size:2.5rem">✅</div>
+        <h2 style="font-family:'Poppins',sans-serif;color:var(--text)">Süre Doldu!</h2>
+        <p style="color:var(--text-dim)">Görev tamamlandı, panele dönebilirsin.</p>
+        <a href="${sinusPanelUrl()}" style="background:var(--gold);color:var(--navy-deep);padding:12px 28px;border-radius:10px;font-weight:600;text-decoration:none;font-family:'Poppins',sans-serif">Panele Dön →</a>
+      </div>`;
+  }
+
+  function kilitliModuBaslat(){
+    document.querySelector('.kontrol-grubu').style.display = 'none';
+    document.getElementById('btn-yeni-tema').style.display = 'none';
+    document.getElementById('geri-link-baslangic').style.display = 'none';
+    document.getElementById('btn-panele-don').style.display = 'none';
+    if(!isNaN(HIZ_PARAM)) sure = Math.min(2000, Math.max(200, HIZ_PARAM));
+    const temaSecim = (TEMA_PARAM && TEMALAR[TEMA_PARAM]) ? TEMA_PARAM : Object.keys(TEMALAR)[0];
+    secimTema.value = temaSecim;
+    document.getElementById('btn-baslat').textContent = 'Başla';
+    document.getElementById('btn-baslat').onclick = function(){
+      if(!isNaN(SURE_PARAM_DK)) kilitliSureyiBaslat(SURE_PARAM_DK);
+      egzersiziBaslat();
+    };
+  }
+  if(KILITLI){ kilitliModuBaslat(); }
+  else{
+    document.getElementById('btn-baslat').addEventListener('click', egzersiziBaslat);
+  }
+
+  document.getElementById('btn-tekrar').addEventListener('click', egzersiziBaslat);
+
+  document.getElementById('btn-yeni-tema').addEventListener('click', () => {
+    bitisEkrani.classList.remove('gorunur');
+    baslangicEkrani.classList.remove('gizli');
+  });
+
+  document.getElementById('btn-durdur').addEventListener('click', () => {
+    if(duraklatildi) devamEt(); else duraklat();
+  });
+
+  document.getElementById('btn-tam-ekran').addEventListener('click', () => {
+    if(!document.fullscreenElement){
+      sahne.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if(ifadeEl.textContent) yaziyiSigdir();
+  });
+
+  // Boşluk tuşu ile duraklat/devam et
+  document.addEventListener('keydown', (e) => {
+    const calisiyor = baslangicEkrani.classList.contains('gizli') && !bitisEkrani.classList.contains('gorunur');
+    if(e.code === 'Space' && calisiyor){
+      e.preventDefault();
+      if(duraklatildi) devamEt(); else duraklat();
+    }
+  });
+</script>
+
+</body>
+</html>

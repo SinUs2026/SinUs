@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kelime Bulmaca - SinUs</title>
+<style>
+  :root{
+    --navy:#0a1628;
+    --navy-light:#132238;
+    --navy-lighter:#1c2e4a;
+    --blue:#2563a8;
+    --blue-light:#60a5fa;
+    --gold:#d4af37;
+    --gold-soft:#e8ca6a;
+    --success:#3fae6a;
+    --text:#e6ecf5;
+    --text-dim:#8fa3c0;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:radial-gradient(ellipse at top, var(--navy-light) 0%, var(--navy) 60%);
+    color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow-x:hidden;
+    user-select:none;
+  }
+  .wrap{
+    max-width:900px; margin:0 auto; padding:16px 14px 40px;
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px; border-radius:14px;
+    background:linear-gradient(135deg, var(--navy-light), var(--navy-lighter));
+    border:1px solid rgba(212,175,55,0.25);
+    margin-bottom:14px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .brand{display:flex; flex-direction:column; line-height:1.15;}
+  .brand .title{font-size:15px; font-weight:700; letter-spacing:.3px;}
+  .brand .sub{font-size:11px; color:var(--text-dim);}
+  .brand .title .sin{color:var(--text);}
+  .brand .title .us{color:var(--gold);}
+  .stats-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .pill{
+    background:rgba(37,99,168,0.25); border:1px solid rgba(96,165,250,0.35);
+    border-radius:999px; padding:6px 12px; font-size:12px; font-weight:600;
+    display:flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .pill.timer{border-color:rgba(212,175,55,0.5); background:rgba(212,175,55,0.12); color:var(--gold-soft);}
+  .pill.timer.warn{background:rgba(220,80,80,0.18); border-color:rgba(220,80,80,0.5); color:#ff8f8f;}
+  .pill.geri{color:var(--text-dim); cursor:pointer; text-decoration:none; border-color:rgba(143,163,192,0.3); background:rgba(255,255,255,0.03);}
+  .pill.geri:hover{color:var(--text); border-color:rgba(143,163,192,0.5);}
+
+  .board-area{
+    display:flex; gap:16px; flex:1; align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  .grid-card{
+    background:linear-gradient(160deg, var(--navy-light), var(--navy));
+    border:1px solid rgba(212,175,55,0.2);
+    border-radius:16px; padding:14px;
+    flex:1 1 380px; display:flex; justify-content:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+  #grid{
+    display:grid;
+    gap:3px;
+    touch-action:none;
+  }
+  .cell{
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:6px;
+    font-weight:700;
+    color:var(--text);
+    aspect-ratio:1/1;
+    transition:background .12s, color .12s, transform .1s;
+  }
+  .cell.selecting{background:rgba(96,165,250,0.35); border-color:var(--blue-light);}
+  .cell.found{background:rgba(63,174,106,0.35); border-color:var(--success); color:#c9f5da;}
+
+  .side-card{
+    flex:0 0 220px;
+    background:linear-gradient(160deg, var(--navy-light), var(--navy));
+    border:1px solid rgba(212,175,55,0.2);
+    border-radius:16px; padding:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+  .side-card h3{
+    margin:0 0 10px; font-size:13px; letter-spacing:.5px;
+    color:var(--gold-soft); text-transform:uppercase;
+  }
+  #wordList{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+  #wordList li{
+    font-size:14px; font-weight:600; color:var(--text);
+    padding:6px 10px; border-radius:8px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.05);
+    transition:all .2s;
+  }
+  #wordList li.done{
+    text-decoration:line-through; color:var(--text-dim);
+    background:rgba(63,174,106,0.12); border-color:rgba(63,174,106,0.3);
+  }
+
+  .action-row{margin-top:16px; display:flex; justify-content:center;}
+  .btn{
+    background:linear-gradient(135deg, var(--gold-soft), var(--gold));
+    color:#1a1408; border:none; font-weight:800; font-size:15px;
+    padding:13px 34px; border-radius:999px; cursor:pointer;
+    box-shadow:0 6px 18px rgba(212,175,55,0.35);
+    transition:transform .12s, box-shadow .12s;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn.secondary{
+    background:transparent; color:var(--gold-soft);
+    border:1.5px solid rgba(212,175,55,0.5); box-shadow:none;
+  }
+
+  .overlay{
+    position:fixed; inset:0; background:rgba(4,9,20,0.85);
+    display:flex; align-items:center; justify-content:center;
+    z-index:50; padding:20px; backdrop-filter:blur(4px);
+  }
+  .overlay.hidden{display:none;}
+  .modal{
+    background:linear-gradient(160deg, var(--navy-light), var(--navy));
+    border:1px solid rgba(212,175,55,0.35);
+    border-radius:20px; padding:28px 26px; max-width:380px; width:100%;
+    text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.6);
+  }
+  .modal h2{margin:0 0 6px; color:var(--gold-soft); font-size:20px;}
+  .modal p.lead{color:var(--text-dim); font-size:13px; margin:0 0 18px;}
+  .result-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;}
+  .result-item{
+    background:rgba(255,255,255,0.04); border-radius:10px; padding:10px 8px;
+    border:1px solid rgba(255,255,255,0.06);
+  }
+  .result-item .num{font-size:20px; font-weight:800; color:var(--gold-soft);}
+  .result-item .lab{font-size:11px; color:var(--text-dim); margin-top:2px;}
+  .transition-msg{font-size:16px; font-weight:700; color:var(--gold-soft);}
+
+  @media (max-width:640px){
+    .board-area{flex-direction:column;}
+    .side-card{flex:1 1 auto; order:2; width:100%;}
+    .grid-card{order:1; padding:8px;}
+    .stats-row{gap:6px;}
+    .pill{padding:5px 9px; font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="title"><span class="sin">Sin</span><span class="us">Us</span> · Kelime Bulmaca</div>
+      <div class="sub" id="levelLabel">Seviye 1</div>
+    </div>
+    <div class="stats-row">
+      <div class="pill">🎯 <span id="foundCount">0</span>/<span id="totalCount">0</span></div>
+      <div class="pill timer" id="timerPill">⏱ <span id="timeLeft">--</span></div>
+      <div class="pill timer" id="kilitliSurePill" style="display:none">⏱ Toplam: <span id="kilitliSureKalan">—</span></div>
+      <a href="#" class="pill geri" id="backBtn">← Panele Dön</a>
+    </div>
+  </div>
+
+  <div class="board-area">
+    <div class="grid-card">
+      <div id="grid"></div>
+    </div>
+    <div class="side-card">
+      <h3>Bulunacak Kelimeler</h3>
+      <ul id="wordList"></ul>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn" id="startBtn">Başlat</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="transitionOverlay">
+  <div class="modal">
+    <p class="transition-msg" id="transitionMsg">Harika! Yeni kelimeler geliyor…</p>
+  </div>
+</div>
+
+<div class="overlay hidden" id="resultOverlay">
+  <div class="modal">
+    <h2 id="resultTitle">Sonuç</h2>
+    <p class="lead" id="resultSub">Bulmaca tamamlandı.</p>
+    <div class="result-grid">
+      <div class="result-item"><div class="num" id="rTotal">0</div><div class="lab">Toplam Kelime</div></div>
+      <div class="result-item"><div class="num" id="rFound">0</div><div class="lab">Bulunan</div></div>
+      <div class="result-item"><div class="num" id="rRemain">0</div><div class="lab">Kalan</div></div>
+      <div class="result-item"><div class="num" id="rTime">0</div><div class="lab">Kullanılan Süre (sn)</div></div>
+      <div class="result-item"><div class="num" id="rPercent">0%</div><div class="lab">Başarı Yüzdesi</div></div>
+      <div class="result-item"><div class="num" id="rScore">0</div><div class="lab">Puan</div></div>
+    </div>
+    <button class="btn" id="replayBtn">Yeni Bulmaca</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   SinUs - Kelime Bulmaca Egzersizi
+   Seviye 1: yalnızca yatay, 3 tur otomatik yenileme
+   Seviye 2: yatay + dikey
+   Seviye 3: yatay + dikey + çapraz
+   Bitiş sinyali: localStorage.sinus_bekleyen_gorev = {tamamlandiMi:true, puan}
+   ============================================================ */
+
+(function(){
+  'use strict';
+
+  // ---------- URL parametreleri (admin tarafından ayarlanır) ----------
+  const params = new URLSearchParams(window.location.search);
+
+  // ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev) ──
+  // NOT: Bu dosyanın kendi "sure" parametresi TUR BAŞINA SANİYE anlamına geliyor,
+  // ama admin panelindeki genel "sure" parametresi TOPLAM GÖREV DAKİKASI anlamına
+  // geliyor. Bu iki anlam çakışmasın diye kilitli modda URL'deki "sure" değeri
+  // SADECE toplam görev süresi olarak kullanılır; tur içi geri sayım için her
+  // zaman seviyenin kendi varsayılan süresi (cfg.sure) kullanılır.
+  const KILITLI = params.get('kilitli') === '1';
+  const HIZ_PARAM = parseInt(params.get('hiz'));
+  const SEVIYE_PARAM = parseInt(params.get('seviye'));
+  const SURE_PARAM_DK = parseInt(params.get('sure'));
+
+  const seviye = Math.min(3, Math.max(1,
+    !isNaN(SEVIYE_PARAM) ? SEVIYE_PARAM : (!isNaN(HIZ_PARAM) ? HIZ_PARAM : 1)
+  ));
+
+  const LEVEL_DEFAULTS = {
+    1: { sure: 90, kelimeSayisi: 6, izgara: 8,  yonler: ['H'] },
+    2: { sure: 75, kelimeSayisi: 8, izgara: 10, yonler: ['H','V'] },
+    3: { sure: 60, kelimeSayisi: 12, izgara: 12, yonler: ['H','V','D1','D2'] }
+  };
+
+  const cfg = LEVEL_DEFAULTS[seviye];
+  const SURE = KILITLI ? cfg.sure : (parseInt(params.get('sure')) || cfg.sure);
+  const KELIME_SAYISI = parseInt(params.get('kelimeSayisi')) || cfg.kelimeSayisi;
+  const IZGARA = parseInt(params.get('izgaraBoyutu')) || cfg.izgara;
+  const YONLER = cfg.yonler;
+  const MAX_TUR = seviye === 1 ? 3 : 1;
+
+  let kilitliBitisZamani = null;
+  let kilitliSureInterval = null;
+
+  // ---------- Kelime havuzları ----------
+  const WORD_POOLS = {
+    1: ['ev','top','kitap','masa','kalem','okul','elma','kus','kedi','anne'],
+    2: ['orman','ogrenci','ogretmen','dikkat','hizli','okuma','zaman','basari','duzen','calisma'],
+    3: ['paragraf','cikarim','baglam','yorumlama','dusunce','kavram','analiz','gelisim','yontem','strateji']
+  };
+  // Ekranda gösterilecek Türkçe orijinal biçimler (ızgaraya ASCII-normalize konur, listede güzel görünür)
+  const DISPLAY_MAP = {
+    'kus':'kuş','ogrenci':'öğrenci','ogretmen':'öğretmen','hizli':'hızlı','basari':'başarı',
+    'duzen':'düzen','calisma':'çalışma','cikarim':'çıkarım','baglam':'bağlam','dusunce':'düşünce',
+    'gelisim':'gelişim','yontem':'yöntem'
+  };
+
+  const TR_LETTERS = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+
+  function turkishUpper(str){
+    return str
+      .replace(/i/g,'İ').replace(/ı/g,'I')
+      .toLocaleUpperCase('tr-TR');
+  }
+
+  // ---------- Durum ----------
+  let state = {
+    tur: 1,
+    grid: [],
+    placements: [], // {word, displayWord, cells:[{r,c}], cellSet:Set}
+    found: new Set(),
+    timeLeft: SURE,
+    timerId: null,
+    started: false,
+    selecting: false,
+    startCell: null,
+    currentPath: [],
+    totalScore: 0,
+    roundStats: [] // {total, found, timeUsed}
+  };
+
+  const gridEl = document.getElementById('grid');
+  const wordListEl = document.getElementById('wordList');
+  const foundCountEl = document.getElementById('foundCount');
+  const totalCountEl = document.getElementById('totalCount');
+  const timeLeftEl = document.getElementById('timeLeft');
+  const timerPillEl = document.getElementById('timerPill');
+  const levelLabelEl = document.getElementById('levelLabel');
+  const startBtn = document.getElementById('startBtn');
+  const transitionOverlay = document.getElementById('transitionOverlay');
+  const resultOverlay = document.getElementById('resultOverlay');
+  const replayBtn = document.getElementById('replayBtn');
+  const backBtn = document.getElementById('backBtn');
+
+  levelLabelEl.textContent = 'Seviye ' + seviye + (MAX_TUR > 1 ? ' · Tur 1/' + MAX_TUR : '');
+
+  // ---------- PANELe DÖNÜŞ + TAMAMLANMA SİNYALİ ----------
+  (function(){
+    const from = params.get('from');
+    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    backBtn.href = '#';
+    backBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      sinusTamamlandiSinyalGonderVeDon();
+    });
+    window._sinusBackUrl = backUrl;
+  })();
+
+  function sinusTamamlandiSinyalGonderVeDon(){
+    try{
+      const veri = localStorage.getItem('sinus_bekleyen_gorev');
+      if(veri){
+        const b = JSON.parse(veri);
+        if(b && b.tamamlandiMi===false){ b.tamamlandiMi=true; b.puan=state.totalScore||10; localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b)); }
+      }
+    }catch(e){}
+    setTimeout(()=>{ window.location.href = window._sinusBackUrl; }, 200);
+  }
+
+  // ---------- KİLİTLİ MOD ----------
+  function kilitliModuBaslat(){
+    backBtn.style.display = 'none';
+    startBtn.textContent = 'Başla';
+  }
+  if(KILITLI){ kilitliModuBaslat(); }
+
+  function kilitliSureyiBaslat(dakika){
+    kilitliBitisZamani = Date.now() + dakika*60000;
+    document.getElementById('kilitliSurePill').style.display = 'flex';
+    clearInterval(kilitliSureInterval);
+    kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
+    kilitliSureGuncelle();
+  }
+  function kilitliSureGuncelle(){
+    if(kilitliBitisZamani===null) return;
+    const kalanMs = kilitliBitisZamani - Date.now();
+    if(kalanMs<=0){ document.getElementById('kilitliSureKalan').textContent='0:00'; clearInterval(kilitliSureInterval); return; }
+    const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
+    document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
+  }
+  function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
+
+  function kilitliGoreviBitir(){
+    clearInterval(kilitliSureInterval);
+    clearInterval(state.timerId);
+    sendCompletionSignal(state.totalScore);
+    document.querySelector('.wrap').innerHTML = `
+      <div style="text-align:center;padding:60px 20px">
+        <div style="font-size:2.5rem;margin-bottom:10px">✅</div>
+        <h2 style="color:var(--gold-soft);margin-bottom:10px">SÜRE DOLDU!</h2>
+        <p style="color:var(--text-dim);margin-bottom:24px">Görev tamamlandı, panele dönebilirsin.</p>
+        <a href="${window._sinusBackUrl}" class="btn" style="text-decoration:none;display:inline-block">Panele Dön →</a>
+      </div>`;
+  }
+
+  // ---------- Kelime seçimi ----------
+  function pickWords(){
+    const pool = WORD_POOLS[seviye].slice();
+    // karıştır
+    for(let i=pool.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [pool[i],pool[j]] = [pool[j],pool[i]];
+    }
+    return pool.slice(0, Math.min(KELIME_SAYISI, pool.length));
+  }
+
+  // ---------- Yön vektörleri ----------
+  const DIR_VECTORS = {
+    H:  {dr:0, dc:1},
+    V:  {dr:1, dc:0},
+    D1: {dr:1, dc:1},   // sol üst -> sağ alt
+    D2: {dr:1, dc:-1}   // sağ üst -> sol alt
+  };
+
+  function buildGrid(words){
+    const size = IZGARA;
+    const grid = Array.from({length:size}, () => Array(size).fill(null));
+    const placements = [];
+
+    // uzun kelimeleri önce yerleştirmeye çalış (daha iyi paketleme)
+    const sorted = words.slice().sort((a,b)=>b.length-a.length);
+
+    sorted.forEach(word => {
+      const upperWord = turkishUpper(word).replace(/İ/g,'İ');
+      const letters = Array.from(upperWord); // Türkçe karakterleri doğru say
+      let placed = false;
+      let attempts = 0;
+
+      while(!placed && attempts < 300){
+        attempts++;
+        const dirKey = YONLER[Math.floor(Math.random()*YONLER.length)];
+        const dirStart = DIR_VECTORS[dirKey];
+        // D2 sağ üstten başladığı için başlangıç sütunu farklı hesaplanmalı
+        let vec = dirStart;
+        const len = letters.length;
+
+        const startR = Math.floor(Math.random()*size);
+        const startC = Math.floor(Math.random()*size);
+        const endR = startR + vec.dr*(len-1);
+        const endC = startC + vec.dc*(len-1);
+
+        if(endR < 0 || endR >= size || endC < 0 || endC >= size) continue;
+
+        // uyuşmazlık kontrolü
+        let conflict = false;
+        const cells = [];
+        for(let i=0;i<len;i++){
+          const r = startR + vec.dr*i;
+          const c = startC + vec.dc*i;
+          const existing = grid[r][c];
+          if(existing && existing !== letters[i]){ conflict = true; break; }
+          cells.push({r,c});
+        }
+        if(conflict) continue;
+
+        // yerleştir
+        cells.forEach((cell,i) => { grid[cell.r][cell.c] = letters[i]; });
+        placements.push({
+          word: word,
+          displayWord: (DISPLAY_MAP[word] || word),
+          cells,
+          cellKeySet: new Set(cells.map(c => c.r+','+c.c))
+        });
+        placed = true;
+      }
+      // yerleşemeyen kelime atlanır (ör. çok küçük ızgara); nadir durum
+    });
+
+    // boş hücreleri rastgele harflerle doldur
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+        if(!grid[r][c]){
+          grid[r][c] = TR_LETTERS[Math.floor(Math.random()*TR_LETTERS.length)];
+        }
+      }
+    }
+
+    return { grid, placements };
+  }
+
+  // ---------- Render ----------
+  function renderGrid(){
+    gridEl.style.gridTemplateColumns = 'repeat(' + IZGARA + ', 1fr)';
+    const cellPx = Math.min(38, Math.floor(360 / IZGARA));
+    gridEl.style.width = (cellPx * IZGARA + (IZGARA-1)*3) + 'px';
+    gridEl.innerHTML = '';
+    for(let r=0;r<IZGARA;r++){
+      for(let c=0;c<IZGARA;c++){
+        const div = document.createElement('div');
+        div.className = 'cell';
+        div.dataset.r = r;
+        div.dataset.c = c;
+        div.style.fontSize = Math.max(11, Math.floor(cellPx*0.5)) + 'px';
+        div.textContent = state.grid[r][c];
+        gridEl.appendChild(div);
+      }
+    }
+  }
+
+  function renderWordList(){
+    wordListEl.innerHTML = '';
+    state.placements.forEach(p => {
+      const li = document.createElement('li');
+      li.textContent = p.displayWord;
+      li.dataset.word = p.word;
+      if(state.found.has(p.word)) li.classList.add('done');
+      wordListEl.appendChild(li);
+    });
+    totalCountEl.textContent = state.placements.length;
+    foundCountEl.textContent = state.found.size;
+  }
+
+  function updateTimerUI(){
+    timeLeftEl.textContent = state.timeLeft + 's';
+    timerPillEl.classList.toggle('warn', state.timeLeft <= 10);
+  }
+
+  // ---------- Oyun akışı ----------
+  function startRound(){
+    const words = pickWords();
+    const built = buildGrid(words);
+    state.grid = built.grid;
+    state.placements = built.placements;
+    state.found = new Set();
+    state.timeLeft = SURE;
+    renderGrid();
+    renderWordList();
+    updateTimerUI();
+    levelLabelEl.textContent = 'Seviye ' + seviye + (MAX_TUR > 1 ? ' · Tur ' + state.tur + '/' + MAX_TUR : '');
+
+    clearInterval(state.timerId);
+    state.timerId = setInterval(() => {
+      state.timeLeft--;
+      updateTimerUI();
+      if(state.timeLeft <= 0){
+        clearInterval(state.timerId);
+        finishRound(false);
+      }
+    }, 1000);
+  }
+
+  function finishRound(allFound){
+    clearInterval(state.timerId);
+    const timeUsed = SURE - Math.max(0, state.timeLeft);
+    let roundScore = state.found.size * 10;
+    if(allFound){
+      roundScore += Math.max(0, state.timeLeft) * 1; // erken bitirme bonusu
+      roundScore += 25; // tüm kelimeleri bulma bonusu
+    }
+    state.totalScore += roundScore;
+    state.roundStats.push({
+      total: state.placements.length,
+      found: state.found.size,
+      timeUsed
+    });
+
+    if(seviye === 1 && allFound && state.tur < MAX_TUR){
+      state.tur++;
+      showTransition();
+      return;
+    }
+    showResult();
+  }
+
+  function showTransition(){
+    transitionOverlay.classList.remove('hidden');
+    setTimeout(() => {
+      transitionOverlay.classList.add('hidden');
+      startRound();
+    }, 1400);
+  }
+
+  function showResult(){
+    const totalWords = state.roundStats.reduce((s,r)=>s+r.total,0);
+    const totalFound = state.roundStats.reduce((s,r)=>s+r.found,0);
+    const totalTime = state.roundStats.reduce((s,r)=>s+r.timeUsed,0);
+    const remain = totalWords - totalFound;
+    const percent = totalWords ? Math.round((totalFound/totalWords)*100) : 0;
+
+    sendCompletionSignal(state.totalScore);
+
+    // KİLİTLİ MOD: sonuç ekranı yerine, süre bitmediyse otomatik yeni oturum başlat.
+    if(KILITLI){
+      if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
+      setTimeout(()=>{
+        state.tur = 1;
+        state.totalScore = 0;
+        state.roundStats = [];
+        startRound();
+      }, 1500);
+      return;
+    }
+
+    document.getElementById('resultTitle').textContent =
+      percent === 100 ? 'Harika! Hepsini Buldun 🎉' : 'Bulmaca Tamamlandı';
+    document.getElementById('resultSub').textContent =
+      MAX_TUR > 1 ? '3 tur tamamlandı.' : 'Sonuçların aşağıda.';
+    document.getElementById('rTotal').textContent = totalWords;
+    document.getElementById('rFound').textContent = totalFound;
+    document.getElementById('rRemain').textContent = remain;
+    document.getElementById('rTime').textContent = totalTime;
+    document.getElementById('rPercent').textContent = percent + '%';
+    document.getElementById('rScore').textContent = state.totalScore;
+
+    resultOverlay.classList.remove('hidden');
+  }
+
+  // ÖNEMLİ DÜZELTME: Bu fonksiyon önceden localStorage'daki görev nesnesinin TAMAMINI
+  // {tamamlandiMi, puan} ile değiştiriyordu — bu, ogrenci.html'in görevi eşleştirmek için
+  // kullandığı kullanici/asama/gun/idx alanlarını SİLİYORDU. Sonuç: görev öğrenci
+  // panelinde HİÇBİR ZAMAN tamamlandı olarak işaretlenmiyordu. Artık mevcut nesne
+  // korunuyor, sadece tamamlandiMi ve puan alanları güncelleniyor.
+  function sendCompletionSignal(puan){
+    try{
+      const veri = localStorage.getItem('sinus_bekleyen_gorev');
+      if(!veri) return;
+      const b = JSON.parse(veri);
+      if(b.tamamlandiMi === false){
+        b.tamamlandiMi = true;
+        b.puan = puan;
+        localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+      }
+    }catch(e){ /* localStorage erişilemezse sessizce geç */ }
+  }
+
+  // ---------- Seçim etkileşimi (fare / dokunmatik) ----------
+  function cellFromPoint(x,y){
+    const el = document.elementFromPoint(x,y);
+    if(!el || !el.classList.contains('cell')) return null;
+    return el;
+  }
+
+  function clearSelectingClasses(){
+    document.querySelectorAll('.cell.selecting').forEach(el => el.classList.remove('selecting'));
+  }
+
+  function straightLineCells(r0,c0,r1,c1){
+    const dr = r1 - r0, dc = c1 - c0;
+    const steps = Math.max(Math.abs(dr), Math.abs(dc));
+    if(steps === 0) return [{r:r0,c:c0}];
+    const stepR = Math.sign(dr), stepC = Math.sign(dc);
+    // yalnızca yatay, dikey veya tam çapraz çizgilere izin ver
+    if(!(dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc))) return null;
+    const cells = [];
+    for(let i=0;i<=steps;i++){
+      cells.push({r:r0+stepR*i, c:c0+stepC*i});
+    }
+    return cells;
+  }
+
+  function highlightPath(cells){
+    clearSelectingClasses();
+    cells.forEach(({r,c}) => {
+      const el = gridEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
+      if(el) el.classList.add('selecting');
+    });
+  }
+
+  function tryMatchSelection(cells){
+    const keySet = new Set(cells.map(c => c.r+','+c.c));
+    for(const p of state.placements){
+      if(state.found.has(p.word)) continue;
+      if(p.cellKeySet.size !== keySet.size) continue;
+      let match = true;
+      for(const k of p.cellKeySet){ if(!keySet.has(k)){ match=false; break; } }
+      if(match){
+        state.found.add(p.word);
+        p.cells.forEach(({r,c}) => {
+          const el = gridEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
+          if(el) el.classList.add('found');
+        });
+        renderWordList();
+        if(state.found.size === state.placements.length){
+          finishRound(true);
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function pointerDown(e){
+    if(!state.started) return;
+    const point = e.touches ? e.touches[0] : e;
+    const el = cellFromPoint(point.clientX, point.clientY);
+    if(!el) return;
+    state.selecting = true;
+    state.startCell = { r: parseInt(el.dataset.r), c: parseInt(el.dataset.c) };
+    state.currentPath = [state.startCell];
+    highlightPath(state.currentPath);
+    e.preventDefault();
+  }
+
+  function pointerMove(e){
+    if(!state.selecting) return;
+    const point = e.touches ? e.touches[0] : e;
+    const el = cellFromPoint(point.clientX, point.clientY);
+    if(!el) return;
+    const r = parseInt(el.dataset.r), c = parseInt(el.dataset.c);
+    const line = straightLineCells(state.startCell.r, state.startCell.c, r, c);
+    if(line){
+      state.currentPath = line;
+      highlightPath(line);
+    }
+    e.preventDefault();
+  }
+
+  function pointerUp(e){
+    if(!state.selecting) return;
+    state.selecting = false;
+    tryMatchSelection(state.currentPath);
+    clearSelectingClasses();
+    // bulunan hücrelerin "found" sınıfı korunur, renderWordList zaten günceller
+    state.currentPath.forEach(({r,c}) => {
+      const el = gridEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
+      if(el && !el.classList.contains('found')) { /* seçim iptal, bir şey yok */ }
+    });
+  }
+
+  gridEl.addEventListener('mousedown', pointerDown);
+  gridEl.addEventListener('mousemove', pointerMove);
+  window.addEventListener('mouseup', pointerUp);
+  gridEl.addEventListener('touchstart', pointerDown, {passive:false});
+  gridEl.addEventListener('touchmove', pointerMove, {passive:false});
+  gridEl.addEventListener('touchend', pointerUp);
+
+  // ---------- Başlat / Yeniden Başlat ----------
+  startBtn.addEventListener('click', () => {
+    if(KILITLI && !isNaN(SURE_PARAM_DK)){ kilitliSureyiBaslat(SURE_PARAM_DK); }
+    state.started = true;
+    state.tur = 1;
+    state.totalScore = 0;
+    state.roundStats = [];
+    startBtn.style.display = 'none';
+    startRound();
+  });
+
+  replayBtn.addEventListener('click', () => {
+    resultOverlay.classList.add('hidden');
+    state.tur = 1;
+    state.totalScore = 0;
+    state.roundStats = [];
+    startRound();
+  });
+
+})();
+</script>
+</body>
+</html>
