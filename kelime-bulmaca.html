@@ -232,14 +232,19 @@
   const SEVIYE_PARAM = parseInt(params.get('seviye'));
   const SURE_PARAM_DK = parseInt(params.get('sure'));
 
-  const seviye = Math.min(3, Math.max(1,
+  const seviye = Math.min(4, Math.max(1,
     !isNaN(SEVIYE_PARAM) ? SEVIYE_PARAM : (!isNaN(HIZ_PARAM) ? HIZ_PARAM : 1)
   ));
 
+  // Seviye 1: az + kısa + basit kelime, sadece YATAY.
+  // Seviye 2: daha uzun + daha fazla kelime, sadece YATAY.
+  // Seviye 3: basit kelimeler, YATAY + YUKARIDAN AŞAĞI.
+  // Seviye 4: zor + uzun kelimeler, YATAY + YUKARIDAN AŞAĞI + AŞAĞIDAN YUKARI.
   const LEVEL_DEFAULTS = {
-    1: { sure: 90, kelimeSayisi: 6, izgara: 8,  yonler: ['H'] },
-    2: { sure: 75, kelimeSayisi: 8, izgara: 10, yonler: ['H','V'] },
-    3: { sure: 60, kelimeSayisi: 12, izgara: 12, yonler: ['H','V','D1','D2'] }
+    1: { sure: 90, kelimeSayisi: 4, izgara: 7,  yonler: ['H'] },
+    2: { sure: 90, kelimeSayisi: 6, izgara: 10, yonler: ['H'] },
+    3: { sure: 75, kelimeSayisi: 6, izgara: 9,  yonler: ['H','V'] },
+    4: { sure: 60, kelimeSayisi: 9, izgara: 12, yonler: ['H','V','VU'] }
   };
 
   const cfg = LEVEL_DEFAULTS[seviye];
@@ -254,9 +259,10 @@
 
   // ---------- Kelime havuzları ----------
   const WORD_POOLS = {
-    1: ['ev','top','kitap','masa','kalem','okul','elma','kus','kedi','anne'],
-    2: ['orman','ogrenci','ogretmen','dikkat','hizli','okuma','zaman','basari','duzen','calisma'],
-    3: ['paragraf','cikarim','baglam','yorumlama','dusunce','kavram','analiz','gelisim','yontem','strateji']
+    1: ['ev','top','kus','kedi','anne','elma','okul','masa'],
+    2: ['ogrenci','ogretmen','dikkat','hizli','basari','duzen','calisma','zaman','orman','okuma'],
+    3: ['ev','top','kus','kedi','anne','elma','okul','masa','kalem','kitap'],
+    4: ['paragraf','cikarim','baglam','yorumlama','dusunce','kavram','analiz','gelisim','yontem','strateji']
   };
   // Ekranda gösterilecek Türkçe orijinal biçimler (ızgaraya ASCII-normalize konur, listede güzel görünür)
   const DISPLAY_MAP = {
@@ -377,7 +383,8 @@
   // ---------- Yön vektörleri ----------
   const DIR_VECTORS = {
     H:  {dr:0, dc:1},
-    V:  {dr:1, dc:0},
+    V:  {dr:1, dc:0},    // yukarıdan aşağı
+    VU: {dr:-1, dc:0},   // aşağıdan yukarı
     D1: {dr:1, dc:1},   // sol üst -> sağ alt
     D2: {dr:1, dc:-1}   // sağ üst -> sol alt
   };
