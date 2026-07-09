@@ -122,6 +122,19 @@
     border:1.5px solid rgba(212,175,55,0.5); box-shadow:none;
   }
 
+  .seviye-btn{
+    background:rgba(255,255,255,0.03); border:1.5px solid rgba(96,165,250,0.25);
+    border-radius:10px; padding:10px 6px; cursor:pointer; text-align:center;
+    color:var(--text-dim); font-family:'Segoe UI',system-ui,sans-serif;
+    font-weight:700; font-size:15px; transition:all 0.15s;
+  }
+  .seviye-btn span{display:block; font-weight:400; font-size:11px; margin-top:3px;}
+  .seviye-btn:hover{border-color:var(--blue-light); color:var(--text);}
+  .seviye-btn.sel{
+    background:rgba(212,175,55,0.12); border-color:var(--gold);
+    color:var(--gold-soft); box-shadow:0 0 12px rgba(212,175,55,0.2);
+  }
+
   .overlay{
     position:fixed; inset:0; background:rgba(4,9,20,0.85);
     display:flex; align-items:center; justify-content:center;
@@ -166,6 +179,16 @@
       <div class="pill timer" id="timerPill">⏱ <span id="timeLeft">--</span></div>
       <div class="pill timer" id="kilitliSurePill" style="display:none">⏱ Toplam: <span id="kilitliSureKalan">—</span></div>
       <a href="#" class="pill geri" id="backBtn">← Panele Dön</a>
+    </div>
+  </div>
+
+  <div class="menu-card" id="seviyeSeciciKart" style="background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.25);border-radius:14px;padding:14px 18px;margin-bottom:12px">
+    <div style="font-size:12px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Seviye Seç</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      <button class="seviye-btn" data-seviye="1">1<br><span>Kolay · Yatay</span></button>
+      <button class="seviye-btn" data-seviye="2">2<br><span>Uzun · Yatay</span></button>
+      <button class="seviye-btn" data-seviye="3">3<br><span>Yatay+Dikey</span></button>
+      <button class="seviye-btn" data-seviye="4">4<br><span>Zor · Her Yön</span></button>
     </div>
   </div>
 
@@ -232,7 +255,7 @@
   const SEVIYE_PARAM = parseInt(params.get('seviye'));
   const SURE_PARAM_DK = parseInt(params.get('sure'));
 
-  const seviye = Math.min(4, Math.max(1,
+  let seviye = Math.min(4, Math.max(1,
     !isNaN(SEVIYE_PARAM) ? SEVIYE_PARAM : (!isNaN(HIZ_PARAM) ? HIZ_PARAM : 1)
   ));
 
@@ -247,12 +270,18 @@
     4: { sure: 60, kelimeSayisi: 9, izgara: 12, yonler: ['H','V','VU'] }
   };
 
-  const cfg = LEVEL_DEFAULTS[seviye];
-  const SURE = KILITLI ? cfg.sure : (parseInt(params.get('sure')) || cfg.sure);
-  const KELIME_SAYISI = parseInt(params.get('kelimeSayisi')) || cfg.kelimeSayisi;
-  const IZGARA = parseInt(params.get('izgaraBoyutu')) || cfg.izgara;
-  const YONLER = cfg.yonler;
-  const MAX_TUR = seviye === 1 ? 3 : 1;
+  // Seviyeye bağlı ayarları (cfg, süre, ızgara, yönler, tur sayısı) hesaplar.
+  // Sayfa yüklenince ve kullanıcı "Seviye Seç" panelinden seçim yapınca çağrılır.
+  let cfg, SURE, KELIME_SAYISI, IZGARA, YONLER, MAX_TUR;
+  function seviyeAyarlariniHesapla(){
+    cfg = LEVEL_DEFAULTS[seviye];
+    SURE = KILITLI ? cfg.sure : (parseInt(params.get('sure')) || cfg.sure);
+    KELIME_SAYISI = parseInt(params.get('kelimeSayisi')) || cfg.kelimeSayisi;
+    IZGARA = parseInt(params.get('izgaraBoyutu')) || cfg.izgara;
+    YONLER = cfg.yonler;
+    MAX_TUR = seviye === 1 ? 3 : 1;
+  }
+  seviyeAyarlariniHesapla();
 
   let kilitliBitisZamani = null;
   let kilitliSureInterval = null;
@@ -308,7 +337,25 @@
   const replayBtn = document.getElementById('replayBtn');
   const backBtn = document.getElementById('backBtn');
 
-  levelLabelEl.textContent = 'Seviye ' + seviye + (MAX_TUR > 1 ? ' · Tur 1/' + MAX_TUR : '');
+  function seviyeEtiketiGuncelle(){
+    levelLabelEl.textContent = 'Seviye ' + seviye + (MAX_TUR > 1 ? ' · Tur 1/' + MAX_TUR : '');
+  }
+  seviyeEtiketiGuncelle();
+
+  // ---------- SEVİYE SEÇİMİ ----------
+  const seviyeButonlari = document.querySelectorAll('.seviye-btn');
+  function seviyeButonlariniGuncelle(){
+    seviyeButonlari.forEach(b => b.classList.toggle('sel', parseInt(b.dataset.seviye) === seviye));
+  }
+  seviyeButonlariniGuncelle();
+  seviyeButonlari.forEach(b => {
+    b.addEventListener('click', () => {
+      seviye = parseInt(b.dataset.seviye);
+      seviyeAyarlariniHesapla();
+      seviyeButonlariniGuncelle();
+      seviyeEtiketiGuncelle();
+    });
+  });
 
   // ---------- PANELe DÖNÜŞ + TAMAMLANMA SİNYALİ ----------
   (function(){
@@ -337,6 +384,7 @@
   function kilitliModuBaslat(){
     backBtn.style.display = 'none';
     startBtn.textContent = 'Başla';
+    document.getElementById('seviyeSeciciKart').style.display = 'none';
   }
   if(KILITLI){ kilitliModuBaslat(); }
 
@@ -709,6 +757,7 @@
     state.totalScore = 0;
     state.roundStats = [];
     startBtn.style.display = 'none';
+    document.getElementById('seviyeSeciciKart').style.display = 'none';
     startRound();
   });
 
