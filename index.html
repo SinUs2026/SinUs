@@ -90,10 +90,10 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .gric{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
 .grf{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.15);border-radius:16px;padding:2rem}
 .grh{font-size:0.72rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--gr);margin-bottom:1.5rem;display:flex;justify-content:space-between}
-.gra{height:160px;display:flex;align-items:flex-end;gap:0.45rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(96,165,250,0.1)}
+.gra{height:160px;display:flex;align-items:flex-end;gap:0.45rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(96,165,250,0.1);overflow:hidden}
 .gcc{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.25rem}
-.gbw{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;width:100%}
-.gb{border-radius:3px 3px 0 0;width:100%}.gbh{background:linear-gradient(to top,var(--ma),var(--ma2))}.gba{background:linear-gradient(to top,rgba(212,175,55,0.35),var(--al));opacity:0.65}
+.gbw{display:flex;flex-direction:row;align-items:flex-end;gap:3px;width:100%;height:130px}
+.gb{border-radius:3px 3px 0 0;flex:1}.gbh{background:linear-gradient(to top,var(--ma),var(--ma2))}.gba{background:linear-gradient(to top,rgba(212,175,55,0.35),var(--al));opacity:0.9}
 .gg2{font-size:0.6rem;color:var(--gr);text-align:center}
 .gl{display:flex;gap:1.5rem;margin-top:1rem}.gli{display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--gr)}.gld{width:10px;height:10px;border-radius:2px}
 .grm p{font-size:1rem;color:var(--ya);opacity:0.75;line-height:1.85;margin-bottom:1.2rem}
@@ -495,13 +495,12 @@ const an=[55,58,61,64,67,70,73,76,79,81,83,85,87,89,91];
 const gr=document.getElementById('grafik');
 const mh=Math.max(...hz),ml=Math.min(...hz);
 const ah=Math.max(...an),al=Math.min(...an);
-const barAlani=130; // .gra yüksekliği 160px, etiket için ~30px ayrıldı
+const barAlani=130;
 for(let i=0;i<15;i++){
   const col=document.createElement('div');col.className='gcc';
   const wrap=document.createElement('div');wrap.className='gbw';
-  wrap.style.height=barAlani+'px';
-  const hpx=Math.round(10+((hz[i]-ml)/(mh-ml))*(barAlani-10));
-  const apx=Math.round(10+((an[i]-al)/(ah-al))*(barAlani-10));
+  const hpx=Math.round(8+((hz[i]-ml)/(mh-ml))*(barAlani-8));
+  const apx=Math.round(8+((an[i]-al)/(ah-al))*(barAlani-8));
   wrap.innerHTML='<div class="gb gbh" style="height:'+hpx+'px"></div><div class="gb gba" style="height:'+apx+'px"></div>';
   col.appendChild(wrap);
   const gl=document.createElement('div');gl.className='gg2';gl.textContent=i+1;col.appendChild(gl);
