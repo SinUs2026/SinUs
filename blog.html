@@ -51,6 +51,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .nr{display:flex;align-items:center;gap:0.8rem}
 .ng{display:flex;gap:0.4rem}.ng a{font-size:0.76rem;font-weight:500;padding:0.38rem 0.85rem;border-radius:5px;text-decoration:none;border:1px solid rgba(96,165,250,0.25);color:var(--ma2);transition:all 0.2s}.ng a:hover{background:rgba(96,165,250,0.1)}
 .ncta{background:var(--al);color:var(--la);padding:0.5rem 1.3rem;border-radius:6px;font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s}.ncta:hover{background:var(--al2);transform:translateY(-1px)}
+.hb{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:0.4rem}
+.hb span{width:24px;height:2px;background:var(--be)}
 .blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem;margin-top:3rem}
 .blog-kart{background:rgba(255,255,255,0.02);border:1px solid rgba(96,165,250,0.1);border-radius:16px;overflow:hidden;transition:all 0.3s;display:flex;flex-direction:column}
 .blog-kart:hover{border-color:rgba(96,165,250,0.3);transform:translateY(-5px)}
@@ -69,39 +71,56 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .cta-blok .st{margin-bottom:0.8rem}
 .cta-blok p{font-size:1rem;color:var(--gr);margin-bottom:2.5rem}
 .cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-@media(max-width:768px){nav{padding:1rem 1.5rem}.nl,.ng{display:none}.fic{grid-template-columns:1fr}}
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;flex-wrap:wrap}
+  .hb{display:flex}
+  .nl{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(10,22,40,0.98);flex-direction:column;padding:1rem 1.5rem;gap:0.3rem;border-bottom:1px solid rgba(212,175,55,0.15);max-height:70vh;overflow-y:auto}
+  .nl.acik{display:flex}
+  .nl>li{width:100%}
+  .nl>li>a{width:100%}
+  .dropdown{position:static;transform:none;opacity:1;visibility:visible;display:none;box-shadow:none;margin-top:0.3rem;backdrop-filter:none;background:rgba(255,255,255,0.03)}
+  .nl>li.dd-acik .dropdown{display:block}
+  .ng{display:none}
+  .fic{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <canvas id="uzay"></canvas>
 <nav id="nav">
   <a href="index.html" class="logo"><span class="s">Sin</span><span class="u">Us</span></a>
-  <ul class="nl">
+  <button class="hb" id="hbBtn" aria-label="Menü">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nl" id="navList">
     <li><a href="index.html">Ana Sayfa</a></li>
-    <li><a href="hakkimizda.html">Hakkimizda</a></li>
+    <li><a href="hakkimizda.html">Hakkımızda</a></li>
     <li>
-      <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi <span class="dd-ok">&#9660;</span></a>
+      <a href="hizli-okuma-nedir.html" onclick="return dropToggle(event,this)">Hızlı Okuma Eğitimi <span class="dd-ok">&#9660;</span></a>
       <div class="dropdown">
-        <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
+        <a href="hizli-okuma-nedir.html">Hızlı Okuma Eğitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
         <div class="dropdown-sep"></div>
-        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yas, seviye ve on kosullar</span></a>
+        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yaş, seviye ve ön koşullar</span></a>
         <div class="dropdown-sep"></div>
-        <a href="neden-almaliyim.html">Neden Almaliyim?<span>Faydalari ve sonuclar</span></a>
+        <a href="neden-almaliyim.html">Neden Almalıyım?<span>Faydaları ve sonuçları</span></a>
         <div class="dropdown-sep"></div>
-        <a href="platform.html">SinUs Platformu<span>Sistem nasil calisir?</span></a>
+        <a href="platform.html">SinUs Platformu<span>Sistem nasıl çalışır?</span></a>
       </div>
     </li>
     <li class="aktif"><a href="blog.html">Blog</a></li>
     <li><a href="sss.html">SSS</a></li>
-    <li><a href="iletisim.html">Iletisim</a></li>
+    <li><a href="iletisim.html">İletişim</a></li>
+    <li><a href="admin-giris.html">Yönetici</a></li>
+    <li><a href="giris.html">Öğretmen</a></li>
+    <li><a href="giris.html">Öğrenci</a></li>
   </ul>
   <div class="nr">
     <div class="ng">
-      <a href="admin.html">Yonetici</a>
-      <a href="ogretmen.html">Ogretmen</a>
-      <a href="ogrenci-panel.html">Ogrenci</a>
+      <a href="admin-giris.html">Yönetici</a>
+      <a href="giris.html">Öğretmen</a>
+      <a href="giris.html">Öğrenci</a>
     </div>
-    <a href="index.html#olcum" class="ncta">Ucretsiz Olc</a>
+    <a href="index.html#olcum" class="ncta">Ücretsiz Ölç</a>
   </div>
 </nav>
 
@@ -109,23 +128,23 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
   <div class="c">
     <p class="breadcrumb"><a href="index.html">Ana Sayfa</a><span>/</span>Blog</p>
     <p class="sl">Blog</p>
-    <h1 class="st">Daha fazla verim icin<br>okumaya devam edin.</h1>
-    <p class="ozet">Okuma, dikkat, odak ve ogrenme uzerine yazilar. Her yazi, gelisiminizi hizlandiracak bir ipucu tasir.</p>
+    <h1 class="st">Daha fazla verim için<br>okumaya devam edin.</h1>
+    <p class="ozet">Okuma, dikkat, odak ve öğrenme üzerine yazılar. Her yazı, gelişiminizi hızlandıracak bir ipucu taşır.</p>
   </div>
 </section>
 
 <section>
   <div class="c-wide">
-    <p class="sl">Tum Yazilar</p>
-    <h2 class="st">Bilgi bankasi.</h2>
+    <p class="sl">Tüm Yazılar</p>
+    <h2 class="st">Bilgi bankası.</h2>
     <div class="blog-grid">
 
       <div class="blog-kart">
         <div class="blog-ust">&#128065;</div>
         <div class="blog-govde">
-          <div class="blog-etiket">Goz Sagligi</div>
-          <h2>Goz kaslari neden bu kadar onemli? Hizli okumada goz sagligi</h2>
-          <p>Okuma hizini artirmanin en temel adimi goz kaslarini dogru calistirmaktan geciyor. Peki gozler okurken nasil calisir?</p>
+          <div class="blog-etiket">Göz Sağlığı</div>
+          <h2>Göz kasları neden bu kadar önemli? Hızlı okumada göz sağlığı</h2>
+          <p>Okuma hızını artırmanın en temel adımı göz kaslarını doğru çalıştırmaktan geçiyor. Peki gözler okurken nasıl çalışır?</p>
           <div class="blog-meta">
             <span class="blog-sure">5 dk okuma</span>
             <a href="#" class="blog-ok">Oku &rarr;</a>
@@ -137,8 +156,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
         <div class="blog-ust">&#127919;</div>
         <div class="blog-govde">
           <div class="blog-etiket">Dikkat ve Odak</div>
-          <h2>Cocugunuz okurken akli neden baska yerde? Odak sorununa bilimsel bakis</h2>
-          <p>Dikkat daginikligi bir karakter sorunu degil, egitilebilir bir beceri meselesidir. Bilim ne diyor?</p>
+          <h2>Çocuğunuz okurken aklı neden başka yerde? Odak sorununa bilimsel bakış</h2>
+          <p>Dikkat dağınıklığı bir karakter sorunu değil, eğitilebilir bir beceri meselesidir. Bilim ne diyor?</p>
           <div class="blog-meta">
             <span class="blog-sure">6 dk okuma</span>
             <a href="#" class="blog-ok">Oku &rarr;</a>
@@ -150,8 +169,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
         <div class="blog-ust">&#128218;</div>
         <div class="blog-govde">
           <div class="blog-etiket">Ebeveyn Rehberi</div>
-          <h2>30 gunluk programdan maksimum verim almak icin 5 oneri</h2>
-          <p>Sistemi dogru kullanmak kadar sureci desteklemek de gelisimi dogrudan etkiliyor. Veli olarak ne yapabilirsiniz?</p>
+          <h2>30 günlük programdan maksimum verim almak için 5 öneri</h2>
+          <p>Sistemi doğru kullanmak kadar süreci desteklemek de gelişimi doğrudan etkiliyor. Veli olarak ne yapabilirsiniz?</p>
           <div class="blog-meta">
             <span class="blog-sure">4 dk okuma</span>
             <a href="#" class="blog-ok">Oku &rarr;</a>
@@ -163,8 +182,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
         <div class="blog-ust">&#9889;</div>
         <div class="blog-govde">
           <div class="blog-etiket">Okuma Teknikleri</div>
-          <h2>Tek tek kelime okumaktan blok okumaya gecis nasil olur?</h2>
-          <p>Cogu insan okurken tek tek kelime isler. Bu aliskanlik hem hizi hem anlama derinligini sinirlar. Nasil degistirirsiniz?</p>
+          <h2>Tek tek kelime okumaktan blok okumaya geçiş nasıl olur?</h2>
+          <p>Çoğu insan okurken tek tek kelime işler. Bu alışkanlık hem hızı hem anlama derinliğini sınırlar. Nasıl değiştirirsiniz?</p>
           <div class="blog-meta">
             <span class="blog-sure">7 dk okuma</span>
             <a href="#" class="blog-ok">Oku &rarr;</a>
@@ -175,9 +194,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       <div class="blog-kart">
         <div class="blog-ust">&#128200;</div>
         <div class="blog-govde">
-          <div class="blog-etiket">Veri ve Olcum</div>
-          <h2>Gelisim neden olculmeli? Sayilar olmadan ilerleme olmaz</h2>
-          <p>Hizli okuma egitiminde en gozardi edilen konu olcumdur. Oysa gelisim gorünür olmazsa surudurulemez.</p>
+          <div class="blog-etiket">Veri ve Ölçüm</div>
+          <h2>Gelişim neden ölçülmeli? Sayılar olmadan ilerleme olmaz</h2>
+          <p>Hızlı okuma eğitiminde en gözardı edilen konu ölçümdür. Oysa gelişim görünür olmazsa sürdürülemez.</p>
           <div class="blog-meta">
             <span class="blog-sure">5 dk okuma</span>
             <a href="#" class="blog-ok">Oku &rarr;</a>
@@ -188,12 +207,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
       <div class="blog-kart">
         <div class="blog-ust">&#127774;</div>
         <div class="blog-govde">
-          <div class="blog-etiket">Sinav Hazirlik</div>
-          <h2>YKS ve LGS'de paragraf sorularini daha hizli cozmenin yolu</h2>
-          <p>Sinav stresinin onemli bir kaynagi sure baskisidir. Okuma hizi bu stresi dogrudan etkiler.</p>
+          <div class="blog-etiket">Sınav Hazırlık</div>
+          <h2>YKS ve LGS'de paragraf sorularını daha hızlı çözmenin yolu</h2>
+          <p>Sınav stresinin önemli bir kaynağı süre baskısıdır. Okuma hızı bu stresi doğrudan etkiler.</p>
           <div class="blog-meta">
             <span class="blog-sure">6 dk okuma</span>
-            <span class="blog-yakin">Yakinda</span>
+            <span class="blog-yakin">Yakında</span>
           </div>
         </div>
       </div>
@@ -204,11 +223,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 
 <section class="cta-blok">
   <div class="c">
-    <h2 class="st">Okumak icin en iyi yatirim<br>kendinize yaptiginizdir.</h2>
-    <p>Ucretsiz olcum ile baslangic noktanizi ogrenin.</p>
+    <h2 class="st">Okumak için en iyi yatırım<br>kendinize yaptığınızdır.</h2>
+    <p>Ücretsiz ölçüm ile başlangıç noktanızı öğrenin.</p>
     <div class="cta-btns">
-      <a href="index.html#olcum" class="bp">Ucretsiz Olcumu Basla</a>
-      <a href="sss.html" class="bs">Sik Sorulan Sorular</a>
+      <a href="index.html#olcum" class="bp">Ücretsiz Ölçümü Başla</a>
+      <a href="sss.html" class="bs">Sık Sorulan Sorular</a>
     </div>
   </div>
 </section>
@@ -217,14 +236,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
   <div class="fic">
     <div>
       <div class="flo"><span class="s">Sin</span><span class="u">Us</span></div>
-      <p class="fsl">Okuma Anlama Muhendisligi<br>Her zihin kesfedilmeyi bekleyen bir evrendir.</p>
+      <p class="fsl">Okuma Anlama Mühendisliği<br>Her zihin keşfedilmeyi bekleyen bir evrendir.</p>
     </div>
     <div>
       <div class="fbas">Platform</div>
       <ul class="fln">
-        <li><a href="hizli-okuma-nedir.html">Hizli Okuma Nedir?</a></li>
+        <li><a href="hizli-okuma-nedir.html">Hızlı Okuma Nedir?</a></li>
         <li><a href="kimler-alabilir.html">Kimler Alabilir?</a></li>
-        <li><a href="neden-almaliyim.html">Neden Almaliyim?</a></li>
+        <li><a href="neden-almaliyim.html">Neden Almalıyım?</a></li>
         <li><a href="platform.html">SinUs Platformu</a></li>
         <li><a href="blog.html">Blog</a></li>
         <li><a href="sss.html">SSS</a></li>
@@ -233,15 +252,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
     <div>
       <div class="fbas">Kurumsal</div>
       <ul class="fln">
-        <li><a href="hakkimizda.html">Hakkimizda</a></li>
-        <li><a href="admin.html">Yonetici Paneli</a></li>
-        <li><a href="ogretmen.html">Ogretmen Paneli</a></li>
-        <li><a href="ogrenci-panel.html">Ogrenci Paneli</a></li>
-        <li><a href="iletisim.html">Iletisim</a></li>
+        <li><a href="hakkimizda.html">Hakkımızda</a></li>
+        <li><a href="admin-giris.html">Yönetici Paneli</a></li>
+        <li><a href="giris.html">Öğretmen Paneli</a></li>
+        <li><a href="giris.html">Öğrenci Paneli</a></li>
+        <li><a href="iletisim.html">İletişim</a></li>
       </ul>
     </div>
   </div>
-  <div class="falt">&copy; 2026 SinUs &middot; Tum haklari saklidir &middot; Izmir, Turkiye</div>
+  <div class="falt">&copy; 2026 SinUs &middot; Tüm hakları saklıdır &middot; İzmir, Türkiye</div>
 </footer>
 <script>
 const cv=document.getElementById('uzay');
@@ -259,6 +278,19 @@ spwn();sh=sh.filter(s=>s.a>0.02);
 sh.forEach(s=>{const d=Math.hypot(s.vx,s.vy);const tx=s.x-s.vx*(s.len/d);const ty=s.y-s.vy*(s.len/d);const g=cx.createLinearGradient(tx,ty,s.x,s.y);g.addColorStop(0,'transparent');g.addColorStop(0.7,'rgba(212,175,55,'+(s.a*0.35)+')');g.addColorStop(1,'rgba(255,255,255,'+s.a+')');cx.strokeStyle=g;cx.lineWidth=1.6;cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(s.x,s.y);cx.stroke();s.x+=s.vx;s.y+=s.vy;s.a-=0.016});
 requestAnimationFrame(drw)}
 drw();
+
+const hbBtn=document.getElementById('hbBtn');
+const navList=document.getElementById('navList');
+hbBtn.addEventListener('click',()=>navList.classList.toggle('acik'));
+function dropToggle(e,el){
+  if(window.innerWidth<=768){
+    e.preventDefault();
+    el.parentElement.classList.toggle('dd-acik');
+    return false;
+  }
+  return true;
+}
+
 window.addEventListener('scroll',()=>{document.getElementById('nav').style.borderBottomColor=window.scrollY>60?'rgba(212,175,55,0.25)':'rgba(212,175,55,0.12)'});
 </script>
 </body>
