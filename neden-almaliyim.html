@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neden Almaliyim? - SinUs</title>
+<title>Neden Almalıyım? - SinUs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
@@ -31,6 +31,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .nr{display:flex;align-items:center;gap:0.8rem}
 .ng{display:flex;gap:0.4rem}.ng a{font-size:0.76rem;font-weight:500;padding:0.38rem 0.85rem;border-radius:5px;text-decoration:none;border:1px solid rgba(96,165,250,0.25);color:var(--ma2);transition:all 0.2s}.ng a:hover{background:rgba(96,165,250,0.1)}
 .ncta{background:var(--al);color:var(--la);padding:0.5rem 1.3rem;border-radius:6px;font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s}.ncta:hover{background:var(--al2);transform:translateY(-1px)}
+.hb{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:0.4rem}
+.hb span{width:24px;height:2px;background:var(--be)}
 section{position:relative;z-index:1;padding:6rem 2rem}
 .c{max-width:780px;margin:0 auto}
 .c-wide{max-width:1100px;margin:0 auto}
@@ -44,12 +46,10 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .breadcrumb a{color:var(--gr);text-decoration:none}.breadcrumb a:hover{color:var(--ma2)}
 .breadcrumb span{margin:0 0.5rem;opacity:0.4}
 
-/* HERO */
 .page-hero{padding:10rem 2rem 4rem;text-align:center}
 .page-hero .st{font-size:clamp(2rem,5vw,3.2rem)}
 .page-hero .ozet{font-size:1.1rem;color:var(--ya);opacity:0.8;max-width:600px;margin:0 auto;line-height:1.85}
 
-/* SENARYO BLOKLARI */
 .senaryo-bolum{background:var(--la2);border-top:1px solid rgba(96,165,250,0.08)}
 .sen-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:3rem}
 .sen-kart{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.1);border-radius:16px;padding:2rem;position:relative;overflow:hidden;transition:all 0.3s}
@@ -61,7 +61,6 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .sen-sonuc{display:flex;align-items:center;gap:0.5rem;margin-top:1.2rem;font-size:0.85rem;color:var(--ma2);font-weight:500}
 .sen-sonuc::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ma2);flex-shrink:0}
 
-/* FAYDA SATIRLARI */
 .fayda-bolum{padding:5rem 2rem}
 .fayda-liste{display:flex;flex-direction:column;gap:1.2rem;margin-top:3rem}
 .fayda-item{display:flex;gap:1.5rem;align-items:flex-start;padding:1.8rem;background:rgba(255,255,255,0.02);border:1px solid rgba(96,165,250,0.08);border-radius:14px;transition:all 0.3s}
@@ -70,18 +69,15 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .fayda-icerik h3{font-size:1rem;font-weight:600;color:var(--be);margin-bottom:0.4rem}
 .fayda-icerik p{font-size:0.9rem;color:var(--gr);line-height:1.7}
 
-/* ALINTI */
 .alinti-bolum{background:var(--la3);padding:5rem 2rem;text-align:center}
 .alinti-kutu{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.2);border-left:4px solid var(--al);border-radius:0 12px 12px 0;padding:2rem 2.5rem;max-width:680px;margin:0 auto;text-align:left}
 .alinti-kutu p{font-family:'Playfair Display',serif;font-style:italic;font-size:1.2rem;color:var(--be);line-height:1.65;margin-bottom:0;opacity:1}
 
-/* SAYILAR */
 .sayilar{padding:4rem 2rem;background:var(--la2);border-top:1px solid rgba(96,165,250,0.08);border-bottom:1px solid rgba(96,165,250,0.08)}
 .say-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;max-width:900px;margin:0 auto;text-align:center}
 .say-sayi{font-size:2.5rem;font-weight:700;color:var(--al);line-height:1;margin-bottom:0.5rem}
 .say-acik{font-size:0.85rem;color:var(--gr);line-height:1.5}
 
-/* SINUs FARKI */
 .fark-bolum{padding:5rem 2rem}
 .fark-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:3rem;border:1px solid rgba(96,165,250,0.12);border-radius:16px;overflow:hidden}
 .fark-sutun{padding:2rem}
@@ -94,7 +90,6 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .fark-madde.check{color:var(--ya);opacity:0.85}
 .fark-icon{flex-shrink:0;font-size:0.9rem;margin-top:0.05rem}
 
-/* DEVAM */
 .devam-bolum{background:var(--la2);border-top:1px solid rgba(96,165,250,0.08)}
 .devam-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;margin-top:2.5rem}
 .devam-kart{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.1);border-radius:14px;padding:1.8rem;text-decoration:none;display:block;transition:all 0.3s}
@@ -104,13 +99,11 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .devam-kart p{font-size:0.82rem;color:var(--gr);line-height:1.5}
 .devam-ok{display:inline-block;margin-top:1rem;font-size:0.8rem;color:var(--ma2);font-weight:500}
 
-/* CTA */
 .cta-blok{padding:5rem 2rem;text-align:center;background:var(--la3);border-top:1px solid rgba(212,175,55,0.1)}
 .cta-blok .st{margin-bottom:0.8rem}
 .cta-blok p{font-size:1rem;color:var(--gr);margin-bottom:2.5rem}
 .cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 
-/* FOOTER */
 footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);padding:3rem 2rem 2rem}
 .fic{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem}
 .flo{font-size:1.5rem;font-weight:700;margin-bottom:0.8rem}.flo .s{color:var(--ma2)}.flo .u{color:var(--al)}
@@ -120,7 +113,17 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
 .falt{border-top:1px solid rgba(96,165,250,0.08);padding-top:1.5rem;text-align:center;font-size:0.78rem;color:var(--gr);opacity:0.5;max-width:1100px;margin:0 auto}
 
 @media(max-width:900px){.sen-grid,.fark-grid,.say-grid,.fic{grid-template-columns:1fr}.fark-sutun:first-child{border-right:none;border-bottom:1px solid rgba(96,165,250,0.12)}}
-@media(max-width:768px){nav{padding:1rem 1.5rem}.nl,.ng{display:none}}
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;flex-wrap:wrap}
+  .hb{display:flex}
+  .nl{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(10,22,40,0.98);flex-direction:column;padding:1rem 1.5rem;gap:0.3rem;border-bottom:1px solid rgba(212,175,55,0.15);max-height:70vh;overflow-y:auto}
+  .nl.acik{display:flex}
+  .nl>li{width:100%}
+  .nl>li>a{width:100%}
+  .dropdown{position:static;transform:none;opacity:1;visibility:visible;display:none;box-shadow:none;margin-top:0.3rem;backdrop-filter:none;background:rgba(255,255,255,0.03)}
+  .nl>li.dd-acik .dropdown{display:block}
+  .ng{display:none}
+}
 </style>
 </head>
 <body>
@@ -128,243 +131,240 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
 
 <nav id="nav">
   <a href="index.html" class="logo"><span class="s">Sin</span><span class="u">Us</span></a>
-  <ul class="nl">
+  <button class="hb" id="hbBtn" aria-label="Menü">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nl" id="navList">
     <li><a href="index.html">Ana Sayfa</a></li>
-    <li><a href="hakkimizda.html">Hakkimizda</a></li>
+    <li><a href="hakkimizda.html">Hakkımızda</a></li>
     <li class="aktif">
-      <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi <span class="dd-ok">&#9660;</span></a>
+      <a href="hizli-okuma-nedir.html" onclick="return dropToggle(event,this)">Hızlı Okuma Eğitimi <span class="dd-ok">&#9660;</span></a>
       <div class="dropdown">
-        <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
+        <a href="hizli-okuma-nedir.html">Hızlı Okuma Eğitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
         <div class="dropdown-sep"></div>
-        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yas, seviye ve on kosullar</span></a>
+        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yaş, seviye ve ön koşullar</span></a>
         <div class="dropdown-sep"></div>
-        <a href="neden-almaliyim.html">Neden Almaliyim?<span>Faydalari ve sonuclar</span></a>
+        <a href="neden-almaliyim.html">Neden Almalıyım?<span>Faydaları ve sonuçları</span></a>
         <div class="dropdown-sep"></div>
-        <a href="platform.html">SinUs Platformu<span>Sistem nasil calisir?</span></a>
+        <a href="platform.html">SinUs Platformu<span>Sistem nasıl çalışır?</span></a>
       </div>
     </li>
     <li><a href="blog.html">Blog</a></li>
     <li><a href="sss.html">SSS</a></li>
-    <li><a href="iletisim.html">Iletisim</a></li>
+    <li><a href="iletisim.html">İletişim</a></li>
+    <li><a href="admin-giris.html">Yönetici</a></li>
+    <li><a href="giris.html">Öğretmen</a></li>
+    <li><a href="giris.html">Öğrenci</a></li>
   </ul>
   <div class="nr">
     <div class="ng">
-      <a href="admin.html">Yonetici</a>
-      <a href="ogretmen.html">Ogretmen</a>
-      <a href="ogrenci-panel.html">Ogrenci</a>
+      <a href="admin-giris.html">Yönetici</a>
+      <a href="giris.html">Öğretmen</a>
+      <a href="giris.html">Öğrenci</a>
     </div>
-    <a href="index.html#olcum" class="ncta">Ucretsiz Olc</a>
+    <a href="index.html#olcum" class="ncta">Ücretsiz Ölç</a>
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="page-hero">
   <div class="c">
-    <p class="breadcrumb"><a href="index.html">Ana Sayfa</a><span>/</span><a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi</a><span>/</span>Neden Almaliyim?</p>
+    <p class="breadcrumb"><a href="index.html">Ana Sayfa</a><span>/</span><a href="hizli-okuma-nedir.html">Hızlı Okuma Eğitimi</a><span>/</span>Neden Almalıyım?</p>
     <p class="sl">Neden SinUs?</p>
-    <h1 class="st">Cunku okuma hizi<br>hayati dogrudan etkiler.</h1>
-    <p class="ozet">Daha hizli ve derin okuyan bir ogrenci daha iyi not alir, daha az stres yasayar, daha cok kaynak tararken daha iyi anlar. Bu bir yetenek degil, egitimle kazanilan bir beceridir.</p>
+    <h1 class="st">Çünkü okuma hızı<br>hayatı doğrudan etkiler.</h1>
+    <p class="ozet">Daha hızlı ve derin okuyan bir öğrenci daha iyi not alır, daha az stres yaşar, daha çok kaynak tararken daha iyi anlar. Bu bir yetenek değil, eğitimle kazanılan bir beceridir.</p>
   </div>
 </section>
 
-<!-- SENARYO BLOKLARI -->
 <section class="senaryo-bolum">
   <div class="c-wide">
-    <p class="sl">Gercek Hayattan</p>
-    <h2 class="st">Taniyor musunuz<br>bu senaryolari?</h2>
+    <p class="sl">Gerçek Hayattan</p>
+    <h2 class="st">Tanıyor musunuz<br>bu senaryoları?</h2>
     <div class="sen-grid">
       <div class="sen-kart">
         <div class="sen-etiket">Veli Senaryosu</div>
-        <h3>"Cocugum saatlerce calisiyor ama sinav notlari yeterli degil."</h3>
-        <p>Sorun calisma suresi degil, calisma kalitesidir. Yavasc okuyan bir ogrenci ayni zamanda metin icerigini tam olarak islemiyor olabilir. Okuma hizi ve anlama becerisini gelistirmek bu donguyu kirar.</p>
-        <div class="sen-sonuc">SinUs her gunun sonunda anlama oranini olcer</div>
+        <h3>"Çocuğum saatlerce çalışıyor ama sınav notları yeterli değil."</h3>
+        <p>Sorun çalışma süresi değil, çalışma kalitesidir. Yavaş okuyan bir öğrenci aynı zamanda metin içeriğini tam olarak işlemiyor olabilir. Okuma hızı ve anlama becerisini geliştirmek bu döngüyü kırar.</p>
+        <div class="sen-sonuc">SinUs her günün sonunda anlama oranını ölçer</div>
       </div>
       <div class="sen-kart">
-        <div class="sen-etiket">Ogrenci Senaryosu</div>
-        <h3>"Ders calisirken aklim surekli dagilıyor, odaklanamiyorum."</h3>
-        <p>Dikkat daginikliginin bir nedeni de okuma hizinin dusuk olmasidir. Zihin, cok yavas gelen bilgiyle sikiliyor ve baska yerlere gidiyor. Hiz ve dikkat egzersizleri bu sorunu birlikte cozuyor.</p>
-        <div class="sen-sonuc">SinUs'ta her gun odak calismalari yapilir</div>
+        <div class="sen-etiket">Öğrenci Senaryosu</div>
+        <h3>"Ders çalışırken aklım sürekli dağılıyor, odaklanamıyorum."</h3>
+        <p>Dikkat dağınıklığının bir nedeni de okuma hızının düşük olmasıdır. Zihin, çok yavaş gelen bilgiyle sıkılıyor ve başka yerlere gidiyor. Hız ve dikkat egzersizleri bu sorunu birlikte çözüyor.</p>
+        <div class="sen-sonuc">SinUs'ta her gün odak çalışmaları yapılır</div>
       </div>
       <div class="sen-kart">
-        <div class="sen-etiket">Sinav Senaryosu</div>
-        <h3>"Sorulari yetiştiremiyorum, paragraflar cok uzuyor."</h3>
-        <p>YKS, LGS ve benzeri sinavlarda paragraf sorulari belirleyicidir. Daha hizli okuyan ogrenci ayni sure icinde daha cok soru cozer, daha az stres altinda calisir.</p>
-        <div class="sen-sonuc">Ortalama 3x hiz artisi saglanir</div>
+        <div class="sen-etiket">Sınav Senaryosu</div>
+        <h3>"Soruları yetiştiremiyorum, paragraflar çok uzuyor."</h3>
+        <p>YKS, LGS ve benzeri sınavlarda paragraf soruları belirleyicidir. Daha hızlı okuyan öğrenci aynı süre içinde daha çok soru çözer, daha az stres altında çalışır.</p>
+        <div class="sen-sonuc">Ortalama 3x hız artışı sağlanır</div>
       </div>
       <div class="sen-kart">
-        <div class="sen-etiket">Yetiskin Senaryosu</div>
-        <h3>"Is hayatimda cok fazla belge okuyor, verimim dusuyor."</h3>
-        <p>Profesyonel hayatta okuma yukü ciddi bir zaman kaynagi. Hizli ve odakli okuma bu sureyi yarimadan fazla kisaltabilir, analiz kalitesini ise arttirir.</p>
-        <div class="sen-sonuc">Gunde saatler kazanilabilir</div>
+        <div class="sen-etiket">Yetişkin Senaryosu</div>
+        <h3>"İş hayatımda çok fazla belge okuyorum, verimim düşüyor."</h3>
+        <p>Profesyonel hayatta okuma yükü ciddi bir zaman kaynağı. Hızlı ve odaklı okuma bu süreyi yarıdan fazla kısaltabilir, analiz kalitesini ise artırır.</p>
+        <div class="sen-sonuc">Günde saatler kazanılabilir</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FAYDALAR -->
 <section class="fayda-bolum">
   <div class="c">
     <p class="sl">Somut Faydalar</p>
-    <h2 class="st">Hizli okuma egitimi<br>hayatinda ne degistirir?</h2>
+    <h2 class="st">Hızlı okuma eğitimi<br>hayatında ne değiştirir?</h2>
     <div class="fayda-liste">
       <div class="fayda-item">
         <div class="fayda-no">1</div>
         <div class="fayda-icerik">
-          <h3>Ayni surede iki kat daha fazla okursunuz</h3>
-          <p>Ortalama bir yetiskin dakikada 200-250 kelime okur. Dogru egitimle bu rakam 500-600'e cikabilir. Ayni ders calisma suresinde cok daha fazla konu kapsanir.</p>
+          <h3>Aynı sürede iki kat daha fazla okursunuz</h3>
+          <p>Ortalama bir yetişkin dakikada 200-250 kelime okur. Doğru eğitimle bu rakam 500-600'e çıkabilir. Aynı ders çalışma süresinde çok daha fazla konu kapsanır.</p>
         </div>
       </div>
       <div class="fayda-item">
         <div class="fayda-no">2</div>
         <div class="fayda-icerik">
-          <h3>Anlama derinligi artar, unutma azalir</h3>
-          <p>Hizli okuma egitimi yalnizca hizi degil, bilginin beyinde nasil isleneceğini de degistirir. Bloklar halinde okunan metin daha kalici izler birakir.</p>
+          <h3>Anlama derinliği artar, unutma azalır</h3>
+          <p>Hızlı okuma eğitimi yalnızca hızı değil, bilginin beyinde nasıl işleneceğini de değiştirir. Bloklar halinde okunan metin daha kalıcı izler bırakır.</p>
         </div>
       </div>
       <div class="fayda-item">
         <div class="fayda-no">3</div>
         <div class="fayda-icerik">
-          <h3>Dikkat suresi uzar, odak guclenur</h3>
-          <p>Egzersizler yalnizca goz kaslarini degil, dikkati de calıstirir. Duzzenli yapan ogrenciler zamanla daha uzun sure odakli kalabilir hale gelir.</p>
+          <h3>Dikkat süresi uzar, odak güçlenir</h3>
+          <p>Egzersizler yalnızca göz kaslarını değil, dikkati de çalıştırır. Düzenli yapan öğrenciler zamanla daha uzun süre odaklı kalabilir hale gelir.</p>
         </div>
       </div>
       <div class="fayda-item">
         <div class="fayda-no">4</div>
         <div class="fayda-icerik">
-          <h3>Sinav stresi azalir</h3>
-          <p>Yeterince hizli okuyan bir ogrenci sinav suresi baskisini daha az hisseder. Bu psikolojik rahatlama dogru cevap sayisini da dogrudan etkiler.</p>
+          <h3>Sınav stresi azalır</h3>
+          <p>Yeterince hızlı okuyan bir öğrenci sınav süresi baskısını daha az hisseder. Bu psikolojik rahatlama doğru cevap sayısını da doğrudan etkiler.</p>
         </div>
       </div>
       <div class="fayda-item">
         <div class="fayda-no">5</div>
         <div class="fayda-icerik">
-          <h3>Gelisim olculur ve gorulur</h3>
-          <p>SinUs'ta her gun okuma hizi ve anlama orani kaydedilir. Baslangictan buyana gelisim grafige dokulur. Bu gorunurluk motivasyonu ciddi sekilde arttirir.</p>
+          <h3>Gelişim ölçülür ve görülür</h3>
+          <p>SinUs'ta her gün okuma hızı ve anlama oranı kaydedilir. Başlangıçtan bu yana gelişim grafiğe dökülür. Bu görünürlük motivasyonu ciddi şekilde artırır.</p>
         </div>
       </div>
       <div class="fayda-item">
         <div class="fayda-no">6</div>
         <div class="fayda-icerik">
-          <h3>Hayat boyu surdurulebilir bir beceri kazanilir</h3>
-          <p>Hizli okuma bir kurs degil, bir beceridir. Bir kez kazanilan bu beceri hayat boyu kullanilir ve zamanla daha da guclenur.</p>
+          <h3>Hayat boyu sürdürülebilir bir beceri kazanılır</h3>
+          <p>Hızlı okuma bir kurs değil, bir beceridir. Bir kez kazanılan bu beceri hayat boyu kullanılır ve zamanla daha da güçlenir.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ALINTI -->
 <section class="alinti-bolum">
   <div class="c-wide">
     <div class="alinti-kutu">
-      <p>"Okuma hizi, ogrencinin potansiyelini gorünür kilan en kritik becerilerden biridir. Yavasc okuyan bir ogrenci ne kadar zeki olursa olsun, bu yavaslık zamanla onun onune gececektir."</p>
+      <p>"Okuma hızı, öğrencinin potansiyelini görünür kılan en kritik becerilerden biridir. Yavaş okuyan bir öğrenci ne kadar zeki olursa olsun, bu yavaşlık zamanla onun önüne geçecektir."</p>
     </div>
   </div>
 </section>
 
-<!-- SAYILAR -->
 <section class="sayilar">
   <div class="say-grid">
     <div>
       <div class="say-sayi">3x</div>
-      <div class="say-acik">Ortalama hiz artisi<br>dogru egitimle</div>
+      <div class="say-acik">Ortalama hız artışı<br>doğru eğitimle</div>
     </div>
     <div>
       <div class="say-sayi">30</div>
-      <div class="say-acik">Gunluk sistematik<br>program</div>
+      <div class="say-acik">Günlük sistematik<br>program</div>
     </div>
     <div>
       <div class="say-sayi">%70+</div>
-      <div class="say-acik">Anlama esigi<br>SinUs sisteminde</div>
+      <div class="say-acik">Anlama eşiği<br>SinUs sisteminde</div>
     </div>
     <div>
-      <div class="say-sayi">100+</div>
-      <div class="say-acik">Ogrenci ile<br>calisildi</div>
+      <div class="say-sayi">3000+</div>
+      <div class="say-acik">Öğrenci ile<br>çalışıldı</div>
     </div>
   </div>
 </section>
 
-<!-- SİNUS FARKI -->
 <section class="fark-bolum">
   <div class="c-wide">
-    <p class="sl">SinUs Farki</p>
-    <h2 class="st">Diger sistemlerden<br>ne farklidir?</h2>
+    <p class="sl">SinUs Farkı</p>
+    <h2 class="st">Diğer sistemlerden<br>ne farklıdır?</h2>
     <div class="fark-grid">
       <div class="fark-sutun">
-        <div class="fark-bas diger">Diger Platformlar</div>
-        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Sadece hiz egzersizleri, anlama olcumu yok</div>
-        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Tek tip program, herkes ayni seyi yapar</div>
-        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Ogretmen veya veli takibi yok</div>
-        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Gelisim grafigi yok, ilerleme gorünmez</div>
-        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Yazilimci mantigi, pedagoji eksik</div>
+        <div class="fark-bas diger">Diğer Platformlar</div>
+        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Sadece hız egzersizleri, anlama ölçümü yok</div>
+        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Tek tip program, herkes aynı şeyi yapar</div>
+        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Öğretmen veya veli takibi yok</div>
+        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Gelişim grafiği yok, ilerleme görünmez</div>
+        <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Yazılımcı mantığı, pedagoji eksik</div>
         <div class="fark-madde cizik"><span class="fark-icon">&#10007;</span>Sistem sizi dinlemez, siz sisteme uyarsınız</div>
       </div>
       <div class="fark-sutun" style="background:rgba(212,175,55,0.02)">
         <div class="fark-bas sinus">SinUs</div>
-        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Her gun okuma hizi + anlama orani olculur</div>
-        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Adaptif sistem, her ogrenciye gore kalibre olur</div>
-        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Ogretmen ve veli ayni verileri gorebilir</div>
-        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Gunluk gelisim grafigi, baslangictan buyana</div>
-        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Sahada yillar gecirmis egitimci tarafindan tasarlandi</div>
-        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Sistem size gore sekillenir, siz sisteme degiil</div>
+        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Her gün okuma hızı + anlama oranı ölçülür</div>
+        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Adaptif sistem, her öğrenciye göre kalibre olur</div>
+        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Öğretmen ve veli aynı verileri görebilir</div>
+        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Günlük gelişim grafiği, başlangıçtan bu yana</div>
+        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Sahada yıllar geçirmiş eğitimci tarafından tasarlandı</div>
+        <div class="fark-madde check"><span class="fark-icon" style="color:var(--ma2)">&#10003;</span>Sistem size göre şekillenir, siz sisteme değil</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- DEVAM -->
 <section class="devam-bolum">
   <div class="c-wide">
     <p class="sl">Devam Et</p>
-    <h2 class="st">Daha fazlasi icin.</h2>
+    <h2 class="st">Daha fazlası için.</h2>
     <div class="devam-grid">
       <a href="kimler-alabilir.html" class="devam-kart">
-        <div class="devam-no">Onceki</div>
+        <div class="devam-no">Önceki</div>
         <h3>Kimler Alabilir?</h3>
-        <p>Hangi yas ve seviyedeki ogrencilere uygundur?</p>
-        <span class="devam-ok">&larr; Geri Don</span>
+        <p>Hangi yaş ve seviyedeki öğrencilere uygundur?</p>
+        <span class="devam-ok">&larr; Geri Dön</span>
       </a>
       <a href="platform.html" class="devam-kart">
         <div class="devam-no">Sonraki</div>
         <h3>SinUs Platformu</h3>
-        <p>30 gunluk adaptif sistem nasil calisir?</p>
+        <p>30 günlük adaptif sistem nasıl çalışır?</p>
         <span class="devam-ok">Devam Et &rarr;</span>
       </a>
       <a href="index.html#olcum" class="devam-kart">
-        <div class="devam-no">Hemen Basla</div>
-        <h3>Ucretsiz Olcum</h3>
-        <p>Simdi nerede oldugunu ogren. Kayit gerekmez.</p>
-        <span class="devam-ok">Olcumu Basla &rarr;</span>
+        <div class="devam-no">Hemen Başla</div>
+        <h3>Ücretsiz Ölçüm</h3>
+        <p>Şimdi nerede olduğunu öğren. Kayıt gerekmez.</p>
+        <span class="devam-ok">Ölçümü Başla &rarr;</span>
       </a>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
 <section class="cta-blok">
   <div class="c">
-    <h2 class="st">Bir adim yeter.</h2>
-    <p>Ucretsiz olcum ile okuma hizinizi ve anlama oraninizi saniyeler icinde gorün. Kayit gerekmez.</p>
+    <h2 class="st">Bir adım yeter.</h2>
+    <p>Ücretsiz ölçüm ile okuma hızınızı ve anlama oranınızı saniyeler içinde görün. Kayıt gerekmez.</p>
     <div class="cta-btns">
-      <a href="index.html#olcum" class="bp">Ucretsiz Olcumu Basla</a>
-      <a href="platform.html" class="bs">SinUs Platformunu Incele</a>
+      <a href="index.html#olcum" class="bp">Ücretsiz Ölçümü Başla</a>
+      <a href="platform.html" class="bs">SinUs Platformunu İncele</a>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="fic">
     <div>
       <div class="flo"><span class="s">Sin</span><span class="u">Us</span></div>
-      <p class="fsl">Okuma Anlama Muhendisligi<br>Her zihin kesfedilmeyi bekleyen bir evrendir.</p>
+      <p class="fsl">Okuma Anlama Mühendisliği<br>Her zihin keşfedilmeyi bekleyen bir evrendir.</p>
     </div>
     <div>
       <div class="fbas">Platform</div>
       <ul class="fln">
-        <li><a href="hizli-okuma-nedir.html">Hizli Okuma Nedir?</a></li>
+        <li><a href="hizli-okuma-nedir.html">Hızlı Okuma Nedir?</a></li>
         <li><a href="kimler-alabilir.html">Kimler Alabilir?</a></li>
-        <li><a href="neden-almaliyim.html">Neden Almaliyim?</a></li>
+        <li><a href="neden-almaliyim.html">Neden Almalıyım?</a></li>
         <li><a href="platform.html">SinUs Platformu</a></li>
         <li><a href="blog.html">Blog</a></li>
         <li><a href="sss.html">SSS</a></li>
@@ -373,15 +373,15 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
     <div>
       <div class="fbas">Kurumsal</div>
       <ul class="fln">
-        <li><a href="hakkimizda.html">Hakkimizda</a></li>
-        <li><a href="admin.html">Yonetici Paneli</a></li>
-        <li><a href="ogretmen.html">Ogretmen Paneli</a></li>
-        <li><a href="ogrenci-panel.html">Ogrenci Paneli</a></li>
-        <li><a href="iletisim.html">Iletisim</a></li>
+        <li><a href="hakkimizda.html">Hakkımızda</a></li>
+        <li><a href="admin-giris.html">Yönetici Paneli</a></li>
+        <li><a href="giris.html">Öğretmen Paneli</a></li>
+        <li><a href="giris.html">Öğrenci Paneli</a></li>
+        <li><a href="iletisim.html">İletişim</a></li>
       </ul>
     </div>
   </div>
-  <div class="falt">&copy; 2026 SinUs &middot; Tum haklari saklidir &middot; Izmir, Turkiye</div>
+  <div class="falt">&copy; 2026 SinUs &middot; Tüm hakları saklıdır &middot; İzmir, Türkiye</div>
 </footer>
 
 <script>
@@ -400,6 +400,19 @@ spwn();sh=sh.filter(s=>s.a>0.02);
 sh.forEach(s=>{const d=Math.hypot(s.vx,s.vy);const tx=s.x-s.vx*(s.len/d);const ty=s.y-s.vy*(s.len/d);const g=cx.createLinearGradient(tx,ty,s.x,s.y);g.addColorStop(0,'transparent');g.addColorStop(0.7,'rgba(212,175,55,'+(s.a*0.35)+')');g.addColorStop(1,'rgba(255,255,255,'+s.a+')');cx.strokeStyle=g;cx.lineWidth=1.6;cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(s.x,s.y);cx.stroke();s.x+=s.vx;s.y+=s.vy;s.a-=0.016});
 requestAnimationFrame(drw)}
 drw();
+
+const hbBtn=document.getElementById('hbBtn');
+const navList=document.getElementById('navList');
+hbBtn.addEventListener('click',()=>navList.classList.toggle('acik'));
+function dropToggle(e,el){
+  if(window.innerWidth<=768){
+    e.preventDefault();
+    el.parentElement.classList.toggle('dd-acik');
+    return false;
+  }
+  return true;
+}
+
 window.addEventListener('scroll',()=>{document.getElementById('nav').style.borderBottomColor=window.scrollY>60?'rgba(212,175,55,0.25)':'rgba(212,175,55,0.12)'});
 </script>
 </body>
