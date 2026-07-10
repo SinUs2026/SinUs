@@ -31,6 +31,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .nr{display:flex;align-items:center;gap:0.8rem}
 .ng{display:flex;gap:0.4rem}.ng a{font-size:0.76rem;font-weight:500;padding:0.38rem 0.85rem;border-radius:5px;text-decoration:none;border:1px solid rgba(96,165,250,0.25);color:var(--ma2);transition:all 0.2s}.ng a:hover{background:rgba(96,165,250,0.1)}
 .ncta{background:var(--al);color:var(--la);padding:0.5rem 1.3rem;border-radius:6px;font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s}.ncta:hover{background:var(--al2);transform:translateY(-1px)}
+.hb{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:0.4rem}
+.hb span{width:24px;height:2px;background:var(--be)}
 section{position:relative;z-index:1;padding:6rem 2rem}
 .c{max-width:780px;margin:0 auto}
 .c-wide{max-width:1100px;margin:0 auto}
@@ -44,12 +46,10 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .breadcrumb a{color:var(--gr);text-decoration:none}.breadcrumb a:hover{color:var(--ma2)}
 .breadcrumb span{margin:0 0.5rem;opacity:0.4}
 
-/* HERO */
 .page-hero{padding:10rem 2rem 4rem;text-align:center}
 .page-hero .st{font-size:clamp(2rem,5vw,3.2rem)}
 .page-hero .ozet{font-size:1.1rem;color:var(--ya);opacity:0.8;max-width:620px;margin:0 auto;line-height:1.85}
 
-/* SUREC ZAMAN CIZGISI */
 .surec-bolum{background:var(--la2);border-top:1px solid rgba(96,165,250,0.08)}
 .surec-zaman{margin-top:3.5rem;position:relative;padding-left:1rem}
 .surec-zaman::before{content:'';position:absolute;left:27px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--al),var(--ma2),transparent)}
@@ -60,7 +60,6 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .surec-icerik p{font-size:0.92rem;color:var(--gr);line-height:1.7}
 .surec-ipucu{display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.8rem;font-size:0.8rem;color:var(--al);opacity:0.85;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.15);padding:0.35rem 0.8rem;border-radius:20px}
 
-/* GUNLUK AKIS */
 .gunluk-bolum{padding:5rem 2rem}
 .gunluk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:3rem}
 .gunluk-kart{background:rgba(255,255,255,0.02);border:1px solid rgba(96,165,250,0.1);border-radius:14px;padding:1.5rem;text-align:center;transition:all 0.3s;position:relative}
@@ -71,7 +70,6 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .gunluk-kart h3{font-size:0.9rem;font-weight:600;color:var(--be);margin-bottom:0.3rem}
 .gunluk-kart p{font-size:0.8rem;color:var(--gr);line-height:1.5}
 
-/* ADAPTIF SISTEM */
 .adaptif-bolum{background:var(--la3);border-top:1px solid rgba(96,165,250,0.08)}
 .adaptif-ic{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
 .adaptif-tablo{display:flex;flex-direction:column;gap:0.8rem}
@@ -86,7 +84,6 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .adaptif-yazi h4{font-size:0.9rem;font-weight:600;color:var(--be);margin-bottom:0.2rem}
 .adaptif-yazi p{font-size:0.82rem;color:var(--gr);line-height:1.5;margin-bottom:0;opacity:1}
 
-/* LİSANS */
 .lisans-bolum{padding:5rem 2rem}
 .lisans-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem}
 .lisans-kart{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.12);border-radius:16px;padding:2rem;position:relative}
@@ -102,7 +99,6 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .lisans-kart.one-cikan a{background:var(--al);color:var(--la);border-color:var(--al)}
 .lisans-kart.one-cikan a:hover{background:var(--al2)}
 
-/* PANELLER */
 .panel-bolum{background:var(--la2);border-top:1px solid rgba(96,165,250,0.08)}
 .panel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
 .panel-kart{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.1);border-radius:16px;padding:2rem;text-align:center;text-decoration:none;display:block;transition:all 0.3s;position:relative;overflow:hidden}
@@ -120,21 +116,18 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .panel-ok{font-size:0.8rem;font-weight:600;color:var(--ma2);opacity:0;transform:translateY(4px);transition:all 0.3s;display:inline-block}
 .panel-kart:hover .panel-ok{opacity:1;transform:translateY(0)}
 
-/* SAYILAR */
 .sayilar{padding:4rem 2rem;border-top:1px solid rgba(96,165,250,0.08);border-bottom:1px solid rgba(96,165,250,0.08)}
 .say-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;max-width:900px;margin:0 auto;text-align:center}
 .say-sayi{font-size:2.5rem;font-weight:700;color:var(--al);line-height:1;margin-bottom:0.5rem}
 .say-acik{font-size:0.85rem;color:var(--gr);line-height:1.5}
 
-/* CTA */
 .cta-blok{padding:6rem 2rem;text-align:center;background:var(--la3);border-top:1px solid rgba(212,175,55,0.1)}
 .cta-blok .st{margin-bottom:0.8rem}
 .cta-blok p{font-size:1rem;color:var(--gr);margin-bottom:2.5rem;max-width:500px;margin-left:auto;margin-right:auto}
 .cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-.fel-alinti{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(1.2rem,2.5vw,1.7rem);color:var(--be);max-width:620px;margin:0 auto 1rem;line-height:1.55;opacity:0.9}
+.fel-alinti{font-family:'Inter',sans-serif;font-weight:300;font-style:normal;font-size:clamp(1.2rem,2.5vw,1.7rem);color:var(--be);max-width:620px;margin:0 auto 1rem;line-height:1.55;opacity:0.9}
 .fel-kaynak{font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--al);opacity:0.65;margin-bottom:3rem}
 
-/* FOOTER */
 footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);padding:3rem 2rem 2rem}
 .fic{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem}
 .flo{font-size:1.5rem;font-weight:700;margin-bottom:0.8rem}.flo .s{color:var(--ma2)}.flo .u{color:var(--al)}
@@ -144,7 +137,20 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
 .falt{border-top:1px solid rgba(96,165,250,0.08);padding-top:1.5rem;text-align:center;font-size:0.78rem;color:var(--gr);opacity:0.5;max-width:1100px;margin:0 auto}
 
 @media(max-width:900px){.adaptif-ic,.lisans-grid,.panel-grid,.say-grid,.fic{grid-template-columns:1fr}}
-@media(max-width:768px){nav{padding:1rem 1.5rem}.nl,.ng{display:none}.adaptif-satir{grid-template-columns:1fr}.adaptif-hucre{border-right:none;border-bottom:1px solid rgba(96,165,250,0.1)}.adaptif-hucre:last-child{border-bottom:none}}
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;flex-wrap:wrap}
+  .hb{display:flex}
+  .nl{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(10,22,40,0.98);flex-direction:column;padding:1rem 1.5rem;gap:0.3rem;border-bottom:1px solid rgba(212,175,55,0.15);max-height:70vh;overflow-y:auto}
+  .nl.acik{display:flex}
+  .nl>li{width:100%}
+  .nl>li>a{width:100%}
+  .dropdown{position:static;transform:none;opacity:1;visibility:visible;display:none;box-shadow:none;margin-top:0.3rem;backdrop-filter:none;background:rgba(255,255,255,0.03)}
+  .nl>li.dd-acik .dropdown{display:block}
+  .ng{display:none}
+  .adaptif-satir{grid-template-columns:1fr}
+  .adaptif-hucre{border-right:none;border-bottom:1px solid rgba(96,165,250,0.1)}
+  .adaptif-hucre:last-child{border-bottom:none}
+}
 </style>
 </head>
 <body>
@@ -152,96 +158,100 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
 
 <nav id="nav">
   <a href="index.html" class="logo"><span class="s">Sin</span><span class="u">Us</span></a>
-  <ul class="nl">
+  <button class="hb" id="hbBtn" aria-label="Menü">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nl" id="navList">
     <li><a href="index.html">Ana Sayfa</a></li>
-    <li><a href="hakkimizda.html">Hakkimizda</a></li>
+    <li><a href="hakkimizda.html">Hakkımızda</a></li>
     <li class="aktif">
-      <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi <span class="dd-ok">&#9660;</span></a>
+      <a href="hizli-okuma-nedir.html" onclick="return dropToggle(event,this)">Hızlı Okuma Eğitimi <span class="dd-ok">&#9660;</span></a>
       <div class="dropdown">
-        <a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
+        <a href="hizli-okuma-nedir.html">Hızlı Okuma Eğitimi Nedir?<span>Temel kavramlar ve bilimsel arka plan</span></a>
         <div class="dropdown-sep"></div>
-        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yas, seviye ve on kosullar</span></a>
+        <a href="kimler-alabilir.html">Kimler Alabilir?<span>Yaş, seviye ve ön koşullar</span></a>
         <div class="dropdown-sep"></div>
-        <a href="neden-almaliyim.html">Neden Almaliyim?<span>Faydalari ve sonuclar</span></a>
+        <a href="neden-almaliyim.html">Neden Almalıyım?<span>Faydaları ve sonuçları</span></a>
         <div class="dropdown-sep"></div>
-        <a href="platform.html">SinUs Platformu<span>Sistem nasil calisir?</span></a>
+        <a href="platform.html">SinUs Platformu<span>Sistem nasıl çalışır?</span></a>
       </div>
     </li>
     <li><a href="blog.html">Blog</a></li>
     <li><a href="sss.html">SSS</a></li>
-    <li><a href="iletisim.html">Iletisim</a></li>
+    <li><a href="iletisim.html">İletişim</a></li>
+    <li><a href="admin-giris.html">Yönetici</a></li>
+    <li><a href="giris.html">Öğretmen</a></li>
+    <li><a href="giris.html">Öğrenci</a></li>
   </ul>
   <div class="nr">
     <div class="ng">
-      <a href="admin.html">Yonetici</a>
-      <a href="ogretmen.html">Ogretmen</a>
-      <a href="ogrenci-panel.html">Ogrenci</a>
+      <a href="admin-giris.html">Yönetici</a>
+      <a href="giris.html">Öğretmen</a>
+      <a href="giris.html">Öğrenci</a>
     </div>
-    <a href="index.html#olcum" class="ncta">Ucretsiz Olc</a>
+    <a href="index.html#olcum" class="ncta">Ücretsiz Ölç</a>
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="page-hero">
   <div class="c">
-    <p class="breadcrumb"><a href="index.html">Ana Sayfa</a><span>/</span><a href="hizli-okuma-nedir.html">Hizli Okuma Egitimi</a><span>/</span>SinUs Platformu</p>
+    <p class="breadcrumb"><a href="index.html">Ana Sayfa</a><span>/</span><a href="hizli-okuma-nedir.html">Hızlı Okuma Eğitimi</a><span>/</span>SinUs Platformu</p>
     <p class="sl">Platform</p>
-    <h1 class="st">30 gun. Her gun olculur.<br>Her gun ilerler.</h1>
-    <p class="ozet">SinUs, rastgele egzersizler sunmaz. Baslangic noktanizi olcer, size ozel kalibre olur ve her gun sistematik olarak ilerletir. Gelisim grafige dokulur, hic bir sey gozden kacmaz.</p>
+    <h1 class="st">30 gün. Her gün ölçülür.<br>Her gün ilerler.</h1>
+    <p class="ozet">SinUs, rastgele egzersizler sunmaz. Başlangıç noktanızı ölçer, size özel kalibre olur ve her gün sistematik olarak ilerletir. Gelişim grafiğe dökülür, hiçbir şey gözden kaçmaz.</p>
   </div>
 </section>
 
-<!-- SUREC -->
 <section class="surec-bolum">
   <div class="c-wide">
-    <p class="sl">Adim Adim</p>
-    <h2 class="st">SinUs'ta yolculuk<br>nasil baslar?</h2>
+    <p class="sl">Adım Adım</p>
+    <h2 class="st">SinUs'ta yolculuk<br>nasıl başlar?</h2>
     <div class="surec-zaman">
       <div class="surec-adim">
         <div class="surec-no">01</div>
         <div class="surec-icerik">
-          <h3>Ucretsiz Olcum</h3>
-          <p>Kayit olmadan, hicbir satin alma yapmadan. Bir metin okursunuz, sistem okuma hizinizi hesaplar, anlama sorulari ile oranini cikarir. Ilk defa gercek bir baslangic noktaniz olur.</p>
-          <span class="surec-ipucu">Gunde 1 kez, kayit gerekmez</span>
+          <h3>Ücretsiz Ölçüm</h3>
+          <p>Kayıt olmadan, hiçbir satın alma yapmadan. Bir metin okursunuz, sistem okuma hızınızı hesaplar, anlama soruları ile oranını çıkarır. İlk defa gerçek bir başlangıç noktanız olur.</p>
+          <span class="surec-ipucu">Günde 1 kez, kayıt gerekmez</span>
         </div>
       </div>
       <div class="surec-adim">
         <div class="surec-no">02</div>
         <div class="surec-icerik">
-          <h3>Kayit ve Baslangic Olcumu</h3>
-          <p>Programa kaydolduktan sonra daha kapsamli bir baslangic olcumu yapilir. Bu olcum sisteme sizin baslangiç hizinizi ve anlama oraninizi bildirir. Platform artik size ozel kalibre olmustur.</p>
-          <span class="surec-ipucu">Baslangic verisi grafige islenir</span>
+          <h3>Kayıt ve Başlangıç Ölçümü</h3>
+          <p>Programa kaydolduktan sonra daha kapsamlı bir başlangıç ölçümü yapılır. Bu ölçüm sisteme sizin başlangıç hızınızı ve anlama oranınızı bildirir. Platform artık size özel kalibre olmuştur.</p>
+          <span class="surec-ipucu">Başlangıç verisi grafiğe işlenir</span>
         </div>
       </div>
       <div class="surec-adim">
         <div class="surec-no">03</div>
         <div class="surec-icerik">
-          <h3>30 Gunluk Program Baslar</h3>
-          <p>Her gun yaklasik 10 aktivite siralı sekilde acilir. Goz egzersizleri, okuma teknikleri ve dikkat calismalari. Her aktivite minimum 1 dakika, sure dolmadan bir sonrakine gecilmez. Gün atlatma yoktur.</p>
-          <span class="surec-ipucu">Sirali, atlama yok, sistem yonlendirir</span>
+          <h3>30 Günlük Program Başlar</h3>
+          <p>Her gün yaklaşık 10 aktivite sıralı şekilde açılır. Göz egzersizleri, okuma teknikleri ve dikkat çalışmaları. Her aktivite minimum 1 dakika, süre dolmadan bir sonrakine geçilmez. Gün atlatma yoktur.</p>
+          <span class="surec-ipucu">Sıralı, atlama yok, sistem yönlendirir</span>
         </div>
       </div>
       <div class="surec-adim">
         <div class="surec-no">04</div>
         <div class="surec-icerik">
-          <h3>Gunu Bitir</h3>
-          <p>Tum aktiviteler tamamlaninca "Gunu Bitir" butonu aktif olur. Gunun hikayesi tam ekranda acilir, okursunuz, sistem hizinizi olcer. Ardindan 8-10 anlama sorusu sorulur, anlama oraniniz hesaplanir.</p>
-          <span class="surec-ipucu">Hiz + anlama birlikte kaydedilir</span>
+          <h3>Günü Bitir</h3>
+          <p>Tüm aktiviteler tamamlanınca "Günü Bitir" butonu aktif olur. Günün hikayesi tam ekranda açılır, okursunuz, sistem hızınızı ölçer. Ardından 8-10 anlama sorusu sorulur, anlama oranınız hesaplanır.</p>
+          <span class="surec-ipucu">Hız + anlama birlikte kaydedilir</span>
         </div>
       </div>
       <div class="surec-adim">
         <div class="surec-no">05</div>
         <div class="surec-icerik">
-          <h3>Adaptif Ilerleme</h3>
-          <p>Sistem sonuclara gore ertesi gunun egzersiz hizini otomatik ayarlar. Anlama %70 ve uzeri ise hiz artar. Dusukse dondurulur. Siz hic mudeahale etmeden sistem size gore sekillenir.</p>
-          <span class="surec-ipucu">Anlama %70+ ise hiz %20 artar</span>
+          <h3>Adaptif İlerleme</h3>
+          <p>Sistem sonuçlara göre ertesi günün egzersiz hızını otomatik ayarlar. Anlama %70 ve üzeri ise hız artar. Düşükse dondurulur. Siz hiç müdahale etmeden sistem size göre şekillenir.</p>
+          <span class="surec-ipucu">Anlama %70+ ise hız %20 artar</span>
         </div>
       </div>
       <div class="surec-adim">
         <div class="surec-no">06</div>
         <div class="surec-icerik">
-          <h3>30 Gun Sonrasi</h3>
-          <p>Program tamamlandi. Tamamlanan egzersizler acik kalir, tekrar yapilabilir. Iki secenek sunulur: Ust asama programi veya Pratik Paketi ile ayni seviyede 30 gun daha. 6 aylik lisans boyunca erisim devam eder.</p>
+          <h3>30 Gün Sonrası</h3>
+          <p>Program tamamlandı. Tamamlanan egzersizler açık kalır, tekrar yapılabilir. İki seçenek sunulur: Üst aşama programı veya Pratik Paketi ile aynı seviyede 30 gün daha. 6 aylık lisans boyunca erişim devam eder.</p>
           <span class="surec-ipucu">Pratik Paketi %50 indirimli</span>
         </div>
       </div>
@@ -249,60 +259,58 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
   </div>
 </section>
 
-<!-- GUNLUK AKIS -->
 <section class="gunluk-bolum">
   <div class="c-wide">
-    <p class="sl">Gunluk Akis</p>
-    <h2 class="st">Bir gunde neler yapilir?</h2>
-    <p style="color:var(--gr);font-size:0.95rem;max-width:580px">Her gun ortalama 20-30 dakika. Sirayla, sistemin yonlendirmesiyle. Hic dusunmenize gerek yok.</p>
+    <p class="sl">Günlük Akış</p>
+    <h2 class="st">Bir günde neler yapılır?</h2>
+    <p style="color:var(--gr);font-size:0.95rem;max-width:580px">Her gün ortalama 20-30 dakika. Sırayla, sistemin yönlendirmesiyle. Hiç düşünmenize gerek yok.</p>
     <div class="gunluk-grid">
       <div class="gunluk-kart">
         <span class="gunluk-ikon">&#128065;</span>
         <div class="gunluk-sure">2-3 dk</div>
-        <h3>Goz Egzersizi</h3>
-        <p>Goz kasi guclendirme ve gorsel takip</p>
+        <h3>Göz Egzersizi</h3>
+        <p>Göz kası güçlendirme ve görsel takip</p>
       </div>
       <div class="gunluk-kart">
         <span class="gunluk-ikon">&#128065;</span>
         <div class="gunluk-sure">2-3 dk</div>
-        <h3>Goz Egzersizi</h3>
-        <p>Gorsel alan genisleme calismalari</p>
+        <h3>Göz Egzersizi</h3>
+        <p>Görsel alan genişleme çalışmaları</p>
       </div>
       <div class="gunluk-kart">
         <span class="gunluk-ikon">&#128218;</span>
         <div class="gunluk-sure">2-3 dk</div>
-        <h3>Okuma Teknigi</h3>
-        <p>Gunun metni, 1. teknik</p>
+        <h3>Okuma Tekniği</h3>
+        <p>Günün metni, 1. teknik</p>
       </div>
       <div class="gunluk-kart">
         <span class="gunluk-ikon">&#128218;</span>
         <div class="gunluk-sure">2-3 dk</div>
-        <h3>Okuma Teknigi</h3>
-        <p>Ayni metin, farkli teknik</p>
+        <h3>Okuma Tekniği</h3>
+        <p>Aynı metin, farklı teknik</p>
       </div>
       <div class="gunluk-kart">
         <span class="gunluk-ikon">&#127919;</span>
         <div class="gunluk-sure">2-3 dk</div>
-        <h3>Dikkat Calismasi</h3>
-        <p>Odak ve secici dikkat egzersizi</p>
+        <h3>Dikkat Çalışması</h3>
+        <p>Odak ve seçici dikkat egzersizi</p>
       </div>
       <div class="gunluk-kart" style="border-color:rgba(212,175,55,0.3);background:rgba(212,175,55,0.04)">
         <span class="gunluk-ikon">&#9654;</span>
         <div class="gunluk-sure" style="color:var(--al)">5-8 dk</div>
-        <h3 style="color:var(--al)">Gunu Bitir</h3>
-        <p>Metin okuma + hiz olcumu + anlama testi</p>
+        <h3 style="color:var(--al)">Günü Bitir</h3>
+        <p>Metin okuma + hız ölçümü + anlama testi</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ADAPTIF SİSTEM -->
 <section class="adaptif-bolum">
   <div class="c-wide">
     <div class="adaptif-ic">
       <div>
         <p class="sl">Adaptif Sistem</p>
-        <h2 class="st">Sistem size gore<br>sekillenir.</h2>
+        <h2 class="st">Sistem size göre<br>şekillenir.</h2>
         <div class="adaptif-tablo">
           <div class="adaptif-satir baslik">
             <div class="adaptif-hucre">Durum</div>
@@ -311,155 +319,150 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
           </div>
           <div class="adaptif-satir">
             <div class="adaptif-hucre iyi">Dengeli</div>
-            <div class="adaptif-hucre iyi">%70 ve uzeri</div>
-            <div class="adaptif-hucre iyi">Hizi %20 artirir</div>
+            <div class="adaptif-hucre iyi">%70 ve üzeri</div>
+            <div class="adaptif-hucre iyi">Hızı %20 artırır</div>
           </div>
           <div class="adaptif-satir">
-            <div class="adaptif-hucre dikkat">Hiz fazla</div>
-            <div class="adaptif-hucre dikkat">%70 alti</div>
-            <div class="adaptif-hucre dikkat">Hizi dondurur, uyari verir</div>
+            <div class="adaptif-hucre dikkat">Hız fazla</div>
+            <div class="adaptif-hucre dikkat">%70 altı</div>
+            <div class="adaptif-hucre dikkat">Hızı dondurur, uyarı verir</div>
           </div>
           <div class="adaptif-satir">
-            <div class="adaptif-hucre yav">Yavas ilerleme</div>
-            <div class="adaptif-hucre yav">%70 ve uzeri</div>
-            <div class="adaptif-hucre yav">Hizi %10 artirir</div>
+            <div class="adaptif-hucre yav">Yavaş ilerleme</div>
+            <div class="adaptif-hucre yav">%70 ve üzeri</div>
+            <div class="adaptif-hucre yav">Hızı %10 artırır</div>
           </div>
         </div>
       </div>
       <div class="adaptif-metin">
-        <p>SinUs'ta hiz ve anlama birbirinden ayri dusunulmez. Sistem her gunun sonunda iki degeri birlikte degerlendirir ve ertesi gun icin en uygun egzersiz hizini belirler.</p>
-        <p>Bu sayede hicbir ogrenci fazla zorlayici veya fazla kolay bir programla karsilasmaz. Sistem surekli dogru noktada tutar.</p>
+        <p>SinUs'ta hız ve anlama birbirinden ayrı düşünülmez. Sistem her günün sonunda iki değeri birlikte değerlendirir ve ertesi gün için en uygun egzersiz hızını belirler.</p>
+        <p>Bu sayede hiçbir öğrenci fazla zorlayıcı veya fazla kolay bir programla karşılaşmaz. Sistem sürekli doğru noktada tutar.</p>
         <div class="adaptif-ozellik">
           <div class="adaptif-ikon">&#128202;</div>
-          <div class="adaptif-yazi"><h4>Gunluk Grafik</h4><p>Her gunun hiz ve anlama verisi sutun grafige islenecek</p></div>
+          <div class="adaptif-yazi"><h4>Günlük Grafik</h4><p>Her günün hız ve anlama verisi sütun grafiğe işlenir</p></div>
         </div>
         <div class="adaptif-ozellik">
           <div class="adaptif-ikon">&#127774;</div>
-          <div class="adaptif-yazi"><h4>30 Gunluk Yolculuk</h4><p>Baslangic noktasindan 30. gune kadar tum ilerleme gorülür</p></div>
+          <div class="adaptif-yazi"><h4>30 Günlük Yolculuk</h4><p>Başlangıç noktasından 30. güne kadar tüm ilerleme görülür</p></div>
         </div>
         <div class="adaptif-ozellik">
           <div class="adaptif-ikon">&#128196;</div>
-          <div class="adaptif-yazi"><h4>Veli Raporu</h4><p>Veli ogrenci sifresiyle sisteme girip her seyi gorebilir</p></div>
+          <div class="adaptif-yazi"><h4>Veli Raporu</h4><p>Veli öğrenci şifresiyle sisteme girip her şeyi görebilir</p></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- LİSANS MODELİ -->
 <section class="lisans-bolum">
   <div class="c-wide">
     <p class="sl">Lisans</p>
-    <h2 class="st">6 ay erisim,<br>30 gun program.</h2>
+    <h2 class="st">6 ay erişim,<br>30 gün program.</h2>
     <div class="lisans-grid">
       <div class="lisans-kart">
         <div class="lisans-bas">Bireysel</div>
-        <h3>Kendi Hizinda Ilerle</h3>
+        <h3>Kendi Hızında İlerle</h3>
         <ul class="lisans-liste">
-          <li>6 aylik lisans erisimi</li>
-          <li>30 gunluk adaptif program</li>
-          <li>Goz, okuma ve dikkat egzersizleri</li>
-          <li>Gunluk hiz ve anlama olcumu</li>
-          <li>Gelisim grafigi</li>
-          <li>30 gun sonrasi Pratik Paketi imkani</li>
+          <li>6 aylık lisans erişimi</li>
+          <li>30 günlük adaptif program</li>
+          <li>Göz, okuma ve dikkat egzersizleri</li>
+          <li>Günlük hız ve anlama ölçümü</li>
+          <li>Gelişim grafiği</li>
+          <li>30 gün sonrası Pratik Paketi imkanı</li>
         </ul>
-        <a href="index.html#olcum">Once Ucretsiz Olc</a>
+        <a href="index.html#olcum">Önce Ücretsiz Ölç</a>
       </div>
       <div class="lisans-kart one-cikan">
-        <div class="lisans-rozet">En Cok Tercih Edilen</div>
-        <div class="lisans-bas">Kocluk Programi</div>
-        <h3>Uzman Esliginde Ilerle</h3>
+        <div class="lisans-rozet">En Çok Tercih Edilen</div>
+        <div class="lisans-bas">Koçluk Programı</div>
+        <h3>Uzman Eşliğinde İlerle</h3>
         <ul class="lisans-liste">
-          <li>Bireysel plandaki her sey</li>
-          <li>Sertifikali SinUs egitmeni esliginde</li>
+          <li>Bireysel plandaki her şey</li>
+          <li>Sertifikalı SinUs eğitmeni eşliğinde</li>
           <li>Haftada 2 birebir seans</li>
-          <li>Kisisellestirilmis ilerleme takibi</li>
-          <li>Ogretmen panel erisimi</li>
-          <li>Veli gelisim raporu</li>
+          <li>Kişiselleştirilmiş ilerleme takibi</li>
+          <li>Öğretmen panel erişimi</li>
+          <li>Veli gelişim raporu</li>
         </ul>
-        <a href="iletisim.html">Kocluk Programina Basvur</a>
+        <a href="iletisim.html">Koçluk Programına Başvur</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PANELLER -->
 <section class="panel-bolum">
   <div class="c-wide">
     <p class="sl">Paneller</p>
-    <h2 class="st">Her kullanici icin<br>ayri bir giris.</h2>
+    <h2 class="st">Her kullanıcı için<br>ayrı bir giriş.</h2>
     <div class="panel-grid">
-      <a href="admin.html" class="panel-kart yo">
+      <a href="admin-giris.html" class="panel-kart yo">
         <span class="panel-ikon">&#9733;</span>
-        <h3>Yonetici Paneli</h3>
-        <p>Mufredrat yonetimi, icerik duzenleme, tum sistemin kontrolu</p>
-        <span class="panel-ok">Giris Yap &rarr;</span>
+        <h3>Yönetici Paneli</h3>
+        <p>Müfredat yönetimi, içerik düzenleme, tüm sistemin kontrolü</p>
+        <span class="panel-ok">Giriş Yap &rarr;</span>
       </a>
-      <a href="ogretmen.html" class="panel-kart og">
+      <a href="giris.html" class="panel-kart og">
         <span class="panel-ikon">&#9679;</span>
-        <h3>Ogretmen Paneli</h3>
-        <p>Ogrenci takibi, kocluk, ilerleme raporlari, birebir yonlendirme</p>
-        <span class="panel-ok">Giris Yap &rarr;</span>
+        <h3>Öğretmen Paneli</h3>
+        <p>Öğrenci takibi, koçluk, ilerleme raporları, birebir yönlendirme</p>
+        <span class="panel-ok">Giriş Yap &rarr;</span>
       </a>
-      <a href="ogrenci-panel.html" class="panel-kart os">
+      <a href="giris.html" class="panel-kart os">
         <span class="panel-ikon">&#9650;</span>
-        <h3>Ogrenci Paneli</h3>
-        <p>Gunluk program, egzersizler, gelisim grafigi, gunun hikayesi</p>
-        <span class="panel-ok">Giris Yap &rarr;</span>
+        <h3>Öğrenci Paneli</h3>
+        <p>Günlük program, egzersizler, gelişim grafiği, günün hikayesi</p>
+        <span class="panel-ok">Giriş Yap &rarr;</span>
       </a>
     </div>
   </div>
 </section>
 
-<!-- SAYILAR -->
 <section class="sayilar">
   <div class="say-grid">
     <div>
       <div class="say-sayi">30</div>
-      <div class="say-acik">Gunluk sistematik<br>program</div>
+      <div class="say-acik">Günlük sistematik<br>program</div>
     </div>
     <div>
       <div class="say-sayi">10</div>
-      <div class="say-acik">Gunluk aktivite<br>ortalama</div>
+      <div class="say-acik">Günlük aktivite<br>ortalama</div>
     </div>
     <div>
       <div class="say-sayi">6 ay</div>
-      <div class="say-acik">Lisans suresi<br>tam erisim</div>
+      <div class="say-acik">Lisans süresi<br>tam erişim</div>
     </div>
     <div>
       <div class="say-sayi">%70</div>
-      <div class="say-acik">Anlama esigi<br>adaptif sistem</div>
+      <div class="say-acik">Anlama eşiği<br>adaptif sistem</div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
 <section class="cta-blok">
   <div class="c">
-    <p class="fel-alinti">"Her zihin kesfedilmeyi bekleyen bir evrendir."</p>
+    <p class="fel-alinti">Her zihin keşfedilmeyi bekleyen bir evrendir.</p>
     <p class="fel-kaynak">— SinUs Marka Felsefesi</p>
-    <h2 class="st">Simdi baslayın.</h2>
-    <p>Ucretsiz olcum ile nerede oldugunuzu gorun. Kayit gerekmez.</p>
+    <h2 class="st">Şimdi başlayın.</h2>
+    <p>Ücretsiz ölçüm ile nerede olduğunuzu görün. Kayıt gerekmez.</p>
     <div class="cta-btns">
-      <a href="index.html#olcum" class="bp">Ucretsiz Olcumu Basla</a>
-      <a href="iletisim.html" class="bs">Bize Ulasin</a>
+      <a href="index.html#olcum" class="bp">Ücretsiz Ölçümü Başla</a>
+      <a href="iletisim.html" class="bs">Bize Ulaşın</a>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div class="fic">
     <div>
       <div class="flo"><span class="s">Sin</span><span class="u">Us</span></div>
-      <p class="fsl">Okuma Anlama Muhendisligi<br>Her zihin kesfedilmeyi bekleyen bir evrendir.</p>
+      <p class="fsl">Okuma Anlama Mühendisliği<br>Her zihin keşfedilmeyi bekleyen bir evrendir.</p>
     </div>
     <div>
       <div class="fbas">Platform</div>
       <ul class="fln">
-        <li><a href="hizli-okuma-nedir.html">Hizli Okuma Nedir?</a></li>
+        <li><a href="hizli-okuma-nedir.html">Hızlı Okuma Nedir?</a></li>
         <li><a href="kimler-alabilir.html">Kimler Alabilir?</a></li>
-        <li><a href="neden-almaliyim.html">Neden Almaliyim?</a></li>
+        <li><a href="neden-almaliyim.html">Neden Almalıyım?</a></li>
         <li><a href="platform.html">SinUs Platformu</a></li>
         <li><a href="blog.html">Blog</a></li>
         <li><a href="sss.html">SSS</a></li>
@@ -468,15 +471,15 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
     <div>
       <div class="fbas">Kurumsal</div>
       <ul class="fln">
-        <li><a href="hakkimizda.html">Hakkimizda</a></li>
-        <li><a href="admin.html">Yonetici Paneli</a></li>
-        <li><a href="ogretmen.html">Ogretmen Paneli</a></li>
-        <li><a href="ogrenci-panel.html">Ogrenci Paneli</a></li>
-        <li><a href="iletisim.html">Iletisim</a></li>
+        <li><a href="hakkimizda.html">Hakkımızda</a></li>
+        <li><a href="admin-giris.html">Yönetici Paneli</a></li>
+        <li><a href="giris.html">Öğretmen Paneli</a></li>
+        <li><a href="giris.html">Öğrenci Paneli</a></li>
+        <li><a href="iletisim.html">İletişim</a></li>
       </ul>
     </div>
   </div>
-  <div class="falt">&copy; 2026 SinUs &middot; Tum haklari saklidir &middot; Izmir, Turkiye</div>
+  <div class="falt">&copy; 2026 SinUs &middot; Tüm hakları saklıdır &middot; İzmir, Türkiye</div>
 </footer>
 
 <script>
@@ -495,6 +498,19 @@ spwn();sh=sh.filter(s=>s.a>0.02);
 sh.forEach(s=>{const d=Math.hypot(s.vx,s.vy);const tx=s.x-s.vx*(s.len/d);const ty=s.y-s.vy*(s.len/d);const g=cx.createLinearGradient(tx,ty,s.x,s.y);g.addColorStop(0,'transparent');g.addColorStop(0.7,'rgba(212,175,55,'+(s.a*0.35)+')');g.addColorStop(1,'rgba(255,255,255,'+s.a+')');cx.strokeStyle=g;cx.lineWidth=1.6;cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(s.x,s.y);cx.stroke();s.x+=s.vx;s.y+=s.vy;s.a-=0.016});
 requestAnimationFrame(drw)}
 drw();
+
+const hbBtn=document.getElementById('hbBtn');
+const navList=document.getElementById('navList');
+hbBtn.addEventListener('click',()=>navList.classList.toggle('acik'));
+function dropToggle(e,el){
+  if(window.innerWidth<=768){
+    e.preventDefault();
+    el.parentElement.classList.toggle('dd-acik');
+    return false;
+  }
+  return true;
+}
+
 window.addEventListener('scroll',()=>{document.getElementById('nav').style.borderBottomColor=window.scrollY>60?'rgba(212,175,55,0.25)':'rgba(212,175,55,0.12)'});
 </script>
 </body>
