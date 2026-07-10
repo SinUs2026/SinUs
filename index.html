@@ -495,12 +495,14 @@ const an=[55,58,61,64,67,70,73,76,79,81,83,85,87,89,91];
 const gr=document.getElementById('grafik');
 const mh=Math.max(...hz),ml=Math.min(...hz);
 const ah=Math.max(...an),al=Math.min(...an);
+const barAlani=130; // .gra yüksekliği 160px, etiket için ~30px ayrıldı
 for(let i=0;i<15;i++){
   const col=document.createElement('div');col.className='gcc';
   const wrap=document.createElement('div');wrap.className='gbw';
-  const hp=Math.round(15+((hz[i]-ml)/(mh-ml))*80);
-  const ap=Math.round(15+((an[i]-al)/(ah-al))*80);
-  wrap.innerHTML='<div class="gb gbh" style="height:'+hp+'%;min-height:6px"></div><div class="gb gba" style="height:'+ap+'%;min-height:6px"></div>';
+  wrap.style.height=barAlani+'px';
+  const hpx=Math.round(10+((hz[i]-ml)/(mh-ml))*(barAlani-10));
+  const apx=Math.round(10+((an[i]-al)/(ah-al))*(barAlani-10));
+  wrap.innerHTML='<div class="gb gbh" style="height:'+hpx+'px"></div><div class="gb gba" style="height:'+apx+'px"></div>';
   col.appendChild(wrap);
   const gl=document.createElement('div');gl.className='gg2';gl.textContent=i+1;col.appendChild(gl);
   gr.appendChild(col);
