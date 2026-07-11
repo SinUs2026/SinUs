@@ -137,86 +137,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
   <div class="c-wide">
     <p class="sl">Tüm Yazılar</p>
     <h2 class="st">Bilgi bankası.</h2>
-    <div class="blog-grid">
-
-      <div class="blog-kart">
-        <div class="blog-ust">&#128065;</div>
-        <div class="blog-govde">
-          <div class="blog-etiket">Göz Sağlığı</div>
-          <h2>Göz hareketleri neden bu kadar önemli? Hızlı okumada görsel takip</h2>
-          <p>Okuma hızını artırmanın en temel adımı görsel takip becerilerini doğru geliştirmekten geçiyor. Peki gözler okurken nasıl çalışır?</p>
-          <div class="blog-meta">
-            <span class="blog-sure">5 dk okuma</span>
-            <a href="#" class="blog-ok">Oku &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="blog-kart">
-        <div class="blog-ust">&#127919;</div>
-        <div class="blog-govde">
-          <div class="blog-etiket">Dikkat ve Odak</div>
-          <h2>Çocuğunuz okurken aklı neden başka yerde? Odak sorununa bilimsel bakış</h2>
-          <p>Dikkat dağınıklığı bir karakter sorunu değil, eğitilebilir bir beceri meselesidir. Bilim ne diyor?</p>
-          <div class="blog-meta">
-            <span class="blog-sure">6 dk okuma</span>
-            <a href="#" class="blog-ok">Oku &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="blog-kart">
-        <div class="blog-ust">&#128218;</div>
-        <div class="blog-govde">
-          <div class="blog-etiket">Ebeveyn Rehberi</div>
-          <h2>30 günlük programdan maksimum verim almak için 5 öneri</h2>
-          <p>Sistemi doğru kullanmak kadar süreci desteklemek de gelişimi doğrudan etkiliyor. Veli olarak ne yapabilirsiniz?</p>
-          <div class="blog-meta">
-            <span class="blog-sure">4 dk okuma</span>
-            <a href="#" class="blog-ok">Oku &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="blog-kart">
-        <div class="blog-ust">&#9889;</div>
-        <div class="blog-govde">
-          <div class="blog-etiket">Okuma Teknikleri</div>
-          <h2>Tek tek kelime okumaktan blok okumaya geçiş nasıl olur?</h2>
-          <p>Çoğu insan okurken tek tek kelime işler. Bu alışkanlık hem hızı hem anlama derinliğini sınırlar. Nasıl değiştirirsiniz?</p>
-          <div class="blog-meta">
-            <span class="blog-sure">7 dk okuma</span>
-            <a href="#" class="blog-ok">Oku &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="blog-kart">
-        <div class="blog-ust">&#128200;</div>
-        <div class="blog-govde">
-          <div class="blog-etiket">Veri ve Ölçüm</div>
-          <h2>Gelişim neden ölçülmeli? Sayılar olmadan ilerleme olmaz</h2>
-          <p>Hızlı okuma eğitiminde en göz ardı edilen konu ölçümdür. Oysa gelişim görünür olmazsa sürdürülemez.</p>
-          <div class="blog-meta">
-            <span class="blog-sure">5 dk okuma</span>
-            <a href="#" class="blog-ok">Oku &rarr;</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="blog-kart">
-        <div class="blog-ust">&#127774;</div>
-        <div class="blog-govde">
-          <div class="blog-etiket">Sınav Hazırlık</div>
-          <h2>YKS ve LGS'de paragraf sorularını daha hızlı çözmenin yolu</h2>
-          <p>Sınav stresinin önemli bir kaynağı süre baskısıdır. Okuma hızı bu stresi doğrudan etkiler.</p>
-          <div class="blog-meta">
-            <span class="blog-sure">6 dk okuma</span>
-            <span class="blog-yakin">Yakında</span>
-          </div>
-        </div>
-      </div>
-
+    <div class="blog-grid" id="blogGrid">
+      <p style="color:var(--gr);text-align:center;grid-column:1/-1">⏳ Yazılar yükleniyor...</p>
     </div>
   </div>
 </section>
@@ -292,6 +214,37 @@ function dropToggle(e,el){
 }
 
 window.addEventListener('scroll',()=>{document.getElementById('nav').style.borderBottomColor=window.scrollY>60?'rgba(212,175,55,0.25)':'rgba(212,175,55,0.12)'});
+
+const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
+const KATEGORI_IKON_BLOG={'göz sağlığı':'👁️','dikkat ve odak':'🎯','ebeveyn rehberi':'📚','okuma teknikleri':'⚡','veri ve ölçüm':'📈','sınav hazırlık':'🌟'};
+function kacir(m){const d=document.createElement('div');d.textContent=m||'';return d.innerHTML;}
+async function blogYazilariniGetir(){
+  const grid=document.getElementById('blogGrid');
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/blog_yazilari?durum=eq.yayinda&order=yayin_tarihi.desc',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const yazilar=await res.json();
+    if(!yazilar.length){grid.innerHTML='<p style="color:var(--gr);text-align:center;grid-column:1/-1">Henüz yazı yayınlanmadı.</p>';return;}
+    grid.innerHTML=yazilar.map(y=>{
+      const ikon=KATEGORI_IKON_BLOG[(y.kategori||'').toLowerCase()]||'📝';
+      const kelime=(y.icerik||'').trim().split(/\s+/).length;
+      const dakika=Math.max(1,Math.round(kelime/200));
+      return `<div class="blog-kart">
+        <div class="blog-ust">${ikon}</div>
+        <div class="blog-govde">
+          <div class="blog-etiket">${kacir(y.kategori||'Genel')}</div>
+          <h2>${kacir(y.baslik)}</h2>
+          <p>${kacir(y.ozet||'')}</p>
+          <div class="blog-meta">
+            <span class="blog-sure">${dakika} dk okuma</span>
+            <a href="blog-detay.html?id=${y.id}" class="blog-ok">Oku &rarr;</a>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){grid.innerHTML='<p style="color:var(--gr);text-align:center;grid-column:1/-1">❌ Yazılar yüklenemedi.</p>';}
+}
+blogYazilariniGetir();
 </script>
 </body>
 </html>
