@@ -164,6 +164,7 @@ tr:hover td{background:#f8fafc}
         <li><a href="#" onclick="sayfaGoster('hikayeler',this)">📚 Aşama/Seviye Metinleri</a></li>
       </ul>
     </li>
+    <li><a href="#" onclick="sayfaGoster('blog',this)"><span class="ikon">📝</span> Blog Yazıları</a></li>
     <li>
       <a href="#" onclick="altMenuToggle('asama-alt',this)"><span class="ikon">🏆</span> Seviyeler <span class="ok">▶</span></a>
       <ul class="alt-menu" id="asama-alt">
@@ -298,6 +299,21 @@ tr:hover td{background:#f8fafc}
     <div class="kart"><div id="ders-liste"><div class="bos-durum">⏳ Metinler yükleniyor...</div></div></div>
   </div>
 
+  <!-- BLOG YAZILARI -->
+  <div id="sayfa-blog" class="sayfa">
+    <div class="ust-bar"><div><h1>Blog Yazıları</h1><p>Sitede yayınlanacak blog yazılarını buradan yönetin.</p></div><button class="yeni-btn" onclick="modalAc('blog')">+ Yeni Yazı Ekle</button></div>
+    <div class="kart" style="padding:1rem 1.5rem">
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Durum:</label>
+          <select id="filtre-blog-durum" onchange="blogYazilariYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
+            <option value="">Tümü</option><option value="yayinda">Yayında</option><option value="taslak">Taslak</option>
+          </select></div>
+        <span id="blog-sayac" style="font-size:0.82rem;color:#94a3b8;margin-left:auto"></span>
+      </div>
+    </div>
+    <div class="kart"><div id="blog-liste"><div class="bos-durum">⏳ Yazılar yükleniyor...</div></div></div>
+  </div>
+
   <!-- SEVİYE SAYFALARI (eski asama numaraları 2,3,4 = Seviye 1,2,3) -->
   <div id="sayfa-asama-2" class="sayfa"></div>
   <div id="sayfa-asama-3" class="sayfa"></div>
@@ -419,6 +435,35 @@ tr:hover td{background:#f8fafc}
     <div class="form-grup"><label>Metin Başlığı</label><input type="text" id="od-baslik"></div>
     <div class="form-grup"><label>Metin</label><textarea id="od-metin" oninput="duzenleKelimeSay()"></textarea><div class="sayac" id="duzenle-kelime-sayac">0 kelime</div></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('olcum-duzenle')">İptal</button><button class="btn-kaydet" id="btn-olcum-guncelle" onclick="olcumMetniGuncelle()">💾 Güncelle</button></div>
+  </div>
+</div>
+
+<div class="modal" id="modal-blog">
+  <div class="modal-kutu genis">
+    <div class="modal-baslik">📝 Yeni Blog Yazısı Ekle</div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Kategori</label><input type="text" id="b-kategori" placeholder="örn. hız okuma, çalışma teknikleri..." value="genel"></div>
+      <div class="form-grup"><label>Durum</label><select id="b-durum"><option value="taslak">Taslak</option><option value="yayinda">Yayında</option></select></div>
+    </div>
+    <div class="form-grup"><label>Başlık</label><input type="text" id="b-baslik" placeholder="Yazının başlığı..."></div>
+    <div class="form-grup"><label>Özet</label><input type="text" id="b-ozet" placeholder="Kart görünümünde gösterilecek kısa özet..."></div>
+    <div class="form-grup"><label>İçerik</label><textarea id="b-icerik" placeholder="Yazının tam metni..." style="min-height:220px"></textarea></div>
+    <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('blog')">İptal</button><button class="btn-kaydet" id="btn-blog-kaydet" onclick="blogYazisiKaydet()">💾 Kaydet</button></div>
+  </div>
+</div>
+
+<div class="modal" id="modal-blog-duzenle">
+  <div class="modal-kutu genis">
+    <div class="modal-baslik">✏️ Blog Yazısı Düzenle</div>
+    <input type="hidden" id="bd-id">
+    <div class="form-grid">
+      <div class="form-grup"><label>Kategori</label><input type="text" id="bd-kategori"></div>
+      <div class="form-grup"><label>Durum</label><select id="bd-durum"><option value="taslak">Taslak</option><option value="yayinda">Yayında</option></select></div>
+    </div>
+    <div class="form-grup"><label>Başlık</label><input type="text" id="bd-baslik"></div>
+    <div class="form-grup"><label>Özet</label><input type="text" id="bd-ozet"></div>
+    <div class="form-grup"><label>İçerik</label><textarea id="bd-icerik" style="min-height:220px"></textarea></div>
+    <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('blog-duzenle')">İptal</button><button class="btn-kaydet" id="btn-blog-guncelle" onclick="blogYazisiGuncelle()">💾 Güncelle</button></div>
   </div>
 </div>
 
@@ -589,6 +634,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='hikayeler') hikayeleriYukle();
   if(sayfa==='olcum-metinleri') olcumMetinleriYukle();
   if(sayfa==='ders-metinleri') dersMetinleriYukle();
+  if(sayfa==='blog') blogYazilariYukle();
     if(sayfa==='ogrenciler') ogrencileriYukle();
   if(sayfa==='ogretmenler') ogretmenleriYukle();
   if(sayfa==='kurumlar') kurumlarıYukle();
@@ -805,6 +851,8 @@ function modalKapat(tip){
   if(tip==='olcum'){document.getElementById('o-baslik').value='';document.getElementById('o-metin').value='';document.getElementById('o-kelime').value='';document.getElementById('olcum-kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi-olcum').innerHTML='';}
   if(tip==='ders'){document.getElementById('d-baslik').value='';document.getElementById('d-metin').value='';document.getElementById('d-kelime').value='';document.getElementById('ders-kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi-ders').innerHTML='';}
   if(tip==='ders-duzenle'){document.getElementById('dd-baslik').value='';document.getElementById('dd-metin').value='';document.getElementById('dd-kelime').value='';document.getElementById('ders-duzenle-kelime-sayac').textContent='0 kelime';}
+  if(tip==='blog'){document.getElementById('b-baslik').value='';document.getElementById('b-ozet').value='';document.getElementById('b-icerik').value='';document.getElementById('b-kategori').value='genel';document.getElementById('b-durum').value='taslak';}
+  if(tip==='blog-duzenle'){document.getElementById('bd-baslik').value='';document.getElementById('bd-ozet').value='';document.getElementById('bd-icerik').value='';}
   if(tip==='ogrenci'){document.getElementById('og-ad').value='';document.getElementById('og-soyad').value='';document.getElementById('og-kullanici').value='';document.getElementById('og-sifre').value='';document.getElementById('og-telefon').value='';}
   if(tip==='ogretmen'){document.getElementById('ogr-ad').value='';document.getElementById('ogr-soyad').value='';document.getElementById('ogr-kullanici').value='';document.getElementById('ogr-sifre').value='';}
 }
@@ -1023,6 +1071,69 @@ async function olcumMetinleriYukle(){
       const tr=document.createElement('tr');
       const mG=m.metin.replace(/'/g,"\\'"),bG=m.baslik.replace(/'/g,"\\'");
       tr.innerHTML=`<td><span class="grup-badge ${renkler[m.yas_grubu]}">${GRUP_ADLARI[m.yas_grubu]}</span></td><td><strong>${m.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${m.metin.substring(0,100)}...</div></td><td>${m.kelime_sayisi||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="olcumMetniDuzenle(${m.id},${m.yas_grubu},'${bG}','${mG}',${m.kelime_sayisi||0})" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="olcumMetniSil(${m.id})">🗑️ Sil</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+// ── BLOG YAZILARI ──
+async function blogYazisiKaydet(){
+  const kategori=document.getElementById('b-kategori').value.trim()||'genel';
+  const durum=document.getElementById('b-durum').value;
+  const baslik=document.getElementById('b-baslik').value.trim();
+  const ozet=document.getElementById('b-ozet').value.trim();
+  const icerik=document.getElementById('b-icerik').value.trim();
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!icerik){bildirimGoster('⚠️ İçerik boş olamaz!','hata');return;}
+  const btn=document.getElementById('btn-blog-kaydet');btn.textContent='⏳ Kaydediliyor...';
+  try{await supabase('POST','blog_yazilari',{kategori,durum,baslik,ozet,icerik});bildirimGoster('✅ Blog yazısı kaydedildi!','basari');modalKapat('blog');blogYazilariYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Kaydet';
+}
+async function blogYazisiSil(id){
+  if(!confirm('Emin misiniz?')) return;
+  try{await supabase('DELETE','blog_yazilari',null,'id=eq.'+id);bildirimGoster('🗑️ Silindi.','basari');blogYazilariYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+function blogYazisiDuzenleAc(id,kategori,durum,baslik,ozet,icerik){
+  document.getElementById('bd-id').value=id;document.getElementById('bd-kategori').value=kategori;
+  document.getElementById('bd-durum').value=durum;document.getElementById('bd-baslik').value=baslik;
+  document.getElementById('bd-ozet').value=ozet;document.getElementById('bd-icerik').value=icerik;
+  modalAc('blog-duzenle');
+}
+async function blogYazisiGuncelle(){
+  const id=document.getElementById('bd-id').value;
+  const kategori=document.getElementById('bd-kategori').value.trim()||'genel';
+  const durum=document.getElementById('bd-durum').value;
+  const baslik=document.getElementById('bd-baslik').value.trim();
+  const ozet=document.getElementById('bd-ozet').value.trim();
+  const icerik=document.getElementById('bd-icerik').value.trim();
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!icerik){bildirimGoster('⚠️ İçerik boş olamaz!','hata');return;}
+  const btn=document.getElementById('btn-blog-guncelle');btn.textContent='⏳ Güncelleniyor...';
+  try{
+    await supabase('PATCH','blog_yazilari',{kategori,durum,baslik,ozet,icerik},'id=eq.'+id);
+    bildirimGoster('✅ Yazı güncellendi!','basari');modalKapat('blog-duzenle');blogYazilariYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Güncelle';
+}
+async function blogYazilariYukle(){
+  const liste=document.getElementById('blog-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=yayin_tarihi.desc';
+  const durum=document.getElementById('filtre-blog-durum').value;
+  if(durum) filtre+='&durum=eq.'+durum;
+  try{
+    const yazilar=await supabase('GET','blog_yazilari',null,filtre);
+    document.getElementById('blog-sayac').textContent=yazilar.length+' yazı';
+    if(!yazilar.length){liste.innerHTML='<div class="bos-durum">📭 Henüz blog yazısı eklenmemiş.</div>';return;}
+    liste.innerHTML='<table><thead><tr><th>Durum</th><th>Başlık</th><th>Kategori</th><th>Tarih</th><th>İşlem</th></tr></thead><tbody id="blog-tbody"></tbody></table>';
+    const tbody=document.getElementById('blog-tbody');
+    yazilar.forEach(y=>{
+      const tarih=y.yayin_tarihi?new Date(y.yayin_tarihi).toLocaleDateString('tr-TR'):'-';
+      const tr=document.createElement('tr');
+      const iG=(y.icerik||'').replace(/'/g,"\\'"),bG=(y.baslik||'').replace(/'/g,"\\'"),oG=(y.ozet||'').replace(/'/g,"\\'"),kG=(y.kategori||'').replace(/'/g,"\\'");
+      tr.innerHTML=`<td><span class="durum ${y.durum==='yayinda'?'aktif':'bekliyor'}">${y.durum==='yayinda'?'● Yayında':'● Taslak'}</span></td><td><strong>${y.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${(y.ozet||y.icerik).substring(0,100)}...</div></td><td>${y.kategori||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="blogYazisiDuzenleAc(${y.id},'${kG}','${y.durum}','${bG}','${oG}','${iG}')" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="blogYazisiSil(${y.id})">🗑️ Sil</button></td>`;
       tbody.appendChild(tr);
     });
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
