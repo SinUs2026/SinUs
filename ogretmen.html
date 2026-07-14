@@ -127,6 +127,7 @@ tr:hover td{background:#f8fafc}
     <li><a href="program-yonetimi.html?from=ogretmen"><span class="ikon">📅</span> Program Yönetimi</a></li>
     <li><a href="#" onclick="sayfaGoster('egzersizler',this)"><span class="ikon">🌌</span> Egzersizler</a></li>
     <li><a href="#" onclick="sayfaGoster('okuma-teknikleri',this)"><span class="ikon">📖</span> Okuma Teknikleri</a></li>
+    <li><a href="#" onclick="sayfaGoster('ders-metinleri',this)"><span class="ikon">📄</span> Ders Metinleri</a></li>
     <div class="sidebar-alt2">Hesap</div>
     <li><a href="giris.html"><span class="ikon">🚪</span> Çıkış Yap</a></li>
   </ul>
@@ -189,6 +190,21 @@ tr:hover td{background:#f8fafc}
     <div class="egzersiz-grid" id="grid-okuma-og"></div>
   </div>
 
+  <!-- DERS METİNLERİ -->
+  <div id="sayfa-ders-metinleri" class="sayfa">
+    <div class="ust-bar"><div><h1>Ders Metinleri</h1><p>Okuma tekniklerinde kullanılan metinleri görüntüleyin.</p></div></div>
+    <div class="kart" style="padding:1rem 1.5rem">
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Zorluk:</label>
+          <select id="filtre-ders-og-zorluk" onchange="dersMetinleriYukleOg()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
+            <option value="">Tümü</option><option value="basit">Basit</option><option value="orta">Orta</option><option value="zor">Zor</option><option value="cok_zor">Çok Zor</option>
+          </select></div>
+        <span id="ders-og-sayac" style="font-size:0.82rem;color:#94a3b8;margin-left:auto"></span>
+      </div>
+    </div>
+    <div class="kart"><div id="ders-og-liste"><div class="bos-durum">⏳ Metinler yükleniyor...</div></div></div>
+  </div>
+
 
 </div>
 
@@ -243,6 +259,18 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+<!-- DERS METNİ GÖRÜNTÜLEME MODALI -->
+<div class="modal" id="modal-ders-og-goruntule">
+  <div class="modal-kutu" style="width:640px">
+    <div class="modal-baslik" id="dersOgBaslik">Ders Metni</div>
+    <div style="font-size:0.78rem;color:#64748b;margin-bottom:1rem" id="dersOgMeta">—</div>
+    <div style="font-size:0.92rem;line-height:1.8;color:#1e293b;white-space:pre-wrap;max-height:50vh;overflow-y:auto;background:#f8fafc;border-radius:10px;padding:1rem 1.2rem" id="dersOgMetin">—</div>
+    <div class="modal-btn-grup">
+      <button class="btn-iptal" onclick="modalKapat('ders-og-goruntule')">Kapat</button>
+    </div>
+  </div>
+</div>
+
 <div class="bildirim" id="bildirim"></div>
 
 <script>
@@ -285,6 +313,7 @@ const EGZERSIZLER_OKUMA=[
   {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩',aciklama:'Izgarada gizli kelimeleri bulma.'},
   {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦',aciklama:'Sabit bakış noktasıyla kelime grubu okuma.'},
 ];
+const ZORLUK_ADLARI={basit:'Basit',orta:'Orta',zor:'Zor',cok_zor:'Çok Zor'};
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',asama1:'🔤'};
 const MODUL_AD={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',kelime_merdiveni:'Kelime Merdiveni',azalan:'Azalan Kelime',kelime_zinciri:'Kelime Zinciri',benzer_kelime:'Benzer Kelime',kelime_avi:'Kelime Avı',hizli_gor:'Hızlı Gör-Söyle',tekerleme:'Tekerleme Piramit',dogru_kelime:'Doğru Kelimeyi Bul',hafiza_okuma:'Hafıza + Okuma',mini_hikaye:'Mini Hikâye'};
 
@@ -299,6 +328,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='genel'||sayfa==='ogrencilerim') ogrencileriYukle();
   if(sayfa==='egzersizler') egzersizleriOlustur();
   if(sayfa==='okuma-teknikleri') okumaTeknikleriOlustur();
+  if(sayfa==='ders-metinleri') dersMetinleriYukleOg();
 }
 
 // ── EGZERSİZ KARTLARI ──
@@ -318,6 +348,39 @@ function okumaTeknikleriOlustur(){
   document.getElementById('grid-okuma-og').innerHTML='';
   EGZERSIZLER_OKUMA.forEach(e=>egzersizKarti(e,'grid-okuma-og'));
 }
+// ── DERS METİNLERİ (GÖRÜNTÜLEME) ──
+function kacirOg(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'');}
+async function dersMetinleriYukleOg(){
+  const liste=document.getElementById('ders-og-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=zorluk,baslik';
+  const zorluk=document.getElementById('filtre-ders-og-zorluk').value;
+  if(zorluk) filtre+='&zorluk=eq.'+zorluk;
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/ders_metinleri?'+filtre,{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const metinler=await res.json();
+    document.getElementById('ders-og-sayac').textContent=metinler.length+' metin';
+    if(!metinler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz ders metni eklenmemiş.</div>';return;}
+    liste.innerHTML='<table><thead><tr><th>Zorluk</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="ders-og-tbody"></tbody></table>';
+    const tbody=document.getElementById('ders-og-tbody');
+    metinler.forEach(m=>{
+      const tarih=m.created_at?new Date(m.created_at).toLocaleDateString('tr-TR'):'-';
+      const tr=document.createElement('tr');
+      const mG=kacirOg(m.metin),bG=kacirOg(m.baslik);
+      tr.innerHTML=`<td><span class="asama-badge a1">${ZORLUK_ADLARI[m.zorluk]||m.zorluk}</span></td><td><strong>${m.baslik}</strong><div style="font-size:0.8rem;color:#94a3b8;margin-top:0.3rem">${m.metin.substring(0,100)}...</div></td><td>${m.kelime_sayisi||'-'}</td><td>${tarih}</td><td><button class="islem-btn goruntule" onclick="dersMetniGoruntuleOg('${bG}','${ZORLUK_ADLARI[m.zorluk]||m.zorluk}','${mG}',${m.kelime_sayisi||0})">👁 Görüntüle</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+function dersMetniGoruntuleOg(baslik,zorlukAdi,metin,kelime){
+  document.getElementById('dersOgBaslik').textContent=baslik;
+  document.getElementById('dersOgMeta').textContent=zorlukAdi+' · '+kelime+' kelime';
+  document.getElementById('dersOgMetin').textContent=metin;
+  modalAc('ders-og-goruntule');
+}
+
 // ── ÖĞRENCİLERİ YÜKLE ──
 async function ogrencileriYukle(){
   try{
