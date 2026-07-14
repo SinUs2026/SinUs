@@ -349,7 +349,7 @@ function okumaTeknikleriOlustur(){
   EGZERSIZLER_OKUMA.forEach(e=>egzersizKarti(e,'grid-okuma-og'));
 }
 // ── DERS METİNLERİ (GÖRÜNTÜLEME) ──
-function kacirOg(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'');}
+function kacirOg(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'').replace(/"/g,'&quot;');}
 async function dersMetinleriYukleOg(){
   const liste=document.getElementById('ders-og-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
