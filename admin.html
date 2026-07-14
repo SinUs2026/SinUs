@@ -566,7 +566,7 @@ tr:hover td{background:#f8fafc}
     window.location.href='admin-giris.html';
   }
 })();
-function kacirAdmin(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'');}
+function kacirAdmin(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'').replace(/"/g,'&quot;');}
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 const GRUP_ADLARI={1:'Grup 1 – 1-2. Sınıf',2:'Grup 2 – 3-4. Sınıf',3:'Grup 3 – 5-6. Sınıf',4:'Grup 4 – 7-8. Sınıf',5:'Grup 5 – Lise',6:'Grup 6 – Yetişkin'};
