@@ -127,7 +127,6 @@ tr:hover td{background:#f8fafc}
     <li><a href="program-yonetimi.html?from=ogretmen"><span class="ikon">📅</span> Program Yönetimi</a></li>
     <li><a href="#" onclick="sayfaGoster('egzersizler',this)"><span class="ikon">🌌</span> Egzersizler</a></li>
     <li><a href="#" onclick="sayfaGoster('okuma-teknikleri',this)"><span class="ikon">📖</span> Okuma Teknikleri</a></li>
-    <li><a href="#" onclick="sayfaGoster('diger-calismalar',this)"><span class="ikon">🔤</span> Diğer Çalışmalar</a></li>
     <div class="sidebar-alt2">Hesap</div>
     <li><a href="giris.html"><span class="ikon">🚪</span> Çıkış Yap</a></li>
   </ul>
@@ -190,11 +189,6 @@ tr:hover td{background:#f8fafc}
     <div class="egzersiz-grid" id="grid-okuma-og"></div>
   </div>
 
-  <!-- DİĞER ÇALIŞMALAR -->
-  <div id="sayfa-diger-calismalar" class="sayfa">
-    <div class="ust-bar"><div><h1>Diğer Çalışmalar</h1><p>1. Aşama modülleri ve ek çalışmalar.</p></div></div>
-    <div class="egzersiz-grid" id="grid-diger-og"></div>
-  </div>
 
 </div>
 
@@ -291,10 +285,6 @@ const EGZERSIZLER_OKUMA=[
   {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩',aciklama:'Izgarada gizli kelimeleri bulma.'},
   {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦',aciklama:'Sabit bakış noktasıyla kelime grubu okuma.'},
 ];
-const EGZERSIZLER_DIGER=[
-  {dosya:'asama1.html',isim:'1. Aşama Modülleri',ikon:'🔤',aciklama:'Harf tamamlama, kelime avı ve daha fazlası.'},
-];
-
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',asama1:'🔤'};
 const MODUL_AD={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',kelime_merdiveni:'Kelime Merdiveni',azalan:'Azalan Kelime',kelime_zinciri:'Kelime Zinciri',benzer_kelime:'Benzer Kelime',kelime_avi:'Kelime Avı',hizli_gor:'Hızlı Gör-Söyle',tekerleme:'Tekerleme Piramit',dogru_kelime:'Doğru Kelimeyi Bul',hafiza_okuma:'Hafıza + Okuma',mini_hikaye:'Mini Hikâye'};
 
@@ -309,7 +299,6 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='genel'||sayfa==='ogrencilerim') ogrencileriYukle();
   if(sayfa==='egzersizler') egzersizleriOlustur();
   if(sayfa==='okuma-teknikleri') okumaTeknikleriOlustur();
-  if(sayfa==='diger-calismalar') digerCalismalariOlustur();
 }
 
 // ── EGZERSİZ KARTLARI ──
@@ -329,11 +318,6 @@ function okumaTeknikleriOlustur(){
   document.getElementById('grid-okuma-og').innerHTML='';
   EGZERSIZLER_OKUMA.forEach(e=>egzersizKarti(e,'grid-okuma-og'));
 }
-function digerCalismalariOlustur(){
-  document.getElementById('grid-diger-og').innerHTML='';
-  EGZERSIZLER_DIGER.forEach(e=>egzersizKarti(e,'grid-diger-og'));
-}
-
 // ── ÖĞRENCİLERİ YÜKLE ──
 async function ogrencileriYukle(){
   try{
