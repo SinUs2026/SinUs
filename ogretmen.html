@@ -221,12 +221,11 @@ tr:hover td{background:#f8fafc}
       <div class="form-grup"><label>Şifre</label><input type="password" id="oe-sifre" placeholder="Şifre belirle"></div>
     </div>
     <div class="form-grid">
-      <div class="form-grup"><label>Aşama</label>
+      <div class="form-grup"><label>Seviye</label>
         <select id="oe-asama">
-          <option value="1">1. Aşama – Okuma Temeli</option>
-          <option value="2">2. Aşama – Akıcı Okuma</option>
-          <option value="3">3. Aşama – Hız + Anlama</option>
-          <option value="4">4. Aşama – Sınav Odaklı</option>
+          <option value="2">Seviye-1 — Akıcı Okuma</option>
+          <option value="3">Seviye-2 — Hız + Anlama</option>
+          <option value="4">Seviye-3 — Sınav Odaklı</option>
         </select>
       </div>
       <div class="form-grup"><label>Lisans</label>
@@ -246,7 +245,7 @@ tr:hover td{background:#f8fafc}
     <div class="modal-baslik" id="detayBaslik">Öğrenci Detayı</div>
     <div class="detay-grid">
       <div class="detay-kart"><div class="detay-label">Kullanıcı Adı</div><div class="detay-deger" id="detayKullanici">—</div></div>
-      <div class="detay-kart"><div class="detay-label">Aşama</div><div class="detay-deger" id="detayAsama">—</div></div>
+      <div class="detay-kart"><div class="detay-label">Seviye</div><div class="detay-deger" id="detayAsama">—</div></div>
       <div class="detay-kart"><div class="detay-label">Enerji</div><div class="detay-deger" id="detayEnerji">—</div></div>
       <div class="detay-kart"><div class="detay-label">Gün</div><div class="detay-deger" id="detayGun">—</div></div>
     </div>
@@ -336,6 +335,7 @@ const EGZERSIZLER_OKUMA=[
   {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦',aciklama:'Sabit bakış noktasıyla kelime grubu okuma.'},
 ];
 const ZORLUK_ADLARI={basit:'Basit',orta:'Orta',zor:'Zor',cok_zor:'Çok Zor'};
+const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',asama1:'🔤'};
 const MODUL_AD={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',kelime_merdiveni:'Kelime Merdiveni',azalan:'Azalan Kelime',kelime_zinciri:'Kelime Zinciri',benzer_kelime:'Benzer Kelime',kelime_avi:'Kelime Avı',hizli_gor:'Hızlı Gör-Söyle',tekerleme:'Tekerleme Piramit',dogru_kelime:'Doğru Kelimeyi Bul',hafiza_okuma:'Hafıza + Okuma',mini_hikaye:'Mini Hikâye'};
 
@@ -424,12 +424,12 @@ function ozetGuncelle(ogrenciler){
 function ogrenciTablosuOlustur(ogrenciler){
   const html=ogrenciler.length===0?'<div class="bos-durum">📭 Henüz öğrenci yok.</div>':`
     <table>
-      <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Aşama</th><th>Gün</th><th>Enerji</th><th>Durum</th><th>İşlem</th></tr></thead>
+      <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Durum</th><th>İşlem</th></tr></thead>
       <tbody>${ogrenciler.map(o=>`
         <tr>
           <td><strong>${o.ad||''} ${o.soyad||''}</strong></td>
           <td>${o.kullanici_adi||'—'}</td>
-          <td><span class="asama-badge a${o.asama||1}">${o.asama||1}. Aşama</span></td>
+          <td><span class="asama-badge a${o.asama||1}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye'}</span></td>
           <td>${o.mevcut_gun||1}/30</td>
           <td>⚡ ${o.enerji||0}</td>
           <td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>
@@ -455,7 +455,7 @@ function ogrenciAra(q){
 async function ogrenciDetay(o){
   document.getElementById('detayBaslik').textContent=(o.ad||'')+' '+(o.soyad||'');
   document.getElementById('detayKullanici').textContent=o.kullanici_adi||'—';
-  document.getElementById('detayAsama').textContent=(o.asama||1)+'. Aşama';
+  document.getElementById('detayAsama').textContent=SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye';
   document.getElementById('detayEnerji').textContent='⚡ '+(o.enerji||0);
   document.getElementById('detayGun').textContent=(o.mevcut_gun||1)+'. Gün';
   document.getElementById('detayProgramLink').href='program-yonetimi.html?from=ogretmen&asama='+(o.asama||1)+'&gun='+(o.mevcut_gun||1);
