@@ -252,6 +252,7 @@ async function panelYukle(){
     bilgileriYukle();
     programiYukle();
     siralamaYukle();
+    if(ogrenci.ilk_giris_tamamlandi===false){ ilkGirisModalGoster(); }
   }catch(e){
     // Geliştirme modunda demo veri
     ogrenci={ad:'Ali',soyad:'Demir',kullanici_adi:'ali2016',asama:2,mevcut_gun:7,enerji:248,aktif:true};
@@ -469,6 +470,40 @@ function cikisYap(){
   localStorage.removeItem('sinus_kullanici_obj');
   sessionStorage.clear();
   location.href='giris.html';
+}
+
+// ── İLK GİRİŞ SORUSU ──
+function ilkGirisModalGoster(){
+  document.getElementById('ilkGirisOverlay').style.display='flex';
+}
+async function ilkGirisAtla(){
+  document.getElementById('ilkGirisOverlay').style.display='none';
+  try{ await rpc('ilk_giris_tamamlandi_isaretle',{}); }catch(e){}
+}
+function ilkGirisDegistirGoster(){
+  document.getElementById('ilkGirisSoru').style.display='none';
+  document.getElementById('ilkGirisForm').style.display='block';
+  document.getElementById('ig-kullanici').value=ogrenci.kullanici_adi||'';
+}
+async function ilkGirisKaydet(){
+  const yeniKullanici=document.getElementById('ig-kullanici').value.trim();
+  const yeniSifre=document.getElementById('ig-sifre').value;
+  const hataEl=document.getElementById('ig-hata');
+  hataEl.style.display='none';
+  try{
+    const sonuc=await rpc('kullanici_kendi_bilgi_guncelle',{p_yeni_kullanici_adi:yeniKullanici||null,p_yeni_sifre:yeniSifre||null});
+    if(sonuc && sonuc.length){
+      ogrenci.kullanici_adi=sonuc[0].kullanici_adi;
+      const obj=JSON.parse(localStorage.getItem('sinus_kullanici_obj')||'{}');
+      obj.kullanici_adi=sonuc[0].kullanici_adi;
+      localStorage.setItem('sinus_kullanici_obj',JSON.stringify(obj));
+    }
+    document.getElementById('ilkGirisOverlay').style.display='none';
+    alert('✅ Bilgileriniz güncellendi!');
+  }catch(e){
+    hataEl.textContent='❌ '+e.message;
+    hataEl.style.display='block';
+  }
 }
 
 // ── GÜNÜ BİTİR SİSTEMİ ──
@@ -734,6 +769,36 @@ async function yolculukYukle(){
     <div style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.5rem">🗺️ Gelişim Yolculuğu</div>
     <div style="overflow-x:auto;padding-bottom:1rem">
       <div id="yolculukSarici" style="display:flex;align-items:flex-start;gap:0;min-width:max-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- İLK GİRİŞ SORUSU -->
+<div id="ilkGirisOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,22,40,0.7);z-index:1100;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:420px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.3)">
+    <div id="ilkGirisSoru">
+      <div style="font-size:1.1rem;font-weight:700;color:#0a1628;margin-bottom:0.6rem">👋 Hoş geldin!</div>
+      <div style="font-size:0.9rem;color:#475569;margin-bottom:1.5rem;line-height:1.5">Kullanıcı adını veya şifreni değiştirmek ister misin? İstersen daha sonra da yapabilirsin.</div>
+      <div style="display:flex;gap:0.6rem">
+        <button onclick="ilkGirisAtla()" style="flex:1;padding:0.7rem;background:#f1f5f9;color:#475569;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">Şimdi Değil</button>
+        <button onclick="ilkGirisDegistirGoster()" style="flex:1;padding:0.7rem;background:#2563a8;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">Değiştir</button>
+      </div>
+    </div>
+    <div id="ilkGirisForm" style="display:none">
+      <div style="font-size:1.1rem;font-weight:700;color:#0a1628;margin-bottom:1rem">Bilgilerini Güncelle</div>
+      <div style="margin-bottom:1rem">
+        <label style="display:block;font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:0.4rem">Kullanıcı Adı</label>
+        <input type="text" id="ig-kullanici" style="width:100%;padding:0.6rem 0.9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:0.9rem;outline:none">
+      </div>
+      <div style="margin-bottom:1rem">
+        <label style="display:block;font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:0.4rem">Yeni Şifre <span style="font-weight:400;color:#94a3b8">(boş bırakırsan değişmez)</span></label>
+        <input type="text" id="ig-sifre" placeholder="Yeni şifre (opsiyonel)" style="width:100%;padding:0.6rem 0.9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:0.9rem;outline:none">
+      </div>
+      <div id="ig-hata" style="display:none;color:#dc2626;font-size:0.82rem;margin-bottom:1rem"></div>
+      <div style="display:flex;gap:0.6rem">
+        <button onclick="ilkGirisAtla()" style="flex:1;padding:0.7rem;background:#f1f5f9;color:#475569;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">İptal</button>
+        <button onclick="ilkGirisKaydet()" style="flex:1;padding:0.7rem;background:#16a34a;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">Kaydet</button>
+      </div>
     </div>
   </div>
 </div>
