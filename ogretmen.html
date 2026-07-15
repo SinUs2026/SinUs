@@ -129,7 +129,7 @@ tr:hover td{background:#f8fafc}
     <li><a href="#" onclick="sayfaGoster('okuma-teknikleri',this)"><span class="ikon">📖</span> Okuma Teknikleri</a></li>
     <li><a href="#" onclick="sayfaGoster('ders-metinleri',this)"><span class="ikon">📄</span> Ders Metinleri</a></li>
     <div class="sidebar-alt2">Hesap</div>
-    <li><a href="giris.html"><span class="ikon">🚪</span> Çıkış Yap</a></li>
+    <li><a href="#" onclick="cikisYapOgretmen()"><span class="ikon">🚪</span> Çıkış Yap</a></li>
   </ul>
   <div class="ogretmen-bilgi">
     <div class="ogretmen-ad" id="ogretmenAd">Öğretmen</div>
@@ -278,12 +278,34 @@ tr:hover td{background:#f8fafc}
 (function(){
   var k=sessionStorage.getItem('sinus_kullanici_adi');
   var r=sessionStorage.getItem('sinus_kullanici_rol');
-  if(!k||r!=='ogretmen'){
+  var t=sessionStorage.getItem('sinus_oturum_token');
+  if(!k||r!=='ogretmen'||!t){
     window.location.href='ogretmen-giris.html';
   }
 })();
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
+
+function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
+
+async function rpc(fonksiyon,params){
+  const gonderilecek=Object.assign({p_token:oturumToken()},params||{});
+  const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+fonksiyon,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(gonderilecek)
+  });
+  if(!res.ok){const h=await res.json().catch(()=>({}));throw new Error(h.message||'Hata');}
+  return res.json();
+}
+
+function cikisYapOgretmen(){
+  const t=oturumToken();
+  if(t){fetch(SUPABASE_URL+'/rest/v1/rpc/oturum_kapat',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_token:t})}).catch(()=>{});}
+  sessionStorage.clear();
+  localStorage.removeItem('sinus_kullanici_obj');
+  window.location.href='giris.html';
+}
 
 const EGZERSIZLER_GOZ=[
   {dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip',ikon:'↔️',aciklama:'Yatay göz kası egzersizi.'},
@@ -384,10 +406,7 @@ function dersMetniGoruntuleOg(baslik,zorlukAdi,metin,kelime){
 // ── ÖĞRENCİLERİ YÜKLE ──
 async function ogrencileriYukle(){
   try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?rol=eq.ogrenci&order=ad',{
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
-    });
-    tumOgrenciler=await res.json();
+    tumOgrenciler=await rpc('kullanicilar_listele',{p_rol:'ogrenci',p_limit:500});
     ogrenciTablosuOlustur(tumOgrenciler);
     ozetGuncelle(tumOgrenciler);
   }catch(e){
@@ -470,11 +489,7 @@ async function ogrenciKaydet(){
   const asama=parseInt(document.getElementById('oe-asama').value);
   if(!ad||!kullanici||!sifre){bildirimGoster('⚠️ Ad, kullanıcı adı ve şifre zorunlu!','hata');return;}
   try{
-    await fetch(SUPABASE_URL+'/rest/v1/kullanicilar',{
-      method:'POST',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
-      body:JSON.stringify({ad,soyad,kullanici_adi:kullanici,sifre,rol:'ogrenci',asama,mevcut_gun:1,enerji:0,aktif:true})
-    });
+    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogrenci',p_asama:asama});
     bildirimGoster('✅ Öğrenci eklendi!','basari');
     modalKapat('ogrenci-ekle');
     ogrencileriYukle();
