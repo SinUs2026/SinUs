@@ -213,12 +213,12 @@ tr:hover td{background:#f8fafc}
   <div class="modal-kutu">
     <div class="modal-baslik">➕ Öğrenci Ekle</div>
     <div class="form-grid">
-      <div class="form-grup"><label>Ad</label><input type="text" id="oe-ad" placeholder="Öğrencinin adı"></div>
-      <div class="form-grup"><label>Soyad</label><input type="text" id="oe-soyad" placeholder="Öğrencinin soyadı"></div>
+      <div class="form-grup"><label>Ad</label><input type="text" id="oe-ad" placeholder="Öğrencinin adı" oninput="otomatikDoldur('oe')"></div>
+      <div class="form-grup"><label>Soyad</label><input type="text" id="oe-soyad" placeholder="Öğrencinin soyadı" oninput="otomatikDoldur('oe')"></div>
     </div>
     <div class="form-grid">
-      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="oe-kullanici" placeholder="kullanici_adi"></div>
-      <div class="form-grup"><label>Şifre</label><input type="password" id="oe-sifre" placeholder="Şifre belirle"></div>
+      <div class="form-grup"><label>Kullanıcı Adı <span style="font-weight:400;color:#94a3b8">(otomatik önerilir)</span></label><input type="text" id="oe-kullanici" placeholder="Ad/soyad girince otomatik dolar" oninput="alanKirlendi('oe-kullanici')"></div>
+      <div class="form-grup"><label>Şifre <span style="font-weight:400;color:#94a3b8">(otomatik önerilir)</span></label><input type="text" id="oe-sifre" placeholder="Ad girince otomatik dolar" oninput="alanKirlendi('oe-sifre')"></div>
     </div>
     <div class="form-grid">
       <div class="form-grup"><label>Seviye</label>
@@ -496,7 +496,30 @@ async function ogrenciKaydet(){
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 
-function modalAc(tip){document.getElementById('modal-'+tip).classList.add('acik');}
+const _kirliAlanlar={};
+function alanKirlendi(id){_kirliAlanlar[id]=true;}
+function slugify(s){
+  return (s||'').toLowerCase().trim()
+    .replace(/ı/g,'i').replace(/i̇/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g')
+    .replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c')
+    .replace(/[^a-z0-9]/g,'');
+}
+function otomatikDoldur(prefix){
+  const ad=document.getElementById(prefix+'-ad').value;
+  const soyad=document.getElementById(prefix+'-soyad').value;
+  const kullaniciEl=document.getElementById(prefix+'-kullanici');
+  const sifreEl=document.getElementById(prefix+'-sifre');
+  if(!_kirliAlanlar[prefix+'-kullanici']) kullaniciEl.value=slugify(ad)+slugify(soyad)+'@sinus';
+  if(!_kirliAlanlar[prefix+'-sifre']) sifreEl.value=slugify(ad)+'1234';
+}
+function formSifirla(prefix){
+  ['ad','soyad','kullanici','sifre'].forEach(k=>{const el=document.getElementById(prefix+'-'+k);if(el)el.value='';});
+  delete _kirliAlanlar[prefix+'-kullanici'];delete _kirliAlanlar[prefix+'-sifre'];
+}
+function modalAc(tip){
+  if(tip==='ogrenci-ekle') formSifirla('oe');
+  document.getElementById('modal-'+tip).classList.add('acik');
+}
 function modalKapat(tip){document.getElementById('modal-'+tip).classList.remove('acik');}
 function bildirimGoster(mesaj,tip){const el=document.getElementById('bildirim');el.textContent=mesaj;el.className='bildirim '+tip;el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
 
