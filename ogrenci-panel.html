@@ -201,11 +201,29 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
   // OTURUM KONTROLU
 (function(){
   var obj=localStorage.getItem('sinus_kullanici_obj');
-  if(!obj){window.location.href='giris.html';return;}
+  var t=sessionStorage.getItem('sinus_oturum_token');
+  if(!obj||!t){window.location.href='giris.html';return;}
   try{var u=JSON.parse(obj);if(!u||u.rol!=='ogrenci'){window.location.href='giris.html';}}catch(e){window.location.href='giris.html';}
 })();
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
+
+function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
+
+async function rpc(fonksiyon,params){
+  const gonderilecek=Object.assign({p_token:oturumToken()},params||{});
+  const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+fonksiyon,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(gonderilecek)
+  });
+  if(!res.ok){const h=await res.json().catch(()=>({}));throw new Error(h.message||'Hata');}
+  return res.json();
+}
+
+function oturumHeaders(ekstra){
+  return Object.assign({'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'X-Oturum-Token':oturumToken()},ekstra||{});
+}
 
 const ASAMA_AD={1:'Okuma Temeli',2:'Akıcı Okuma',3:'Hız + Anlama',4:'Sınav Odaklı'};
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
@@ -226,10 +244,7 @@ async function panelYukle(){
   if(!kullanici){location.href='giris.html';return;}
 
   try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?kullanici_adi=eq.'+encodeURIComponent(kullanici),{
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
-    });
-    const data=await res.json();
+    const data=await rpc('ogrenci_profil_getir',{});
     if(!data.length){location.href='giris.html';return;}
     ogrenci=data[0];
     if(ogrenci.rol!=='ogrenci'){location.href='giris.html';return;}
@@ -422,21 +437,14 @@ async function enerjiGuncelle(puan){
   ogrenci.enerji=yeniEnerji;
   document.getElementById('bilgiEnerji').textContent='⚡ '+yeniEnerji;
   try{
-    await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi),{
-      method:'PATCH',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({enerji:yeniEnerji})
-    });
+    await rpc('ogrenci_ilerleme_guncelle',{p_enerji:yeniEnerji});
   }catch(e){}
 }
 
 // ── SIRALAMA YÜKLE ──
 async function siralamaYukle(){
   try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?rol=eq.ogrenci&asama=eq.'+(ogrenci.asama||1)+'&order=enerji.desc&limit=5',{
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
-    });
-    const data=await res.json();
+    const data=await rpc('siralama_getir',{p_asama:(ogrenci.asama||1),p_limit:5});
     const renkler=['altin','gumus','bronz','',''];
     let benimSira=data.findIndex(o=>o.kullanici_adi===ogrenci.kullanici_adi)+1;
     document.getElementById('bilgiSiralama').textContent='#'+(benimSira||'—');
@@ -454,8 +462,10 @@ async function siralamaYukle(){
 }
 
 function cikisYap(){
+  const t=oturumToken();
+  if(t){fetch(SUPABASE_URL+'/rest/v1/rpc/oturum_kapat',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_token:t})}).catch(()=>{});}
   localStorage.removeItem('sinus_kullanici_obj');
-  sessionStorage.removeItem('sinus_kullanici');
+  sessionStorage.clear();
   location.href='giris.html';
 }
 
@@ -576,7 +586,7 @@ async function sonucKaydet(hiz,anlamaOrani,dogru,toplam){
   try{
     await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans',{
       method:'POST',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      headers:oturumHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
       body:JSON.stringify({
         kullanici_adi:ogrenci.kullanici_adi,
         asama,gun,
@@ -591,11 +601,7 @@ async function sonucKaydet(hiz,anlamaOrani,dogru,toplam){
       })
     });
     // Öğrencinin okuma hızını güncelle
-    await fetch(SUPABASE_URL+'/rest/v1/kullanicilar?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi),{
-      method:'PATCH',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({okuma_hizi:hiz,mevcut_gun:gun+1})
-    });
+    await rpc('ogrenci_ilerleme_guncelle',{p_okuma_hizi:hiz,p_mevcut_gun:gun+1});
   }catch(e){}
 }
 
@@ -614,7 +620,7 @@ async function yolculukYukle(){
   let performans = {};
   try {
     const res = await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi)+'&asama=eq.'+(ogrenci.asama||1),{
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+      headers:oturumHeaders()
     });
     const data = await res.json();
     data.forEach(d=>{ performans[d.gun]=d; });
