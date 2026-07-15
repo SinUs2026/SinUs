@@ -161,7 +161,7 @@ tr:hover td{background:#f8fafc}
       <ul class="alt-menu" id="hikayeler-alt">
         <li><a href="#" onclick="sayfaGoster('olcum-metinleri',this)">📏 Ölçüm Metinleri</a></li>
         <li><a href="#" onclick="sayfaGoster('ders-metinleri',this)">📖 Ders Metinleri</a></li>
-        <li><a href="#" onclick="sayfaGoster('hikayeler',this)">📚 Aşama/Seviye Metinleri</a></li>
+        <li><a href="#" onclick="sayfaGoster('hikayeler',this)">📚 Seviye Metinleri</a></li>
       </ul>
     </li>
     <li><a href="#" onclick="sayfaGoster('blog',this)"><span class="ikon">📝</span> Blog Yazıları</a></li>
@@ -251,10 +251,10 @@ tr:hover td{background:#f8fafc}
 
   <!-- HİKAYELER (Aşama/Seviye Metinleri) -->
   <div id="sayfa-hikayeler" class="sayfa">
-    <div class="ust-bar"><div><h1>Aşama / Seviye Metinleri</h1><p>Egzersiz metinlerini aşama ve güne göre yükleyin.</p></div><button class="yeni-btn" onclick="modalAc('hikaye')">+ Yeni Hikâye Ekle</button></div>
+    <div class="ust-bar"><div><h1>Seviye Metinleri</h1><p>Egzersiz metinlerini seviye ve güne göre yükleyin.</p></div><button class="yeni-btn" onclick="modalAc('hikaye')">+ Yeni Hikâye Ekle</button></div>
     <div class="kart" style="padding:1rem 1.5rem">
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
-        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Aşama:</label>
+        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Seviye:</label>
           <select id="filtre-asama" onchange="hikayeleriYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
             <option value="">Tümü</option><option value="2">Seviye-1</option><option value="3">Seviye-2</option><option value="4">Seviye-3</option>
           </select></div>
@@ -759,7 +759,7 @@ function asamaSayfasiAc(asamaNo,link){
 
   sayfa.innerHTML=`
     <div class="ust-bar">
-      <div><h1>${SEVIYE_ADI[asamaNo]||asamaNo+'. Aşama'}</h1><p>Günlere göre programı düzenleyin. Bir güne tıklayarak içeriğini görüntüleyip düzenleyebilirsiniz.</p></div>
+      <div><h1>${SEVIYE_ADI[asamaNo]||asamaNo+'. Seviye'}</h1><p>Günlere göre programı düzenleyin. Bir güne tıklayarak içeriğini görüntüleyip düzenleyebilirsiniz.</p></div>
     </div>
     <div class="kart">
       <div class="kart-baslik" style="margin-bottom:1rem">📅 30 Günlük Program</div>
@@ -914,11 +914,11 @@ async function ogrencileriYukle(){
 function ogrenciTablosuOlustur(ogrenciler,liste){
   if(!ogrenciler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz öğrenci yok.</div>';return;}
   const renkler={1:'a1',2:'a2',3:'a3',4:'a4'};
-  liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Aşama</th><th>Gün</th><th>Enerji</th><th>Durum</th></tr></thead><tbody></tbody></table>';
+  liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Durum</th></tr></thead><tbody></tbody></table>';
   const tbody=liste.querySelector('tbody');
   ogrenciler.forEach(o=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Aşama ⚠️'}</span></td><td>${o.mevcut_gun||1}/30</td><td>⚡ ${o.enerji||0}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>`;
+    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye ⚠️'}</span></td><td>${o.mevcut_gun||1}/30</td><td>⚡ ${o.enerji||0}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1029,12 +1029,12 @@ async function hikayeleriYukle(){
     document.getElementById('hikaye-sayac').textContent=hikayeler.length+' hikâye';
     if(!hikayeler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz hikâye eklenmemiş.</div>';return;}
     const renkler={'1':'a1','2':'a2','3':'a3','4':'a4'};
-    liste.innerHTML='<table><thead><tr><th>Aşama</th><th>Gün</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="hikaye-tbody"></tbody></table>';
+    liste.innerHTML='<table><thead><tr><th>Seviye</th><th>Gün</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="hikaye-tbody"></tbody></table>';
     const tbody=document.getElementById('hikaye-tbody');
     hikayeler.forEach(h=>{
       const tarih=h.created_at?new Date(h.created_at).toLocaleDateString('tr-TR'):'-';
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td><span class="asama-badge ${renkler[h.asama]}">${SEVIYE_ADI[h.asama]||h.asama+'. Aşama ⚠️'}</span></td><td>${h.gun}. Gün</td><td><strong>${h.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${h.metin.substring(0,100)}...</div></td><td>${h.kelime_sayisi||'-'}</td><td>${tarih}</td><td><button class="islem-btn sil" onclick="hikayeSil(${h.id})">🗑️ Sil</button></td>`;
+      tr.innerHTML=`<td><span class="asama-badge ${renkler[h.asama]}">${SEVIYE_ADI[h.asama]||h.asama+'. Seviye ⚠️'}</span></td><td>${h.gun}. Gün</td><td><strong>${h.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${h.metin.substring(0,100)}...</div></td><td>${h.kelime_sayisi||'-'}</td><td>${tarih}</td><td><button class="islem-btn sil" onclick="hikayeSil(${h.id})">🗑️ Sil</button></td>`;
       tbody.appendChild(tr);
     });
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
