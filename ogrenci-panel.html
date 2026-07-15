@@ -382,6 +382,7 @@ function gorevUrl(g){
     if(g.sure!==undefined && g.sure!==null) url+='&sure='+g.sure;
     if(g.metin_id!==undefined && g.metin_id!==null) url+='&metin_id='+g.metin_id;
     if(g.tema!==undefined && g.tema!==null) url+='&tema='+encodeURIComponent(g.tema);
+    if(g.sekil!==undefined && g.sekil!==null) url+='&sekil='+encodeURIComponent(g.sekil);
   }
   return url;
 }
