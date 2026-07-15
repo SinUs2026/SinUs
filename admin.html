@@ -366,12 +366,12 @@ tr:hover td{background:#f8fafc}
   <div class="modal-kutu">
     <div class="modal-baslik">➕ Yeni Öğrenci Ekle</div>
     <div class="form-grid">
-      <div class="form-grup"><label>Ad</label><input type="text" id="og-ad" placeholder="Öğrencinin adı"></div>
-      <div class="form-grup"><label>Soyad</label><input type="text" id="og-soyad" placeholder="Öğrencinin soyadı"></div>
+      <div class="form-grup"><label>Ad</label><input type="text" id="og-ad" placeholder="Öğrencinin adı" oninput="otomatikDoldur('og')"></div>
+      <div class="form-grup"><label>Soyad</label><input type="text" id="og-soyad" placeholder="Öğrencinin soyadı" oninput="otomatikDoldur('og')"></div>
     </div>
     <div class="form-grid">
-      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="og-kullanici" placeholder="kullanici_adi"></div>
-      <div class="form-grup"><label>Şifre</label><input type="password" id="og-sifre" placeholder="Şifre belirle"></div>
+      <div class="form-grup"><label>Kullanıcı Adı <span style="font-weight:400;color:#94a3b8">(otomatik önerilir, değiştirebilirsiniz)</span></label><input type="text" id="og-kullanici" placeholder="Ad/soyad girince otomatik dolar" oninput="alanKirlendi('og-kullanici')"></div>
+      <div class="form-grup"><label>Şifre <span style="font-weight:400;color:#94a3b8">(otomatik önerilir)</span></label><input type="text" id="og-sifre" placeholder="Ad girince otomatik dolar" oninput="alanKirlendi('og-sifre')"></div>
     </div>
     <div class="form-grid">
       <div class="form-grup"><label>Seviye</label><select id="og-asama"><option value="2">Seviye-1 – Akıcı Okuma</option><option value="3">Seviye-2 – Hız + Anlama</option><option value="4">Seviye-3 – Sınav Odaklı</option></select></div>
@@ -386,12 +386,12 @@ tr:hover td{background:#f8fafc}
   <div class="modal-kutu">
     <div class="modal-baslik">➕ Yeni Öğretmen Ekle</div>
     <div class="form-grid">
-      <div class="form-grup"><label>Ad</label><input type="text" id="ogr-ad" placeholder="Öğretmenin adı"></div>
-      <div class="form-grup"><label>Soyad</label><input type="text" id="ogr-soyad" placeholder="Öğretmenin soyadı"></div>
+      <div class="form-grup"><label>Ad</label><input type="text" id="ogr-ad" placeholder="Öğretmenin adı" oninput="otomatikDoldur('ogr')"></div>
+      <div class="form-grup"><label>Soyad</label><input type="text" id="ogr-soyad" placeholder="Öğretmenin soyadı" oninput="otomatikDoldur('ogr')"></div>
     </div>
     <div class="form-grid">
-      <div class="form-grup"><label>Kullanıcı Adı</label><input type="text" id="ogr-kullanici" placeholder="kullanici_adi"></div>
-      <div class="form-grup"><label>Şifre</label><input type="password" id="ogr-sifre" placeholder="Şifre belirle"></div>
+      <div class="form-grup"><label>Kullanıcı Adı <span style="font-weight:400;color:#94a3b8">(otomatik önerilir)</span></label><input type="text" id="ogr-kullanici" placeholder="Ad/soyad girince otomatik dolar" oninput="alanKirlendi('ogr-kullanici')"></div>
+      <div class="form-grup"><label>Şifre <span style="font-weight:400;color:#94a3b8">(otomatik önerilir)</span></label><input type="text" id="ogr-sifre" placeholder="Ad girince otomatik dolar" oninput="alanKirlendi('ogr-sifre')"></div>
     </div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ogretmen')">İptal</button><button class="btn-kaydet" id="btn-ogretmen-kaydet" onclick="ogretmenKaydet()">💾 Kaydet</button></div>
   </div>
@@ -825,7 +825,45 @@ async function gunIcerigiYukle(asamaNo,gun){
 }
 
 // ── MODAL YÖNETİMİ ──
-function modalAc(tip){document.getElementById('modal-'+tip).classList.add('acik');}
+const _kirliAlanlar={};
+function alanKirlendi(id){_kirliAlanlar[id]=true;}
+
+function slugify(s){
+  return (s||'').toLowerCase().trim()
+    .replace(/ı/g,'i').replace(/i̇/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g')
+    .replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c')
+    .replace(/[^a-z0-9]/g,'');
+}
+
+// prefix: 'og' (öğrenci) veya 'ogr' (öğretmen) — ilgili formun ad/soyad alanlarından
+// kullanıcı_adi ve şifre önerisi üretir. Admin/öğretmen zaten manuel değiştirmişse dokunmaz.
+function otomatikDoldur(prefix){
+  const ad=document.getElementById(prefix+'-ad').value;
+  const soyad=document.getElementById(prefix+'-soyad').value;
+  const kullaniciEl=document.getElementById(prefix+'-kullanici');
+  const sifreEl=document.getElementById(prefix+'-sifre');
+  if(!_kirliAlanlar[prefix+'-kullanici']){
+    kullaniciEl.value = slugify(ad)+slugify(soyad)+'@sinus';
+  }
+  if(!_kirliAlanlar[prefix+'-sifre']){
+    sifreEl.value = slugify(ad)+'1234';
+  }
+}
+
+function formSifirla(prefix){
+  ['ad','soyad','kullanici','sifre'].forEach(k=>{
+    const el=document.getElementById(prefix+'-'+k);
+    if(el) el.value='';
+  });
+  delete _kirliAlanlar[prefix+'-kullanici'];
+  delete _kirliAlanlar[prefix+'-sifre'];
+}
+
+function modalAc(tip){
+  if(tip==='ogrenci') formSifirla('og');
+  if(tip==='ogretmen') formSifirla('ogr');
+  document.getElementById('modal-'+tip).classList.add('acik');
+}
 let soruSayaci=0;
 function soruEkle(listeId){
   const liste=document.getElementById(listeId);
@@ -914,11 +952,11 @@ async function ogrencileriYukle(){
 function ogrenciTablosuOlustur(ogrenciler,liste){
   if(!ogrenciler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz öğrenci yok.</div>';return;}
   const renkler={1:'a1',2:'a2',3:'a3',4:'a4'};
-  liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Durum</th></tr></thead><tbody></tbody></table>';
+  liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Durum</th><th>İşlem</th></tr></thead><tbody></tbody></table>';
   const tbody=liste.querySelector('tbody');
   ogrenciler.forEach(o=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye ⚠️'}</span></td><td>${o.mevcut_gun||1}/30</td><td>⚡ ${o.enerji||0}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>`;
+    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye ⚠️'}</span></td><td>${o.mevcut_gun||1}/30</td><td>⚡ ${o.enerji||0}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -966,26 +1004,90 @@ async function ogretmenleriYukle(){
 }
 function ogretmenAra(q){clearTimeout(window._ogretmenAraTimer);window._ogretmenAraTimer=setTimeout(()=>ogretmenleriYukle(),400);}
 
-// ── ŞİFRE İŞLEMLERİ ──
+// ── ŞİFRE İŞLEMLERİ (Kurum/Öğretmen/Öğrenci gruplu, şifre görünür) ──
+function sifreSatiriOlustur(k,tip){
+  const isim = tip==='kurum' ? (k.kurum_adi||'') : ((k.ad||'')+' '+(k.soyad||''));
+  return `<tr>
+    <td><strong>${isim}</strong></td>
+    <td>${k.kullanici_adi||'-'}</td>
+    <td><code style="background:#f1f5f9;padding:0.2rem 0.5rem;border-radius:6px;font-size:0.82rem">${k.sifre||'—'}</code></td>
+    <td><input type="text" id="yenisifre-${tip}-${k.id}" placeholder="Yeni şifre" style="padding:0.4rem 0.6rem;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.82rem;width:130px"></td>
+    <td style="white-space:nowrap">
+      <button class="islem-btn duzenle" onclick="sifreGuncelleGenel('${tip}',${k.id})">🔑 Güncelle</button>
+      <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSilGenel('${tip}',${k.id})">Sil</button>
+    </td>
+  </tr>`;
+}
+
+function sifreGrupTablosu(baslik,liste,tip){
+  if(!liste.length) return `<div class="kart-baslik" style="margin:1rem 0 0.5rem">${baslik} (0)</div><div class="bos-durum">Kayıt yok.</div>`;
+  return `<div class="kart-baslik" style="margin:1rem 0 0.5rem">${baslik} (${liste.length})</div>
+    <table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Mevcut Şifre</th><th>Yeni Şifre</th><th>İşlem</th></tr></thead>
+    <tbody>${liste.map(k=>sifreSatiriOlustur(k,tip)).join('')}</tbody></table>`;
+}
+
+async function sifreIslemleriYukle(){
+  const liste=document.getElementById('sifre-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  try{
+    const [kurumlar,ogretmenler,ogrenciler]=await Promise.all([
+      rpc('kurumlar_listele',{}),
+      rpc('kullanicilar_listele',{p_rol:'ogretmen',p_limit:200}),
+      rpc('kullanicilar_listele',{p_rol:'ogrenci',p_limit:200})
+    ]);
+    liste.innerHTML=
+      sifreGrupTablosu('🏢 Kurumlar',kurumlar,'kurum')+
+      sifreGrupTablosu('👨‍🏫 Öğretmenler',ogretmenler,'ogretmen')+
+      sifreGrupTablosu('🎓 Öğrenciler',ogrenciler,'ogrenci');
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
 let sifreAramaZamanlayici=null;
 function sifreKullaniciAra(q){
   clearTimeout(sifreAramaZamanlayici);
+  if(!q.trim()){sifreIslemleriYukle();return;}
   const liste=document.getElementById('sifre-liste');
-  if(!q.trim()){liste.innerHTML='<div class="bos-durum">Bir kullanıcı aramak için yukarıdaki kutuyu kullanın.</div>';return;}
   liste.innerHTML='<div class="bos-durum">⏳ Aranıyor...</div>';
   sifreAramaZamanlayici=setTimeout(async()=>{
     try{
-      const kullanicilar=await rpc('kullanicilar_listele',{p_arama:q,p_limit:20});
-      if(!kullanicilar.length){liste.innerHTML='<div class="bos-durum">📭 Kullanıcı bulunamadı.</div>';return;}
-      liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Rol</th><th>Yeni Şifre</th><th>İşlem</th></tr></thead><tbody></tbody></table>';
-      const tbody=liste.querySelector('tbody');
-      kullanicilar.forEach(k=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td><strong>${k.ad||''} ${k.soyad||''}</strong></td><td>${k.kullanici_adi}</td><td>${k.rol}</td><td><input type="text" id="yenisifre-${k.id}" placeholder="Yeni şifre" style="padding:0.4rem 0.6rem;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.82rem;width:140px"></td><td><button class="islem-btn duzenle" onclick="sifreGuncelle(${k.id})">🔑 Güncelle</button></td>`;
-        tbody.appendChild(tr);
-      });
+      const [kurumlar,kullanicilar]=await Promise.all([
+        rpc('kurumlar_listele',{p_arama:q}),
+        rpc('kullanicilar_listele',{p_arama:q,p_limit:30})
+      ]);
+      const ogretmenler=kullanicilar.filter(k=>k.rol==='ogretmen');
+      const ogrenciler=kullanicilar.filter(k=>k.rol==='ogrenci');
+      if(!kurumlar.length && !ogretmenler.length && !ogrenciler.length){
+        liste.innerHTML='<div class="bos-durum">📭 Kullanıcı bulunamadı.</div>';return;
+      }
+      liste.innerHTML=
+        sifreGrupTablosu('🏢 Kurumlar',kurumlar,'kurum')+
+        sifreGrupTablosu('👨‍🏫 Öğretmenler',ogretmenler,'ogretmen')+
+        sifreGrupTablosu('🎓 Öğrenciler',ogrenciler,'ogrenci');
     }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
   },400);
+}
+
+async function sifreGuncelleGenel(tip,id){
+  const el=document.getElementById('yenisifre-'+tip+'-'+id);
+  const yeni=el.value.trim();
+  if(!yeni){bildirimGoster('⚠️ Yeni şifre boş olamaz!','hata');return;}
+  try{
+    if(tip==='kurum'){ await rpc('kurum_sifre_guncelle',{p_id:id,p_yeni_sifre:yeni}); }
+    else{ await rpc('kullanici_sifre_guncelle',{p_id:id,p_yeni_sifre:yeni}); }
+    bildirimGoster('✅ Şifre güncellendi!','basari');
+    el.value='';
+    sifreIslemleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function kullaniciSilGenel(tip,id){
+  if(!confirm('Bu kaydı silmek istediğinize emin misiniz?'))return;
+  try{
+    if(tip==='kurum'){ await rpc('kurum_sil',{p_id:id}); }
+    else{ await rpc('kullanici_sil',{p_id:id}); }
+    bildirimGoster('🗑️ Silindi.','basari');
+    sifreIslemleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 async function sifreGuncelle(id){
   const yeni=document.getElementById('yenisifre-'+id).value.trim();
@@ -1224,50 +1326,7 @@ async function dersMetinleriYukle(){
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
 
-// ── ŞİFRE İŞLEMLERİ ──
-async function sifreIslemleriYukle(aramaMetni=''){
-  const liste=document.getElementById('sifre-liste');
-  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
-  try{
-    let filtre='order=created_at.desc&limit=20';
-    if(aramaMetni) filtre=`kullanici_adi=ilike.*${aramaMetni}*&order=created_at.desc&limit=20`;
-    const kullanicilar=await supabase('GET','kullanicilar',null,filtre);
-    if(!kullanicilar.length){liste.innerHTML='<div class="bos-durum">Kullanıcı bulunamadı.</div>';return;}
-    const bugun=new Date();
-    liste.innerHTML=`<table>
-      <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Rol</th><th>Telefon</th><th>İl / İlçe</th><th>Lisans Başlangıç</th><th>Kalan Süre</th><th>Durum</th><th>İşlem</th></tr></thead>
-      <tbody>${kullanicilar.map(k=>{
-        let kalanGun='-';
-        if(k.lisans_bitis){
-          const fark=Math.ceil((new Date(k.lisans_bitis)-bugun)/(1000*60*60*24));
-          kalanGun=fark>0?fark+' gün':'<span style="color:#dc2626">Süresi doldu</span>';
-        }
-        const rolRenk=k.rol==='admin'?'#7c3aed':k.rol==='ogretmen'?'#2563a8':'#16a34a';
-        const rolAd=k.rol==='admin'?'Admin':k.rol==='ogretmen'?'Öğretmen':'Öğrenci';
-        return `<tr>
-          <td><strong>${k.ad||''} ${k.soyad||''}</strong></td>
-          <td>${k.kullanici_adi}</td>
-          <td><span style="background:${rolRenk};color:white;padding:2px 8px;border-radius:4px;font-size:0.75rem">${rolAd}</span></td>
-          <td>${k.telefon||'-'}</td>
-          <td>${k.il||'-'} / ${k.ilce||'-'}</td>
-          <td>${k.lisans_baslangic||'-'}</td>
-          <td>${kalanGun}</td>
-          <td><span class="durum ${k.aktif?'aktif':'pasif'}">${k.aktif?'● Aktif':'● Pasif'}</span></td>
-          <td>
-            <button class="islem-btn duzenle" onclick="sifreDuzenle(${k.id})">Düzenle</button>
-            <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${k.id},'${k.kullanici_adi}')">Şifre</button>
-            <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${k.id})">Sil</button>
-          </td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>`;
-  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
-}
-
-function sifreAra(deger){
-  clearTimeout(window._sifreAraTimer);
-  window._sifreAraTimer=setTimeout(()=>sifreIslemleriYukle(deger),400);
-}
+// ── ŞİFRE İŞLEMLERİ (yukarıda tanımlandı, sifreIslemleriYukle/sifreKullaniciAra) ──
 
 async function kullaniciSifreSifirla(id,kullanici){
   const yeniSifre=prompt(`"${kullanici}" için yeni şifre girin:`);
