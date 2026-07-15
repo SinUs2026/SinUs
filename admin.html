@@ -189,6 +189,7 @@ tr:hover td{background:#f8fafc}
     <div class="sidebar-alt2">Sistem</div>
     <li><a href="#" onclick="sayfaGoster('odemeler',this)"><span class="ikon">💳</span> Ödemeler</a></li>
     <li><a href="#" onclick="sayfaGoster('sifre-islemleri',this)"><span class="ikon">🔑</span> Şifre İşlemleri</a></li>
+    <li><a href="#" onclick="cikisYapAdmin()"><span class="ikon">🚪</span> Çıkış Yap</a></li>
     <li><a href="index.html"><span class="ikon">🌐</span> Siteye Dön</a></li>
   </ul>
 </div>
@@ -562,7 +563,8 @@ tr:hover td{background:#f8fafc}
 (function(){
   var k=sessionStorage.getItem('sinus_kullanici_adi');
   var r=sessionStorage.getItem('sinus_kullanici_rol');
-  if(!k||r!=='admin'){
+  var t=sessionStorage.getItem('sinus_oturum_token');
+  if(!k||r!=='admin'||!t){
     window.location.href='admin-giris.html';
   }
 })();
@@ -606,12 +608,34 @@ const KATEGORI_AD={okuma:'Okuma Tekniği',goz:'Göz Kası',odak:'Dikkat & Odak'}
 const KATEGORI_IKON={okuma:'📜',goz:'👁️',odak:'🎯'};
 const KATEGORI_BASLIK={okuma:'Okuma Teknikleri',goz:'Göz Egzersizleri',odak:'Odak Çalışmaları'};
 
+function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
+
 async function supabase(metod,tablo,veri,filtre){
   let url=SUPABASE_URL+'/rest/v1/'+tablo;
   if(filtre) url+='?'+filtre;
-  const res=await fetch(url,{method:metod,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':(metod==='POST'||metod==='PATCH')?'return=representation':''},body:veri?JSON.stringify(veri):undefined});
+  const res=await fetch(url,{method:metod,headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','X-Oturum-Token':oturumToken(),'Prefer':(metod==='POST'||metod==='PATCH')?'return=representation':''},body:veri?JSON.stringify(veri):undefined});
   if(!res.ok){const h=await res.json();throw new Error(h.message||'Hata');}
   return metod==='DELETE'?true:res.json();
+}
+
+// ── RPC ÇAĞRISI (kullanicilar / kurumlar işlemleri için) ──
+async function rpc(fonksiyon,params){
+  const gonderilecek=Object.assign({p_token:oturumToken()},params||{});
+  const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+fonksiyon,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(gonderilecek)
+  });
+  if(!res.ok){const h=await res.json().catch(()=>({}));throw new Error(h.message||'Hata');}
+  return res.json();
+}
+
+function cikisYapAdmin(){
+  const t=oturumToken();
+  if(t){fetch(SUPABASE_URL+'/rest/v1/rpc/oturum_kapat',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_token:t})}).catch(()=>{});}
+  sessionStorage.clear();
+  localStorage.removeItem('sinus_kullanici_obj');
+  window.location.href='giris.html';
 }
 
 // ── MOBİL MENÜ ──
@@ -874,7 +898,7 @@ async function ogrenciKaydet(){
   if(!ad||!kullanici||!sifre){bildirimGoster('⚠️ Ad, kullanıcı adı ve şifre zorunlu!','hata');return;}
   const btn=document.getElementById('btn-ogrenci-kaydet');btn.textContent='⏳ Kaydediliyor...';
   try{
-    await supabase('POST','kullanicilar',{ad,soyad,kullanici_adi:kullanici,sifre,rol:'ogrenci',asama,mevcut_gun:1,enerji:0,aktif:true});
+    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogrenci',p_asama:asama});
     bildirimGoster('✅ Öğrenci eklendi!','basari');modalKapat('ogrenci');ogrencileriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
@@ -883,7 +907,7 @@ async function ogrencileriYukle(){
   const liste=document.getElementById('ogrenciler-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
   try{
-    const ogrenciler=await supabase('GET','kullanicilar',null,'rol=eq.ogrenci&order=id.desc&limit=50');
+    const ogrenciler=await rpc('kullanicilar_listele',{p_rol:'ogrenci',p_limit:50});
     ogrenciTablosuOlustur(ogrenciler,liste);
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
@@ -906,7 +930,7 @@ function ogrenciAra(q){
   liste.innerHTML='<div class="bos-durum">⏳ Aranıyor...</div>';
   ogrenciAramaZamanlayici=setTimeout(async()=>{
     try{
-      const ogrenciler=await supabase('GET','kullanicilar',null,'rol=eq.ogrenci&or=(ad.ilike.*'+encodeURIComponent(q)+'*,soyad.ilike.*'+encodeURIComponent(q)+'*,kullanici_adi.ilike.*'+encodeURIComponent(q)+'*)&limit=50');
+      const ogrenciler=await rpc('kullanicilar_listele',{p_rol:'ogrenci',p_arama:q,p_limit:50});
       ogrenciTablosuOlustur(ogrenciler,liste);
     }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
   },400);
@@ -921,7 +945,7 @@ async function ogretmenKaydet(){
   if(!ad||!kullanici||!sifre){bildirimGoster('⚠️ Ad, kullanıcı adı ve şifre zorunlu!','hata');return;}
   const btn=document.getElementById('btn-ogretmen-kaydet');btn.textContent='⏳ Kaydediliyor...';
   try{
-    await supabase('POST','kullanicilar',{ad,soyad,kullanici_adi:kullanici,sifre,rol:'ogretmen',aktif:true});
+    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogretmen'});
     bildirimGoster('✅ Öğretmen eklendi!','basari');modalKapat('ogretmen');ogretmenleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
@@ -930,7 +954,7 @@ async function ogretmenleriYukle(){
   const liste=document.getElementById('ogretmenler-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
   try{
-    const ogretmenler=await supabase('GET','kullanicilar',null,'rol=eq.ogretmen&order=created_at.desc');
+    const ogretmenler=await rpc('kullanicilar_listele',{p_rol:'ogretmen',p_limit:200});
     if(!ogretmenler.length){liste.innerHTML='<div class="bos-durum">Henüz öğretmen eklenmemiş.</div>';return;}
     const bugun=new Date();
     liste.innerHTML=`<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Telefon</th><th>İl / İlçe</th><th>Lisans Başlangıç</th><th>Kalan Süre</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${ogretmenler.map(o=>{
@@ -951,7 +975,7 @@ function sifreKullaniciAra(q){
   liste.innerHTML='<div class="bos-durum">⏳ Aranıyor...</div>';
   sifreAramaZamanlayici=setTimeout(async()=>{
     try{
-      const kullanicilar=await supabase('GET','kullanicilar',null,'or=(ad.ilike.*'+encodeURIComponent(q)+'*,soyad.ilike.*'+encodeURIComponent(q)+'*,kullanici_adi.ilike.*'+encodeURIComponent(q)+'*)&limit=20');
+      const kullanicilar=await rpc('kullanicilar_listele',{p_arama:q,p_limit:20});
       if(!kullanicilar.length){liste.innerHTML='<div class="bos-durum">📭 Kullanıcı bulunamadı.</div>';return;}
       liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Rol</th><th>Yeni Şifre</th><th>İşlem</th></tr></thead><tbody></tbody></table>';
       const tbody=liste.querySelector('tbody');
@@ -967,7 +991,7 @@ async function sifreGuncelle(id){
   const yeni=document.getElementById('yenisifre-'+id).value.trim();
   if(!yeni){bildirimGoster('⚠️ Yeni şifre boş olamaz!','hata');return;}
   try{
-    await supabase('PATCH','kullanicilar',{sifre:yeni},'id=eq.'+id);
+    await rpc('kullanici_sifre_guncelle',{p_id:id,p_yeni_sifre:yeni});
     bildirimGoster('✅ Şifre güncellendi!','basari');
     document.getElementById('yenisifre-'+id).value='';
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
@@ -1249,14 +1273,14 @@ async function kullaniciSifreSifirla(id,kullanici){
   const yeniSifre=prompt(`"${kullanici}" için yeni şifre girin:`);
   if(!yeniSifre)return;
   try{
-    await supabase('PATCH','kullanicilar',{sifre:yeniSifre},'id=eq.'+id);
+    await rpc('kullanici_sifre_guncelle',{p_id:id,p_yeni_sifre:yeniSifre});
     bildirimGoster('✅ Şifre güncellendi!','basari');
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 
 async function sifreDuzenle(id){
   try{
-    const veri=await supabase('GET','kullanicilar',null,'id=eq.'+id);
+    const veri=await rpc('kullanici_getir',{p_id:id});
     const k=veri[0];
     document.getElementById('sd-id').value=k.id;
     document.getElementById('sd-ad').value=k.ad||'';
@@ -1284,7 +1308,7 @@ async function sifreDuzenleKaydet(){
     aktif:document.getElementById('sd-aktif').value==='true'
   };
   try{
-    await supabase('PATCH','kullanicilar',veri,'id=eq.'+id);
+    await rpc('kullanici_guncelle',{p_id:id,p_ad:veri.ad,p_soyad:veri.soyad,p_telefon:veri.telefon,p_il:veri.il,p_ilce:veri.ilce,p_lisans_baslangic:veri.lisans_baslangic,p_lisans_bitis:veri.lisans_bitis,p_aktif:veri.aktif});
     bildirimGoster('✅ Kullanıcı güncellendi!','basari');
     modalKapat('sifre-duzenle');
     sifreIslemleriYukle();
@@ -1294,7 +1318,7 @@ async function sifreDuzenleKaydet(){
 async function kullaniciSil(id){
   if(!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?'))return;
   try{
-    await supabase('DELETE','kullanicilar',null,'id=eq.'+id);
+    await rpc('kullanici_sil',{p_id:id});
     bildirimGoster('🗑️ Kullanıcı silindi.','basari');
     sifreIslemleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
@@ -1304,9 +1328,7 @@ async function kurumlarıYukle(aramaMetni=''){
   const liste=document.getElementById('kurumlar-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
   try{
-    let filtre='order=created_at.desc&limit=50';
-    if(aramaMetni) filtre+=`&or=(kurum_adi.ilike.*${aramaMetni}*,yetkili_ad.ilike.*${aramaMetni}*,kullanici_adi.ilike.*${aramaMetni}*)`;
-    const veri=await supabase('GET','kurumlar',null,filtre);
+    const veri=await rpc('kurumlar_listele',{p_arama:aramaMetni||null});
     document.getElementById('kurum-sayac').textContent=veri.length+' kurum';
     if(!veri.length){liste.innerHTML='<div class="bos-durum">Henüz kurum eklenmemiş.</div>';return;}
     liste.innerHTML=`<table><thead><tr><th>Kurum Adı</th><th>Yetkili</th><th>Telefon</th><th>İl / İlçe</th><th>Lisans Başlangıç</th><th>Lisans Bitiş</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${veri.map(k=>`<tr><td><strong>${k.kurum_adi}</strong></td><td>${k.yetkili_ad||'-'}</td><td>${k.telefon||'-'}</td><td>${k.il||'-'} / ${k.ilce||'-'}</td><td>${k.lisans_baslangic||'-'}</td><td>${k.lisans_bitis||'-'}</td><td><span class="durum ${k.aktif?'aktif':'pasif'}">${k.aktif?'● Aktif':'● Pasif'}</span></td><td><button class="islem-btn duzenle" onclick="kurumDuzenle(${k.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kurumSifreSifirla(${k.id},'${k.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kurumSil(${k.id})">Sil</button></td></tr>`).join('')}</tbody></table>`;
@@ -1326,15 +1348,15 @@ async function kurumKaydet(){
   if(!id&&!veri.sifre){bildirimGoster('⚠️ Şifre zorunlu!','hata');return;}
   const btn=document.getElementById('btn-kurum-kaydet');btn.textContent='⏳ Kaydediliyor...';
   try{
-    if(id){if(!veri.sifre)delete veri.sifre;await supabase('PATCH','kurumlar',veri,'id=eq.'+id);bildirimGoster('✅ Kurum güncellendi!','basari');}
-    else{await supabase('POST','kurumlar',veri);bildirimGoster('✅ Kurum eklendi!','basari');}
+    await rpc('kurum_kaydet',{p_id:id||null,p_kurum_adi:veri.kurum_adi,p_yetkili_ad:veri.yetkili_ad,p_kullanici_adi:veri.kullanici_adi,p_sifre:veri.sifre||null,p_telefon:veri.telefon,p_il:veri.il,p_ilce:veri.ilce,p_lisans_baslangic:veri.lisans_baslangic,p_lisans_bitis:veri.lisans_bitis,p_aktif:veri.aktif});
+    bildirimGoster(id?'✅ Kurum güncellendi!':'✅ Kurum eklendi!','basari');
     modalKapat('kurum');kurumlarıYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
 }
 async function kurumDuzenle(id){
   try{
-    const veri=await supabase('GET','kurumlar',null,'id=eq.'+id);const k=veri[0];
+    const veri=await rpc('kurum_getir',{p_id:id});const k=veri[0];
     document.getElementById('k-id').value=k.id;
     document.getElementById('kurum-modal-baslik').textContent='✏️ Kurum Düzenle';
     document.getElementById('k-kurum-adi').value=k.kurum_adi||'';
@@ -1353,12 +1375,12 @@ async function kurumDuzenle(id){
 async function kurumSifreSifirla(id,kullanici){
   const yeniSifre=prompt(`"${kullanici}" için yeni şifre girin:`);
   if(!yeniSifre)return;
-  try{await supabase('PATCH','kurumlar',{sifre:yeniSifre},'id=eq.'+id);bildirimGoster('✅ Şifre güncellendi!','basari');}
+  try{await rpc('kurum_sifre_guncelle',{p_id:id,p_yeni_sifre:yeniSifre});bildirimGoster('✅ Şifre güncellendi!','basari');}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 async function kurumSil(id){
   if(!confirm('Bu kurumu silmek istediğinize emin misiniz?'))return;
-  try{await supabase('DELETE','kurumlar',null,'id=eq.'+id);bildirimGoster('🗑️ Kurum silindi.','basari');kurumlarıYukle();}
+  try{await rpc('kurum_sil',{p_id:id});bildirimGoster('🗑️ Kurum silindi.','basari');kurumlarıYukle();}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 function ara(q){document.querySelectorAll('#tablo-govde tr').forEach(r=>{r.style.display=r.innerText.toLowerCase().includes(q.toLowerCase())?'':'none';});}
