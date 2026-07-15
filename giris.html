@@ -55,11 +55,14 @@ async function girisYap(){
   if(!k||!s){hata.innerText='Lütfen tüm alanları doldurun.';hata.style.display='block';return;}
   btn.disabled=true;btn.innerText='Kontrol ediliyor...';
   try{
-    var r=await fetch(SUPABASE_URL+'/rest/v1/rpc/giris_yap',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_kullanici_adi:k,p_sifre:s})});
+    var r=await fetch(SUPABASE_URL+'/rest/v1/rpc/oturum_baslat',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_kullanici_adi:k,p_sifre:s})});
     var d=await r.json();
     if(d&&d.length>0){
       var u=d[0];
       sessionStorage.setItem('sinus_kullanici',u.kullanici_adi);
+      sessionStorage.setItem('sinus_kullanici_adi',u.kullanici_adi);
+      sessionStorage.setItem('sinus_kullanici_rol',u.rol);
+      sessionStorage.setItem('sinus_oturum_token',u.oturum_token);
       localStorage.setItem('sinus_kullanici_obj',JSON.stringify(u));
       basari.innerText='Giriş başarılı! Yönlendiriliyorsunuz...';
       basari.style.display='block';
