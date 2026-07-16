@@ -30,32 +30,44 @@ body::before {
     radial-gradient(2px 2px at 55% 40%, rgba(0,212,255,0.15) 0%, transparent 100%);
 }
 
-#app { position:relative; z-index:1; max-width:700px; margin:0 auto; padding:16px; min-height:100vh; display:flex; flex-direction:column; }
+#app { position:relative; z-index:1; max-width:700px; margin:0 auto; padding:12px 16px; min-height:100vh; display:flex; flex-direction:column; }
 
-.header { display:flex; justify-content:space-between; align-items:center; padding:8px 0 16px; }
+.header { display:flex; justify-content:space-between; align-items:center; padding:4px 0 8px; }
 .logo { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; color:var(--accent); letter-spacing:3px; text-shadow:0 0 20px rgba(0,212,255,0.5); }
 .logo span { color:var(--white); }
 .score-pill { display:flex; align-items:center; gap:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:5px 14px; font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; color:var(--accent); }
 
 .screen { display:none; flex-direction:column; align-items:center; flex:1; }
 .screen.active { display:flex; }
+#screenMenu.active { justify-content:center; }
 .screen:not(.active) { pointer-events:none !important; visibility:hidden !important; }
 
-.game-title { font-family:'Orbitron',sans-serif; font-size:clamp(1.3rem,5vw,2rem); font-weight:900; text-align:center; margin:16px 0 6px; text-shadow:0 0 30px rgba(0,212,255,0.4); }
-.game-sub { color:var(--grey); font-size:0.8rem; letter-spacing:2px; text-align:center; margin-bottom:24px; }
-.menu-card { background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.15); border-radius:16px; padding:20px; width:100%; max-width:480px; margin-bottom:14px; }
-.menu-card h3 { font-family:'Orbitron',sans-serif; font-size:0.68rem; color:var(--accent); letter-spacing:2px; margin-bottom:14px; opacity:0.8; }
-.mod-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
-.mod-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:12px; padding:14px 10px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--grey); font-size:0.85rem; }
+.title-row { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:2px; }
+.game-title { font-family:'Orbitron',sans-serif; font-size:clamp(1.15rem,5vw,1.6rem); font-weight:900; text-align:center; text-shadow:0 0 30px rgba(0,212,255,0.4); }
+.info-btn { width:26px; height:26px; border-radius:50%; background:rgba(0,212,255,0.12); border:1px solid rgba(0,212,255,0.35); color:var(--accent); font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.info-btn:hover { background:rgba(0,212,255,0.22); }
+.game-sub { color:var(--grey); font-size:0.74rem; letter-spacing:2px; text-align:center; margin-bottom:12px; }
+.menu-card { background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.15); border-radius:14px; padding:14px 16px; width:100%; max-width:480px; margin-bottom:8px; }
+.menu-card h3 { font-family:'Orbitron',sans-serif; font-size:0.64rem; color:var(--accent); letter-spacing:2px; margin-bottom:10px; opacity:0.8; }
+.mod-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:0; }
+.mod-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:12px; padding:10px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--grey); font-size:0.85rem; }
 .mod-btn:hover, .mod-btn.sel { background:rgba(0,212,255,0.15); border-color:var(--accent); color:var(--white); box-shadow:0 0 12px rgba(0,212,255,0.2); }
-.mod-btn .mi { font-size:1.5rem; display:block; margin-bottom:6px; }
+.mod-btn .mi { font-size:1.3rem; display:block; margin-bottom:4px; }
 .asama-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-.asama-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:12px 6px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--grey); }
+.asama-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:9px 6px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--grey); }
 .asama-btn:hover, .asama-btn.sel { background:rgba(0,212,255,0.15); border-color:var(--accent); color:var(--white); }
 .asama-btn .as-n { font-family:'Orbitron',sans-serif; font-size:0.9rem; font-weight:700; color:var(--accent); display:block; margin-bottom:3px; }
-.asama-btn .as-d { font-size:0.65rem; line-height:1.4; }
-.start-btn { width:100%; max-width:480px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 24px rgba(0,212,255,0.3); }
+.asama-btn .as-d { font-size:0.62rem; line-height:1.3; }
+.start-btn { width:100%; max-width:480px; padding:14px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:0.95rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 24px rgba(0,212,255,0.3); margin-top:2px; }
 .start-btn:hover { transform:translateY(-2px); }
+
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.active { display:flex; }
+.modal-box { background:#0b1830; border:1px solid rgba(0,212,255,0.3); border-radius:18px; padding:22px 20px; max-width:420px; width:100%; position:relative; }
+.modal-close { position:absolute; top:10px; right:12px; background:none; border:none; color:var(--grey); font-size:1.3rem; cursor:pointer; line-height:1; }
+.modal-box h3 { font-family:'Orbitron',sans-serif; font-size:0.75rem; color:var(--accent); letter-spacing:2px; margin-bottom:14px; padding-right:20px; }
+.modal-box .icerik { font-size:0.85rem; color:var(--grey); line-height:1.8; }
+.modal-box .icerik strong { color:var(--white); }
 
 .kilitli-sure-pill { background:rgba(255,215,0,0.08); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px; padding:6px 14px; margin-bottom:10px; text-align:center; font-family:'Orbitron',sans-serif; font-size:0.8rem; font-weight:700; color:var(--gold); width:100%; max-width:480px; }
 
@@ -119,6 +131,7 @@ body::before {
 .btn-play { flex:1; max-width:200px; padding:13px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:12px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; cursor:pointer; }
 .btn-back { flex:1; max-width:160px; padding:13px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:12px; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.72rem; font-weight:700; cursor:pointer; }
 .btn-back:hover { background:rgba(255,255,255,0.1); color:var(--white); }
+@media(max-height:750px) { .menu-card{padding:10px 14px;margin-bottom:6px} .game-title{font-size:1.05rem} .game-sub{margin-bottom:8px} .start-btn{padding:12px} }
 </style>
 </head>
 <body>
@@ -130,8 +143,10 @@ body::before {
 
   <!-- MENÜ -->
   <div id="screenMenu" class="screen active">
-    <div style="font-size:2.5rem;margin-top:8px;margin-bottom:4px">👁️</div>
-    <div class="game-title">MERKEZ NOKTA</div>
+    <div class="title-row">
+      <div class="game-title">MERKEZ NOKTA</div>
+      <button class="info-btn" onclick="infoAc()" title="Nasıl Oynanır?">ⓘ</button>
+    </div>
     <div class="game-sub">PERİFERİK GÖRÜŞ EGZERSİZİ</div>
 
     <div class="menu-card" id="kartMod">
@@ -157,17 +172,6 @@ body::before {
         <div class="asama-btn" onclick="selAsama(2,this)"><span class="as-n">2</span><span class="as-d">Orta<br>1.2 sn</span></div>
         <div class="asama-btn" onclick="selAsama(3,this)"><span class="as-n">3</span><span class="as-d">Uzak<br>1 sn</span></div>
         <div class="asama-btn" onclick="selAsama(4,this)"><span class="as-n">4</span><span class="as-d">Çok Uzak<br>0.7 sn</span></div>
-      </div>
-    </div>
-
-    <div class="menu-card">
-      <h3>NASIL OYNANIR?</h3>
-      <div style="font-size:0.83rem;color:var(--grey);line-height:1.7">
-        👁️ Ortadaki mavi noktaya bak, gözünü <strong style="color:var(--white)">oradan ayırma</strong><br>
-        ⚡ Sağda veya solda kısa süreliğine bir değer belirir<br>
-        2️⃣ "Çift Taraf" modunda <strong style="color:var(--white)">aynı anda hem sağda hem solda</strong> farklı birer değer belirir, ikisini de hatırlaman gerekir<br>
-        🎯 Periferik görüşünle gördüğün değeri seç<br>
-        📈 Her doğruda mesafe artar
       </div>
     </div>
 
@@ -228,6 +232,21 @@ body::before {
   </div>
 </div>
 
+<!-- NASIL OYNANIR? MODAL -->
+<div class="modal-overlay" id="infoModal" onclick="if(event.target===this) infoKapat()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="infoKapat()">×</button>
+    <h3>NASIL OYNANIR?</h3>
+    <div class="icerik">
+      👁️ Ortadaki mavi noktaya bak, gözünü <strong>oradan ayırma</strong><br>
+      ⚡ Sağda veya solda kısa süreliğine bir değer belirir<br>
+      2️⃣ "Çift Taraf" modunda <strong>aynı anda hem sağda hem solda</strong> farklı birer değer belirir, ikisini de hatırlaman gerekir<br>
+      🎯 Periferik görüşünle gördüğün değeri seç<br>
+      📈 Her doğruda mesafe artar
+    </div>
+  </div>
+</div>
+
 <script>
 // ── PANELe DÖNÜŞ URL'İ + TAMAMLANMA SİNYALİ ──
 // (Önceden backBtn hiçbir sinyal göndermeden direkt yönlendiriyordu — düzeltildi.)
@@ -238,6 +257,9 @@ body::before {
     sinusTamamlandiSinyalGonderVeDon();
   });
 })();
+
+function infoAc(){ document.getElementById('infoModal').classList.add('active'); }
+function infoKapat(){ document.getElementById('infoModal').classList.remove('active'); }
 
 const ASAMALAR = {
   1: { mesafe:0.25, sure:1500, label:'Yakın' },
