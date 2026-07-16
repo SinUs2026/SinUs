@@ -14,20 +14,21 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--lacivert); font-family:'Nunito',sans-serif; color:var(--white); min-height:100vh; overflow-x:hidden; }
   body::before { content:''; position:fixed; inset:0; background-image: radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,0.6) 0%,transparent 100%), radial-gradient(1px 1px at 25% 40%,rgba(255,255,255,0.4) 0%,transparent 100%), radial-gradient(1px 1px at 40% 10%,rgba(255,255,255,0.5) 0%,transparent 100%), radial-gradient(1px 1px at 55% 70%,rgba(255,255,255,0.3) 0%,transparent 100%), radial-gradient(1px 1px at 70% 25%,rgba(255,255,255,0.6) 0%,transparent 100%), radial-gradient(1px 1px at 80% 55%,rgba(255,255,255,0.4) 0%,transparent 100%), radial-gradient(2px 2px at 35% 60%,rgba(0,212,255,0.3) 0%,transparent 100%); pointer-events:none; z-index:0; }
-  #app { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:16px; min-height:100vh; display:flex; flex-direction:column; }
-  .header { display:flex; justify-content:space-between; align-items:center; padding:12px 0 16px; }
+  #app { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:12px 16px; min-height:100vh; display:flex; flex-direction:column; }
+  .header { display:flex; justify-content:space-between; align-items:center; padding:4px 0 8px; }
   .logo { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:900; color:var(--accent); letter-spacing:3px; text-shadow:0 0 20px rgba(0,212,255,0.5); }
   .logo span { color:var(--white); }
   .score-display { display:flex; align-items:center; gap:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:6px 14px; font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; color:var(--accent); }
   .screen { display:none; flex-direction:column; align-items:center; flex:1; }
   .screen.active { display:flex; }
+  #screenMenu.active { justify-content:center; }
   .screen:not(.active) { pointer-events:none !important; visibility:hidden !important; }
-  .game-title { font-family:'Orbitron',sans-serif; font-size:clamp(1.4rem,5vw,2.2rem); font-weight:900; text-align:center; margin:24px 0 8px; color:var(--white); text-shadow:0 0 30px rgba(0,212,255,0.4); }
-  .game-subtitle { color:var(--grey); font-size:0.9rem; text-align:center; margin-bottom:32px; letter-spacing:1px; }
-  .menu-card { background:rgba(255,255,255,0.04); border:1px solid rgba(0,212,255,0.2); border-radius:16px; padding:24px; width:100%; max-width:480px; margin-bottom:16px; }
-  .menu-card h3 { font-family:'Orbitron',sans-serif; font-size:0.75rem; color:var(--accent); letter-spacing:2px; margin-bottom:16px; opacity:0.8; }
-  .level-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-  .level-btn { background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.25); border-radius:12px; padding:12px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--white); }
+  .game-title { font-family:'Orbitron',sans-serif; font-size:clamp(1.2rem,5vw,1.7rem); font-weight:900; text-align:center; margin:4px 0 4px; color:var(--white); text-shadow:0 0 30px rgba(0,212,255,0.4); }
+  .game-subtitle { color:var(--grey); font-size:0.78rem; text-align:center; margin-bottom:12px; letter-spacing:1px; }
+  .menu-card { background:rgba(255,255,255,0.04); border:1px solid rgba(0,212,255,0.2); border-radius:14px; padding:14px 16px; width:100%; max-width:480px; margin-bottom:10px; }
+  .menu-card h3 { font-family:'Orbitron',sans-serif; font-size:0.7rem; color:var(--accent); letter-spacing:2px; margin-bottom:10px; opacity:0.8; }
+  .level-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:0; }
+  .level-btn { background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.25); border-radius:12px; padding:9px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--white); }
   .level-btn:hover, .level-btn.selected { background:rgba(0,212,255,0.18); border-color:var(--accent); box-shadow:0 0 15px rgba(0,212,255,0.2); }
   .level-btn .lv-num { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; color:var(--accent); display:block; }
   .level-btn .lv-desc { font-size:0.72rem; color:var(--grey); margin-top:2px; }
@@ -104,6 +105,7 @@
   .geri-btn:hover { color:var(--white); }
   .kilitli-sure-bar { width:100%; max-width:480px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,215,0,0.3); border-radius:12px; padding:8px 14px; margin-bottom:14px; text-align:center; font-size:0.8rem; color:var(--gold); font-weight:700; }
   @media(max-width:480px) { .house-svg-wrap{height:200px} .house-svg{width:210px;height:180px} .dual-house-row{gap:8px} .dual-house-wrap{max-width:160px} }
+  @media(max-height:750px) { .menu-card{padding:10px 14px;margin-bottom:6px} .game-title{font-size:1.05rem} .game-subtitle{margin-bottom:8px} .start-btn{padding:12px} }
 </style>
 </head>
 <body>
@@ -129,9 +131,7 @@
     <div class="menu-card">
       <h3>OYUN MODU</h3>
       <div class="mod-grid">
-        <div class="mod-btn selected" data-mod="1" onclick="selectMod(1,this)"><span class="mod-icon">🏠</span>Evde Kaç Kişi?</div>
-        <div class="mod-btn" data-mod="2" onclick="selectMod(2,this)"><span class="mod-icon">➡️</span>Toplam Giren?</div>
-        <div class="mod-btn" data-mod="3" onclick="selectMod(3,this)"><span class="mod-icon">⬅️</span>Toplam Çıkan?</div>
+        <div class="mod-btn selected" data-mod="1" onclick="selectMod(1,this)"><span class="mod-icon">🏠</span>Tek Ev</div>
         <div class="mod-btn" data-mod="4" onclick="selectMod(4,this)"><span class="mod-icon">🏘️</span>Çift Ev</div>
       </div>
     </div>
@@ -370,9 +370,7 @@ function startGame(){
     document.getElementById('dualHouseWrap').style.display='none';
     const sc=generateScenario(cfg);
     S.steps=sc.steps; S.finalCount=sc.finalCount;
-    if(S.mod===1)S.answer=sc.finalCount;
-    else if(S.mod===2)S.answer=sc.steps.filter(s=>s.type==='enter').reduce((a,s)=>a+s.count,0);
-    else if(S.mod===3)S.answer=sc.steps.filter(s=>s.type==='exit').reduce((a,s)=>a+s.count,0);
+    S.answer=sc.finalCount;
   }
   runCountdown(3,()=>runSteps(cfg.animMs));
 }
@@ -390,7 +388,7 @@ function spawnPerson(container,isEnter,dur,delay){const fig=document.createEleme
 
 function updateWindowLights(){let inside=0;for(let i=0;i<S.currentStep;i++){const s=S.steps[i];if(s.type==='enter')inside+=s.count;else inside-=s.count;}inside=Math.max(0,inside);const lit=inside>0;const w1=document.getElementById('win1');const w2=document.getElementById('win2');if(w1)w1.classList.toggle('lit',lit);if(w2)w2.classList.toggle('lit',inside>2);}
 
-function showQuestion(){S.startTime=Date.now();showScreen('screenQuestion');document.getElementById('qLevel').textContent=S.level;document.getElementById('qScore').textContent=S.score;document.getElementById('qStreak').textContent=S.streak+' 🔥';if(S.mod===4){document.getElementById('singleQBox').style.display='none';document.getElementById('dualQBox').style.display='block';document.getElementById('dqLeft').value='';document.getElementById('dqRight').value='';}else{document.getElementById('singleQBox').style.display='block';document.getElementById('dualQBox').style.display='none';const texts={1:'Evde şu anda kaç kişi bulunmaktadır?',2:'Toplam kaç kişi eve girdi?',3:'Toplam kaç kişi evden çıktı?'};document.getElementById('questionText').textContent=texts[S.mod]||texts[1];if(S.answerMode==='choice'){document.getElementById('choicesGrid').style.display='grid';document.getElementById('numberInputWrap').style.display='none';buildChoices(S.answer);}else{document.getElementById('choicesGrid').style.display='none';document.getElementById('numberInputWrap').style.display='flex';document.getElementById('numberInput').value='';setTimeout(()=>document.getElementById('numberInput').focus(),100);}}}
+function showQuestion(){S.startTime=Date.now();showScreen('screenQuestion');document.getElementById('qLevel').textContent=S.level;document.getElementById('qScore').textContent=S.score;document.getElementById('qStreak').textContent=S.streak+' 🔥';if(S.mod===4){document.getElementById('singleQBox').style.display='none';document.getElementById('dualQBox').style.display='block';document.getElementById('dqLeft').value='';document.getElementById('dqRight').value='';}else{document.getElementById('singleQBox').style.display='block';document.getElementById('dualQBox').style.display='none';document.getElementById('questionText').textContent='Evde şu anda kaç kişi bulunmaktadır?';if(S.answerMode==='choice'){document.getElementById('choicesGrid').style.display='grid';document.getElementById('numberInputWrap').style.display='none';buildChoices(S.answer);}else{document.getElementById('choicesGrid').style.display='none';document.getElementById('numberInputWrap').style.display='flex';document.getElementById('numberInput').value='';setTimeout(()=>document.getElementById('numberInput').focus(),100);}}}
 
 function buildChoices(correct){const grid=document.getElementById('choicesGrid');grid.innerHTML='';const opts=new Set([correct]);while(opts.size<4){let w=correct+randInt(-4,4);if(w<0)w=0;opts.add(w);}const arr=shuffle([...opts]);arr.forEach(val=>{const btn=document.createElement('button');btn.className='choice-btn';btn.textContent=val;btn.onclick=()=>checkAnswer(val,correct,btn);grid.appendChild(btn);});}
 
