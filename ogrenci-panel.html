@@ -546,13 +546,29 @@ function hikayeEkraniGoster(){
 function okumayaBasla(){
   hikayeBaslangicZamani=Date.now();
   document.getElementById('gbOkuBtn').style.display='none';
-  document.getElementById('gbBitirBtn').style.display='block';
+  const btn=document.getElementById('gbBitirBtn');
+  btn.style.display='block';
+  // Yanlışlıkla anında tıklamayı önlemek için kısa bir bekleme (gerçek okuma
+  // süresi asla bu kadar kısa olamaz, bu sadece "çift tık" tipi kazaları önler)
+  btn.disabled=true;
+  const orijinalMetin=btn.textContent;
+  let kalan=3;
+  btn.textContent=`⏳ ${kalan}sn`;
+  const sayac=setInterval(()=>{
+    kalan--;
+    if(kalan<=0){ clearInterval(sayac); btn.disabled=false; btn.textContent=orijinalMetin; }
+    else{ btn.textContent=`⏳ ${kalan}sn`; }
+  },1000);
 }
 
 function okumayiBitir(){
   const sure=(Date.now()-hikayeBaslangicZamani)/1000/60; // dakika
   const kelime=mevcutHikaye.kelime_sayisi||100;
-  const hiz=Math.round(kelime/sure);
+  // Sistemin desteklediği azami okuma hızı 1000 kelime/dk'dır (bkz. egzersiz
+  // hız ölçekleri). Süre ölçümü ne kadar kısa olursa olsun, kaydedilen/gösterilen
+  // hız bu gerçekçi tavanın üzerine çıkamaz.
+  const hamHiz=Math.round(kelime/sure);
+  const hiz=Math.min(hamHiz,1000);
   document.getElementById('gbHizSonuc').textContent=hiz+' kelime/dakika';
   document.getElementById('gbEkran1').style.display='none';
   document.getElementById('gbEkran2').style.display='block';
