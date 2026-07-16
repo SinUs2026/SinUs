@@ -218,7 +218,8 @@ async function rpc(fonksiyon,params){
     body:JSON.stringify(gonderilecek)
   });
   if(!res.ok){const h=await res.json().catch(()=>({}));throw new Error(h.message||'Hata');}
-  return res.json();
+  const metin=await res.text();
+  return metin ? JSON.parse(metin) : null;
 }
 
 function oturumHeaders(ekstra){
