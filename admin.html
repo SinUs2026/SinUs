@@ -387,7 +387,16 @@ tr:hover td{background:#f8fafc}
       <div class="form-grup"><label>Kullanıcı Adı <span style="font-weight:400;color:#94a3b8">(otomatik önerilir)</span></label><input type="text" id="ogr-kullanici" placeholder="Ad/soyad girince otomatik dolar" oninput="alanKirlendi('ogr-kullanici')"></div>
       <div class="form-grup"><label>Şifre <span style="font-weight:400;color:#94a3b8">(otomatik önerilir)</span></label><input type="text" id="ogr-sifre" placeholder="Ad girince otomatik dolar" oninput="alanKirlendi('ogr-sifre')"></div>
     </div>
-    <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ogretmen')">İptal</button><button class="btn-kaydet" id="btn-ogretmen-kaydet" onclick="ogretmenKaydet()">💾 Kaydet</button></div>
+    <div class="form-grup">
+      <label>Lisans Süresi</label>
+      <div style="display:flex;gap:0.6rem" id="ogr-lisans-grup">
+        <button type="button" class="islem-btn lisans-sure-btn" data-ay="3" onclick="lisansSureSec(this,'ogr')" style="flex:1;padding:0.6rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer">3 Ay</button>
+        <button type="button" class="islem-btn lisans-sure-btn secili" data-ay="6" onclick="lisansSureSec(this,'ogr')" style="flex:1;padding:0.6rem;border:1.5px solid #2563a8;background:#eff6ff;color:#1d4ed8;border-radius:8px;cursor:pointer">6 Ay</button>
+        <button type="button" class="islem-btn lisans-sure-btn" data-ay="12" onclick="lisansSureSec(this,'ogr')" style="flex:1;padding:0.6rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer">12 Ay</button>
+      </div>
+      <div style="font-size:0.75rem;color:#94a3b8;margin-top:0.4rem" id="ogr-lisans-bilgi">Onayladığınız tarihten itibaren 6 ay geçerli olacak.</div>
+    </div>
+    <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ogretmen')">İptal</button><button class="btn-kaydet" id="btn-ogretmen-kaydet" onclick="ogretmenKaydet()">✅ Onayla ve Kaydet</button></div>
   </div>
 </div>
 
@@ -853,6 +862,17 @@ function formSifirla(prefix){
   });
   delete _kirliAlanlar[prefix+'-kullanici'];
   delete _kirliAlanlar[prefix+'-sifre'];
+  if(document.getElementById(prefix+'-lisans-grup')){
+    _secilenLisansAy[prefix]=6;
+    document.querySelectorAll('#'+prefix+'-lisans-grup .lisans-sure-btn').forEach(b=>{
+      const secili=b.dataset.ay==='6';
+      b.classList.toggle('secili',secili);
+      b.style.border=secili?'1.5px solid #2563a8':'1.5px solid #e2e8f0';
+      b.style.background=secili?'#eff6ff':'white';
+      b.style.color=secili?'#1d4ed8':'inherit';
+    });
+    document.getElementById(prefix+'-lisans-bilgi').textContent='Onayladığınız tarihten itibaren 6 ay geçerli olacak.';
+  }
 }
 
 function modalAc(tip){
@@ -971,18 +991,29 @@ function ogrenciAra(q){
 }
 
 // ── ÖĞRETMEN EKLE / LİSTE / ARA ──
+let _secilenLisansAy={ogr:6};
+function lisansSureSec(btn,prefix){
+  document.querySelectorAll('#'+prefix+'-lisans-grup .lisans-sure-btn').forEach(b=>{
+    b.classList.remove('secili');b.style.border='1.5px solid #e2e8f0';b.style.background='white';b.style.color='inherit';
+  });
+  btn.classList.add('secili');btn.style.border='1.5px solid #2563a8';btn.style.background='#eff6ff';btn.style.color='#1d4ed8';
+  _secilenLisansAy[prefix]=parseInt(btn.dataset.ay);
+  document.getElementById(prefix+'-lisans-bilgi').textContent='Onayladığınız tarihten itibaren '+btn.dataset.ay+' ay geçerli olacak.';
+}
+
 async function ogretmenKaydet(){
   const ad=document.getElementById('ogr-ad').value.trim();
   const soyad=document.getElementById('ogr-soyad').value.trim();
   const kullanici=document.getElementById('ogr-kullanici').value.trim();
   const sifre=document.getElementById('ogr-sifre').value;
+  const lisansAy=_secilenLisansAy.ogr||6;
   if(!ad||!kullanici||!sifre){bildirimGoster('⚠️ Ad, kullanıcı adı ve şifre zorunlu!','hata');return;}
   const btn=document.getElementById('btn-ogretmen-kaydet');btn.textContent='⏳ Kaydediliyor...';
   try{
-    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogretmen'});
-    bildirimGoster('✅ Öğretmen eklendi!','basari');modalKapat('ogretmen');ogretmenleriYukle();
+    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogretmen',p_lisans_ay:lisansAy});
+    bildirimGoster('✅ Öğretmen eklendi! Lisans '+lisansAy+' ay geçerli.','basari');modalKapat('ogretmen');ogretmenleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
-  btn.textContent='💾 Kaydet';
+  btn.textContent='✅ Onayla ve Kaydet';
 }
 async function ogretmenleriYukle(){
   const liste=document.getElementById('ogretmenler-liste');
