@@ -396,6 +396,18 @@ tr:hover td{background:#f8fafc}
       </div>
       <div style="font-size:0.75rem;color:#94a3b8;margin-top:0.4rem" id="ogr-lisans-bilgi">Onayladığınız tarihten itibaren 6 ay geçerli olacak.</div>
     </div>
+    <div class="form-grup">
+      <label>Öğrenci Kotası</label>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="ogr-kota-grup">
+        <button type="button" class="islem-btn kota-sec-btn" data-kota="5" onclick="kotaSec(this)" style="flex:1;min-width:60px;padding:0.6rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer">5</button>
+        <button type="button" class="islem-btn kota-sec-btn secili" data-kota="10" onclick="kotaSec(this)" style="flex:1;min-width:60px;padding:0.6rem;border:1.5px solid #2563a8;background:#eff6ff;color:#1d4ed8;border-radius:8px;cursor:pointer">10</button>
+        <button type="button" class="islem-btn kota-sec-btn" data-kota="30" onclick="kotaSec(this)" style="flex:1;min-width:60px;padding:0.6rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer">30</button>
+        <button type="button" class="islem-btn kota-sec-btn" data-kota="50" onclick="kotaSec(this)" style="flex:1;min-width:60px;padding:0.6rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer">50</button>
+        <button type="button" class="islem-btn kota-sec-btn" data-kota="100" onclick="kotaSec(this)" style="flex:1;min-width:60px;padding:0.6rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer">100</button>
+        <button type="button" class="islem-btn kota-sec-btn" data-kota="250" onclick="kotaSec(this)" style="flex:1;min-width:60px;padding:0.6rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer">250</button>
+      </div>
+      <div style="font-size:0.75rem;color:#94a3b8;margin-top:0.4rem" id="ogr-kota-bilgi">Öğretmen 10 öğrenci için şifre tanımlayabilecek.</div>
+    </div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ogretmen')">İptal</button><button class="btn-kaydet" id="btn-ogretmen-kaydet" onclick="ogretmenKaydet()">✅ Onayla ve Kaydet</button></div>
   </div>
 </div>
@@ -873,6 +885,17 @@ function formSifirla(prefix){
     });
     document.getElementById(prefix+'-lisans-bilgi').textContent='Onayladığınız tarihten itibaren 6 ay geçerli olacak.';
   }
+  if(document.getElementById(prefix+'-kota-grup')){
+    _secilenKota=10;
+    document.querySelectorAll('#'+prefix+'-kota-grup .kota-sec-btn').forEach(b=>{
+      const secili=b.dataset.kota==='10';
+      b.classList.toggle('secili',secili);
+      b.style.border=secili?'1.5px solid #2563a8':'1.5px solid #e2e8f0';
+      b.style.background=secili?'#eff6ff':'white';
+      b.style.color=secili?'#1d4ed8':'inherit';
+    });
+    document.getElementById(prefix+'-kota-bilgi').textContent='Öğretmen 10 öğrenci için şifre tanımlayabilecek.';
+  }
 }
 
 function modalAc(tip){
@@ -992,6 +1015,7 @@ function ogrenciAra(q){
 
 // ── ÖĞRETMEN EKLE / LİSTE / ARA ──
 let _secilenLisansAy={ogr:6};
+let _secilenKota=10;
 function lisansSureSec(btn,prefix){
   document.querySelectorAll('#'+prefix+'-lisans-grup .lisans-sure-btn').forEach(b=>{
     b.classList.remove('secili');b.style.border='1.5px solid #e2e8f0';b.style.background='white';b.style.color='inherit';
@@ -1001,17 +1025,27 @@ function lisansSureSec(btn,prefix){
   document.getElementById(prefix+'-lisans-bilgi').textContent='Onayladığınız tarihten itibaren '+btn.dataset.ay+' ay geçerli olacak.';
 }
 
+function kotaSec(btn){
+  document.querySelectorAll('#ogr-kota-grup .kota-sec-btn').forEach(b=>{
+    b.classList.remove('secili');b.style.border='1.5px solid #e2e8f0';b.style.background='white';b.style.color='inherit';
+  });
+  btn.classList.add('secili');btn.style.border='1.5px solid #2563a8';btn.style.background='#eff6ff';btn.style.color='#1d4ed8';
+  _secilenKota=parseInt(btn.dataset.kota);
+  document.getElementById('ogr-kota-bilgi').textContent='Öğretmen '+_secilenKota+' öğrenci için şifre tanımlayabilecek.';
+}
+
 async function ogretmenKaydet(){
   const ad=document.getElementById('ogr-ad').value.trim();
   const soyad=document.getElementById('ogr-soyad').value.trim();
   const kullanici=document.getElementById('ogr-kullanici').value.trim();
   const sifre=document.getElementById('ogr-sifre').value;
   const lisansAy=_secilenLisansAy.ogr||6;
+  const kota=_secilenKota||10;
   if(!ad||!kullanici||!sifre){bildirimGoster('⚠️ Ad, kullanıcı adı ve şifre zorunlu!','hata');return;}
   const btn=document.getElementById('btn-ogretmen-kaydet');btn.textContent='⏳ Kaydediliyor...';
   try{
-    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogretmen',p_lisans_ay:lisansAy});
-    bildirimGoster('✅ Öğretmen eklendi! Lisans '+lisansAy+' ay geçerli.','basari');modalKapat('ogretmen');ogretmenleriYukle();
+    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogretmen',p_lisans_ay:lisansAy,p_kota_toplam:kota});
+    bildirimGoster('✅ Öğretmen eklendi! Lisans '+lisansAy+' ay, '+kota+' öğrenci kotası tanımlandı.','basari');modalKapat('ogretmen');ogretmenleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='✅ Onayla ve Kaydet';
 }
@@ -1022,14 +1056,28 @@ async function ogretmenleriYukle(){
     const ogretmenler=await rpc('kullanicilar_listele',{p_rol:'ogretmen',p_limit:200});
     if(!ogretmenler.length){liste.innerHTML='<div class="bos-durum">Henüz öğretmen eklenmemiş.</div>';return;}
     const bugun=new Date();
-    liste.innerHTML=`<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Telefon</th><th>İl / İlçe</th><th>Lisans Başlangıç</th><th>Kalan Süre</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${ogretmenler.map(o=>{
+    liste.innerHTML=`<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Telefon</th><th>İl / İlçe</th><th>Lisans Başlangıç</th><th>Kalan Süre</th><th>Kota</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>${ogretmenler.map(o=>{
       let kalanGun='-';
       if(o.lisans_bitis){const fark=Math.ceil((new Date(o.lisans_bitis)-bugun)/(1000*60*60*24));kalanGun=fark>0?fark+' gün':'<span style="color:#dc2626">Süresi doldu</span>';}
-      return `<tr><td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi}</td><td>${o.telefon||'-'}</td><td>${o.il||'-'} / ${o.ilce||'-'}</td><td>${o.lisans_baslangic||'-'}</td><td>${kalanGun}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td><td><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td></tr>`;
+      const kotaToplam=o.kota_toplam||0, kotaKullanilan=o.kota_kullanilan||0;
+      const kotaDoldu=kotaKullanilan>=kotaToplam;
+      return `<tr><td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi}</td><td>${o.telefon||'-'}</td><td>${o.il||'-'} / ${o.ilce||'-'}</td><td>${o.lisans_baslangic||'-'}</td><td>${kalanGun}</td><td><span style="font-weight:600;${kotaDoldu?'color:#dc2626':''}">${kotaKullanilan}/${kotaToplam}</span></td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#f0fdf4;color:#16a34a" onclick="ogretmenKotaEkle(${o.id},${kotaToplam})">+ Kota</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td></tr>`;
     }).join('')}</tbody></table>`;
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
 function ogretmenAra(q){clearTimeout(window._ogretmenAraTimer);window._ogretmenAraTimer=setTimeout(()=>ogretmenleriYukle(),400);}
+
+async function ogretmenKotaEkle(id,mevcutKota){
+  const ekKota=prompt('Kaç öğrenci hakkı eklemek istiyorsunuz? (Mevcut toplam: '+mevcutKota+')');
+  if(!ekKota)return;
+  const sayi=parseInt(ekKota);
+  if(!sayi||sayi<=0){bildirimGoster('⚠️ Geçerli bir sayı girin.','hata');return;}
+  try{
+    await rpc('ogretmen_kota_ekle',{p_ogretmen_id:id,p_ek_kota:sayi});
+    bildirimGoster('✅ '+sayi+' öğrenci hakkı eklendi!','basari');
+    ogretmenleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
 
 // ── ŞİFRE İŞLEMLERİ (Kurum/Öğretmen/Öğrenci gruplu, şifre görünür) ──
 function sifreSatiriOlustur(k,tip){
@@ -1481,63 +1529,34 @@ async function genelBakisYukle(){
       document.getElementById('ist-toplam').textContent=s.toplam_ogrenci;
       document.getElementById('ist-aktif').textContent=s.aktif_hesap;
       const yuzde=s.toplam_ogrenci>0?Math.round(s.aktif_hesap/s.toplam_ogrenci*100):0;
-      document.getElementById('ist-aktif-yuzde').textContent='%'+yuzde+' aktif';
-      document.getElementById('ist-bitenler').textContent=s.suresi_bitenler;
+      document.getElementById('ist-aktif-yuzde').textContent=yuzde+'% aktif';
+      document.getElementById('ist-bitenler').textContent=s.suresi_bitenler||0;
     }
   }catch(e){}
 
+  // Son kayıt olan öğrenciler (genel bakış tablosu)
   const tbody=document.getElementById('tablo-govde');
-  tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem">⏳ Yükleniyor...</td></tr>';
   try{
-    const ogrenciler=await rpc('genel_bakis_ogrenciler',{p_limit:10});
-    if(!ogrenciler.length){
-      tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem">📭 Henüz öğrenci yok.</td></tr>';
-      return;
-    }
+    const ogrenciler=await rpc('kullanicilar_listele',{p_rol:'ogrenci',p_limit:20});
+    if(!ogrenciler.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem">📭 Henüz öğrenci yok.</td></tr>';return;}
     const renkler={1:'a1',2:'a2',3:'a3',4:'a4'};
-    const bugun=new Date();
     tbody.innerHTML=ogrenciler.map(o=>{
-      let durumHtml='<span class="durum aktif">● Aktif</span>';
-      if(!o.aktif){
-        durumHtml='<span class="durum pasif">● Pasif</span>';
-      }else if(o.lisans_bitis){
-        const kalanGun=Math.ceil((new Date(o.lisans_bitis)-bugun)/(1000*60*60*24));
-        if(kalanGun<0) durumHtml='<span class="durum pasif">● Süresi Doldu</span>';
-        else if(kalanGun<=30) durumHtml='<span class="durum bekliyor">● Süresi Bitiyor</span>';
-      }
-      const lisansGosterim=o.lisans_bitis?new Date(o.lisans_bitis).toLocaleDateString('tr-TR'):'—';
+      const bitis=o.lisans_bitis?new Date(o.lisans_bitis).toLocaleDateString('tr-TR'):'-';
       return `<tr>
-        <td>${o.ad||''} ${o.soyad||''}</td>
+        <td><strong>${o.ad||''} ${o.soyad||''}</strong></td>
         <td>${o.kullanici_adi||'-'}</td>
-        <td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye'}</span></td>
+        <td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye ⚠️'}</span></td>
         <td>${o.mevcut_gun||1}/30</td>
         <td>⚡ ${o.enerji||0}</td>
-        <td>${lisansGosterim}</td>
-        <td>${durumHtml}</td>
-        <td><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn uzat" onclick="lisansUzat(${o.id},'${o.lisans_bitis||''}')">Uzat</button></td>
+        <td>${bitis}</td>
+        <td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>
+        <td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td>
       </tr>`;
     }).join('');
-  }catch(e){
-    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem">❌ '+e.message+'</td></tr>';
-  }
+  }catch(e){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem">❌ '+e.message+'</td></tr>';}
 }
 
-async function lisansUzat(id,mevcutBitisStr){
-  const gunStr=prompt('Kaç gün uzatılsın?','30');
-  if(!gunStr)return;
-  const gun=parseInt(gunStr);
-  if(isNaN(gun)||gun<=0){bildirimGoster('⚠️ Geçerli bir gün sayısı girin.','hata');return;}
-  const baz=mevcutBitisStr?new Date(mevcutBitisStr):new Date();
-  const bugun=new Date();
-  const baslangic=baz>bugun?baz:bugun; // geçmiş bir tarihten değil, bugünden veya mevcut bitişten (hangisi ileriyse) uzat
-  baslangic.setDate(baslangic.getDate()+gun);
-  const yeniTarih=baslangic.toISOString().split('T')[0];
-  try{
-    await rpc('kullanici_guncelle',{p_id:id,p_lisans_bitis:yeniTarih});
-    bildirimGoster('✅ Lisans '+gun+' gün uzatıldı!','basari');
-    genelBakisYukle();
-  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
-}
+// Sayfa yüklendiğinde genel bakışı yükle
 genelBakisYukle();
 </script>
 </body>
