@@ -203,22 +203,16 @@ tr:hover td{background:#f8fafc}
       <button class="yeni-btn" onclick="modalAc('ogrenci')">+ Yeni Öğrenci Ekle</button>
     </div>
     <div class="ozet-grid">
-      <div class="ozet-kart"><div class="ozet-label">Toplam Öğrenci</div><div class="ozet-deger">24</div><div class="ozet-alt mavi">+3 bu ay</div></div>
-      <div class="ozet-kart"><div class="ozet-label">Aktif Hesap</div><div class="ozet-deger">18</div><div class="ozet-alt yesil">%75 aktif</div></div>
-      <div class="ozet-kart"><div class="ozet-label">Bugün Giriş</div><div class="ozet-deger">7</div><div class="ozet-alt mavi">Çalışma yapıldı</div></div>
-      <div class="ozet-kart"><div class="ozet-label">Süresi Bitenler</div><div class="ozet-deger">3</div><div class="ozet-alt" style="color:#d97706">Yenileme gerekli</div></div>
+      <div class="ozet-kart"><div class="ozet-label">Toplam Öğrenci</div><div class="ozet-deger" id="ist-toplam">—</div></div>
+      <div class="ozet-kart"><div class="ozet-label">Aktif Hesap</div><div class="ozet-deger" id="ist-aktif">—</div><div class="ozet-alt yesil" id="ist-aktif-yuzde"></div></div>
+      <div class="ozet-kart"><div class="ozet-label">Süresi Bitenler</div><div class="ozet-deger" id="ist-bitenler">—</div><div class="ozet-alt" style="color:#d97706">Yenileme gerekli</div></div>
     </div>
     <div class="kart">
       <div class="kart-ust"><span class="kart-baslik">👥 Öğrenci Listesi</span><input class="ara-input" type="text" placeholder="🔍 Öğrenci ara..." oninput="ara(this.value)"></div>
       <table id="tablo">
         <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Lisans Bitiş</th><th>Durum</th><th>İşlem</th></tr></thead>
         <tbody id="tablo-govde">
-          <tr><td>Zeynep Kaya</td><td>zeynep2015</td><td><span class="asama-badge a2">Seviye-1</span></td><td>14/30</td><td>⚡ 412</td><td>15.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Mehmet Arslan</td><td>mehmet_a</td><td><span class="asama-badge a2">Seviye-1</span></td><td>12/30</td><td>⚡ 389</td><td>20.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Elif Şahin</td><td>elif_s</td><td><span class="asama-badge a3">Seviye-2</span></td><td>8/30</td><td>⚡ 301</td><td>01.08.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Ali Demir</td><td>ali2016</td><td><span class="asama-badge a2">Seviye-1</span></td><td>7/30</td><td>⚡ 248</td><td>10.09.2026</td><td><span class="durum aktif">● Aktif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Ayşe Tekin</td><td>ayse_t</td><td><span class="asama-badge a2">Seviye-1 ⚠️</span></td><td>21/30</td><td>⚡ 201</td><td>05.06.2026</td><td><span class="durum bekliyor">● Süresi Bitiyor</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
-          <tr><td>Can Yıldız</td><td>can_y</td><td><span class="asama-badge a4">Seviye-3</span></td><td>3/30</td><td>⚡ 89</td><td>01.05.2026</td><td><span class="durum pasif">● Pasif</span></td><td><button class="islem-btn duzenle">Düzenle</button> <button class="islem-btn uzat">Uzat</button></td></tr>
+          <tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem">⏳ Yükleniyor...</td></tr>
         </tbody>
       </table>
     </div>
@@ -627,7 +621,8 @@ async function rpc(fonksiyon,params){
     body:JSON.stringify(gonderilecek)
   });
   if(!res.ok){const h=await res.json().catch(()=>({}));throw new Error(h.message||'Hata');}
-  return res.json();
+  const metin=await res.text();
+  return metin ? JSON.parse(metin) : null;
 }
 
 function cikisYapAdmin(){
@@ -656,6 +651,7 @@ function sayfaGoster(sayfa,link){
   document.querySelectorAll('.alt-menu li a').forEach(a=>a.classList.remove('aktif'));
   document.getElementById('sayfa-'+sayfa).classList.add('aktif');
   if(link) link.classList.add('aktif');
+  if(sayfa==='genel') genelBakisYukle();
   if(sayfa==='hikayeler') hikayeleriYukle();
   if(sayfa==='olcum-metinleri') olcumMetinleriYukle();
   if(sayfa==='ders-metinleri') dersMetinleriYukle();
@@ -1443,6 +1439,75 @@ async function kurumSil(id){
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 function ara(q){document.querySelectorAll('#tablo-govde tr').forEach(r=>{r.style.display=r.innerText.toLowerCase().includes(q.toLowerCase())?'':'none';});}
+
+// ── GENEL BAKIŞ: son kayıt olan öğrenciler ──
+async function genelBakisYukle(){
+  // İstatistik kutuları
+  try{
+    const ist=await rpc('genel_bakis_istatistik',{});
+    if(ist&&ist.length){
+      const s=ist[0];
+      document.getElementById('ist-toplam').textContent=s.toplam_ogrenci;
+      document.getElementById('ist-aktif').textContent=s.aktif_hesap;
+      const yuzde=s.toplam_ogrenci>0?Math.round(s.aktif_hesap/s.toplam_ogrenci*100):0;
+      document.getElementById('ist-aktif-yuzde').textContent='%'+yuzde+' aktif';
+      document.getElementById('ist-bitenler').textContent=s.suresi_bitenler;
+    }
+  }catch(e){}
+
+  const tbody=document.getElementById('tablo-govde');
+  tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem">⏳ Yükleniyor...</td></tr>';
+  try{
+    const ogrenciler=await rpc('genel_bakis_ogrenciler',{p_limit:10});
+    if(!ogrenciler.length){
+      tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem">📭 Henüz öğrenci yok.</td></tr>';
+      return;
+    }
+    const renkler={1:'a1',2:'a2',3:'a3',4:'a4'};
+    const bugun=new Date();
+    tbody.innerHTML=ogrenciler.map(o=>{
+      let durumHtml='<span class="durum aktif">● Aktif</span>';
+      if(!o.aktif){
+        durumHtml='<span class="durum pasif">● Pasif</span>';
+      }else if(o.lisans_bitis){
+        const kalanGun=Math.ceil((new Date(o.lisans_bitis)-bugun)/(1000*60*60*24));
+        if(kalanGun<0) durumHtml='<span class="durum pasif">● Süresi Doldu</span>';
+        else if(kalanGun<=30) durumHtml='<span class="durum bekliyor">● Süresi Bitiyor</span>';
+      }
+      const lisansGosterim=o.lisans_bitis?new Date(o.lisans_bitis).toLocaleDateString('tr-TR'):'—';
+      return `<tr>
+        <td>${o.ad||''} ${o.soyad||''}</td>
+        <td>${o.kullanici_adi||'-'}</td>
+        <td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye'}</span></td>
+        <td>${o.mevcut_gun||1}/30</td>
+        <td>⚡ ${o.enerji||0}</td>
+        <td>${lisansGosterim}</td>
+        <td>${durumHtml}</td>
+        <td><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn uzat" onclick="lisansUzat(${o.id},'${o.lisans_bitis||''}')">Uzat</button></td>
+      </tr>`;
+    }).join('');
+  }catch(e){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem">❌ '+e.message+'</td></tr>';
+  }
+}
+
+async function lisansUzat(id,mevcutBitisStr){
+  const gunStr=prompt('Kaç gün uzatılsın?','30');
+  if(!gunStr)return;
+  const gun=parseInt(gunStr);
+  if(isNaN(gun)||gun<=0){bildirimGoster('⚠️ Geçerli bir gün sayısı girin.','hata');return;}
+  const baz=mevcutBitisStr?new Date(mevcutBitisStr):new Date();
+  const bugun=new Date();
+  const baslangic=baz>bugun?baz:bugun; // geçmiş bir tarihten değil, bugünden veya mevcut bitişten (hangisi ileriyse) uzat
+  baslangic.setDate(baslangic.getDate()+gun);
+  const yeniTarih=baslangic.toISOString().split('T')[0];
+  try{
+    await rpc('kullanici_guncelle',{p_id:id,p_lisans_bitis:yeniTarih});
+    bildirimGoster('✅ Lisans '+gun+' gün uzatıldı!','basari');
+    genelBakisYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+genelBakisYukle();
 </script>
 </body>
 </html>
