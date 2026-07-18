@@ -97,6 +97,12 @@ tr:hover td{background:#f8fafc}
 .bildirim.hata{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 .bos-durum{text-align:center;padding:3rem;color:#94a3b8;font-size:0.9rem}
+.olcum-yap-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#f4f6f9;z-index:500;overflow-y:auto;padding:3rem 2rem}
+.olcum-yap-overlay.acik{display:block}
+.olcum-yap-secim-karti{cursor:pointer;padding:1rem 1.2rem;border:1.5px solid #e2e8f0;border-radius:12px;transition:border-color 0.2s;background:white}
+.olcum-yap-secim-karti:hover{border-color:#2563a8}
+.olcum-yap-secenek-btn{text-align:left;padding:0.9rem 1.2rem;border:1.5px solid #e2e8f0;border-radius:10px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.92rem;width:100%;transition:border-color 0.2s}
+.olcum-yap-secenek-btn:hover{border-color:#2563a8}
 .metin-onizleme{background:#f8fafc;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;line-height:1.6;color:#475569;max-height:80px;overflow:hidden}
 .sayfa{display:none}
 .sayfa.aktif{display:block}
@@ -264,7 +270,7 @@ tr:hover td{background:#f8fafc}
 
   <!-- ÖLÇÜM METİNLERİ -->
   <div id="sayfa-olcum-metinleri" class="sayfa">
-    <div class="ust-bar"><div><h1>Ölçüm Metinleri</h1><p>İlk ölçüm testinde kullanılacak metinleri yaş grubuna göre yükleyin.</p></div><button class="yeni-btn" onclick="modalAc('olcum')">+ Yeni Metin Ekle</button></div>
+    <div class="ust-bar"><div><h1>Ölçüm Metinleri</h1><p>İlk ölçüm testinde kullanılacak metinleri yaş grubuna göre yükleyin.</p></div><div style="display:flex;gap:0.6rem"><button class="yeni-btn" style="background:#16a34a" onclick="olcumYapAc()">🎯 Ölçüm Yap</button><button class="yeni-btn" onclick="modalAc('olcum')">+ Yeni Metin Ekle</button></div></div>
     <div class="grup-aciklama"><strong>Yaş Grubu Rehberi:</strong> Grup 1 → 1-2. Sınıf &nbsp;|&nbsp; Grup 2 → 3-4. Sınıf &nbsp;|&nbsp; Grup 3 → 5-6. Sınıf &nbsp;|&nbsp; Grup 4 → 7-8. Sınıf &nbsp;|&nbsp; Grup 5 → Lise &nbsp;|&nbsp; Grup 6 → Yetişkin</div>
     <div class="kart" style="padding:1rem 1.5rem">
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
@@ -450,6 +456,7 @@ tr:hover td{background:#f8fafc}
     </div>
     <div class="form-grup"><label>Metin Başlığı</label><input type="text" id="od-baslik"></div>
     <div class="form-grup"><label>Metin</label><textarea id="od-metin" oninput="duzenleKelimeSay()"></textarea><div class="sayac" id="duzenle-kelime-sayac">0 kelime</div></div>
+    <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi-olcum-duzenle" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi-olcum-duzenle')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('olcum-duzenle')">İptal</button><button class="btn-kaydet" id="btn-olcum-guncelle" onclick="olcumMetniGuncelle()">💾 Güncelle</button></div>
   </div>
 </div>
@@ -571,6 +578,10 @@ tr:hover td{background:#f8fafc}
 </div>
 
 
+<div class="olcum-yap-overlay" id="olcum-yap-overlay">
+  <div id="olcum-yap-icerik"></div>
+</div>
+
 <div class="bildirim" id="bildirim"></div>
 
 <script>
@@ -584,6 +595,182 @@ tr:hover td{background:#f8fafc}
   }
 })();
 function kacirAdmin(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'').replace(/"/g,'&quot;');}
+function htmlAttrAdmin(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// ── ÖLÇÜM YAP (canlı test, kaydetmez) ──
+let _olcumYapMetinler=[];
+let _olcumYap=null;
+
+async function olcumYapAc(){
+  document.getElementById('olcum-yap-overlay').classList.add('acik');
+  const icerik=document.getElementById('olcum-yap-icerik');
+  icerik.innerHTML='<div class="bos-durum">⏳ Metinler yükleniyor...</div>';
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/olcum_metinleri?order=yas_grubu,baslik',{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    _olcumYapMetinler=await res.json();
+    if(!_olcumYapMetinler.length){
+      icerik.innerHTML='<div style="max-width:520px;margin:4rem auto;text-align:center"><div class="bos-durum">📭 Henüz ölçüm metni eklenmemiş.</div><button class="btn-iptal" onclick="olcumYapKapat()">Kapat</button></div>';
+      return;
+    }
+    icerik.innerHTML=`
+      <div style="max-width:640px;margin:0 auto">
+        <h2 style="font-family:'Playfair Display',serif;margin-bottom:1.5rem;color:#0a1628">📏 Ölçüm Metni Seç</h2>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          ${_olcumYapMetinler.map((m,i)=>`
+            <div class="olcum-yap-secim-karti" onclick="olcumYapMetinSec(${i})">
+              <div style="font-weight:700;color:#0a1628">${m.baslik}</div>
+              <div style="font-size:0.8rem;color:#64748b;margin-top:0.2rem">${GRUP_ADLARI[m.yas_grubu]||''} · ${m.kelime_sayisi||0} kelime · ${(m.sorular||[]).length} soru</div>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn-iptal" style="margin-top:1.5rem" onclick="olcumYapKapat()">İptal</button>
+      </div>`;
+  }catch(e){
+    icerik.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';
+  }
+}
+
+function olcumYapMetinSec(idx){
+  const m=_olcumYapMetinler[idx];
+  _olcumYap={metin:m,baslaZaman:null,bitisZaman:null,soruIndex:0,dogruSayisi:0,timerInterval:null};
+  olcumYapOkumaEkraniGoster();
+}
+
+function olcumYapOkumaEkraniGoster(){
+  const icerik=document.getElementById('olcum-yap-icerik');
+  icerik.innerHTML=`
+    <div style="max-width:720px;margin:0 auto">
+      <div id="olcum-yap-sure" style="position:fixed;top:1.5rem;right:2rem;background:#0a1628;color:white;padding:0.6rem 1.2rem;border-radius:20px;font-weight:700;font-family:'Playfair Display',serif;font-size:1.1rem">00:00</div>
+      <h2 style="font-family:'Playfair Display',serif;margin-bottom:1rem;color:#0a1628">${_olcumYap.metin.baslik}</h2>
+      <div id="olcum-yap-metin-govde" style="font-size:1.05rem;line-height:1.9;color:#1e293b;white-space:pre-wrap">${_olcumYap.metin.metin}</div>
+      <button class="btn-kaydet" style="margin-top:2rem;width:100%;padding:1rem;font-size:1rem" onclick="olcumYapOkumayiBitir()">✅ Okumayı Bitir</button>
+    </div>`;
+  _olcumYap.baslaZaman=Date.now();
+  _olcumYap.timerInterval=setInterval(olcumYapSureGuncelle,250);
+}
+
+function olcumYapSureGuncelle(){
+  const el=document.getElementById('olcum-yap-sure');
+  if(!el||!_olcumYap) return;
+  const gecen=Math.floor((Date.now()-_olcumYap.baslaZaman)/1000);
+  const dk=String(Math.floor(gecen/60)).padStart(2,'0');
+  const sn=String(gecen%60).padStart(2,'0');
+  el.textContent=dk+':'+sn;
+}
+
+function olcumYapOkumayiBitir(){
+  clearInterval(_olcumYap.timerInterval);
+  _olcumYap.bitisZaman=Date.now();
+  const icerik=document.getElementById('olcum-yap-icerik');
+  const saniye=Math.max(1,Math.round((_olcumYap.bitisZaman-_olcumYap.baslaZaman)/1000));
+  const dk=Math.floor(saniye/60),sn=saniye%60;
+  const sorular=_olcumYap.metin.sorular;
+  icerik.innerHTML=`
+    <div style="max-width:520px;margin:4rem auto;text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem">⏱️</div>
+      <h2 style="font-family:'Playfair Display',serif;margin-bottom:0.5rem;color:#0a1628">Okuma Tamamlandı</h2>
+      <p style="color:#64748b;margin-bottom:2rem">Süre: ${dk} dk ${sn} sn</p>
+      ${(sorular&&sorular.length)?
+        `<button class="btn-kaydet" style="padding:1rem 2rem;font-size:1rem" onclick="olcumYapSorulariBaslat()">🧠 Anlama Oranını Ölç</button>`:
+        `<div class="bos-durum">Bu metin için soru tanımlanmamış.</div><button class="btn-iptal" style="margin-top:1rem" onclick="olcumYapKapat()">Kapat</button>`
+      }
+    </div>`;
+}
+
+function olcumYapSorulariBaslat(){
+  _olcumYap.soruIndex=0;
+  _olcumYap.dogruSayisi=0;
+  olcumYapSoruGoster();
+}
+
+function olcumYapSoruGoster(){
+  const sorular=_olcumYap.metin.sorular;
+  const i=_olcumYap.soruIndex;
+  const s=sorular[i];
+  const icerik=document.getElementById('olcum-yap-icerik');
+  icerik.innerHTML=`
+    <div style="max-width:560px;margin:3rem auto">
+      <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.5rem">Soru ${i+1} / ${sorular.length}</div>
+      <h2 style="font-family:'Playfair Display',serif;margin-bottom:1.5rem;font-size:1.25rem;color:#0a1628">${s.soru}</h2>
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        ${s.secenekler.map((sec,j)=>`<button class="olcum-yap-secenek-btn" onclick="olcumYapCevapVer(${j})">${sec}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function olcumYapCevapVer(secilenIndex){
+  const sorular=_olcumYap.metin.sorular;
+  const s=sorular[_olcumYap.soruIndex];
+  if(secilenIndex===s.dogru) _olcumYap.dogruSayisi++;
+  _olcumYap.soruIndex++;
+  if(_olcumYap.soruIndex<sorular.length){
+    olcumYapSoruGoster();
+  }else{
+    olcumYapSonucGoster();
+  }
+}
+
+function olcumYapSonucGoster(){
+  const saniye=Math.max(1,Math.round((_olcumYap.bitisZaman-_olcumYap.baslaZaman)/1000));
+  const kelime=_olcumYap.metin.kelime_sayisi||0;
+  const kpm=Math.round(kelime/(saniye/60));
+  const sorular=_olcumYap.metin.sorular||[];
+  const anlamaOrani=sorular.length?Math.round((_olcumYap.dogruSayisi/sorular.length)*100):null;
+  const icerik=document.getElementById('olcum-yap-icerik');
+  icerik.innerHTML=`
+    <div style="max-width:520px;margin:3rem auto;text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem">🎉</div>
+      <h2 style="font-family:'Playfair Display',serif;margin-bottom:2rem;color:#0a1628">Ölçüm Sonucu</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem">
+        <div style="background:#f8fafc;border-radius:14px;padding:1.5rem">
+          <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem">Okuma Hızı</div>
+          <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#0a1628">${kpm}</div>
+          <div style="font-size:0.78rem;color:#94a3b8">kelime/dakika</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:14px;padding:1.5rem">
+          <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem">Anlama Oranı</div>
+          <div style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#0a1628">${anlamaOrani!==null?anlamaOrani+'%':'—'}</div>
+          <div style="font-size:0.78rem;color:#94a3b8">${anlamaOrani!==null?_olcumYap.dogruSayisi+'/'+sorular.length+' doğru':'soru yok'}</div>
+        </div>
+      </div>
+      <button class="btn-kaydet" style="padding:0.8rem 2rem;margin-right:0.5rem" onclick="olcumYapAc()">🔁 Yeni Ölçüm</button>
+      <button class="btn-iptal" style="padding:0.8rem 2rem" onclick="olcumYapKapat()">Kapat</button>
+    </div>`;
+}
+
+function olcumYapKapat(){
+  if(_olcumYap&&_olcumYap.timerInterval) clearInterval(_olcumYap.timerInterval);
+  _olcumYap=null;
+  document.getElementById('olcum-yap-overlay').classList.remove('acik');
+}
+function sorulariDoldur(listeId,sorular){
+  const liste=document.getElementById(listeId);
+  sorular.forEach(s=>{
+    soruSayaci++;
+    const grupAdi='dogru-'+soruSayaci;
+    const div=document.createElement('div');
+    div.className='soru-karti';
+    div.style.cssText='border:1px solid #2563a8;border-radius:8px;padding:10px 12px;background:#1a2744;display:flex;flex-direction:column;gap:8px';
+    div.innerHTML=`
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="text" class="soru-metni" placeholder="Soru metni..." value="${htmlAttrAdmin(s.soru)}" style="flex:1;background:#0f1c33;color:#e2e8f0;border:1px solid #2563a8;border-radius:6px;padding:6px 10px;font-size:0.85rem">
+        <button type="button" onclick="this.closest('.soru-karti').remove()" style="background:#7f1d1d;color:#fca5a5;border:none;border-radius:6px;padding:6px 10px;cursor:pointer">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        ${[0,1,2,3].map(i=>`
+          <label style="display:flex;gap:8px;align-items:center;font-size:0.82rem;color:#cbd5e1">
+            <input type="radio" name="${grupAdi}" value="${i}" ${s.dogru===i?'checked':''} style="accent-color:#16a34a">
+            <input type="text" class="secenek-metni" placeholder="Şık ${i+1}" value="${htmlAttrAdmin((s.secenekler&&s.secenekler[i])||'')}" style="flex:1;background:#0f1c33;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:5px 9px;font-size:0.82rem">
+          </label>
+        `).join('')}
+        <div style="font-size:0.72rem;color:#94a3b8">👆 Doğru cevabı işaretleyin</div>
+      </div>
+    `;
+    liste.appendChild(div);
+  });
+}
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 const GRUP_ADLARI={1:'Grup 1 – 1-2. Sınıf',2:'Grup 2 – 3-4. Sınıf',3:'Grup 3 – 5-6. Sınıf',4:'Grup 4 – 7-8. Sınıf',5:'Grup 5 – Lise',6:'Grup 6 – Yetişkin'};
@@ -951,6 +1138,7 @@ function modalKapat(tip){
   document.getElementById('modal-'+tip).classList.remove('acik');
   if(tip==='hikaye'){document.getElementById('h-baslik').value='';document.getElementById('h-metin').value='';document.getElementById('h-kelime').value='';document.getElementById('kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi').innerHTML='';}
   if(tip==='olcum'){document.getElementById('o-baslik').value='';document.getElementById('o-metin').value='';document.getElementById('o-kelime').value='';document.getElementById('olcum-kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi-olcum').innerHTML='';}
+  if(tip==='olcum-duzenle'){document.getElementById('soru-listesi-olcum-duzenle').innerHTML='';}
   if(tip==='ders'){document.getElementById('d-baslik').value='';document.getElementById('d-metin').value='';document.getElementById('d-kelime').value='';document.getElementById('ders-kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi-ders').innerHTML='';}
   if(tip==='ders-duzenle'){document.getElementById('dd-baslik').value='';document.getElementById('dd-metin').value='';document.getElementById('dd-kelime').value='';document.getElementById('ders-duzenle-kelime-sayac').textContent='0 kelime';}
   if(tip==='blog'){document.getElementById('b-baslik').value='';document.getElementById('b-ozet').value='';document.getElementById('b-icerik').value='';document.getElementById('b-kategori').value='genel';document.getElementById('b-durum').value='taslak';}
@@ -1236,11 +1424,18 @@ async function olcumMetniSil(id){
   try{await supabase('DELETE','olcum_metinleri',null,'id=eq.'+id);bildirimGoster('🗑️ Silindi.','basari');olcumMetinleriYukle();}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
-function olcumMetniDuzenle(id,grup,baslik,metin,kelime){
+async function olcumMetniDuzenle(id,grup,baslik,metin,kelime){
   document.getElementById('od-id').value=id;document.getElementById('od-grup').value=grup;
   document.getElementById('od-baslik').value=baslik;document.getElementById('od-metin').value=metin;
   document.getElementById('od-kelime').value=kelime;document.getElementById('duzenle-kelime-sayac').textContent=kelime+' kelime';
+  document.getElementById('soru-listesi-olcum-duzenle').innerHTML='';
   modalAc('olcum-duzenle');
+  try{
+    const veri=await supabase('GET','olcum_metinleri',null,'id=eq.'+id+'&select=sorular');
+    if(veri.length && veri[0].sorular && veri[0].sorular.length){
+      sorulariDoldur('soru-listesi-olcum-duzenle',veri[0].sorular);
+    }
+  }catch(e){}
 }
 async function olcumMetniGuncelle(){
   const id=document.getElementById('od-id').value,grup=document.getElementById('od-grup').value;
@@ -1248,9 +1443,12 @@ async function olcumMetniGuncelle(){
   const kelime=document.getElementById('od-kelime').value;
   if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
   if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi-olcum-duzenle');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
   const btn=document.getElementById('btn-olcum-guncelle');btn.textContent='⏳ Güncelleniyor...';
   try{
-    await supabase('PATCH','olcum_metinleri',{yas_grubu:parseInt(grup),baslik,metin,kelime_sayisi:parseInt(kelime)||0},'id=eq.'+id);
+    await supabase('PATCH','olcum_metinleri',{yas_grubu:parseInt(grup),baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular},'id=eq.'+id);
     bildirimGoster('✅ Metin güncellendi!','basari');modalKapat('olcum-duzenle');olcumMetinleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Güncelle';
