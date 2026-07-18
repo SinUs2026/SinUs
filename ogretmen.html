@@ -59,6 +59,14 @@ tr:hover td{background:#f8fafc}
 .asama-badge.a3{background:#fefce8;color:#b45309}
 .asama-badge.a4{background:#fdf4ff;color:#7e22ce}
 
+.grup-badge{display:inline-block;padding:0.2rem 0.7rem;border-radius:20px;font-size:0.75rem;font-weight:600}
+.grup-badge.g1{background:#eff6ff;color:#1d4ed8}
+.grup-badge.g2{background:#f0fdf4;color:#15803d}
+.grup-badge.g3{background:#fefce8;color:#b45309}
+.grup-badge.g4{background:#fdf4ff;color:#7e22ce}
+.grup-badge.g5{background:#fff1f2;color:#be123c}
+.grup-badge.g6{background:#f0fdfa;color:#0f766e}
+
 .sayfa{display:none}
 .sayfa.aktif{display:block}
 
@@ -128,6 +136,7 @@ tr:hover td{background:#f8fafc}
     <li><a href="#" onclick="sayfaGoster('egzersizler',this)"><span class="ikon">🌌</span> Egzersizler</a></li>
     <li><a href="#" onclick="sayfaGoster('okuma-teknikleri',this)"><span class="ikon">📖</span> Okuma Teknikleri</a></li>
     <li><a href="#" onclick="sayfaGoster('ders-metinleri',this)"><span class="ikon">📄</span> Ders Metinleri</a></li>
+    <li><a href="#" onclick="sayfaGoster('olcum-metinleri',this)"><span class="ikon">📏</span> Ölçüm Metinleri</a></li>
     <div class="sidebar-alt2">Hesap</div>
     <li><a href="#" onclick="cikisYapOgretmen()"><span class="ikon">🚪</span> Çıkış Yap</a></li>
   </ul>
@@ -205,6 +214,21 @@ tr:hover td{background:#f8fafc}
     <div class="kart"><div id="ders-og-liste"><div class="bos-durum">⏳ Metinler yükleniyor...</div></div></div>
   </div>
 
+  <!-- ÖLÇÜM METİNLERİ -->
+  <div id="sayfa-olcum-metinleri" class="sayfa">
+    <div class="ust-bar"><div><h1>Ölçüm Metinleri</h1><p>İlk ölçüm testinde kullanılan metinleri görüntüleyin.</p></div></div>
+    <div class="kart" style="padding:1rem 1.5rem">
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Yaş Grubu:</label>
+          <select id="filtre-olcum-og-grup" onchange="olcumMetinleriYukleOg()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
+            <option value="">Tümü</option><option value="1">Grup 1 – 1-2. Sınıf</option><option value="2">Grup 2 – 3-4. Sınıf</option><option value="3">Grup 3 – 5-6. Sınıf</option><option value="4">Grup 4 – 7-8. Sınıf</option><option value="5">Grup 5 – Lise</option><option value="6">Grup 6 – Yetişkin</option>
+          </select></div>
+        <span id="olcum-og-sayac" style="font-size:0.82rem;color:#94a3b8;margin-left:auto"></span>
+      </div>
+    </div>
+    <div class="kart"><div id="olcum-og-liste"><div class="bos-durum">⏳ Metinler yükleniyor...</div></div></div>
+  </div>
+
 
 </div>
 
@@ -270,6 +294,18 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+<!-- ÖLÇÜM METNİ GÖRÜNTÜLEME MODALI -->
+<div class="modal" id="modal-olcum-og-goruntule">
+  <div class="modal-kutu" style="width:640px">
+    <div class="modal-baslik" id="olcumOgBaslik">Ölçüm Metni</div>
+    <div style="font-size:0.78rem;color:#64748b;margin-bottom:1rem" id="olcumOgMeta">—</div>
+    <div style="font-size:0.92rem;line-height:1.8;color:#1e293b;white-space:pre-wrap;max-height:50vh;overflow-y:auto;background:#f8fafc;border-radius:10px;padding:1rem 1.2rem" id="olcumOgMetin">—</div>
+    <div class="modal-btn-grup">
+      <button class="btn-iptal" onclick="modalKapat('olcum-og-goruntule')">Kapat</button>
+    </div>
+  </div>
+</div>
+
 <div class="bildirim" id="bildirim"></div>
 
 <script>
@@ -284,6 +320,7 @@ tr:hover td{background:#f8fafc}
 })();
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
+const GRUP_ADLARI={1:'Grup 1 – 1-2. Sınıf',2:'Grup 2 – 3-4. Sınıf',3:'Grup 3 – 5-6. Sınıf',4:'Grup 4 – 7-8. Sınıf',5:'Grup 5 – Lise',6:'Grup 6 – Yetişkin'};
 
 function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
 
@@ -351,6 +388,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='egzersizler') egzersizleriOlustur();
   if(sayfa==='okuma-teknikleri') okumaTeknikleriOlustur();
   if(sayfa==='ders-metinleri') dersMetinleriYukleOg();
+  if(sayfa==='olcum-metinleri') olcumMetinleriYukleOg();
 }
 
 // ── EGZERSİZ KARTLARI ──
@@ -401,6 +439,39 @@ function dersMetniGoruntuleOg(baslik,zorlukAdi,metin,kelime){
   document.getElementById('dersOgMeta').textContent=zorlukAdi+' · '+kelime+' kelime';
   document.getElementById('dersOgMetin').textContent=metin;
   modalAc('ders-og-goruntule');
+}
+
+// ── ÖLÇÜM METİNLERİ (GÖRÜNTÜLEME) ──
+async function olcumMetinleriYukleOg(){
+  const liste=document.getElementById('olcum-og-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=yas_grubu,baslik';
+  const grup=document.getElementById('filtre-olcum-og-grup').value;
+  if(grup) filtre+='&yas_grubu=eq.'+grup;
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/olcum_metinleri?'+filtre,{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const metinler=await res.json();
+    document.getElementById('olcum-og-sayac').textContent=metinler.length+' metin';
+    if(!metinler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz ölçüm metni eklenmemiş.</div>';return;}
+    const renkler={1:'g1',2:'g2',3:'g3',4:'g4',5:'g5',6:'g6'};
+    liste.innerHTML='<table><thead><tr><th>Yaş Grubu</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="olcum-og-tbody"></tbody></table>';
+    const tbody=document.getElementById('olcum-og-tbody');
+    metinler.forEach(m=>{
+      const tarih=m.created_at?new Date(m.created_at).toLocaleDateString('tr-TR'):'-';
+      const tr=document.createElement('tr');
+      const mG=kacirOg(m.metin),bG=kacirOg(m.baslik);
+      tr.innerHTML=`<td><span class="grup-badge ${renkler[m.yas_grubu]||'g1'}">${GRUP_ADLARI[m.yas_grubu]||m.yas_grubu}</span></td><td><strong>${m.baslik}</strong><div style="font-size:0.8rem;color:#94a3b8;margin-top:0.3rem">${m.metin.substring(0,100)}...</div></td><td>${m.kelime_sayisi||'-'}</td><td>${tarih}</td><td><button class="islem-btn goruntule" onclick="olcumMetniGoruntuleOg('${bG}','${GRUP_ADLARI[m.yas_grubu]||m.yas_grubu}','${mG}',${m.kelime_sayisi||0})">👁 Görüntüle</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+function olcumMetniGoruntuleOg(baslik,grupAdi,metin,kelime){
+  document.getElementById('olcumOgBaslik').textContent=baslik;
+  document.getElementById('olcumOgMeta').textContent=grupAdi+' · '+kelime+' kelime';
+  document.getElementById('olcumOgMetin').textContent=metin;
+  modalAc('olcum-og-goruntule');
 }
 
 // ── ÖĞRENCİLERİ YÜKLE ──
