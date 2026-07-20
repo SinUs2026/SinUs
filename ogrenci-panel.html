@@ -95,6 +95,15 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 .tip-odak{color:#1d4ed8}
 .tip-okuma{color:#b45309}
 
+/* GEZEGEN YOLCULUĞU */
+.gezegen-sarici{display:flex;align-items:flex-start;gap:0;min-width:max-content}
+.gezegen-kutu{display:flex;align-items:center}
+.gezegen-govde{position:relative;width:52px;height:52px;margin:0 auto 6px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.gezegen-no{font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.92);text-shadow:0 1px 2px rgba(0,0,0,0.35)}
+.gezegen-halka{position:absolute;top:50%;left:50%;width:76px;height:27px;border:1.5px solid rgba(201,163,95,0.55);border-radius:50%;transform:translate(-50%,-50%) rotate(-18deg);pointer-events:none}
+.gezegen-etiket{font-size:0.62rem;line-height:1.4;text-align:center}
+.gezegen-yol{width:22px;height:1.5px;background:#e2e8f0;margin-bottom:24px;flex-shrink:0}
+
 @media(max-width:768px){.grid{grid-template-columns:1fr}.ustbilgi{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -508,7 +517,8 @@ async function ilkGirisKaydet(){
 }
 
 // ── GÜNÜ BİTİR SİSTEMİ ──
-let hikayeBaslangicZamani=null;
+let gbBaslaZaman=null;
+let gbBitisZaman=null;
 let mevcutHikaye=null;
 
 async function gunuBitirAc(){
@@ -540,11 +550,12 @@ function hikayeEkraniGoster(){
   document.getElementById('gbEkran1').style.display='block';
   document.getElementById('gbEkran2').style.display='none';
   document.getElementById('gbEkran3').style.display='none';
-  hikayeBaslangicZamani=null;
+  gbBaslaZaman=null;
+  gbBitisZaman=null;
 }
 
 function okumayaBasla(){
-  hikayeBaslangicZamani=Date.now();
+  gbBaslaZaman=Date.now();
   document.getElementById('gbOkuBtn').style.display='none';
   const btn=document.getElementById('gbBitirBtn');
   btn.style.display='block';
@@ -562,19 +573,22 @@ function okumayaBasla(){
 }
 
 function okumayiBitir(){
-  const sure=(Date.now()-hikayeBaslangicZamani)/1000/60; // dakika
-  const kelime=mevcutHikaye.kelime_sayisi||100;
+  gbBitisZaman=Date.now();
+  // "Ölçüm Yap" özelliğiyle birebir aynı hesaplama mantığı:
+  // saniye cinsinden geçen süre (en az 1 sn), kelime sayısı ÷ (saniye/60) = KPM.
+  const saniye=Math.max(1,Math.round((gbBitisZaman-gbBaslaZaman)/1000));
+  const kelime=mevcutHikaye.kelime_sayisi||0;
+  const hamHiz=kelime>0?Math.round(kelime/(saniye/60)):0;
   // Sistemin desteklediği azami okuma hızı 1000 kelime/dk'dır (bkz. egzersiz
   // hız ölçekleri). Süre ölçümü ne kadar kısa olursa olsun, kaydedilen/gösterilen
   // hız bu gerçekçi tavanın üzerine çıkamaz.
-  const hamHiz=Math.round(kelime/sure);
   const hiz=Math.min(hamHiz,1000);
-  document.getElementById('gbHizSonuc').textContent=hiz+' kelime/dakika';
+  document.getElementById('gbHizSonuc').textContent=(hiz||'—')+' kelime/dakika';
   document.getElementById('gbEkran1').style.display='none';
   document.getElementById('gbEkran2').style.display='block';
   soruOlustur();
   window._okuma_hizi=hiz;
-  window._sure_dk=Math.round(sure*10)/10;
+  window._sure_dk=Math.round((saniye/60)*10)/10;
 }
 
 function soruOlustur(){
@@ -619,7 +633,7 @@ function sonuclariGoster(){
 
   document.getElementById('gbEkran2').style.display='none';
   document.getElementById('gbEkran3').style.display='block';
-  document.getElementById('gbSonucHiz').textContent=hiz+' kelime/dk';
+  document.getElementById('gbSonucHiz').textContent=(hiz||'—')+' kelime/dk';
   document.getElementById('gbSonucAnlama').textContent='%'+oran;
   document.getElementById('gbSonucDogru').textContent=dogru+' / '+toplam+' doğru';
 
@@ -655,8 +669,12 @@ async function sonucKaydet(hiz,anlamaOrani,dogru,toplam){
       })
     });
     // Öğrencinin okuma hızını güncelle
-    await rpc('ogrenci_ilerleme_guncelle',{p_okuma_hizi:hiz,p_mevcut_gun:gun+1});
-  }catch(e){}
+    if(hiz>0){
+      await rpc('ogrenci_ilerleme_guncelle',{p_okuma_hizi:hiz,p_mevcut_gun:gun+1});
+    }
+  }catch(e){
+    console.error('Günü Bitir sonucu kaydedilemedi:',e);
+  }
 }
 
 function gunuBitirKapat(){
@@ -666,6 +684,18 @@ function gunuBitirKapat(){
 // Başlat
 panelYukle();
 yolculukYukle();
+
+// ── GEZEGEN TEMALI GELİŞİM YOLCULUĞU ──
+const GEZEGENLER=[
+  {renk1:'#c9c9c9',renk2:'#84858a'},              // Merkür
+  {renk1:'#f0dcae',renk2:'#c39a5c'},              // Venüs
+  {renk1:'#7fb3e8',renk2:'#1d4a8a'},              // Dünya
+  {renk1:'#e2a184',renk2:'#9c4526'},              // Mars
+  {renk1:'#ecd6ac',renk2:'#a67c4a'},              // Jüpiter
+  {renk1:'#f0e0ab',renk2:'#c9a35f',halka:true},   // Satürn
+  {renk1:'#a9e2e0',renk2:'#4f9797'},              // Uranüs
+  {renk1:'#8b9ce8',renk2:'#2c3a75'}               // Neptün
+];
 
 async function yolculukYukle(){
   if(!ogrenci) { setTimeout(yolculukYukle, 500); return; }
@@ -681,47 +711,45 @@ async function yolculukYukle(){
   } catch(e){}
 
   const mevcutGun = ogrenci.mevcut_gun||1;
+
   for(let g=1; g<=30; g++){
     const p = performans[g];
     const tamamlandi = p && p.okuma_hizi;
     const bugun = g===mevcutGun;
+    const gezegen = GEZEGENLER[(g-1)%8];
 
-    // Daire
     const kutu = document.createElement('div');
-    kutu.style.cssText = 'display:flex;align-items:center;';
+    kutu.className='gezegen-kutu';
+
+    const sonrakiHalka = gezegen.halka ? `<div class="gezegen-halka"></div>` : '';
+    const golgeStil = bugun
+      ? 'box-shadow:0 0 0 2.5px #d4af37, 0 0 10px rgba(212,175,55,0.45);'
+      : 'box-shadow:inset -5px -5px 9px rgba(0,0,0,0.28);';
+    const durumFiltre = (!tamamlandi && !bugun) ? 'filter:grayscale(1) opacity(0.4);' : '';
+
+    const etiketIcerik = tamamlandi
+      ? `<span style="color:#0a1628;font-weight:600">${p.okuma_hizi} kpm<br>%${p.anlama_orani}</span>`
+      : bugun
+        ? `<span style="color:#d4af37;font-weight:700">Bugün</span>`
+        : `<span style="color:#cbd5e1">—</span>`;
 
     const daire = document.createElement('div');
-    daire.style.cssText = `
-      width:72px;text-align:center;
-    `;
-    daire.innerHTML = `
-      <div style="
-        width:52px;height:52px;border-radius:50%;margin:0 auto 6px;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;
-        font-size:0.7rem;font-weight:700;
-        ${tamamlandi
-          ? 'background:#0a1628;color:white;'
-          : bugun
-            ? 'background:#eff6ff;color:#2563a8;border:2px solid #2563a8;'
-            : 'background:#f1f5f9;color:#94a3b8;border:2px dashed #e2e8f0;'
-        }
-      ">
-        <span style="font-size:0.65rem;opacity:0.7">Gün</span>
-        <span style="font-size:0.85rem">${g}</span>
+    daire.style.cssText='width:76px;text-align:center;';
+    daire.innerHTML=`
+      <div style="position:relative;width:52px;height:52px;margin:0 auto 6px;${durumFiltre}">
+        ${sonrakiHalka}
+        <div class="gezegen-govde" style="background:radial-gradient(circle at 32% 28%, ${gezegen.renk1}, ${gezegen.renk2} 78%);${golgeStil}">
+          <span class="gezegen-no">${g}</span>
+        </div>
       </div>
-      ${tamamlandi ? `
-        <div style="font-size:0.62rem;color:#0a1628;font-weight:600;line-height:1.4">
-          ${p.okuma_hizi} kpm<br>%${p.anlama_orani}
-        </div>` : `<div style="font-size:0.62rem;color:#cbd5e1">—</div>`}
+      <div class="gezegen-etiket">${etiketIcerik}</div>
     `;
     kutu.appendChild(daire);
 
-    // Ok (son hariç)
     if(g<30){
-      const ok = document.createElement('div');
-      ok.style.cssText = 'color:#cbd5e1;font-size:0.8rem;margin-bottom:18px;flex-shrink:0;';
-      ok.textContent = '→';
-      kutu.appendChild(ok);
+      const yol=document.createElement('div');
+      yol.className='gezegen-yol';
+      kutu.appendChild(yol);
     }
 
     sarici.appendChild(kutu);
@@ -783,9 +811,9 @@ async function yolculukYukle(){
 <!-- GELİŞİM YOLCULUĞU -->
 <div style="max-width:1100px;margin:2rem auto;padding:0 5%">
   <div style="background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05)">
-    <div style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.5rem">🗺️ Gelişim Yolculuğu</div>
+    <div style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.5rem">🪐 Gelişim Yolculuğu</div>
     <div style="overflow-x:auto;padding-bottom:1rem">
-      <div id="yolculukSarici" style="display:flex;align-items:flex-start;gap:0;min-width:max-content"></div>
+      <div id="yolculukSarici" class="gezegen-sarici"></div>
     </div>
   </div>
 </div>
