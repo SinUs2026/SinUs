@@ -432,6 +432,22 @@ tr:hover td{background:#f8fafc}
   </div>
 </div>
 
+<div class="modal" id="modal-hikaye-duzenle">
+  <div class="modal-kutu genis">
+    <div class="modal-baslik">✏️ Hikâye Düzenle</div>
+    <input type="hidden" id="hd-id">
+    <div class="form-grid-3">
+      <div class="form-grup"><label>Seviye</label><select id="hd-asama"><option value="2">Seviye-1</option><option value="3">Seviye-2</option><option value="4">Seviye-3</option></select></div>
+      <div class="form-grup"><label>Gün</label><select id="hd-gun"><script>for(var i=1;i<=30;i++) document.write('<option value="'+i+'">'+i+'. Gün</option>')</script></select></div>
+      <div class="form-grup"><label>Kelime Sayısı</label><input type="number" id="hd-kelime" min="50" max="500"></div>
+    </div>
+    <div class="form-grup"><label>Hikâye Başlığı</label><input type="text" id="hd-baslik"></div>
+    <div class="form-grup"><label>Hikâye Metni</label><textarea id="hd-metin" oninput="hikayeDuzenleKelimeSay()"></textarea><div class="sayac" id="hikaye-duzenle-kelime-sayac">0 kelime</div></div>
+    <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi-hikaye-duzenle" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi-hikaye-duzenle')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div>
+    <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('hikaye-duzenle')">İptal</button><button class="btn-kaydet" id="btn-hikaye-guncelle" onclick="hikayeGuncelle()">💾 Güncelle</button></div>
+  </div>
+</div>
+
 <div class="modal" id="modal-olcum">
   <div class="modal-kutu genis">
     <div class="modal-baslik">📏 Yeni Ölçüm Metni Ekle</div>
@@ -1137,6 +1153,7 @@ function soruVerileriniTopla(listeId){
 function modalKapat(tip){
   document.getElementById('modal-'+tip).classList.remove('acik');
   if(tip==='hikaye'){document.getElementById('h-baslik').value='';document.getElementById('h-metin').value='';document.getElementById('h-kelime').value='';document.getElementById('kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi').innerHTML='';}
+  if(tip==='hikaye-duzenle'){document.getElementById('soru-listesi-hikaye-duzenle').innerHTML='';}
   if(tip==='olcum'){document.getElementById('o-baslik').value='';document.getElementById('o-metin').value='';document.getElementById('o-kelime').value='';document.getElementById('olcum-kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi-olcum').innerHTML='';}
   if(tip==='olcum-duzenle'){document.getElementById('soru-listesi-olcum-duzenle').innerHTML='';}
   if(tip==='ders'){document.getElementById('d-baslik').value='';document.getElementById('d-metin').value='';document.getElementById('d-kelime').value='';document.getElementById('ders-kelime-sayac').textContent='0 kelime';document.getElementById('soru-listesi-ders').innerHTML='';}
@@ -1377,6 +1394,37 @@ async function hikayeKaydet(){
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
 }
+async function hikayeDuzenleAc(id,asama,gun,baslik,metin,kelime){
+  document.getElementById('hd-id').value=id;document.getElementById('hd-asama').value=asama;
+  document.getElementById('hd-gun').value=gun;document.getElementById('hd-baslik').value=baslik;
+  document.getElementById('hd-metin').value=metin;document.getElementById('hd-kelime').value=kelime;
+  document.getElementById('hikaye-duzenle-kelime-sayac').textContent=kelime+' kelime';
+  document.getElementById('soru-listesi-hikaye-duzenle').innerHTML='';
+  modalAc('hikaye-duzenle');
+  try{
+    const veri=await supabase('GET','hikayeler',null,'id=eq.'+id+'&select=sorular');
+    if(veri.length && veri[0].sorular && veri[0].sorular.length){
+      sorulariDoldur('soru-listesi-hikaye-duzenle',veri[0].sorular);
+    }
+  }catch(e){}
+}
+function hikayeDuzenleKelimeSay(){const m=document.getElementById('hd-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('hikaye-duzenle-kelime-sayac').textContent=s+' kelime';document.getElementById('hd-kelime').value=s;}
+async function hikayeGuncelle(){
+  const id=document.getElementById('hd-id').value,asama=document.getElementById('hd-asama').value,gun=document.getElementById('hd-gun').value;
+  const baslik=document.getElementById('hd-baslik').value.trim(),metin=document.getElementById('hd-metin').value.trim();
+  const kelime=document.getElementById('hd-kelime').value;
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi-hikaye-duzenle');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
+  const btn=document.getElementById('btn-hikaye-guncelle');btn.textContent='⏳ Güncelleniyor...';
+  try{
+    await supabase('PATCH','hikayeler',{asama:parseInt(asama),gun:parseInt(gun),baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular},'id=eq.'+id);
+    bildirimGoster('✅ Hikâye güncellendi!','basari');modalKapat('hikaye-duzenle');hikayeleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Güncelle';
+}
 async function hikayeSil(id){
   if(!confirm('Bu hikâyeyi silmek istediğinize emin misiniz?')) return;
   try{await supabase('DELETE','hikayeler',null,'id=eq.'+id);bildirimGoster('🗑️ Hikâye silindi.','basari');hikayeleriYukle();}
@@ -1399,7 +1447,8 @@ async function hikayeleriYukle(){
     hikayeler.forEach(h=>{
       const tarih=h.created_at?new Date(h.created_at).toLocaleDateString('tr-TR'):'-';
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td><span class="asama-badge ${renkler[h.asama]}">${SEVIYE_ADI[h.asama]||h.asama+'. Seviye ⚠️'}</span></td><td>${h.gun}. Gün</td><td><strong>${h.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${h.metin.substring(0,100)}...</div></td><td>${h.kelime_sayisi||'-'}</td><td>${tarih}</td><td><button class="islem-btn sil" onclick="hikayeSil(${h.id})">🗑️ Sil</button></td>`;
+      const mG=kacirAdmin(h.metin),bG=kacirAdmin(h.baslik);
+      tr.innerHTML=`<td><span class="asama-badge ${renkler[h.asama]}">${SEVIYE_ADI[h.asama]||h.asama+'. Seviye ⚠️'}</span></td><td>${h.gun}. Gün</td><td><strong>${h.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${h.metin.substring(0,100)}...</div></td><td>${h.kelime_sayisi||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="hikayeDuzenleAc(${h.id},${h.asama},${h.gun},'${bG}','${mG}',${h.kelime_sayisi||0})" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="hikayeSil(${h.id})">🗑️ Sil</button></td>`;
       tbody.appendChild(tr);
     });
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
