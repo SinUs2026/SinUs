@@ -4,12 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sağ-Sol Takip – SinUs</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
 :root{--bg:#060d1a;--accent:#00d4ff;--accent2:#0088bb;--gold:#ffd700;--green:#00ff88;--white:#e8f4ff;--grey:#6a8aaa;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min-height:100vh;user-select:none;}
-#app{max-width:1100px;margin:0 auto;padding:12px 16px;min-height:100vh;display:flex;flex-direction:column;}
+#app{max-width:1100px;margin:0 auto;padding:8px 12px;min-height:100vh;display:flex;flex-direction:column;}
 .header{display:flex;justify-content:space-between;align-items:center;padding:4px 0 8px;}
 .logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent);letter-spacing:3px;}
 .logo span{color:var(--white);}
@@ -49,18 +52,20 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .modal-box .icerik{font-size:0.85rem;color:var(--grey);line-height:1.8;}
 .modal-box .icerik strong{color:var(--white);}
 
-.egzersiz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1100px;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:16px;}
+body.egzersiz-aktif .header{display:none;}
+
+.egzersiz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1100px;padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:8px;}
 .hud-item{text-align:center;}
 .hud-lbl{font-size:0.6rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
 .hud-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-top:2px;}
 /* EGZERSİZ ALANI: sabit yükseklik yerine kalan dikey alanı doldurur, tam ekran yapılmasa bile ekranı verimli kullanır */
-.alan{width:100%;max-width:1100px;flex:1 1 auto;min-height:340px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;position:relative;overflow:hidden;margin-bottom:16px;}
+.alan{width:100%;max-width:1100px;flex:1 1 auto;min-height:480px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;position:relative;overflow:hidden;margin-bottom:8px;}
 .nokta-isaret{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(0,212,255,0.3);transform:translate(-50%,-50%);}
 .nokta{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,212,255,0.8),0 0 40px rgba(0,212,255,0.4);transition:none;z-index:2;}
-.sure-bar-wrap{width:100%;max-width:1100px;margin-bottom:8px;}
+.sure-bar-wrap{width:100%;max-width:1100px;margin-bottom:6px;}
 .sure-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
 .sure-bar-ic{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width 1s linear;}
-.mesaj{font-family:'Orbitron',sans-serif;font-size:0.8rem;color:var(--grey);letter-spacing:2px;text-align:center;margin-bottom:8px;min-height:20px;}
+.mesaj{font-family:'Orbitron',sans-serif;font-size:0.8rem;color:var(--grey);letter-spacing:2px;text-align:center;margin-bottom:6px;min-height:16px;}
 .bitti-kart{width:100%;max-width:440px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:28px 24px;text-align:center;margin:16px 0;}
 .bitti-icon{font-size:3rem;display:block;margin-bottom:10px;}
 .bitti-baslik{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;color:var(--green);margin-bottom:8px;}
@@ -85,7 +90,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
   .game-title{font-size:1.15rem;}
   .game-sub{margin-bottom:10px;}
   .start-btn{padding:12px;}
-  .alan{min-height:260px;}
+  .alan{min-height:320px;}
 }
 </style>
 </head>
@@ -242,6 +247,7 @@ function selNokta(n, el){
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById(id).style.display='flex';
+  document.body.classList.toggle('egzersiz-aktif', id === 'screenEgzersiz');
 }
 
 // ── TAM EKRAN ──
