@@ -4,18 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yukarı-Aşağı Takip – SinUs</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
 :root{--bg:#060d1a;--accent:#00d4ff;--accent2:#0088bb;--gold:#ffd700;--green:#00ff88;--white:#e8f4ff;--grey:#6a8aaa;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min-height:100vh;user-select:none;}
-#app{max-width:800px;margin:0 auto;padding:12px 16px;min-height:100vh;display:flex;flex-direction:column;}
+#app{max-width:1400px;margin:0 auto;padding:8px 8px;min-height:100vh;display:flex;flex-direction:column;}
 .header{display:flex;justify-content:space-between;align-items:center;padding:4px 0 8px;}
 .logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent);letter-spacing:3px;}
 .logo span{color:var(--white);}
 .screen{display:none;flex-direction:column;align-items:center;flex:1;}
 .screen.active{display:flex;}
 #screenMenu.active{justify-content:center;}
+body.egzersiz-aktif .header{display:none;}
 .title-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:2px;}
 .game-title{font-family:'Orbitron',sans-serif;font-size:1.35rem;font-weight:900;text-align:center;}
 .info-btn{width:26px;height:26px;border-radius:50%;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.35);color:var(--accent);font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -35,6 +39,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
   .game-title{font-size:1.15rem;}
   .game-sub{margin-bottom:10px;}
   .start-btn{padding:12px;}
+  .alan{min-height:320px;}
 }
 .hiz-wrap{display:flex;align-items:center;gap:12px;}
 .hiz-slider{flex:1;-webkit-appearance:none;height:6px;border-radius:3px;background:rgba(255,255,255,0.1);outline:none;}
@@ -43,22 +48,22 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .sure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .sure-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px;cursor:pointer;text-align:center;color:var(--grey);font-size:0.85rem;}
 .sure-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
-.nokta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.nokta-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
 .nokta-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px 6px;cursor:pointer;text-align:center;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;transition:all 0.2s;}
 .nokta-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
 .start-btn{width:100%;max-width:500px;padding:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;}
 .geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
-.egzersiz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:16px;}
+.egzersiz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1400px;padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:8px;}
 .hud-item{text-align:center;}
 .hud-lbl{font-size:0.6rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
 .hud-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-top:2px;}
-.alan{width:100%;max-width:700px;height:340px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;position:relative;overflow:hidden;margin-bottom:16px;}
+.alan{width:100%;max-width:1400px;flex:1 1 auto;min-height:480px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;position:relative;overflow:hidden;margin-bottom:8px;}
 .nokta-isaret{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(0,212,255,0.3);transform:translate(-50%,-50%);}
 .nokta{position:absolute;width:20px;height:20px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,212,255,0.8),0 0 40px rgba(0,212,255,0.4);z-index:2;}
-.sure-bar-wrap{width:100%;max-width:700px;margin-bottom:8px;}
+.sure-bar-wrap{width:100%;max-width:1400px;margin-bottom:6px;}
 .sure-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
 .sure-bar-ic{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width 1s linear;}
-.mesaj{font-family:'Orbitron',sans-serif;font-size:0.8rem;color:var(--grey);letter-spacing:2px;text-align:center;margin-bottom:8px;}
+.mesaj{font-family:'Orbitron',sans-serif;font-size:0.8rem;color:var(--grey);letter-spacing:2px;text-align:center;margin-bottom:6px;min-height:16px;}
 .bitti-kart{width:100%;max-width:440px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:28px 24px;text-align:center;margin:16px 0;}
 .bitti-icon{font-size:3rem;display:block;margin-bottom:10px;}
 .bitti-baslik{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;color:var(--green);margin-bottom:8px;}
@@ -69,7 +74,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 .tam-ekran-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.3);border-radius:8px;color:var(--accent);font-size:1rem;cursor:pointer;font-family:'Nunito',sans-serif;z-index:10;display:flex;align-items:center;justify-content:center;}
 .tam-ekran-btn:hover{background:rgba(0,212,255,0.22);}
 body.tam-ekran-modu #screenEgzersiz{padding:0;}
-body.tam-ekran-modu .alan{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;border-radius:0;margin:0;z-index:1;}
+body.tam-ekran-modu .alan{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;min-height:0;border-radius:0;margin:0;z-index:1;}
 body.tam-ekran-modu .egzersiz-hud{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;max-width:460px;width:90%;background:rgba(6,13,26,0.75);backdrop-filter:blur(4px);}
 body.tam-ekran-modu .sure-bar-wrap{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:20;max-width:460px;width:90%;}
 body.tam-ekran-modu .mesaj{position:fixed;top:96px;left:0;right:0;z-index:20;}
@@ -107,8 +112,9 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
       <div class="nokta-grid">
         <div class="nokta-btn sel" onclick="selNokta(2,this)">2</div>
         <div class="nokta-btn" onclick="selNokta(4,this)">4</div>
-        <div class="nokta-btn" onclick="selNokta(6,this)">6</div>
         <div class="nokta-btn" onclick="selNokta(8,this)">8</div>
+        <div class="nokta-btn" onclick="selNokta(12,this)">12</div>
+        <div class="nokta-btn" onclick="selNokta(16,this)">16</div>
       </div>
     </div>
     <button class="start-btn" id="mainStartBtn" onclick="baslat()">BAŞLAT ▶</button>
@@ -186,7 +192,7 @@ const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika olarak gelir
-const NOKTA_PARAM = parseInt(_kParams.get('nokta')); // 2/4/6/8 — opsiyonel, admin panelinde henüz seçici yok
+const NOKTA_PARAM = parseInt(_kParams.get('nokta')); // 2/4/8/12/16 — opsiyonel, admin panelinde henüz seçici yok
 
 function kilitliModuBaslat(){
   document.getElementById('kartHiz').style.display='none';
@@ -194,7 +200,7 @@ function kilitliModuBaslat(){
   document.getElementById('kartNokta').style.display='none';
   if(!isNaN(HIZ_PARAM)) G.hiz = Math.min(10, Math.max(1, HIZ_PARAM));
   if(!isNaN(SURE_PARAM_DK)) G.sure = SURE_PARAM_DK * 60;
-  if([2,4,6,8].includes(NOKTA_PARAM)) G.noktaSayisi = NOKTA_PARAM;
+  if([2,4,8,12,16].includes(NOKTA_PARAM)) G.noktaSayisi = NOKTA_PARAM;
   document.getElementById('backBtn').style.display='none';
   document.getElementById('durdurBtn').style.display='none';
   document.getElementById('bittiBtnRow').innerHTML = '';
@@ -203,7 +209,11 @@ if(KILITLI){ kilitliModuBaslat(); }
 
 function selSure(s,el){G.sure=s;document.querySelectorAll('.sure-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
 function selNokta(n,el){G.noktaSayisi=n;document.querySelectorAll('.nokta-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.style.display='none');document.getElementById(id).style.display='flex';}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById(id).style.display='flex';
+  document.body.classList.toggle('egzersiz-aktif', id === 'screenEgzersiz');
+}
 
 // ── TAM EKRAN ──
 function tamEkranGirmeyeCalis(){
@@ -234,7 +244,7 @@ function sutunYuzdeleri(sutunSayisi){
 }
 
 // Z şeklinde tarama sırası: her sütunda üst->alt, sonra çapraz bir sonraki sütunun üstüne geçer.
-// noktaSayisi=2 → 1 sütun (klasik dikey takip), 4→2 sütun, 6→3 sütun, 8→4 sütun.
+// noktaSayisi=2 → 1 sütun, 4→2 sütun, 8→4 sütun, 12→6 sütun, 16→8 sütun.
 function noktalariOlustur(noktaSayisi){
   const sutunSayisi = Math.max(1, Math.round(noktaSayisi/2));
   const xler = sutunYuzdeleri(sutunSayisi);
