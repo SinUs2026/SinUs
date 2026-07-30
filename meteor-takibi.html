@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Meteor Takibi – SinUs</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
 
@@ -39,7 +42,7 @@ body {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 700px;
+  max-width: 1400px;
   margin: 0 auto;
   height: 100vh;
   display: flex;
@@ -108,7 +111,7 @@ body {
 .countdown-big { font-family:'Orbitron',sans-serif; font-size:3rem; font-weight:900; color:var(--gold); text-shadow:0 0 30px rgba(255,215,0,0.5); animation:countPulse 0.9s ease-in-out infinite; }
 @keyframes countPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
 
-.select-banner { position:absolute; top:14px; left:50%; transform:translateX(-50%); background:rgba(6,13,26,0.92); border:1.5px solid rgba(0,212,255,0.5); border-radius:14px; padding:10px 24px; text-align:center; z-index:25; pointer-events:none; white-space:nowrap; }
+.select-banner { position:absolute; top:50%; right:12px; transform:translateY(-50%); max-width:150px; background:rgba(6,13,26,0.92); border:1.5px solid rgba(0,212,255,0.5); border-radius:14px; padding:12px 14px; text-align:center; z-index:25; pointer-events:none; white-space:normal; }
 .select-banner-title { font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; color:var(--gold); letter-spacing:1px; }
 .select-banner-sub { font-size:0.75rem; color:var(--grey); margin-top:2px; }
 
