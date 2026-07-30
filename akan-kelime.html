@@ -4,12 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Akan Kelime – SinUs</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
 :root {
   --bg: #060d1a; --accent: #00d4ff; --accent2: #0088bb;
   --gold: #ffd700; --green: #00ff88; --red: #ff4466;
   --white: #e8f4ff; --grey: #6a8aaa;
+  --yazi-olcek: 1;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:var(--bg); font-family:'Nunito',sans-serif; color:var(--white); min-height:100vh; user-select:none; }
@@ -24,7 +28,7 @@ body::before {
     radial-gradient(2px 2px at 50% 40%, rgba(0,212,255,0.15) 0%, transparent 100%);
 }
 
-#app { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:16px; min-height:100vh; display:flex; flex-direction:column; }
+#app { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:16px; min-height:100vh; display:flex; flex-direction:column; }
 
 .header { display:flex; justify-content:space-between; align-items:center; padding:8px 0 16px; }
 .logo { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; color:var(--accent); letter-spacing:3px; }
@@ -43,7 +47,13 @@ body::before {
 .ayar-kart { background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.15); border-radius:16px; padding:20px; width:100%; max-width:560px; margin-bottom:14px; }
 .ayar-kart h3 { font-family:'Orbitron',sans-serif; font-size:0.68rem; color:var(--accent); letter-spacing:2px; margin-bottom:14px; opacity:0.8; }
 
-/* Metin Seçici */
+/* ── METİN SEÇİCİ: tek satır, tıklayınca açılır (madde 4.1) ── */
+.metin-secici{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.3);border-radius:12px;padding:12px 16px;cursor:pointer;transition:all 0.2s;}
+.metin-secici:hover{background:rgba(0,212,255,0.1);}
+.metin-secici-etiket{font-size:0.9rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.metin-secici-ok{color:var(--accent);font-size:0.8rem;transition:transform 0.2s;flex-shrink:0;}
+.metin-secici.acik .metin-secici-ok{transform:rotate(180deg);}
+.metin-dropdown{margin-top:10px;}
 .metin-liste { display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; }
 .metin-item { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:10px 14px; cursor:pointer; transition:all 0.2s; }
 .metin-item:hover { background:rgba(0,212,255,0.1); border-color:var(--accent); }
@@ -71,6 +81,11 @@ body::before {
 .grup-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:10px; cursor:pointer; text-align:center; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.9rem; font-weight:700; transition:all 0.2s; }
 .grup-btn:hover, .grup-btn.sel { background:rgba(0,212,255,0.15); border-color:var(--accent); color:var(--white); }
 
+/* Yazı boyutu seçici (4 seçenek) */
+.boyut-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.boyut-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:10px 6px; cursor:pointer; text-align:center; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; transition:all 0.2s; }
+.boyut-btn:hover, .boyut-btn.sel { background:rgba(0,212,255,0.15); border-color:var(--accent); color:var(--white); }
+
 .basla-btn { width:100%; max-width:560px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; margin-top:8px; transition:all 0.2s; }
 .basla-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,212,255,0.3); }
 .basla-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
@@ -89,10 +104,11 @@ body::before {
 .ilerleme-bar { width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
 .ilerleme-ic { height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); border-radius:3px; transition:width 0.3s; }
 
-/* Kelime gösterim alanı */
+/* Kelime gösterim alanı — artık kalan dikey alanı dolduruyor */
 .kelime-alan {
   width:100%;
-  min-height:260px;
+  flex:1 1 auto;
+  min-height:420px;
   background:rgba(255,255,255,0.02);
   border:1px solid rgba(0,212,255,0.15);
   border-radius:20px;
@@ -174,15 +190,21 @@ body::before {
     <!-- Metin Seç -->
     <div class="ayar-kart" id="kartMetinSec">
       <h3>METİN SEÇ</h3>
-      <div class="filtre-row">
-        <button class="filtre-btn aktif" onclick="filtreUygula('',this)">Tümü</button>
-        <button class="filtre-btn" onclick="filtreUygula('basit',this)">Basit</button>
-        <button class="filtre-btn" onclick="filtreUygula('orta',this)">Orta</button>
-        <button class="filtre-btn" onclick="filtreUygula('zor',this)">Zor</button>
-        <button class="filtre-btn" onclick="filtreUygula('cok_zor',this)">Çok Zor</button>
+      <div class="metin-secici" id="metinSecici" onclick="metinDropdownToggle()">
+        <span class="metin-secici-etiket" id="metinSeciciEtiket">📄 Metin seçin...</span>
+        <span class="metin-secici-ok">▾</span>
       </div>
-      <div class="metin-liste" id="metinListe">
-        <div style="text-align:center;color:var(--grey);padding:20px;font-size:0.85rem">⏳ Metinler yükleniyor...</div>
+      <div class="metin-dropdown" id="metinDropdown" style="display:none">
+        <div class="filtre-row">
+          <button class="filtre-btn aktif" onclick="filtreUygula('',this)">Tümü</button>
+          <button class="filtre-btn" onclick="filtreUygula('basit',this)">Basit</button>
+          <button class="filtre-btn" onclick="filtreUygula('orta',this)">Orta</button>
+          <button class="filtre-btn" onclick="filtreUygula('zor',this)">Zor</button>
+          <button class="filtre-btn" onclick="filtreUygula('cok_zor',this)">Çok Zor</button>
+        </div>
+        <div class="metin-liste" id="metinListe">
+          <div style="text-align:center;color:var(--grey);padding:20px;font-size:0.85rem">⏳ Metinler yükleniyor...</div>
+        </div>
       </div>
     </div>
 
@@ -211,6 +233,17 @@ body::before {
         <span>50 (Yavaş)</span>
         <span>500 (Orta)</span>
         <span>1000 (Hızlı)</span>
+      </div>
+    </div>
+
+    <!-- Yazı Boyutu -->
+    <div class="ayar-kart" id="kartYaziBoyutu">
+      <h3>YAZI BOYUTU</h3>
+      <div class="boyut-grid">
+        <div class="boyut-btn" onclick="selYaziBoyutu(0.75,this)">Küçük</div>
+        <div class="boyut-btn sel" onclick="selYaziBoyutu(1,this)">Orta</div>
+        <div class="boyut-btn" onclick="selYaziBoyutu(1.25,this)">Büyük</div>
+        <div class="boyut-btn" onclick="selYaziBoyutu(1.5,this)">Çok Büyük</div>
       </div>
     </div>
 
@@ -279,6 +312,7 @@ const G = {
   seciliMetin: null,
   kelimeGrubu: 1,
   kpm: 150,
+  yaziOlcek: 1,
   kelimeler: [],
   gruplar: [],
   mevcutGrup: 0,
@@ -286,6 +320,46 @@ const G = {
   timeout: null,
   filtre: ''
 };
+
+// ── YAZI BOYUTU TERCİHİ (tarayıcıda hatırlanır) ──
+(function(){
+  try{
+    const kayitli = parseFloat(localStorage.getItem('sinus_yazi_boyutu'));
+    if(!isNaN(kayitli)){
+      G.yaziOlcek = kayitli;
+      document.querySelectorAll('#kartYaziBoyutu .boyut-btn').forEach(b=>{
+        b.classList.toggle('sel', parseFloat(b.getAttribute('onclick').match(/selYaziBoyutu\(([\d.]+)/)[1]) === kayitli);
+      });
+    }
+  }catch(e){}
+})();
+
+function selYaziBoyutu(v, el){
+  G.yaziOlcek = v;
+  document.querySelectorAll('#kartYaziBoyutu .boyut-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  try{ localStorage.setItem('sinus_yazi_boyutu', v); }catch(e){}
+  // Ekranda kelime gösteriliyorsa boyutu anında güncelle
+  const el2 = document.getElementById('kelimeGoster');
+  if (el2 && el2.dataset.tabanBoyut) el2.style.fontSize = `calc(${el2.dataset.tabanBoyut} * var(--yazi-olcek))`;
+}
+document.documentElement.style.setProperty('--yazi-olcek', 1);
+
+// ── METİN SEÇİCİ (madde 4.1 — tek satır, tıklayınca açılır) ──
+let metinDropdownAcik = false;
+function metinDropdownToggle(){
+  metinDropdownAcik = !metinDropdownAcik;
+  document.getElementById('metinDropdown').style.display = metinDropdownAcik ? 'block' : 'none';
+  document.getElementById('metinSecici').classList.toggle('acik', metinDropdownAcik);
+}
+document.addEventListener('click', function(e){
+  const kart = document.getElementById('kartMetinSec');
+  if(metinDropdownAcik && kart && !kart.contains(e.target)){
+    metinDropdownAcik = false;
+    document.getElementById('metinDropdown').style.display = 'none';
+    document.getElementById('metinSecici').classList.remove('acik');
+  }
+});
 
 // ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci ayar seçemez) ──
 const _kParams = new URLSearchParams(window.location.search);
@@ -365,6 +439,10 @@ function metinSec(m, el) {
   document.querySelectorAll('.metin-item').forEach(i => i.classList.remove('secili'));
   el.classList.add('secili');
   document.getElementById('baslaBtn').disabled = false;
+  document.getElementById('metinSeciciEtiket').textContent = '📄 ' + m.baslik;
+  metinDropdownAcik = false;
+  document.getElementById('metinDropdown').style.display = 'none';
+  document.getElementById('metinSecici').classList.remove('acik');
 }
 
 function filtreUygula(zorluk, el) {
@@ -451,12 +529,16 @@ function sonrakiGrup() {
   el.classList.add('gecis');
   setTimeout(() => {
     el.textContent = grup;
-    // Font boyutunu kelime sayısına göre ayarla
+    // Taban font boyutu kelime sayısına göre belirlenir, kullanıcının seçtiği
+    // YAZI BOYUTU çarpanı (--yazi-olcek) ile ölçeklenir.
     const uzunluk = grup.length;
-    if (uzunluk <= 6) el.style.fontSize = 'clamp(2.5rem,8vw,4rem)';
-    else if (uzunluk <= 12) el.style.fontSize = 'clamp(2rem,6vw,3rem)';
-    else if (uzunluk <= 20) el.style.fontSize = 'clamp(1.5rem,4vw,2.2rem)';
-    else el.style.fontSize = 'clamp(1.2rem,3vw,1.8rem)';
+    let taban;
+    if (uzunluk <= 6) taban = 'clamp(2.5rem,8vw,4rem)';
+    else if (uzunluk <= 12) taban = 'clamp(2rem,6vw,3rem)';
+    else if (uzunluk <= 20) taban = 'clamp(1.5rem,4vw,2.2rem)';
+    else taban = 'clamp(1.2rem,3vw,1.8rem)';
+    el.dataset.tabanBoyut = taban;
+    el.style.fontSize = `calc(${taban} * var(--yazi-olcek))`;
     el.classList.remove('gecis');
   }, 80);
 
