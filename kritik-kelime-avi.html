@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kritik Kelime Avı – SinUs</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+:root{--bg:#060d1a;--accent:#00d4ff;--accent2:#0088bb;--gold:#ffd700;--green:#00ff88;--red:#ff5566;--white:#e8f4ff;--grey:#6a8aaa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min-height:100vh;user-select:none;}
+#app{max-width:1400px;margin:0 auto;padding:8px 8px;min-height:100vh;display:flex;flex-direction:column;}
+.header{display:flex;justify-content:space-between;align-items:center;padding:4px 0 8px;}
+.logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent);letter-spacing:3px;}
+.logo span{color:var(--white);}
+.screen{display:none;flex-direction:column;align-items:center;flex:1;}
+.screen.active{display:flex;}
+#screenMenu.active,#screenHazir.active{justify-content:center;}
+body.egzersiz-aktif .header{display:none;}
+.title-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:2px;}
+.game-title{font-family:'Orbitron',sans-serif;font-size:1.35rem;font-weight:900;text-align:center;}
+.info-btn{width:26px;height:26px;border-radius:50%;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.35);color:var(--accent);font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.info-btn:hover{background:rgba(0,212,255,0.22);}
+.game-sub{color:var(--grey);font-size:0.72rem;letter-spacing:2px;text-align:center;margin-bottom:14px;}
+.menu-card{background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.15);border-radius:14px;padding:14px 16px;width:100%;max-width:500px;margin-bottom:10px;}
+.menu-card h3{font-family:'Orbitron',sans-serif;font-size:0.64rem;color:var(--accent);letter-spacing:2px;margin-bottom:10px;opacity:0.8;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:#0b1830;border:1px solid rgba(0,212,255,0.3);border-radius:18px;padding:22px 20px;max-width:420px;width:100%;position:relative;}
+.modal-close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--grey);font-size:1.3rem;cursor:pointer;line-height:1;}
+.modal-box h3{font-family:'Orbitron',sans-serif;font-size:0.75rem;color:var(--accent);letter-spacing:2px;margin-bottom:14px;padding-right:20px;}
+.modal-box .icerik{font-size:0.85rem;color:var(--grey);line-height:1.8;}
+.modal-box .icerik strong{color:var(--white);}
+@media (max-height: 700px){
+  .menu-card{padding:10px 14px;margin-bottom:8px;}
+  .game-title{font-size:1.15rem;}
+  .game-sub{margin-bottom:10px;}
+  .start-btn{padding:12px;}
+  .metin-kutu{min-height:280px;}
+}
+.zorluk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.zorluk-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px 6px;cursor:pointer;text-align:center;color:var(--grey);}
+.zorluk-btn .zb-ad{font-family:'Orbitron',sans-serif;font-size:0.78rem;font-weight:700;display:block;}
+.zorluk-btn .zb-sn{font-size:0.68rem;opacity:0.8;}
+.zorluk-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
+.start-btn{width:100%;max-width:500px;padding:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;}
+.start-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
+
+/* HAZIR / GERİ SAYIM */
+.hedef-etiket{font-family:'Orbitron',sans-serif;font-size:0.68rem;letter-spacing:3px;color:var(--grey);text-transform:uppercase;margin-bottom:10px;}
+.hedef-kelime{font-family:'Orbitron',sans-serif;font-size:2.1rem;font-weight:900;color:var(--gold);text-align:center;padding:18px 26px;border:2px solid rgba(255,215,0,0.4);border-radius:18px;background:rgba(255,215,0,0.06);margin-bottom:22px;}
+.geri-sayim-buyuk{font-family:'Orbitron',sans-serif;font-size:4.5rem;font-weight:900;color:var(--accent);text-shadow:0 0 30px rgba(0,212,255,0.6);}
+.hazir-alt{color:var(--grey);font-size:0.85rem;margin-top:14px;text-align:center;max-width:360px;}
+
+/* EGZERSİZ HUD + METİN */
+.egzersiz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:900px;padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:8px;}
+.hud-item{text-align:center;}
+.hud-lbl{font-size:0.6rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
+.hud-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-top:2px;}
+.sure-bar-wrap{width:100%;max-width:900px;margin-bottom:10px;}
+.sure-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
+.sure-bar-ic{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width 0.2s linear;}
+.metin-kutu{width:100%;max-width:900px;flex:1 1 auto;min-height:380px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;padding:26px 30px;overflow-y:auto;}
+.metin-kutu p{font-size:1.15rem;line-height:2;color:var(--white);text-align:justify;}
+
+/* CEVAP EKRANI */
+.cevap-kart{width:100%;max-width:440px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:28px 24px;text-align:center;margin:16px 0;}
+.cevap-kart .hedef-hatirlatma{color:var(--grey);font-size:0.8rem;margin-bottom:4px;}
+.cevap-kart .hedef-hatirlatma strong{color:var(--gold);font-family:'Orbitron',sans-serif;}
+.cevap-input{width:140px;text-align:center;font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;background:rgba(0,212,255,0.06);border:2px solid rgba(0,212,255,0.3);border-radius:14px;color:var(--white);padding:10px;margin:18px 0;outline:none;}
+.cevap-input:focus{border-color:var(--accent);}
+
+/* SONUÇ */
+.bitti-kart{width:100%;max-width:440px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:26px 24px;text-align:center;margin:16px 0;}
+.bitti-icon{font-size:3rem;display:block;margin-bottom:8px;}
+.bitti-baslik{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;margin-bottom:14px;}
+.bitti-baslik.basarili{color:var(--green);}
+.bitti-baslik.basarisiz{color:var(--red);}
+.sonuc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.sonuc-item{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 6px;}
+.sonuc-lbl{font-size:0.62rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
+.sonuc-val{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-top:4px;}
+.rozet{display:inline-block;margin-top:2px;padding:6px 16px;border-radius:20px;background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.4);color:var(--gold);font-family:'Orbitron',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:1px;}
+.btn-row{display:flex;gap:10px;justify-content:center;margin-top:6px;}
+.btn-play{flex:1;max-width:200px;padding:13px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;}
+.btn-back{flex:1;max-width:160px;padding:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header"><div class="logo">Sin<span>Us</span></div></div>
+
+  <!-- MENÜ -->
+  <div id="screenMenu" class="screen active">
+    <div class="title-row">
+      <div class="game-title">KRİTİK KELİME AVI</div>
+      <button class="info-btn" onclick="infoAc()" title="Nasıl Yapılır?">ⓘ</button>
+    </div>
+    <div class="game-sub">SEÇİCİ DİKKAT EGZERSİZİ</div>
+    <div class="menu-card" id="kartZorluk">
+      <h3>ZORLUK (Metni Görme Süresi)</h3>
+      <div class="zorluk-grid">
+        <div class="zorluk-btn" data-sn="4" onclick="selZorluk(this)"><span class="zb-ad">PLUS</span><span class="zb-sn">4 sn</span></div>
+        <div class="zorluk-btn sel" data-sn="10" onclick="selZorluk(this)"><span class="zb-ad">SEVİYE 1</span><span class="zb-sn">10 sn</span></div>
+        <div class="zorluk-btn" data-sn="20" onclick="selZorluk(this)"><span class="zb-ad">SEVİYE 2</span><span class="zb-sn">20 sn</span></div>
+        <div class="zorluk-btn" data-sn="30" onclick="selZorluk(this)"><span class="zb-ad">SEVİYE 3</span><span class="zb-sn">30 sn</span></div>
+        <div class="zorluk-btn" data-sn="40" onclick="selZorluk(this)"><span class="zb-ad">SEVİYE 4</span><span class="zb-sn">40 sn</span></div>
+        <div class="zorluk-btn" data-sn="50" onclick="selZorluk(this)"><span class="zb-ad">SEVİYE 5</span><span class="zb-sn">50 sn</span></div>
+      </div>
+    </div>
+    <button class="start-btn" id="mainStartBtn" onclick="baslat()">BAŞLAT ▶</button>
+    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+
+  <!-- HAZIR / HEDEF GÖSTERİMİ -->
+  <div id="screenHazir" class="screen">
+    <div class="hedef-etiket">Bugünkü Hedef Kelime</div>
+    <div class="hedef-kelime" id="hedefGoster">—</div>
+    <div class="geri-sayim-buyuk" id="geriSayimBuyuk">3</div>
+    <div class="hazir-alt">Metin açıldığında sadece bu kelimeyi say. Metni okumaya çalışma, sadece tara.</div>
+  </div>
+
+  <!-- METİN GÖSTERİMİ -->
+  <div id="screenMetin" class="screen">
+    <div class="egzersiz-hud">
+      <div class="hud-item"><div class="hud-lbl">Hedef Kelime</div><div class="hud-val" id="hudHedef">—</div></div>
+      <div class="hud-item"><div class="hud-lbl">Kalan Süre</div><div class="hud-val" id="hudSure">—</div></div>
+    </div>
+    <div class="sure-bar-wrap"><div class="sure-bar"><div class="sure-bar-ic" id="sureIc" style="width:100%"></div></div></div>
+    <div class="metin-kutu"><p id="metinIcerik"></p></div>
+  </div>
+
+  <!-- CEVAP -->
+  <div id="screenCevap" class="screen">
+    <div class="cevap-kart">
+      <div class="hedef-hatirlatma">Hedef kelime: <strong id="cevapHedefGoster">—</strong></div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.85rem;color:var(--white);margin-top:14px;">Kaç kere geçti?</div>
+      <input type="number" class="cevap-input" id="cevapInput" min="0" inputmode="numeric" autofocus>
+      <button class="start-btn" onclick="cevapGonder()">CEVABI GÖNDER</button>
+    </div>
+  </div>
+
+  <!-- SONUÇ -->
+  <div id="screenSonuc" class="screen">
+    <div class="bitti-kart">
+      <span class="bitti-icon" id="sonucIcon">✅</span>
+      <div class="bitti-baslik" id="sonucBaslik">HARİKA!</div>
+      <div class="sonuc-grid">
+        <div class="sonuc-item"><div class="sonuc-lbl">Doğru Cevap</div><div class="sonuc-val" id="sDogru">—</div></div>
+        <div class="sonuc-item"><div class="sonuc-lbl">Senin Cevabın</div><div class="sonuc-val" id="sVerilen">—</div></div>
+        <div class="sonuc-item"><div class="sonuc-lbl">Başarı</div><div class="sonuc-val" id="sBasari">—</div></div>
+        <div class="sonuc-item"><div class="sonuc-lbl">Tepki Süresi</div><div class="sonuc-val" id="sSure">—</div></div>
+      </div>
+      <div class="rozet" id="sRozet">Rozet</div>
+      <div class="btn-row" id="bittiBtnRow">
+        <button class="btn-play" onclick="tekrar()">▶ TEKRAR</button>
+        <button class="btn-back" onclick="menuye()">MENÜ</button>
+      </div>
+    </div>
+    <a id="backBtn2" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+</div>
+
+<!-- NASIL YAPILIR? MODAL -->
+<div class="modal-overlay" id="infoModal" onclick="if(event.target===this) infoKapat()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="infoKapat()">×</button>
+    <h3>NASIL YAPILIR?</h3>
+    <div class="icerik">
+      🎯 Sana bir <strong>hedef kelime</strong> gösterilir (ör. "değildir")<br>
+      📖 Ardından açılan metni <strong>okumaya çalışma</strong>, sadece hedef kelimeyi tara<br>
+      🔢 Süre dolunca metin kapanır, kaç kere gördüğünü gir<br>
+      👁️ Bu, göz taraması ve seçici dikkatini güçlendiren bir egzersizdir<br>
+      ⏱️ Zorluk arttıkça metni görme süren kısalır
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PANELe DÖNÜŞ URL'İ ──
+(function() {
+  const from = new URLSearchParams(window.location.search).get('from');
+  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  document.getElementById('backBtn').href = backUrl;
+  document.getElementById('backBtn2').href = backUrl;
+})();
+
+function infoAc(){ document.getElementById('infoModal').classList.add('active'); }
+function infoKapat(){ document.getElementById('infoModal').classList.remove('active'); }
+
+// ── METİN HAVUZU (başlangıç paketi) ──
+// Not: Bu havuz ileride admin panelindeki "Kritik Kelime Avı Metinleri" ekranından
+// yönetilecek (kritik_kelime_metinleri tablosu). Şimdilik istemci tarafında sabit.
+const METIN_HAVUZU = [
+  { hedef:"değildir", konu:"Bilim", dogruSayi:9,
+    metin:"Evren hakkında bildiğimiz pek çok şey, aslında ilk bakışta göründüğü kadar basit değildir. Bilim insanları yüzyıllardır doğanın kurallarını çözmeye çalışıyor, ancak her yeni keşif beraberinde yeni sorular getiriyor. Örneğin ışığın hem dalga hem parçacık gibi davranması, günlük deneyimlerimizle uyumlu değildir. Bu durum uzun süre bilim insanlarını şaşırtmış ve yeni kuramların doğmasına yol açmıştır. Atomun içindeki elektronlar da klasik fizik kurallarıyla açıklanabilecek varlıklar değildir; onların davranışı ancak kuantum mekaniği ile anlaşılabilir. Bir deneyin sonucu tek başına kesin bir kanıt değildir; bilim insanları aynı deneyi farklı koşullarda tekrarlayarak sonucu doğrulamaya çalışır. Ayrıca bilimsel bir teori, asla değiştirilemez bir gerçek değildir; yeni kanıtlar ortaya çıktıkça teoriler güncellenir ya da tamamen terk edilir. Bu, bilimin zayıf bir yönü değildir, aksine en güçlü yanlarından biridir. Çünkü bilim, hatalarından öğrenerek ilerleyen bir sistemdir. Öğrencilerin çoğu zaman unuttuğu nokta da şudur: bilimsel bilgi, dogma değildir. Bir bilgiyi sorgulamak, bilime karşı gelmek değildir; tam tersine bilimin özüdür. Bu yüzden gerçek bir bilim insanı, kendi fikirlerine bile şüpheyle yaklaşır ve hiçbir zaman bu konu artık tartışılmaz demez. Sonuç olarak bilim, sabit bir bilgi yığını değildir; sürekli değişen, kendini yenileyen canlı bir süreçtir." },
+  { hedef:"vardır", konu:"Uzay", dogruSayi:13,
+    metin:"Gece gökyüzüne baktığımızda gördüğümüz her ışık noktasının ardında uzun bir hikâye vardır. Bazı yıldızlar o kadar uzaktadır ki, gördüğümüz ışık aslında binlerce yıl önce yola çıkmıştır. Güneş sisteminde sekiz gezegen vardır ve her birinin kendine özgü bir atmosferi, sıcaklığı ve yapısı vardır. Mars'ta ince bir atmosfer vardır, bu yüzden yüzey sıcaklığı geceleri hızla düşer. Jüpiter'in etrafında ise onlarca uydu vardır; bunlardan biri olan Europa'nın buzul yüzeyinin altında sıvı bir okyanus olabileceğine dair güçlü kanıtlar vardır. Bilim insanlarına göre evrende milyarlarca galaksi vardır ve her galakside milyarlarca yıldız bulunur. Bu kadar büyük bir evrende, yaşama elverişli başka gezegenlerin de bulunma ihtimali vardır. Elbette bu sorunun kesin bir cevabı henüz yoktur, ama araştırmacıların umutlu olmak için nedenleri vardır. Uzay araçlarının gönderdiği veriler sayesinde artık çok daha fazla bilgimiz vardır. Örneğin bazı gezegenlerin halkalarının nasıl oluştuğuna dair yeni teoriler vardır. Kara delikler konusunda da hâlâ çözülmemiş pek çok gizem vardır. Yine de bilim insanlarının bu konuda net bir yol haritası vardır ve her yeni teleskopla evreni daha iyi anlıyoruz. Uzayı incelemek, insanlığın en eski meraklarından biri olmuştur ve bu merakın sonu hiç gelmeyecek gibi görünmektedir." },
+  { hedef:"yoktur", konu:"Tarih", dogruSayi:10,
+    metin:"Tarih boyunca insanlık pek çok büyük değişim yaşamıştır ve bu değişimlerin hiçbirinde kesin bir başlangıç noktası yoktur. Örneğin tarım devriminin tam olarak hangi yılda başladığına dair net bir kayıt yoktur; bu süreç binlerce yıla yayılmış bir dönüşümdür. Aynı şekilde yazının icadının tek bir kişiye ait olduğuna dair bir kanıt da yoktur. Eski uygarlıkların günlük yaşamı hakkında bazı konularda hiçbir belge yoktur, bu yüzden tarihçiler arkeolojik bulgulara güvenmek zorunda kalır. Bir imparatorluğun neden yıkıldığına dair tek bir kesin sebep genellikle yoktur; ekonomik, siyasi ve toplumsal etkenler bir arada rol oynar. Tarihte kesinlikle böyle olmuştur diyebileceğimiz çok az olay yoktur; çoğu zaman farklı kaynaklar farklı anlatılar sunar. Bu nedenle iyi bir tarihçi için tek bir doğru kaynak yoktur; birden fazla kaynağı karşılaştırmak gerekir. Antik dönemlere ait bazı olayların görgü tanığı kaydı yoktur, bu yüzden efsane ile gerçek birbirine karışabilir. Yine de arkeoloji ve modern bilim sayesinde artık tamamen karanlıkta kalan bir dönem yoktur. Geçmişi anlamadan geleceği doğru şekilde planlamak mümkün değildir; bu yüzden tarih öğrenmenin bir alternatifi yoktur." },
+  { hedef:"olabilir", konu:"Spor", dogruSayi:7,
+    metin:"Düzenli spor yapmak, hem bedensel hem zihinsel sağlık için oldukça faydalı olabilir. Uzmanlara göre haftada üç ila beş gün yapılan orta tempolu egzersiz, kalp sağlığını önemli ölçüde iyileştirebilir ve enerji seviyesini artırabilir. Ancak her sporcu için doğru antrenman programı farklı olabilir; yaş, kondisyon ve hedefler bu programı doğrudan etkiler. Bir sporcunun performansı bazı günler beklenenden düşük olabilir; bunun sebebi yorgunluk, uyku düzeni ya da beslenme olabilir. Antrenörler genellikle sporcularına, kısa vadeli başarısızlıkların uzun vadede faydalı olabileceğini hatırlatır. Doğru teknikle yapılmayan bir hareket, sakatlanma riskini artırabilir; bu yüzden ısınma hareketleri asla atlanmamalıdır. Takım sporlarında iletişim eksikliği, sahada büyük karışıklıklara yol açabilir. Bazı sporcular baskı altında daha iyi performans gösterebilir, bazıları ise tam tersi bir tepki verebilir. Bir maçın sonucu son saniyeye kadar değişebilir; bu da sporu bu kadar heyecanlı kılan şeydir. Genç sporcular için doğru rol model seçmek, kariyerlerinde belirleyici olabilir. Beslenme düzeni de performansı doğrudan etkileyebilir; yetersiz beslenme, sporcunun potansiyelinin altında kalmasına neden olabilir. Sonuç olarak sporda başarı, tek bir faktöre değil, pek çok küçük detayın bir araya gelmesine bağlı olabilir." },
+  { hedef:"söylenemez", konu:"Teknoloji", dogruSayi:11,
+    metin:"Yapay zekâ teknolojisinin hayatımızı kolaylaştırdığı doğrudur, ancak her uygulamasının tamamen güvenli olduğu söylenemez. Bir yazılımın hatasız çalıştığı, test aşamaları tamamlanmadan söylenemez; bu yüzden geliştiriciler uzun test süreçlerinden geçer. Akıllı telefonların insan ilişkilerini olumsuz etkilemediği de söylenemez; uzmanlar ekran süresinin sosyal etkileşimi azalttığını belirtiyor. Her yeni teknolojinin toplum tarafından hemen benimsendiği söylenemez; pek çok yenilik başlangıçta tepkiyle karşılanmıştır. Bir yapay zekâ modelinin insan gibi düşündüğü söylenemez; model yalnızca veriler üzerinden istatistiksel tahminler üretir. İnternetin her kullanıcı için eşit fırsatlar sunduğu da söylenemez; dijital uçurum hâlâ önemli bir sorundur. Otomasyonun bütün meslekleri olumsuz etkilediği söylenemez; bazı sektörlerde yeni iş alanları da doğmuştur. Bir cihazın en yeni model olduğu için mutlaka en iyisi olduğu söylenemez; kullanıcı ihtiyaçları farklılık gösterir. Veri güvenliğinin tamamen sağlandığı hiçbir sistem için söylenemez; siber güvenlik sürekli gelişen bir alandır. Teknolojinin her zaman doğru kullanıldığı da söylenemez; bilinçli kullanım büyük önem taşır. Bu nedenle teknolojiye kör bir güvenle yaklaşmanın doğru olduğu söylenemez." },
+  { hedef:"en çok", konu:"Sağlık", dogruSayi:12,
+    metin:"Sağlıklı bir yaşam için uzmanların en çok önerdiği şey düzenli uyku ve dengeli beslenmedir. Yapılan araştırmalara göre insanların en çok ihmal ettiği konu, yeterli su tüketimidir. Çocuklarda en çok görülen sağlık sorunlarından biri, hareketsizliğe bağlı kilo artışıdır. Yetişkinlerde ise en çok karşılaşılan şikâyetlerin başında sırt ve boyun ağrıları gelir. Uzmanlar, günlük hayatta en çok ihmal edilen alışkanlığın düzenli egzersiz olduğunu vurguluyor. Beslenme uzmanlarına göre en çok tüketilmesi gereken besin grubu sebze ve meyvelerdir. Buna karşın insanların en çok tükettiği besinler arasında işlenmiş gıdalar üst sıralarda yer alıyor. Uyku düzensizliği, en çok bağışıklık sistemini zayıflatan etkenlerden biri olarak gösteriliyor. Stres yönetimi konusunda en çok önerilen yöntemlerden biri düzenli nefes egzersizleridir. Sağlık taramalarında en çok gözden kaçan konu, düzenli kontrolün ihmal edilmesidir. Uzmanlara göre gençlerin en çok dikkat etmesi gereken nokta, ekran süresini sınırlamaktır. Sonuç olarak sağlıklı bir yaşam için en çok önem verilmesi gereken şey, küçük ama sürekli alışkanlıklardır." }
+];
+
+let G = {
+  sn: 10,
+  secilenMetin: null,
+  gosterimBaslangic: 0,
+  cevapBaslangic: 0,
+  gosterimTimeout: null,
+  gosterimInterval: null,
+  gecmisMetinIdx: -1
+};
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const SN_PARAM = parseInt(_kParams.get('sn'));
+
+function kilitliModuBaslat(){
+  document.getElementById('kartZorluk').style.display='none';
+  if(!isNaN(SN_PARAM)) G.sn = SN_PARAM;
+  document.getElementById('backBtn').style.display='none';
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
+function selZorluk(el){
+  document.querySelectorAll('.zorluk-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  G.sn = parseInt(el.dataset.sn);
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById(id).style.display='flex';
+  document.body.classList.toggle('egzersiz-aktif', id === 'screenHazir' || id === 'screenMetin');
+}
+
+function rastgeleMetinSec(){
+  let idx;
+  if(METIN_HAVUZU.length === 1){ idx = 0; }
+  else {
+    do { idx = Math.floor(Math.random() * METIN_HAVUZU.length); }
+    while(idx === G.gecmisMetinIdx);
+  }
+  G.gecmisMetinIdx = idx;
+  return METIN_HAVUZU[idx];
+}
+
+function baslat(){
+  G.secilenMetin = rastgeleMetinSec();
+  document.getElementById('hedefGoster').textContent = G.secilenMetin.hedef.toUpperCase();
+  document.getElementById('hudHedef').textContent = G.secilenMetin.hedef.toUpperCase();
+  document.getElementById('cevapHedefGoster').textContent = G.secilenMetin.hedef.toUpperCase();
+  showScreen('screenHazir');
+  geriSayimBaslat();
+}
+
+function geriSayimBaslat(){
+  let n = 3;
+  const el = document.getElementById('geriSayimBuyuk');
+  el.textContent = n;
+  const iv = setInterval(()=>{
+    n--;
+    if(n <= 0){
+      clearInterval(iv);
+      metinGoster();
+    } else {
+      el.textContent = n;
+    }
+  }, 800);
+}
+
+function metinGoster(){
+  document.getElementById('metinIcerik').textContent = G.secilenMetin.metin;
+  showScreen('screenMetin');
+  G.gosterimBaslangic = Date.now();
+  document.getElementById('hudSure').textContent = G.sn + 'sn';
+  document.getElementById('sureIc').style.width = '100%';
+  if(G.gosterimInterval) clearInterval(G.gosterimInterval);
+  G.gosterimInterval = setInterval(()=>{
+    const gecen = (Date.now() - G.gosterimBaslangic) / 1000;
+    const kalan = Math.max(0, G.sn - gecen);
+    document.getElementById('hudSure').textContent = Math.ceil(kalan) + 'sn';
+    document.getElementById('sureIc').style.width = (kalan / G.sn * 100) + '%';
+    if(kalan <= 0){
+      clearInterval(G.gosterimInterval);
+      cevapEkraniAc();
+    }
+  }, 100);
+}
+
+function cevapEkraniAc(){
+  showScreen('screenCevap');
+  G.cevapBaslangic = Date.now();
+  const inp = document.getElementById('cevapInput');
+  inp.value = '';
+  setTimeout(()=>inp.focus(), 50);
+}
+
+function cevapGonder(){
+  const inp = document.getElementById('cevapInput');
+  const verilen = parseInt(inp.value);
+  if(isNaN(verilen)){ inp.focus(); return; }
+  const dogru = G.secilenMetin.dogruSayi;
+  const fark = Math.abs(dogru - verilen);
+  const basariOrani = Math.max(0, Math.round((1 - fark / Math.max(dogru,1)) * 100));
+  const tepkiSuresi = ((Date.now() - G.gosterimBaslangic) / 1000).toFixed(0);
+
+  document.getElementById('sDogru').textContent = dogru;
+  document.getElementById('sVerilen').textContent = verilen;
+  document.getElementById('sBasari').textContent = basariOrani + '%';
+  document.getElementById('sSure').textContent = tepkiSuresi + 'sn';
+
+  const basarili = verilen === dogru;
+  const icon = document.getElementById('sonucIcon');
+  const baslik = document.getElementById('sonucBaslik');
+  const rozet = document.getElementById('sRozet');
+  if(basarili){
+    icon.textContent = '🎯'; baslik.textContent = 'TAM İSABET!'; baslik.className = 'bitti-baslik basarili';
+    rozet.textContent = 'Keskin Nişancı 🏅';
+  } else if(basariOrani >= 80){
+    icon.textContent = '✅'; baslik.textContent = 'HARİKA!'; baslik.className = 'bitti-baslik basarili';
+    rozet.textContent = 'Güçlü Dikkat ⭐';
+  } else if(basariOrani >= 50){
+    icon.textContent = '👍'; baslik.textContent = 'İYİ GİTTİ'; baslik.className = 'bitti-baslik basarili';
+    rozet.textContent = 'Gelişiyorsun 🌱';
+  } else {
+    icon.textContent = '🔄'; baslik.textContent = 'TEKRAR DENE'; baslik.className = 'bitti-baslik basarisiz';
+    rozet.textContent = 'Odaklanma Zamanı 🧭';
+  }
+
+  showScreen('screenSonuc');
+  gorevTamamlandiSinyaliGonder(basariOrani);
+
+  if(KILITLI){
+    const from = new URLSearchParams(window.location.search).get('from');
+    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+  }
+}
+
+// ── PANELe TAMAMLANMA SİNYALİ ──
+function gorevTamamlandiSinyaliGonder(basariOrani){
+  const from = new URLSearchParams(window.location.search).get('from');
+  if(from !== 'ogrenci') return;
+  try{
+    const veri = localStorage.getItem('sinus_bekleyen_gorev');
+    if(!veri) return;
+    const b = JSON.parse(veri);
+    b.tamamlandiMi = true;
+    b.puan = basariOrani >= 80 ? 10 : (basariOrani >= 50 ? 6 : 2);
+    localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+  }catch(e){}
+}
+
+function tekrar(){ baslat(); }
+function menuye(){
+  if(G.gosterimInterval) clearInterval(G.gosterimInterval);
+  showScreen('screenMenu');
+}
+showScreen('screenMenu');
+</script>
+</body>
+</html>
