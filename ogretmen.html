@@ -434,7 +434,7 @@ function sayfaGoster(sayfa,link){
 function egzersizKarti(e,gridId){
   const grid=document.getElementById(gridId);
   const kart=document.createElement('div');kart.className='egzersiz-kart';
-  kart.innerHTML=`<div class="egzersiz-kart-ust"><div class="egzersiz-ikon">${e.ikon}</div><div><div class="egzersiz-isim">${e.isim}</div></div></div><div class="egzersiz-aciklama">${e.aciklama}</div><button class="btn-basla" onclick="window.open('${e.dosya}?from=ogretmen','_blank')">▶ Başlat</button>`;
+  kart.innerHTML=`<div class="egzersiz-kart-ust"><div class="egzersiz-ikon">${e.ikon}</div><div><div class="egzersiz-isim">${e.isim}</div></div></div><div class="egzersiz-aciklama">${e.aciklama}</div><button class="btn-basla" onclick="location.href='${e.dosya}?from=ogretmen'">▶ Başlat</button>`;
   grid.appendChild(kart);
 }
 function egzersizleriOlustur(){
