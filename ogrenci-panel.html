@@ -15,6 +15,8 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 .kullanici-ad{color:rgba(255,255,255,0.8);font-size:0.88rem}
 .cikis-btn{background:rgba(255,255,255,0.1);color:white;border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif}
 .cikis-btn:hover{background:rgba(255,255,255,0.2)}
+.tum-egz-btn{background:rgba(212,175,55,0.18);color:#f0d060;border:1px solid rgba(212,175,55,0.35);padding:0.4rem 1rem;border-radius:6px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+.tum-egz-btn:hover{background:rgba(212,175,55,0.28)}
 .ana{max-width:1100px;margin:0 auto;padding:2rem 5%}
 
 .hosgeldin{margin-bottom:1.5rem}
@@ -104,6 +106,23 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 .gezegen-etiket{font-size:0.62rem;line-height:1.4;text-align:center}
 .gezegen-yol{width:22px;height:1.5px;background:#e2e8f0;margin-bottom:24px;flex-shrink:0}
 
+/* TÜM EGZERSİZLER (serbest deneme) */
+.tum-egz-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#f4f6f9;z-index:800;overflow-y:auto}
+.tum-egz-overlay.acik{display:block}
+.tum-egz-ust{background:#0a1628;padding:1rem 5%;position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;z-index:5}
+.tum-egz-ust h2{color:white;font-family:'Playfair Display',serif;font-size:1.2rem}
+.tum-egz-kapat{background:rgba(255,255,255,0.1);color:white;border:none;padding:0.5rem 1.1rem;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem}
+.tum-egz-ic{max-width:1100px;margin:0 auto;padding:1.5rem 5% 3rem}
+.tum-egz-not{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:10px;padding:0.9rem 1.2rem;font-size:0.85rem;margin-bottom:1.5rem;line-height:1.6}
+.tum-egz-kategori{font-size:0.78rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:1.6rem 0 0.8rem;padding-bottom:0.4rem;border-bottom:1.5px solid #e2e8f0}
+.tum-egz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem}
+.tum-egz-kart{background:white;border-radius:12px;padding:1.1rem 1.2rem;box-shadow:0 2px 8px rgba(0,0,0,0.05);border:1.5px solid #f1f5f9}
+.tum-egz-kart-ust{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.7rem}
+.tum-egz-ikon{font-size:1.3rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#f0f4ff;border-radius:8px}
+.tum-egz-isim{font-weight:600;font-size:0.88rem;color:#0a1628}
+.tum-egz-dene-btn{width:100%;padding:0.55rem;background:#0a1628;color:white;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:block;text-align:center}
+.tum-egz-dene-btn:hover{opacity:0.85}
+
 @media(max-width:768px){.grid{grid-template-columns:1fr}.ustbilgi{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -111,6 +130,7 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 <nav>
   <div class="logo">Sin<span>Us</span></div>
   <div class="nav-sag">
+    <button class="tum-egz-btn" onclick="tumEgzersizlerAc()">🗂 Tüm Egzersizler</button>
     <span class="kullanici-ad" id="navKullanici">👋 Merhaba</span>
     <button class="cikis-btn" onclick="cikisYap()">Çıkış Yap</button>
   </div>
@@ -206,6 +226,26 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
   </div>
 </div>
 
+<!-- TÜM EGZERSİZLER (serbest / kilitsiz deneme) -->
+<div class="tum-egz-overlay" id="tumEgzOverlay">
+  <div class="tum-egz-ust">
+    <h2>🗂 Tüm Egzersizler</h2>
+    <button class="tum-egz-kapat" onclick="tumEgzersizlerKapat()">✕ Kapat</button>
+  </div>
+  <div class="tum-egz-ic">
+    <div class="tum-egz-not">Buradaki egzersizleri serbestçe, kilitsiz olarak deneyebilirsin — istediğin hızı ve süreyi kendin seçersin. Bu deneme günlük programını etkilemez.</div>
+
+    <div class="tum-egz-kategori">👁️ Göz Kası Egzersizleri</div>
+    <div class="tum-egz-grid" id="tumEgzGoz"></div>
+
+    <div class="tum-egz-kategori">🎯 Dikkat & Odak Egzersizleri</div>
+    <div class="tum-egz-grid" id="tumEgzOdak"></div>
+
+    <div class="tum-egz-kategori">📖 Okuma Teknikleri</div>
+    <div class="tum-egz-grid" id="tumEgzOkuma"></div>
+  </div>
+</div>
+
 <script>
   // OTURUM KONTROLU
 (function(){
@@ -239,6 +279,54 @@ const ASAMA_AD={1:'Okuma Temeli',2:'Akıcı Okuma',3:'Hız + Anlama',4:'Sınav O
 const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
 const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği'};
+
+// ── TÜM EGZERSİZLER (serbest deneme listesi — öğretmen panelindekiyle aynı kapsam) ──
+const TUM_EGZ_GOZ=[
+  {dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip',ikon:'↔️'},
+  {dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı',ikon:'↕️'},
+  {dosya:'goz-sekil.html',isim:'Şekil Takibi',ikon:'⬡'},
+  {dosya:'goz-genel.html',isim:'Genel Hareket',ikon:'🌀'}
+];
+const TUM_EGZ_ODAK=[
+  {dosya:'meteor-takibi.html',isim:'Meteor Takibi',ikon:'☄️'},
+  {dosya:'ev-takibi.html',isim:'Ev Takibi',ikon:'🏠'},
+  {dosya:'sayi-avi.html',isim:'Sayı Avı',ikon:'🔢'},
+  {dosya:'merkez-nokta.html',isim:'Merkez Nokta',ikon:'👁️'},
+  {dosya:'gizli-nesne.html',isim:'Gizli Nesne',ikon:'🔭'}
+];
+const TUM_EGZ_OKUMA=[
+  {dosya:'akan-kelime.html',isim:'Akan Kelime',ikon:'🌊'},
+  {dosya:'akan-cumle.html',isim:'Akan Cümle',ikon:'📜'},
+  {dosya:'ileri-akis.html',isim:'İleri Akış',ikon:'🚀'},
+  {dosya:'kaybolan-metin.html',isim:'Kaybolan Metin',ikon:'🌑'},
+  {dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime',ikon:'🌑'},
+  {dosya:'merkez-kelime.html',isim:'Merkez Kelime',ikon:'⭐'},
+  {dosya:'orp-okuma.html',isim:'ORP Okuma',ikon:'✨'},
+  {dosya:'tarama-teknigi.html',isim:'Tarama Tekniği',ikon:'🔦'},
+  {dosya:'beliren-metin.html',isim:'Beliren Metin',ikon:'🌕'},
+  {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩'},
+  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦'}
+];
+
+function tumEgzKarti(e,gridId){
+  const grid=document.getElementById(gridId);
+  const kart=document.createElement('div');kart.className='tum-egz-kart';
+  kart.innerHTML=`<div class="tum-egz-kart-ust"><div class="tum-egz-ikon">${e.ikon}</div><div class="tum-egz-isim">${e.isim}</div></div><a class="tum-egz-dene-btn" href="${e.dosya}?from=ogrenci-serbest" target="_blank" rel="noopener">▶ Serbest Dene</a>`;
+  grid.appendChild(kart);
+}
+let _tumEgzDolduruldu=false;
+function tumEgzersizlerAc(){
+  if(!_tumEgzDolduruldu){
+    TUM_EGZ_GOZ.forEach(e=>tumEgzKarti(e,'tumEgzGoz'));
+    TUM_EGZ_ODAK.forEach(e=>tumEgzKarti(e,'tumEgzOdak'));
+    TUM_EGZ_OKUMA.forEach(e=>tumEgzKarti(e,'tumEgzOkuma'));
+    _tumEgzDolduruldu=true;
+  }
+  document.getElementById('tumEgzOverlay').classList.add('acik');
+}
+function tumEgzersizlerKapat(){
+  document.getElementById('tumEgzOverlay').classList.remove('acik');
+}
 
 let ogrenci=null;
 let mevcutGorevler=[];
@@ -395,6 +483,7 @@ function gorevUrl(g){
     if(g.metin_id!==undefined && g.metin_id!==null) url+='&metin_id='+g.metin_id;
     if(g.tema!==undefined && g.tema!==null) url+='&tema='+encodeURIComponent(g.tema);
     if(g.sekil!==undefined && g.sekil!==null) url+='&sekil='+encodeURIComponent(g.sekil);
+    if(g.nokta!==undefined && g.nokta!==null) url+='&nokta='+encodeURIComponent(g.nokta);
   }
   return url;
 }
@@ -677,6 +766,14 @@ async function sonucKaydet(hiz,anlamaOrani,dogru,toplam){
   }
 }
 
+// Günü Bitir kapatılıp ana panele dönülürken artık TAM SAYFA YENİLEMEsi
+// yapılmıyor: üst bilgiler, görev listesi, ilerleme ve gezegen yolculuğu
+// yeniden çekiliyor ve kullanıcı olduğu ekranda (panelde) kalıyor.
+async function gunuBitirTamamlaVeDon(){
+  gunuBitirKapat();
+  await Promise.all([panelYukle(), siralamaYukle(), yolculukYukle()]);
+}
+
 function gunuBitirKapat(){
   document.getElementById('gunuBitirOverlay').style.display='none';
 }
@@ -804,7 +901,7 @@ async function yolculukYukle(){
         </div>
       </div>
       <div style="color:rgba(255,255,255,0.6);margin-bottom:2rem" id="gbSonucDogru"></div>
-      <button onclick="gunuBitirKapat();location.reload()" style="background:#2563a8;color:white;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">Ana Panele Dön →</button>
+      <button onclick="gunuBitirTamamlaVeDon()" style="background:#2563a8;color:white;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">Ana Panele Dön →</button>
     </div>
   </div>
 </div>
@@ -825,7 +922,7 @@ async function yolculukYukle(){
       <div style="font-size:1.1rem;font-weight:700;color:#0a1628;margin-bottom:0.6rem">👋 Hoş geldin!</div>
       <div style="font-size:0.9rem;color:#475569;margin-bottom:1.5rem;line-height:1.5">Kullanıcı adını veya şifreni değiştirmek ister misin? İstersen daha sonra da yapabilirsin.</div>
       <div style="display:flex;gap:0.6rem">
-        <button onclick="ilkGirisAtla()" style="flex:1;padding:0.7rem;background:#f1f5f9;color:#475569;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">Şimdi Değil</button>
+        <button onclick="ilkGirisAtla()" style="flex:1;padding:0.7rem;background:#f1f5f9;color:#475569;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">Böyle Kalsın</button>
         <button onclick="ilkGirisDegistirGoster()" style="flex:1;padding:0.7rem;background:#2563a8;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">Değiştir</button>
       </div>
     </div>
