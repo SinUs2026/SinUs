@@ -163,10 +163,16 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
 </div>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ ──
-(function() {
+// ── PANELE DÖNÜŞ URL'İ ──
+// DÜZELTME: 'ogretmen' durumu artık doğru şekilde ogretmen.html'e gidiyor.
+function panelDonusUrl(){
   const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  if(from === 'admin') return 'admin.html';
+  if(from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+(function() {
+  const backUrl = panelDonusUrl();
   document.getElementById('backBtn').href = backUrl;
   document.getElementById('backBtn2').href = backUrl;
 })();
@@ -239,17 +245,14 @@ function tikSesiCal(){
 }
 
 // ── SABİT DESENLER (rastgele DEĞİL) ──
-// Ekranın 4 köşesi (kenar boşluklu): sol-üst, sağ-üst, sağ-alt, sol-alt
 const KOSELER = { TL:{x:10,y:12}, TR:{x:90,y:12}, BR:{x:90,y:88}, BL:{x:10,y:88} };
 
-// "Kare Tur": köşeden köşeye tüm ekranı dolaşma (kapalı döngü), N tur
 function kareTurWaypoints(turSayisi){
   const sira=[KOSELER.TL,KOSELER.TR,KOSELER.BR,KOSELER.BL];
   const wp=[];
   for(let t=0;t<turSayisi;t++){ for(let i=1;i<=4;i++) wp.push(sira[i%4]); }
   return wp;
 }
-// "Z": üst kenar + çapraz iniş + alt kenar (açık yol) — gidiş ve dönüş = 1 "tur çifti"
 function zWaypoints(turSayisi){
   const ileri=[KOSELER.TL,KOSELER.TR,KOSELER.BL,KOSELER.BR];
   const geri=[...ileri].reverse();
@@ -260,7 +263,6 @@ function zWaypoints(turSayisi){
   }
   return wp;
 }
-// "Sonsuz (köşelerle)": çapraz köşeler arasında çarpraz geçiş (bowtie / ∞ yaklaşıklaması), N tur
 function sonsuzWaypoints(turSayisi){
   const sira=[KOSELER.TL,KOSELER.BR,KOSELER.TR,KOSELER.BL];
   const wp=[];
@@ -268,20 +270,18 @@ function sonsuzWaypoints(turSayisi){
   return wp;
 }
 
-// Üç deseni sırayla birleştirip sonsuz döngü haline getirir (TL noktasından başlar, TL'ye döner)
-// Her waypoint'e ayrıca genel "Tur X / 6" numarası atanır (Kare=1-2, Z=3-4, Sonsuz=5-6).
 function kombineDesenDizisiOlustur(){
   const wp = [KOSELER.TL];
   const etiket = ['KARE TUR'];
   const tur = [1];
 
-  const kare = kareTurWaypoints(2); // 8 waypoint, tur başına 4
+  const kare = kareTurWaypoints(2);
   kare.forEach((p,i)=>{ wp.push(p); etiket.push('KARE TUR'); tur.push(1 + Math.floor(i/4)); });
 
-  const z = zWaypoints(2); // 6 waypoint, tur başına 3
+  const z = zWaypoints(2);
   z.forEach((p,i)=>{ wp.push(p); etiket.push('Z ŞEKLİ'); tur.push(3 + Math.floor(i/3)); });
 
-  const sonsuz = sonsuzWaypoints(2); // 8 waypoint, tur başına 4
+  const sonsuz = sonsuzWaypoints(2);
   sonsuz.forEach((p,i)=>{ wp.push(p); etiket.push('SONSUZ ∞'); tur.push(5 + Math.floor(i/4)); });
 
   return {wp, etiket, tur};
@@ -323,8 +323,6 @@ function animasyonBaslat(){
   const nokta = document.getElementById('nokta');
   const etiketEl = document.getElementById('desenEtiket');
   const turEl = document.getElementById('hudTur');
-  // NOT: Aynı hız skalası diğer göz egzersizleriyle tutarlı (eskiden setInterval ile zıplıyordu,
-  // artık requestAnimationFrame ile kesintisiz sabit hızda akıyor — hiçbir noktada durmuyor).
   const hizFaktoru = G.hiz * 0.6;
   nokta.style.left = G.pos.x + '%';
   nokta.style.top = G.pos.y + '%';
@@ -360,8 +358,7 @@ function bitti(){
   showScreen('screenBitti');
   tamEkrandanCik();
   if(KILITLI){
-    const from = new URLSearchParams(window.location.search).get('from');
-    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    const backUrl = panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
   }
 }
