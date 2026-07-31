@@ -391,8 +391,8 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
         <p>Hiçbir şey satın almadan, kayıt olmadan. Bir metin, birkaç dakika ve ilk defa net bir başlangıç noktası.</p>
       </div>
       <div>
-        <a href="#" class="bp" style="font-size:1.1rem;padding:1.1rem 2.8rem">Ücretsiz Ölçümü Başla &rarr;</a>
-        <p style="margin-top:1rem;font-size:0.8rem;color:var(--gr);text-align:center">Günde 1 kez, kayıt gerekmez</p>
+        <a href="#" class="bp" style="font-size:1.1rem;padding:1.1rem 2.8rem" onclick="olcumFormAc();return false;">Ücretsiz Ölçümü Başla &rarr;</a>
+        <p style="margin-top:1rem;font-size:0.8rem;color:var(--gr);text-align:center">Zoom üzerinden, size uygun bir zamanda</p>
       </div>
     </div>
   </div>
@@ -430,6 +430,40 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
     <a href="#olcum" class="bp">Keşfetmeye Başla</a>
   </div>
 </section>
+
+<!-- ÜCRETSİZ ÖLÇÜM BAŞVURU FORMU MODALI -->
+<div id="olcumFormOverlay" style="display:none;position:fixed;inset:0;background:rgba(6,13,26,0.82);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--la2);border:1px solid rgba(212,175,55,0.25);border-radius:20px;padding:2.2rem;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;position:relative">
+    <button onclick="olcumFormKapat()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--gr);font-size:1.4rem;cursor:pointer;line-height:1">×</button>
+
+    <div id="olcumFormIcerik">
+      <p class="sl">Ücretsiz Ölçüm Başvurusu</p>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--be);margin-bottom:0.6rem">Sizi Zoom'da bekleriz.</h3>
+      <p style="font-size:0.9rem;color:var(--gr);line-height:1.7;margin-bottom:1.5rem">Formu doldurun, size uygun bir gün ve saatte Zoom üzerinden ücretsiz okuma hızı ölçümü yapıp uygun seviyeye yönlendirelim.</p>
+
+      <div id="olcumFormHata" style="display:none;background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);color:#fca5a5;border-radius:8px;padding:0.7rem 1rem;font-size:0.85rem;margin-bottom:1rem"></div>
+
+      <div style="display:flex;flex-direction:column;gap:0.9rem">
+        <div class="fg"><input type="text" id="of-ad" placeholder="Ad Soyad (veli veya öğrenci)"></div>
+        <div class="fg"><input type="tel" id="of-telefon" placeholder="Telefon Numarası"></div>
+        <div class="fg"><input type="email" id="of-eposta" placeholder="E-posta (opsiyonel)"></div>
+        <div class="fg"><input type="text" id="of-sinif" placeholder="Sınıf / Yaş (örn: 6. Sınıf)"></div>
+        <div class="fg"><input type="text" id="of-zaman" placeholder="Müsait gün ve saat (örn: Hafta içi akşam)"></div>
+        <div class="fg"><textarea id="of-not" placeholder="Eklemek istediğiniz bir şey var mı? (opsiyonel)" style="min-height:70px"></textarea></div>
+      </div>
+
+      <button class="bp" id="olcumFormBtn" style="width:100%;border:none;cursor:pointer;margin-top:1.3rem;font-size:0.98rem" onclick="olcumFormGonder()">Başvuruyu Gönder &rarr;</button>
+      <p style="margin-top:0.8rem;font-size:0.76rem;color:var(--gr);text-align:center">Bilgileriniz yalnızca sizi arayabilmemiz için kullanılır.</p>
+    </div>
+
+    <div id="olcumFormBasari" style="display:none;text-align:center;padding:1.5rem 0">
+      <div style="font-size:2.6rem;margin-bottom:1rem">✅</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--be);margin-bottom:0.8rem">Başvurunuz alındı!</h3>
+      <p style="font-size:0.92rem;color:var(--gr);line-height:1.8;margin-bottom:1.5rem">En kısa sürede sizi arayıp Zoom üzerinden ücretsiz ölçüm için uygun bir zaman planlayacağız.</p>
+      <button class="bp" style="border:none;cursor:pointer" onclick="olcumFormKapat()">Kapat</button>
+    </div>
+  </div>
+</div>
 
 <footer>
   <div class="fic">
@@ -538,6 +572,63 @@ async function anaBlogYazilariniGetir(){
   }
 }
 anaBlogYazilariniGetir();
+
+/* ── ÜCRETSİZ ÖLÇÜM BAŞVURU FORMU ── */
+function olcumFormAc(){
+  document.getElementById('olcumFormOverlay').style.display='flex';
+  document.getElementById('olcumFormIcerik').style.display='block';
+  document.getElementById('olcumFormBasari').style.display='none';
+  document.getElementById('olcumFormHata').style.display='none';
+}
+function olcumFormKapat(){
+  document.getElementById('olcumFormOverlay').style.display='none';
+}
+async function olcumFormGonder(){
+  const ad=document.getElementById('of-ad').value.trim();
+  const telefon=document.getElementById('of-telefon').value.trim();
+  const eposta=document.getElementById('of-eposta').value.trim();
+  const sinif=document.getElementById('of-sinif').value.trim();
+  const zaman=document.getElementById('of-zaman').value.trim();
+  const not_=document.getElementById('of-not').value.trim();
+  const hataEl=document.getElementById('olcumFormHata');
+  hataEl.style.display='none';
+
+  if(!ad || !telefon){
+    hataEl.textContent='Lütfen adınızı ve telefon numaranızı girin.';
+    hataEl.style.display='block';
+    return;
+  }
+  // Ad Soyad tek alan olarak alınıyor; kayıt için ad/soyad şeklinde ikiye bölünüyor.
+  const parcalar=ad.split(/\s+/);
+  const soyad=parcalar.length>1?parcalar.pop():'-';
+  const adKisim=parcalar.join(' ')||ad;
+
+  const btn=document.getElementById('olcumFormBtn');
+  btn.textContent='Gönderiliyor...';
+  btn.disabled=true;
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/olcum_basvurulari',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({
+        ad:adKisim, soyad:soyad, telefon:telefon,
+        eposta:eposta||null, sinif_yas:sinif||null,
+        musait_zaman:zaman||null, notlar:not_||null
+      })
+    });
+    if(!res.ok){
+      const h=await res.json().catch(()=>({}));
+      throw new Error(h.message||'Başvuru gönderilemedi.');
+    }
+    document.getElementById('olcumFormIcerik').style.display='none';
+    document.getElementById('olcumFormBasari').style.display='block';
+  }catch(e){
+    hataEl.textContent='❌ '+e.message;
+    hataEl.style.display='block';
+  }
+  btn.textContent='Başvuruyu Gönder →';
+  btn.disabled=false;
+}
 </script>
 </body>
 </html>
