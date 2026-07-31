@@ -175,10 +175,17 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
 </div>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ ──
-(function() {
+// ── PANELE DÖNÜŞ URL'İ ──
+// DÜZELTME: 'ogretmen' durumu artık doğru şekilde ogretmen.html'e gidiyor
+// (eskiden yanlışlıkla ogrenci-panel.html'e düşüp anında giris.html'e atıyordu).
+function panelDonusUrl(){
   const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  if(from === 'admin') return 'admin.html';
+  if(from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+(function() {
+  const backUrl = panelDonusUrl();
   document.getElementById('backBtn').href = backUrl;
   document.getElementById('backBtn2').href = backUrl;
 })();
@@ -232,7 +239,7 @@ const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const SURE_PARAM_DK = parseInt(_kParams.get('sure'));
-const SEKIL_PARAM = _kParams.get('sekil'); // opsiyonel — admin panelinde henüz seçici yok
+const SEKIL_PARAM = _kParams.get('sekil');
 
 function kilitliModuBaslat(){
   document.getElementById('kartSekil').style.display='none';
@@ -255,8 +262,6 @@ function showScreen(id){
   document.body.classList.toggle('egzersiz-aktif', id === 'screenEgzersiz');
 }
 
-// Nokta konumunu YÜZDE (0-100) cinsinden hesaplar — piksel değil, bu yüzden
-// tam ekrana geçilse de (veya pencere yeniden boyutlansa da) konum orantılı kalır.
 function noktaKonumuYuzde(t){
   const cx=50, cy=50, rx=38, ry=38;
   switch(G.sekil){
@@ -286,8 +291,6 @@ function noktaKonumuYuzde(t){
   }
 }
 
-// Kılavuz şekil çizgisini gerçek (o anki) piksel boyutuna göre çizer.
-// Tam ekrana geçildiğinde veya pencere boyutu değiştiğinde tekrar çağrılır.
 function sekilCiz(){
   const alan=document.getElementById('alan');
   const W=alan.clientWidth||600, H=alan.clientHeight||340;
@@ -309,7 +312,6 @@ function sekilCiz(){
   ctx.stroke();
 }
 
-// Tam ekrana geçiş / pencere boyutu değişimi olduğunda kılavuz çizgiyi yeniden çiz
 function alanYenidenOlcSonrasiCiz(){
   if(document.getElementById('screenEgzersiz').style.display==='flex'){
     requestAnimationFrame(sekilCiz);
@@ -340,7 +342,6 @@ function baslat(){
   const hf=G.hiz*0.008;
   function animate(){
     G.t+=hf;
-    // Şeklin tam bir turu tamamlanınca (t, 2π'yi geçince) Tur sayacını artır ve tik sesi çal
     const yeniTamamlananTur = Math.floor(G.t/(Math.PI*2));
     if(yeniTamamlananTur > G.tamamlananTur){
       G.tamamlananTur = yeniTamamlananTur;
@@ -362,8 +363,7 @@ function bitti(){
   showScreen('screenBitti');
   tamEkrandanCik();
   if(KILITLI){
-    const from = new URLSearchParams(window.location.search).get('from');
-    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    const backUrl = panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
   }
 }
