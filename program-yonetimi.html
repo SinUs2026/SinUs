@@ -178,6 +178,16 @@ nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:cente
             <option value="zigzag">〰️ Zigzag</option>
           </select>
         </div>
+        <div class="form-grup" id="formGrupNokta" style="display:none">
+          <label>Nokta Sayısı</label>
+          <select class="form-select" id="secNokta">
+            <option value="2">2 Nokta</option>
+            <option value="4">4 Nokta</option>
+            <option value="8" selected>8 Nokta</option>
+            <option value="12">12 Nokta</option>
+            <option value="16">16 Nokta</option>
+          </select>
+        </div>
         <div class="form-grup" id="formGrupHiz" style="display:none">
           <label>Hız / Seviye <span id="hizDeger" style="float:right;color:#2563a8;font-weight:700"></span></label>
           <input type="range" id="hizSlider" oninput="hizGuncelle()" style="width:100%">
@@ -219,7 +229,7 @@ function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
 })();
 
 const EGZERSIZLER={
-  goz:[{dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip'},{dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip'},{dosya:'goz-sekil.html',isim:'Şekil Takibi'},{dosya:'goz-genel.html',isim:'Genel Hareket'},{dosya:'goz-sarkac.html',isim:'Sarkaç Takibi'}],
+  goz:[{dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip'},{dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip'},{dosya:'goz-sekil.html',isim:'Şekil Takibi'},{dosya:'goz-genel.html',isim:'Genel Hareket'}],
   odak:[{dosya:'meteor-takibi.html',isim:'Meteor Takibi'},{dosya:'ev-takibi.html',isim:'Ev Takibi'},{dosya:'sayi-avi.html',isim:'Sayı Avı'},{dosya:'merkez-nokta.html',isim:'Merkez Nokta'},{dosya:'gizli-nesne.html',isim:'Gizli Nesne'}],
   okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin (Silinen Cümle)'},{dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'},{dosya:'tarama-teknigi.html',isim:'Tarama Tekniği'},{dosya:'beliren-metin.html',isim:'Beliren Metin'},{dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca'},{dosya:'blok-okuma.html',isim:'Blok Okuma'}]
 };
@@ -227,8 +237,8 @@ const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
 const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği'};
 const SABLONLAR={
   temel:[{tip:'goz',dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip',sure:2,hiz:5},{tip:'goz',dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip',sure:2,hiz:5}],
-  akici:[{tip:'goz',dosya:'goz-sarkac.html',isim:'Sarkaç Takibi',sure:2,hiz:5},{tip:'odak',dosya:'meteor-takibi.html',isim:'Meteor Takibi',sure:3,hiz:5},{tip:'okuma',dosya:'akan-kelime.html',isim:'Akan Kelime',sure:5,hiz:300},{tip:'okuma',dosya:'orp-okuma.html',isim:'ORP Okuma',sure:5,hiz:300}],
-  hiz:[{tip:'goz',dosya:'goz-sarkac.html',isim:'Sarkaç Takibi',sure:2,hiz:6},{tip:'odak',dosya:'sayi-avi.html',isim:'Sayı Avı',sure:3,hiz:6},{tip:'okuma',dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)',sure:5,hiz:400},{tip:'okuma',dosya:'ileri-akis.html',isim:'İleri Akış',sure:5,hiz:400}],
+  akici:[{tip:'goz',dosya:'goz-genel.html',isim:'Genel Hareket',sure:2,hiz:5},{tip:'odak',dosya:'meteor-takibi.html',isim:'Meteor Takibi',sure:3,hiz:5},{tip:'okuma',dosya:'akan-kelime.html',isim:'Akan Kelime',sure:5,hiz:300},{tip:'okuma',dosya:'orp-okuma.html',isim:'ORP Okuma',sure:5,hiz:300}],
+  hiz:[{tip:'goz',dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip',sure:2,hiz:6},{tip:'odak',dosya:'sayi-avi.html',isim:'Sayı Avı',sure:3,hiz:6},{tip:'okuma',dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)',sure:5,hiz:400},{tip:'okuma',dosya:'ileri-akis.html',isim:'İleri Akış',sure:5,hiz:400}],
   anlama:[{tip:'goz',dosya:'goz-genel.html',isim:'Genel Hareket',sure:2,hiz:5},{tip:'odak',dosya:'merkez-nokta.html',isim:'Merkez Nokta',sure:3,hiz:5},{tip:'okuma',dosya:'tarama-teknigi.html',isim:'Tarama Tekniği',sure:5,hiz:250},{tip:'okuma',dosya:'orp-okuma.html',isim:'ORP Okuma',sure:5,hiz:250}]
 };
 const HIZ_ARALIK={
@@ -243,6 +253,7 @@ const OZEL_HIZ_ARALIK={
 const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html'];
 const TEMA_GEREKEN_DOSYALAR=['blok-okuma.html'];
 const SEKIL_GEREKEN_DOSYALAR=['goz-sekil.html'];
+const NOKTA_GEREKEN_DOSYALAR=['goz-sag-sol.html','goz-yukari-asagi.html'];
 const SEKIL_ISIM={daire:'Daire',kare:'Kare',sekiz:'Sekiz (∞)',ucgen:'Üçgen',zigzag:'Zigzag'};
 
 let mevcutGorevler=[];
@@ -292,6 +303,7 @@ function egzersizDegisti(){
   document.getElementById('formGrupMetin').style.display = metinGerekli ? 'block' : 'none';
   document.getElementById('formGrupTema').style.display = TEMA_GEREKEN_DOSYALAR.includes(dosya) ? 'block' : 'none';
   document.getElementById('formGrupSekil').style.display = SEKIL_GEREKEN_DOSYALAR.includes(dosya) ? 'block' : 'none';
+  document.getElementById('formGrupNokta').style.display = NOKTA_GEREKEN_DOSYALAR.includes(dosya) ? 'block' : 'none';
 }
 
 function hizGuncelle(){
@@ -335,7 +347,8 @@ function listeGuncelle(){
     const metinGosterim=g.metin_id?`<span class="badge" style="background:#fefce8;color:#b45309">📖 ${g.metin_baslik||('#'+g.metin_id)}</span>`:'';
     const temaGosterim=g.tema?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🎨 ${g.tema}</span>`:'';
     const sekilGosterim=g.sekil?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🔷 ${SEKIL_ISIM[g.sekil]||g.sekil}</span>`:'';
-    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${metinGosterim} ${temaGosterim} ${sekilGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
+    const noktaGosterim=g.nokta?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">⚪ ${g.nokta} Nokta</span>`:'';
+    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${metinGosterim} ${temaGosterim} ${sekilGosterim} ${noktaGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
     liste.appendChild(div);
   });
   ozetGuncelle();
@@ -371,6 +384,9 @@ function gorevEkle(){
   }
   if(SEKIL_GEREKEN_DOSYALAR.includes(dosya)){
     gorev.sekil=document.getElementById('secSekil').value;
+  }
+  if(NOKTA_GEREKEN_DOSYALAR.includes(dosya)){
+    gorev.nokta=parseInt(document.getElementById('secNokta').value);
   }
   mevcutGorevler.push(gorev);listeGuncelle();bildirimGoster('✅ Görev eklendi!','basari');
 }
