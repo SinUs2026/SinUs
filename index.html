@@ -353,10 +353,8 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
     <p class="sl">Blog</p>
     <h2 class="st">Daha fazla verim için<br>okumaya devam edin.</h2>
     <p class="sb">Kurs boyunca blog yazılarımızı takip edin. Her yazı, gelişiminizi hızlandıracak bir ipucu taşır.</p>
-    <div class="blg">
-      <a href="#" class="bk"><div class="be2">Okuma Teknikleri</div><h3>Göz kasları neden bu kadar önemli? Hızlı okumada göz sağlığı</h3><p>Okuma hızını artırmanın en temel adımı göz kaslarını doğru çalıştırmaktan geçiyor.</p><span class="bl2">Devam et &rarr;</span></a>
-      <a href="#" class="bk"><div class="be2">Dikkat ve Odak</div><h3>Çocuğunuz okurken aklı neden başka yerde? Odak sorununa bilimsel bakış</h3><p>Dikkat dağınıklığı bir karakter sorunu değil, eğitilebilir bir beceri meselesidir.</p><span class="bl2">Devam et &rarr;</span></a>
-      <a href="#" class="bk"><div class="be2">Ebeveyn Rehberi</div><h3>30 günlük programdan maksimum verim almak için 5 öneri</h3><p>Sistemi doğru kullanmak kadar süreci desteklemek de gelişimi doğrudan etkiliyor.</p><span class="bl2">Devam et &rarr;</span></a>
+    <div class="blg" id="anaBlogGrid">
+      <p style="color:var(--gr);text-align:center;grid-column:1/-1">⏳ Yazılar yükleniyor...</p>
     </div>
   </div>
 </section>
@@ -513,6 +511,33 @@ function dropToggle(e,el){
 }
 
 window.addEventListener('scroll',()=>{document.getElementById('nav').style.borderBottomColor=window.scrollY>60?'rgba(212,175,55,0.25)':'rgba(212,175,55,0.12)'});
+
+/* ── ANA SAYFA BLOG BÖLÜMÜ: en son 3 yayınlanmış yazı, gerçek Supabase verisi ──
+   Önceden bu alanda sabit/örnek 3 kart vardı ve "Devam et" butonu href="#" olduğu
+   için sayfanın başına dönüyordu. Artık blog.html ile aynı mantıkla en son 3
+   yayınlanmış yazı çekiliyor ve her biri gerçek blog-detay.html?id=X sayfasına
+   gidiyor — tıklayan kişi doğrudan o yazıyı okuyup diğerlerine oradan devam edebiliyor. */
+const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
+function anaBlogKacir(m){const d=document.createElement('div');d.textContent=m||'';return d.innerHTML;}
+async function anaBlogYazilariniGetir(){
+  const grid=document.getElementById('anaBlogGrid');
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/blog_yazilari?durum=eq.yayinda&order=yayin_tarihi.desc&limit=3',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const yazilar=await res.json();
+    if(!yazilar.length){grid.innerHTML='<p style="color:var(--gr);text-align:center;grid-column:1/-1">Henüz yazı yayınlanmadı.</p>';return;}
+    grid.innerHTML=yazilar.map(y=>`
+      <a href="blog-detay.html?id=${y.id}" class="bk">
+        <div class="be2">${anaBlogKacir(y.kategori||'Genel')}</div>
+        <h3>${anaBlogKacir(y.baslik)}</h3>
+        <p>${anaBlogKacir(y.ozet||'')}</p>
+        <span class="bl2">Devam et &rarr;</span>
+      </a>`).join('');
+  }catch(e){
+    grid.innerHTML='<p style="color:var(--gr);text-align:center;grid-column:1/-1">❌ Yazılar yüklenemedi.</p>';
+  }
+}
+anaBlogYazilariniGetir();
 </script>
 </body>
 </html>
