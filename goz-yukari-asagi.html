@@ -179,10 +179,18 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
 </div>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ ──
-(function() {
+// ── PANELE DÖNÜŞ URL'İ ──
+// DÜZELTME: eskiden sadece 'admin' ayrı ele alınıyordu, 'ogretmen' durumu
+// yanlışlıkla ogrenci-panel.html'e düşüyordu (o da oturum kontrolünde
+// rol!=='ogrenci' görünce anında giris.html'e atıyordu — "çıkış yapmış gibi" hissi).
+function panelDonusUrl(){
   const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  if(from === 'admin') return 'admin.html';
+  if(from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+(function() {
+  const backUrl = panelDonusUrl();
   document.getElementById('backBtn').href = backUrl;
   document.getElementById('backBtn2').href = backUrl;
 })();
@@ -240,7 +248,7 @@ const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika olarak gelir
-const NOKTA_PARAM = parseInt(_kParams.get('nokta')); // 2/4/8/12/16 — opsiyonel, admin panelinde henüz seçici yok
+const NOKTA_PARAM = parseInt(_kParams.get('nokta')); // 2/4/8/12/16
 
 function kilitliModuBaslat(){
   document.getElementById('kartHiz').style.display='none';
@@ -335,8 +343,6 @@ function baslat(){
 
 function animasyonBaslat(){
   const nokta = document.getElementById('nokta');
-  // NOT: Hız skalası güncellendi — eski "4. kademe" hızı artık "1. kademe" oldu,
-  // diğer kademeler aynı oranla (x4) hızlandırıldı (eskiden G.hiz*0.15 idi).
   const hizFaktoru = G.hiz * 0.6;
   nokta.style.left = G.pos.x + '%';
   nokta.style.top = G.pos.y + '%';
@@ -374,8 +380,7 @@ function bitti(){
   tamEkrandanCik();
   gorevTamamlandiSinyaliGonder(s);
   if(KILITLI){
-    const from = new URLSearchParams(window.location.search).get('from');
-    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    const backUrl = panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
   }
 }
