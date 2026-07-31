@@ -193,6 +193,7 @@ tr:hover td{background:#f8fafc}
     </li>
 
     <div class="sidebar-alt2">Sistem</div>
+    <li><a href="#" onclick="sayfaGoster('basvurular',this)"><span class="ikon">📋</span> Ölçüm Başvuruları <span id="basvuruRozet" style="display:none;margin-left:auto;background:#dc2626;color:white;font-size:0.68rem;font-weight:700;padding:0.1rem 0.5rem;border-radius:10px"></span></a></li>
     <li><a href="#" onclick="sayfaGoster('odemeler',this)"><span class="ikon">💳</span> Ödemeler</a></li>
     <li><a href="#" onclick="sayfaGoster('sifre-islemleri',this)"><span class="ikon">🔑</span> Şifre İşlemleri</a></li>
     <li><a href="#" onclick="cikisYapAdmin()"><span class="ikon">🚪</span> Çıkış Yap</a></li>
@@ -336,6 +337,24 @@ tr:hover td{background:#f8fafc}
   <div id="sayfa-odak-egzersizi" class="sayfa">
     <div class="ust-bar"><div id="odak-egzersizi-baslik"><h1>Odak Çalışması</h1><p>Egzersizi başlatın veya hızını ayarlayın.</p></div></div>
     <div id="odak-egzersizi-icerik"></div>
+  </div>
+
+  <!-- ÖLÇÜM BAŞVURULARI -->
+  <div id="sayfa-basvurular" class="sayfa">
+    <div class="ust-bar"><div><h1>Ölçüm Başvuruları</h1><p>Ücretsiz ölçüm için gelen başvurular. Zoom üzerinden arayıp uygun seviyeye yönlendirin.</p></div></div>
+    <div class="kart" style="padding:1rem 1.5rem">
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Durum:</label>
+          <select id="filtre-basvuru-durum" onchange="basvurulariYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
+            <option value="">Tümü</option>
+            <option value="bekliyor" selected>Bekliyor</option>
+            <option value="aranildi">Arandı</option>
+            <option value="tamamlandi">Tamamlandı</option>
+          </select></div>
+        <span id="basvuru-sayac" style="font-size:0.82rem;color:#94a3b8;margin-left:auto"></span>
+      </div>
+    </div>
+    <div class="kart"><div id="basvuru-liste"><div class="bos-durum">⏳ Başvurular yükleniyor...</div></div></div>
   </div>
 
   <!-- ÖDEMELER -->
@@ -883,6 +902,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='ogretmenler') ogretmenleriYukle();
   if(sayfa==='kurumlar') kurumlarıYukle();
   if(sayfa==='sifre-islemleri') sifreIslemleriYukle();
+  if(sayfa==='basvurular') basvurulariYukle();
 }
 
 function altMenuToggle(id,link){
@@ -1802,8 +1822,62 @@ async function genelBakisYukle(){
   }catch(e){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem">❌ '+e.message+'</td></tr>';}
 }
 
+// ── ÖLÇÜM BAŞVURULARI ──
+const BASVURU_DURUM_ADI={bekliyor:'⏳ Bekliyor',aranildi:'📞 Arandı',tamamlandi:'✅ Tamamlandı'};
+const BASVURU_DURUM_RENK={bekliyor:'bekliyor',aranildi:'aktif',tamamlandi:'aktif'};
+
+async function basvurulariYukle(){
+  const liste=document.getElementById('basvuru-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=created_at.desc';
+  const durum=document.getElementById('filtre-basvuru-durum').value;
+  if(durum) filtre+='&durum=eq.'+durum;
+  try{
+    const basvurular=await supabase('GET','olcum_basvurulari',null,filtre);
+    document.getElementById('basvuru-sayac').textContent=basvurular.length+' başvuru';
+    if(!basvurular.length){liste.innerHTML='<div class="bos-durum">📭 Başvuru bulunamadı.</div>';basvuruRozetGuncelle();return;}
+    liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Telefon</th><th>E-posta</th><th>Sınıf/Yaş</th><th>Müsait Zaman</th><th>Not</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="basvuru-tbody"></tbody></table>';
+    const tbody=document.getElementById('basvuru-tbody');
+    basvurular.forEach(b=>{
+      const tarih=b.created_at?new Date(b.created_at).toLocaleString('tr-TR'):'-';
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><strong>${b.ad||''} ${b.soyad||''}</strong></td><td>${b.telefon||'-'}</td><td>${b.eposta||'-'}</td><td>${b.sinif_yas||'-'}</td><td>${b.musait_zaman||'-'}</td><td style="max-width:180px;font-size:0.8rem;color:#64748b">${b.notlar||'-'}</td><td>${tarih}</td><td><span class="durum ${BASVURU_DURUM_RENK[b.durum]||'bekliyor'}">${BASVURU_DURUM_ADI[b.durum]||b.durum}</span></td><td style="white-space:nowrap">
+        <select onchange="basvuruDurumGuncelle(${b.id},this.value)" style="padding:0.3rem 0.5rem;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;font-family:'DM Sans',sans-serif">
+          <option value="bekliyor" ${b.durum==='bekliyor'?'selected':''}>Bekliyor</option>
+          <option value="aranildi" ${b.durum==='aranildi'?'selected':''}>Arandı</option>
+          <option value="tamamlandi" ${b.durum==='tamamlandi'?'selected':''}>Tamamlandı</option>
+        </select>
+      </td>`;
+      tbody.appendChild(tr);
+    });
+    basvuruRozetGuncelle();
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+async function basvuruDurumGuncelle(id,yeniDurum){
+  try{
+    await supabase('PATCH','olcum_basvurulari',{durum:yeniDurum},'id=eq.'+id);
+    bildirimGoster('✅ Durum güncellendi!','basari');
+    basvurulariYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function basvuruRozetGuncelle(){
+  try{
+    const bekleyenler=await supabase('GET','olcum_basvurulari',null,'durum=eq.bekliyor&select=id');
+    const rozet=document.getElementById('basvuruRozet');
+    if(bekleyenler.length>0){
+      rozet.textContent=bekleyenler.length;
+      rozet.style.display='inline-block';
+    } else {
+      rozet.style.display='none';
+    }
+  }catch(e){}
+}
+
 // Sayfa yüklendiğinde genel bakışı yükle
 genelBakisYukle();
+basvuruRozetGuncelle();
 </script>
 </body>
 </html>
