@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Blok Okuma | SinUs</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -60,8 +63,8 @@
 
   #kutu{
     position:relative;
-    width:min(90vw, 720px);
-    max-width:90vw;
+    width:min(92vw, 920px);
+    max-width:92vw;
     padding:64px 56px;
     border-radius:20px;
     border:1px solid rgba(96,165,250,0.18);
@@ -142,6 +145,43 @@
     border:none;
   }
   button.birincil:hover{background:#e6c25a;}
+
+  /* Hız (KPM) satırı — diğer okuma teknikleriyle aynı sistem */
+  .hiz-satir-blok{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:min(92vw, 420px);
+  }
+  .hiz-etiket-blok{
+    font-size:13px;
+    color:var(--text-dim);
+    white-space:nowrap;
+  }
+  .hiz-slider-blok{
+    flex:1;
+    -webkit-appearance:none;
+    height:5px;
+    border-radius:3px;
+    background:rgba(255,255,255,0.12);
+    outline:none;
+    cursor:pointer;
+  }
+  .hiz-slider-blok::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:16px;height:16px;border-radius:50%;
+    background:var(--gold);cursor:pointer;
+  }
+  .hiz-deger-blok{
+    font-family:'Poppins',sans-serif;
+    font-size:13px;font-weight:600;color:var(--gold);
+    min-width:64px;text-align:right;
+  }
+
+  /* Yazı boyutu seçici (madde 4.3 — Blok Okuma'da özellikle istenmiş) */
+  .boyut-grubu-blok{ display:flex; gap:8px; }
+  .boyut-btn-blok{ font-size:13px; padding:8px 14px; }
+  .boyut-btn-blok.sel{ border-color:var(--gold); color:var(--gold); }
 
   #geri-link-baslangic{
     color:var(--text-dim);
@@ -263,12 +303,19 @@
 
     <div class="kontrol-grubu">
       <select id="secim-tema"></select>
-      <select id="secim-sure">
-        <option value="1000">1000 ms (yavaş)</option>
-        <option value="800" selected>800 ms</option>
-        <option value="600">600 ms</option>
-        <option value="400">400 ms (hızlı)</option>
-      </select>
+    </div>
+
+    <div class="hiz-satir-blok" id="hiz-satir-blok">
+      <span class="hiz-etiket-blok">KPM (Kelime/Dakika)</span>
+      <input type="range" class="hiz-slider-blok" id="secim-hiz" min="50" max="1000" step="50" value="200">
+      <span class="hiz-deger-blok" id="hiz-deger-blok">200 KPM</span>
+    </div>
+
+    <div class="boyut-grubu-blok" id="boyut-grubu-blok">
+      <button class="boyut-btn-blok" data-boyut="0.75">Küçük</button>
+      <button class="boyut-btn-blok sel" data-boyut="1">Orta</button>
+      <button class="boyut-btn-blok" data-boyut="1.25">Büyük</button>
+      <button class="boyut-btn-blok" data-boyut="1.5">Çok Büyük</button>
     </div>
 
     <button class="birincil" id="btn-baslat">Egzersizi Başlat</button>
@@ -359,18 +406,54 @@
   const baslangicEkrani = document.getElementById('baslangic-ekrani');
   const bitisEkrani = document.getElementById('bitis-ekrani');
   const secimTema = document.getElementById('secim-tema');
-  const secimSure = document.getElementById('secim-sure');
+  const secimHiz = document.getElementById('secim-hiz');
+  const hizDegerEl = document.getElementById('hiz-deger-blok');
 
   let dizi = [];       // seçilen temanın düz (flatten) ifade listesi
   let index = 0;
-  let sure = 800;
+  let kpm = 200;       // KPM (Kelime/Dakika) — diğer okuma teknikleriyle aynı hız sistemi (madde 6.2)
+  let mevcutBekleme = 0; // o an gösterilen bloğun toplam bekleme süresi (ms) — duraklat/devam için
   let zamanlayici = null;
   let duraklatildi = false;
   let kalanSure = 0;
   let adimBaslangic = 0;
+  let yaziOlcek = 1;   // YAZI BOYUTU çarpanı (madde 4.3)
+
+  // Bir bloğun kelime sayısına göre ekranda kalma süresini hesaplar (diğer okuma teknikleriyle aynı formül)
+  function blokBeklemeSuresi(ifadeMetni){
+    const kelimeSayisi = ifadeMetni.trim().split(/\s+/).length;
+    return Math.round((60000 / kpm) * kelimeSayisi);
+  }
+
+  // ── YAZI BOYUTU TERCİHİ (tarayıcıda hatırlanır, diğer okuma dosyalarıyla ortak) ──
+  (function(){
+    try{
+      const kayitli = parseFloat(localStorage.getItem('sinus_yazi_boyutu'));
+      if(!isNaN(kayitli)){
+        yaziOlcek = kayitli;
+        document.querySelectorAll('#boyut-grubu-blok .boyut-btn-blok').forEach(b=>{
+          b.classList.toggle('sel', parseFloat(b.dataset.boyut) === kayitli);
+        });
+      }
+    }catch(e){}
+  })();
+  document.querySelectorAll('#boyut-grubu-blok .boyut-btn-blok').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      yaziOlcek = parseFloat(this.dataset.boyut);
+      document.querySelectorAll('#boyut-grubu-blok .boyut-btn-blok').forEach(b=>b.classList.remove('sel'));
+      this.classList.add('sel');
+      try{ localStorage.setItem('sinus_yazi_boyutu', yaziOlcek); }catch(e){}
+      if(ifadeEl.textContent) yaziyiSigdir();
+    });
+  });
+
+  secimHiz.addEventListener('input', function(){
+    kpm = parseInt(this.value, 10);
+    hizDegerEl.textContent = kpm + ' KPM';
+  });
 
   // ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev) ──
-  // NOT: "hiz" parametresi burada tur-başına-kelime-gösterim süresini (ms) belirtir,
+  // NOT: "hiz" parametresi artık diğer okuma teknikleriyle aynı şekilde KPM (50-1000) olarak yorumlanır.
   // "sure" (dakika) ise toplam görev süresidir — bu ikisi birbirinden bağımsızdır.
   const _params = new URLSearchParams(window.location.search);
   const KILITLI = _params.get('kilitli') === '1';
@@ -414,13 +497,15 @@
   }
 
   const kutuEl = document.getElementById('kutu');
-  const MAKS_PUNTO = 52;
+  const MAKS_PUNTO_TABAN = 52;
   const MIN_PUNTO = 15;
 
-  // İfadeyi kutunun genişliğine göre tek satıra sığacak şekilde boyutlandırır
+  // İfadeyi kutunun genişliğine göre tek satıra sığacak şekilde boyutlandırır.
+  // Kullanıcının seçtiği YAZI BOYUTU çarpanı (yaziOlcek) üst sınırı belirler,
+  // metin yine de kutuya sığmıyorsa otomatik küçültme devam eder.
   function yaziyiSigdir(){
     const kullanilabilirGenislik = kutuEl.clientWidth - 8; // küçük bir güvenlik payı
-    let punto = Math.min(MAKS_PUNTO, Math.round(kutuEl.clientWidth * 0.09));
+    let punto = Math.min(MAKS_PUNTO_TABAN * yaziOlcek, Math.round(kutuEl.clientWidth * 0.09 * yaziOlcek));
     ifadeEl.style.fontSize = punto + 'px';
 
     while(ifadeEl.scrollWidth > kullanilabilirGenislik && punto > MIN_PUNTO){
@@ -438,20 +523,22 @@
     ifadeEl.classList.remove('gorunur');
 
     setTimeout(() => {
-      ifadeEl.textContent = dizi[index];
+      const metin = dizi[index];
+      ifadeEl.textContent = metin;
       yaziyiSigdir();
       ifadeEl.classList.add('gorunur');
       ilerlemeCizgisi.style.width = ((index+1) / dizi.length * 100) + '%';
       index++;
       adimBaslangic = Date.now();
-      kalanSure = sure;
-      zamanlayici = setTimeout(adimGoster, sure);
+      mevcutBekleme = blokBeklemeSuresi(metin);
+      kalanSure = mevcutBekleme;
+      zamanlayici = setTimeout(adimGoster, mevcutBekleme);
     }, 60);
   }
 
   function egzersiziBaslat(){
     const temaAnahtari = secimTema.value;
-    if(!KILITLI){ sure = parseInt(secimSure.value, 10); }
+    if(!KILITLI){ kpm = parseInt(secimHiz.value, 10); }
     dizi = diziyiOlustur(temaAnahtari);
     index = 0;
     duraklatildi = false;
@@ -485,7 +572,7 @@
     if(duraklatildi) return;
     duraklatildi = true;
     clearTimeout(zamanlayici);
-    kalanSure = sure - (Date.now() - adimBaslangic);
+    kalanSure = mevcutBekleme - (Date.now() - adimBaslangic);
     sahne.classList.add('durduruldu');
     document.getElementById('btn-durdur').textContent = 'Devam Et';
   }
@@ -529,11 +616,11 @@
   }
 
   function kilitliModuBaslat(){
-    document.querySelector('.kontrol-grubu').style.display = 'none';
+    document.getElementById('hiz-satir-blok').style.display = 'none';
     document.getElementById('btn-yeni-tema').style.display = 'none';
     document.getElementById('geri-link-baslangic').style.display = 'none';
     document.getElementById('btn-panele-don').style.display = 'none';
-    if(!isNaN(HIZ_PARAM)) sure = Math.min(2000, Math.max(200, HIZ_PARAM));
+    if(!isNaN(HIZ_PARAM)) kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
     const temaSecim = (TEMA_PARAM && TEMALAR[TEMA_PARAM]) ? TEMA_PARAM : Object.keys(TEMALAR)[0];
     secimTema.value = temaSecim;
     document.getElementById('btn-baslat').textContent = 'Başla';
