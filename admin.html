@@ -753,22 +753,38 @@ function olcumYapOkumaEkraniGoster(){
   const icerik=document.getElementById('olcum-yap-icerik');
   icerik.innerHTML=`
     <div style="max-width:720px;margin:0 auto">
-      <div style="position:fixed;top:1.5rem;left:2rem;right:2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;z-index:5">
+      <div style="position:fixed;top:1.5rem;left:2rem;right:2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;z-index:5;flex-wrap:wrap">
         <button class="btn-iptal" onclick="olcumYapMetinlereDon()" style="padding:0.5rem 1rem">◀ Metinlere Dön</button>
+        <div class="yazi-boyut-satir" style="margin-bottom:0">
+          <span class="yazi-boyut-etiket">Yazı:</span>
+          <button type="button" class="yazi-boyut-btn" data-boyut="1.05" onclick="olcumYapYaziBoyutu(this)">Küçük</button>
+          <button type="button" class="yazi-boyut-btn secili" data-boyut="1.3" onclick="olcumYapYaziBoyutu(this)">Orta</button>
+          <button type="button" class="yazi-boyut-btn" data-boyut="1.6" onclick="olcumYapYaziBoyutu(this)">Büyük</button>
+          <button type="button" class="yazi-boyut-btn" data-boyut="2" onclick="olcumYapYaziBoyutu(this)">Çok Büyük</button>
+        </div>
         <div style="display:flex;gap:0.6rem;align-items:center">
           <button class="btn-iptal" id="olcum-yap-duraklat-btn" onclick="olcumYapDuraklatToggle()" style="padding:0.5rem 1rem">⏸ Duraklat</button>
           <div id="olcum-yap-sure" style="background:#0a1628;color:white;padding:0.6rem 1.2rem;border-radius:20px;font-weight:700;font-family:'Playfair Display',serif;font-size:1.1rem">00:00</div>
         </div>
       </div>
-      <div style="height:3.5rem"></div>
+      <div style="height:5rem"></div>
       <h2 style="font-family:'Playfair Display',serif;margin-bottom:1rem;color:#0a1628">${_olcumYap.metin.baslik}</h2>
-      <div id="olcum-yap-metin-govde" style="font-size:1.05rem;line-height:1.9;color:#1e293b;white-space:pre-wrap;position:relative">${_olcumYap.metin.metin}
+      <div id="olcum-yap-metin-govde" style="font-size:1.3rem;line-height:1.9;color:#1e293b;white-space:pre-wrap;position:relative;transition:font-size 0.15s">${_olcumYap.metin.metin}
         <div id="olcum-yap-duraklatildi-ortusu" style="display:none;position:absolute;inset:0;background:rgba(244,246,249,0.92);align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:#64748b">⏸ Duraklatıldı</div>
       </div>
       <button class="btn-kaydet" style="margin-top:2rem;width:100%;padding:1rem;font-size:1rem" onclick="olcumYapOkumayiBitir()">✅ Okumayı Bitir</button>
     </div>`;
   _olcumYap.baslaZaman=Date.now();
   _olcumYap.timerInterval=setInterval(olcumYapSureGuncelle,250);
+}
+
+// ── OKUMA EKRANI YAZI BOYUTU — öğrenciye göre büyütülüp küçültülebilir ──
+function olcumYapYaziBoyutu(btn){
+  const grup=btn.parentElement;
+  grup.querySelectorAll('.yazi-boyut-btn').forEach(b=>b.classList.remove('secili'));
+  btn.classList.add('secili');
+  const govde=document.getElementById('olcum-yap-metin-govde');
+  if(govde) govde.style.fontSize=btn.dataset.boyut+'rem';
 }
 
 function olcumYapGecenSureMs(){
