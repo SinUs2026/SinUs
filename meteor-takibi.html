@@ -229,11 +229,15 @@ body {
 </div>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ — ?from=admin ise admin, değilse öğrenci paneli ──
-(function() {
+// ── PANELe DÖNÜŞ URL'İ — admin/ogretmen/ogrenci ayrımı doğru yapılıyor ──
+function panelDonusUrl() {
   const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
-  document.getElementById('backBtn').href = backUrl;
+  if (from === 'admin') return 'admin.html';
+  if (from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+(function() {
+  document.getElementById('backBtn').href = panelDonusUrl();
 })();
 
 // ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci seviye/mod seçemez) ──
@@ -276,8 +280,7 @@ function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=k
 function kilitliGoreviBitir(){
   clearInterval(kilitliSureInterval);
   sinusTamamlandiSinyalGonder();
-  const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  const backUrl = panelDonusUrl();
   showScreen('screenMenu');
   document.getElementById('screenMenu').innerHTML = `
     <div class="meteor-preview">✅</div>
