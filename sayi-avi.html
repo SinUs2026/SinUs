@@ -65,7 +65,7 @@ body::before {
 }
 .logo { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; color:var(--accent); letter-spacing:3px; text-shadow:0 0 20px rgba(0,212,255,0.5); }
 .logo span { color:var(--white); }
-.score-pill { display:flex; align-items:center; gap:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:5px 14px; font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; color:var(--accent); }
+.score-pill { display:flex; align-items:center; gap:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:5px 14px; font-family:'Nunito',sans-serif; font-size:0.9rem; font-weight:800; color:var(--accent); }
 
 .screen { display:none; flex-direction:column; align-items:center; flex:1; }
 .screen.active { display:flex; }
@@ -80,18 +80,18 @@ body::before {
 .asama-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
 .asama-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:12px; padding:14px 8px; cursor:pointer; transition:all 0.2s; text-align:center; color:var(--grey); }
 .asama-btn:hover, .asama-btn.sel { background:rgba(0,212,255,0.15); border-color:var(--accent); color:var(--white); box-shadow:0 0 12px rgba(0,212,255,0.2); }
-.asama-btn .as-n { font-family:'Orbitron',sans-serif; font-size:0.9rem; font-weight:700; color:var(--accent); display:block; margin-bottom:4px; }
+.asama-btn .as-n { font-family:'Nunito',sans-serif; font-size:0.95rem; font-weight:800; color:var(--accent); display:block; margin-bottom:4px; }
 .asama-btn .as-d { font-size:0.68rem; line-height:1.4; }
 
 .start-btn { width:100%; max-width:480px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 24px rgba(0,212,255,0.3); }
 .start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,212,255,0.4); }
 
-.kilitli-sure-pill { background:rgba(255,215,0,0.08); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px; padding:6px 14px; margin-bottom:10px; text-align:center; font-family:'Orbitron',sans-serif; font-size:0.8rem; font-weight:700; color:var(--gold); width:100%; max-width:600px; }
+.kilitli-sure-pill { background:rgba(255,215,0,0.08); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px; padding:6px 14px; margin-bottom:10px; text-align:center; font-family:'Nunito',sans-serif; font-size:0.8rem; font-weight:800; color:var(--gold); width:100%; max-width:600px; }
 
 .game-hud { display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:16px; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px; }
 .hud-item { text-align:center; }
 .hud-lbl { font-size:0.62rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
-.hud-val { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; color:var(--accent); margin-top:2px; }
+.hud-val { font-family:'Nunito',sans-serif; font-size:1.05rem; font-weight:800; color:var(--accent); margin-top:2px; }
 .hud-val.hedef { color:var(--gold); font-size:1.3rem; }
 
 .hedef-banner {
@@ -105,7 +105,7 @@ body::before {
   margin-bottom:16px;
 }
 .hedef-banner-lbl { font-size:0.72rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
-.hedef-sayi { font-family:'Orbitron',sans-serif; font-size:2.8rem; font-weight:900; color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.4); }
+.hedef-sayi { font-family:'Nunito',sans-serif; font-size:2.8rem; font-weight:900; color:var(--gold); text-shadow:0 0 20px rgba(255,215,0,0.4); }
 
 .sayilar-alan {
   width:100%;
@@ -125,9 +125,9 @@ body::before {
 }
 
 .sayi-item {
-  font-family:'Orbitron',sans-serif;
-  font-size:1rem;
-  font-weight:700;
+  font-family:'Nunito',sans-serif;
+  font-size:1.1rem;
+  font-weight:800;
   color:rgba(100,180,220,0.7);
   cursor:pointer;
   padding:6px 10px;
@@ -167,14 +167,14 @@ body::before {
 @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 .sonuc-icon { font-size:3rem; display:block; margin-bottom:10px; }
 .sonuc-baslik { font-family:'Orbitron',sans-serif; font-size:1.3rem; font-weight:900; color:var(--green); margin-bottom:6px; text-shadow:0 0 20px rgba(0,255,136,0.4); }
-.sonuc-sure { font-family:'Orbitron',sans-serif; font-size:2.5rem; font-weight:900; color:var(--gold); margin:12px 0; }
+.sonuc-sure { font-family:'Nunito',sans-serif; font-size:2.5rem; font-weight:900; color:var(--gold); margin:12px 0; }
 .sonuc-sure-lbl { font-size:0.75rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
-.fark-kutu { display:inline-block; padding:8px 20px; border-radius:10px; font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; margin:10px 0 20px; }
+.fark-kutu { display:inline-block; padding:8px 20px; border-radius:10px; font-family:'Nunito',sans-serif; font-size:1.1rem; font-weight:800; margin:10px 0 20px; }
 .fark-kutu.iyi { background:rgba(0,255,136,0.1); border:1.5px solid rgba(0,255,136,0.4); color:var(--green); }
 .fark-kutu.kotu { background:rgba(255,68,102,0.1); border:1.5px solid rgba(255,68,102,0.4); color:var(--red); }
 .fark-kutu.ilk { background:rgba(255,215,0,0.1); border:1.5px solid rgba(255,215,0,0.4); color:var(--gold); }
 .stats-row { display:flex; justify-content:space-around; padding:14px 0; border-top:1px solid rgba(255,255,255,0.07); border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:20px; }
-.stat-n { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; color:var(--accent); }
+.stat-n { font-family:'Nunito',sans-serif; font-size:1.15rem; font-weight:800; color:var(--accent); }
 .stat-l { font-size:0.68rem; color:var(--grey); margin-top:2px; }
 .btn-row { display:flex; gap:10px; justify-content:center; }
 .btn-play { flex:1; max-width:200px; padding:13px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:12px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
@@ -184,7 +184,7 @@ body::before {
 
 @media(max-width:600px) {
   .asama-grid { grid-template-columns:repeat(2,1fr); }
-  .sayi-item { font-size:0.88rem; padding:5px 8px; min-width:38px; }
+  .sayi-item { font-size:0.95rem; padding:5px 8px; min-width:38px; }
   .hedef-sayi { font-size:2rem; }
 }
 </style>
@@ -288,10 +288,15 @@ body::before {
 </div>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ ──
-(function() {
+// ── PANELe DÖNÜŞ URL'İ — admin/ogretmen/ogrenci ayrımı doğru yapılıyor ──
+function panelDonusUrl() {
   const from = new URLSearchParams(window.location.search).get('from');
-  document.getElementById('backBtn').href = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  if (from === 'admin') return 'admin.html';
+  if (from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+(function() {
+  document.getElementById('backBtn').href = panelDonusUrl();
 })();
 
 const AYARLAR = {
@@ -347,8 +352,7 @@ function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=k
 function kilitliGoreviBitir(){
   clearInterval(kilitliSureInterval);
   gorevTamamlandiSinyaliGonder();
-  const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  const backUrl = panelDonusUrl();
   showScreen('screenMenu');
   document.getElementById('screenMenu').innerHTML = `
     <div style="font-size:2.5rem;margin-top:16px;margin-bottom:4px">✅</div>
@@ -499,7 +503,18 @@ function gorevTamamlandiSinyaliGonder(){
 }
 
 function tekrarOyna() { oyunuBaslat(); }
-function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);}
+// ── "MENÜ" tıklanınca: sinyali gönder, sonra doğru panele (admin/ogretmen/ogrenci) yönlendir ──
+function sinusTamamlandiSinyalGonderVeDon(){
+  try{
+    const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
+    if(b&&b.tamamlandiMi===false){
+      b.tamamlandiMi=true;b.puan=10;
+      localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+    }
+  }catch(e){}
+  const backUrl = panelDonusUrl();
+  setTimeout(()=>{window.location.href=backUrl;},200);
+}
 function menuye() { sinusTamamlandiSinyalGonderVeDon(); }
 
 function showScreen(id) {
