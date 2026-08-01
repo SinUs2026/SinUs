@@ -88,6 +88,12 @@ tr:hover td{background:#f8fafc}
 .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
 .modal.acik{display:flex}
 .modal-kutu{background:white;border-radius:20px;padding:2rem;width:520px;max-width:90%;max-height:90vh;overflow-y:auto}
+.metin-goruntule-devasa{max-height:70vh !important;font-size:1.05rem}
+.yazi-boyut-satir{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap}
+.yazi-boyut-etiket{font-size:0.78rem;font-weight:600;color:#64748b;margin-right:0.2rem}
+.yazi-boyut-btn{padding:0.35rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.78rem;font-family:'DM Sans',sans-serif;color:#475569}
+.yazi-boyut-btn:hover{border-color:#93c5fd}
+.yazi-boyut-btn.secili{border-color:#2563a8;background:#eff6ff;color:#1d4ed8;font-weight:600}
 .modal-baslik{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#0a1628;margin-bottom:1.5rem}
 .form-grup{margin-bottom:1rem}
 .form-grup label{display:block;font-size:0.82rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem}
@@ -290,10 +296,16 @@ tr:hover td{background:#f8fafc}
 
 <!-- DERS METNİ GÖRÜNTÜLEME MODALI -->
 <div class="modal" id="modal-ders-og-goruntule">
-  <div class="modal-kutu" style="width:640px">
+  <div class="modal-kutu" style="width:960px">
     <div class="modal-baslik" id="dersOgBaslik">Ders Metni</div>
     <div style="font-size:0.78rem;color:#64748b;margin-bottom:1rem" id="dersOgMeta">—</div>
-    <div style="font-size:0.92rem;line-height:1.8;color:#1e293b;white-space:pre-wrap;max-height:50vh;overflow-y:auto;background:#f8fafc;border-radius:10px;padding:1rem 1.2rem" id="dersOgMetin">—</div>
+    <div class="yazi-boyut-satir"><span class="yazi-boyut-etiket">Yazı Boyutu:</span>
+      <button type="button" class="yazi-boyut-btn" data-boyut="0.9" onclick="metinGoruntuleYaziBoyutu('dersOgMetin',this)">Küçük</button>
+      <button type="button" class="yazi-boyut-btn secili" data-boyut="1.05" onclick="metinGoruntuleYaziBoyutu('dersOgMetin',this)">Orta</button>
+      <button type="button" class="yazi-boyut-btn" data-boyut="1.3" onclick="metinGoruntuleYaziBoyutu('dersOgMetin',this)">Büyük</button>
+      <button type="button" class="yazi-boyut-btn" data-boyut="1.6" onclick="metinGoruntuleYaziBoyutu('dersOgMetin',this)">Çok Büyük</button>
+    </div>
+    <div class="metin-goruntule-devasa" style="line-height:1.8;color:#1e293b;white-space:pre-wrap;overflow-y:auto;background:#f8fafc;border-radius:10px;padding:1rem 1.2rem" id="dersOgMetin">—</div>
     <div class="modal-btn-grup">
       <button class="btn-iptal" onclick="modalKapat('ders-og-goruntule')">Kapat</button>
     </div>
@@ -302,10 +314,16 @@ tr:hover td{background:#f8fafc}
 
 <!-- ÖLÇÜM METNİ GÖRÜNTÜLEME MODALI -->
 <div class="modal" id="modal-olcum-og-goruntule">
-  <div class="modal-kutu" style="width:640px">
+  <div class="modal-kutu" style="width:960px">
     <div class="modal-baslik" id="olcumOgBaslik">Ölçüm Metni</div>
     <div style="font-size:0.78rem;color:#64748b;margin-bottom:1rem" id="olcumOgMeta">—</div>
-    <div style="font-size:0.92rem;line-height:1.8;color:#1e293b;white-space:pre-wrap;max-height:50vh;overflow-y:auto;background:#f8fafc;border-radius:10px;padding:1rem 1.2rem" id="olcumOgMetin">—</div>
+    <div class="yazi-boyut-satir"><span class="yazi-boyut-etiket">Yazı Boyutu:</span>
+      <button type="button" class="yazi-boyut-btn" data-boyut="0.9" onclick="metinGoruntuleYaziBoyutu('olcumOgMetin',this)">Küçük</button>
+      <button type="button" class="yazi-boyut-btn secili" data-boyut="1.05" onclick="metinGoruntuleYaziBoyutu('olcumOgMetin',this)">Orta</button>
+      <button type="button" class="yazi-boyut-btn" data-boyut="1.3" onclick="metinGoruntuleYaziBoyutu('olcumOgMetin',this)">Büyük</button>
+      <button type="button" class="yazi-boyut-btn" data-boyut="1.6" onclick="metinGoruntuleYaziBoyutu('olcumOgMetin',this)">Çok Büyük</button>
+    </div>
+    <div class="metin-goruntule-devasa" style="line-height:1.8;color:#1e293b;white-space:pre-wrap;overflow-y:auto;background:#f8fafc;border-radius:10px;padding:1rem 1.2rem" id="olcumOgMetin">—</div>
     <div class="modal-btn-grup">
       <button class="btn-iptal" onclick="modalKapat('olcum-og-goruntule')">Kapat</button>
     </div>
@@ -454,9 +472,24 @@ function kacirOg(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").rep
 // ── ÖLÇÜM YAP (canlı test, kaydetmez) ──
 let _olcumYapMetinler=[];
 let _olcumYap=null;
+let _olcumYapTarihceGirdi=false;
+
+// Tarayıcının "Geri" tuşuna basılınca ölçüm ekranı açıkken kullanıcı yanlışlıkla
+// giriş sayfasına atılıp orada kilitlenmesin diye: ölçüm açılırken sahte bir
+// geçmiş kaydı ekleniyor, "geri" tuşu bu kaydı tüketip sadece ölçüm ekranını kapatıyor.
+window.addEventListener('popstate', function(){
+  if(_olcumYapTarihceGirdi && document.getElementById('olcum-yap-overlay').classList.contains('acik')){
+    _olcumYapTarihceGirdi=false;
+    olcumYapKapat(true);
+  }
+});
 
 async function olcumYapAc(){
   document.getElementById('olcum-yap-overlay').classList.add('acik');
+  if(!_olcumYapTarihceGirdi){
+    history.pushState({olcumYap:true},'',location.href);
+    _olcumYapTarihceGirdi=true;
+  }
   const icerik=document.getElementById('olcum-yap-icerik');
   icerik.innerHTML='<div class="bos-durum">⏳ Metinler yükleniyor...</div>';
   try{
@@ -488,37 +521,116 @@ async function olcumYapAc(){
 
 function olcumYapMetinSec(idx){
   const m=_olcumYapMetinler[idx];
-  _olcumYap={metin:m,baslaZaman:null,bitisZaman:null,soruIndex:0,dogruSayisi:0,timerInterval:null};
-  olcumYapOkumaEkraniGoster();
+  _olcumYap={metin:m,baslaZaman:null,bitisZaman:null,soruIndex:0,dogruSayisi:0,timerInterval:null,duraklatildiMi:false,duraklamaBaslangic:null,toplamDuraklamaMs:0,finalSaniye:null};
+  olcumYapGeriSayimGoster();
+}
+
+// ── GERİ SAYIM (3-2-1) — metin ekrana gelmeden önce öğrenci hazırlansın, süre
+// bu geri sayım sırasında BAŞLAMAZ, ancak metin gerçekten göründüğü an başlar. ──
+function olcumYapGeriSayimGoster(){
+  const icerik=document.getElementById('olcum-yap-icerik');
+  let n=3;
+  const ciz=()=>{
+    icerik.innerHTML=`
+      <div style="max-width:520px;margin:0 auto;text-align:center;padding-top:4rem">
+        <div style="font-size:0.85rem;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem">Hazır ol</div>
+        <div style="font-family:'Playfair Display',serif;font-size:6rem;font-weight:700;color:#0a1628">${n}</div>
+        <div style="color:#64748b;margin-top:1rem;font-size:0.9rem">Metin birazdan açılacak, süre o an başlayacak.</div>
+      </div>`;
+  };
+  ciz();
+  const iv=setInterval(()=>{
+    n--;
+    if(n<=0){ clearInterval(iv); olcumYapOkumaEkraniGoster(); }
+    else{ ciz(); }
+  },800);
 }
 
 function olcumYapOkumaEkraniGoster(){
   const icerik=document.getElementById('olcum-yap-icerik');
   icerik.innerHTML=`
     <div style="max-width:720px;margin:0 auto">
-      <div id="olcum-yap-sure" style="position:fixed;top:1.5rem;right:2rem;background:#0a1628;color:white;padding:0.6rem 1.2rem;border-radius:20px;font-weight:700;font-family:'Playfair Display',serif;font-size:1.1rem">00:00</div>
+      <div style="position:fixed;top:1.5rem;left:2rem;right:2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;z-index:5;flex-wrap:wrap">
+        <button class="btn-iptal" onclick="olcumYapMetinlereDon()" style="padding:0.5rem 1rem">◀ Metinlere Dön</button>
+        <div class="yazi-boyut-satir" style="margin-bottom:0">
+          <span class="yazi-boyut-etiket">Yazı:</span>
+          <button type="button" class="yazi-boyut-btn" data-boyut="1.05" onclick="olcumYapYaziBoyutu(this)">Küçük</button>
+          <button type="button" class="yazi-boyut-btn secili" data-boyut="1.3" onclick="olcumYapYaziBoyutu(this)">Orta</button>
+          <button type="button" class="yazi-boyut-btn" data-boyut="1.6" onclick="olcumYapYaziBoyutu(this)">Büyük</button>
+          <button type="button" class="yazi-boyut-btn" data-boyut="2" onclick="olcumYapYaziBoyutu(this)">Çok Büyük</button>
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:center">
+          <button class="btn-iptal" id="olcum-yap-duraklat-btn" onclick="olcumYapDuraklatToggle()" style="padding:0.5rem 1rem">⏸ Duraklat</button>
+          <div id="olcum-yap-sure" style="background:#0a1628;color:white;padding:0.6rem 1.2rem;border-radius:20px;font-weight:700;font-family:'Playfair Display',serif;font-size:1.1rem">00:00</div>
+        </div>
+      </div>
+      <div style="height:5rem"></div>
       <h2 style="font-family:'Playfair Display',serif;margin-bottom:1rem;color:#0a1628">${_olcumYap.metin.baslik}</h2>
-      <div id="olcum-yap-metin-govde" style="font-size:1.05rem;line-height:1.9;color:#1e293b;white-space:pre-wrap">${_olcumYap.metin.metin}</div>
+      <div id="olcum-yap-metin-govde" style="font-size:1.3rem;line-height:1.9;color:#1e293b;white-space:pre-wrap;position:relative;transition:font-size 0.15s">${_olcumYap.metin.metin}
+        <div id="olcum-yap-duraklatildi-ortusu" style="display:none;position:absolute;inset:0;background:rgba(244,246,249,0.92);align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:#64748b">⏸ Duraklatıldı</div>
+      </div>
       <button class="btn-kaydet" style="margin-top:2rem;width:100%;padding:1rem;font-size:1rem" onclick="olcumYapOkumayiBitir()">✅ Okumayı Bitir</button>
     </div>`;
   _olcumYap.baslaZaman=Date.now();
   _olcumYap.timerInterval=setInterval(olcumYapSureGuncelle,250);
 }
 
+// ── OKUMA EKRANI YAZI BOYUTU — öğrenciye göre büyütülüp küçültülebilir ──
+function olcumYapYaziBoyutu(btn){
+  const grup=btn.parentElement;
+  grup.querySelectorAll('.yazi-boyut-btn').forEach(b=>b.classList.remove('secili'));
+  btn.classList.add('secili');
+  const govde=document.getElementById('olcum-yap-metin-govde');
+  if(govde) govde.style.fontSize=btn.dataset.boyut+'rem';
+}
+
+function olcumYapGecenSureMs(){
+  const simdi=_olcumYap.bitisZaman||Date.now();
+  const duraklamaEk=_olcumYap.duraklatildiMi?(simdi-_olcumYap.duraklamaBaslangic):0;
+  return simdi-_olcumYap.baslaZaman-_olcumYap.toplamDuraklamaMs-duraklamaEk;
+}
+
 function olcumYapSureGuncelle(){
   const el=document.getElementById('olcum-yap-sure');
-  if(!el||!_olcumYap) return;
-  const gecen=Math.floor((Date.now()-_olcumYap.baslaZaman)/1000);
+  if(!el||!_olcumYap||_olcumYap.duraklatildiMi) return;
+  const gecen=Math.floor(olcumYapGecenSureMs()/1000);
   const dk=String(Math.floor(gecen/60)).padStart(2,'0');
   const sn=String(gecen%60).padStart(2,'0');
   el.textContent=dk+':'+sn;
 }
 
+// ── DURAKLAT / DEVAM ET — süreölçer duraklatma anını sayaçtan hariç tutar ──
+function olcumYapDuraklatToggle(){
+  if(!_olcumYap) return;
+  const btn=document.getElementById('olcum-yap-duraklat-btn');
+  const ortu=document.getElementById('olcum-yap-duraklatildi-ortusu');
+  if(!_olcumYap.duraklatildiMi){
+    _olcumYap.duraklatildiMi=true;
+    _olcumYap.duraklamaBaslangic=Date.now();
+    if(btn) btn.textContent='▶ Devam Et';
+    if(ortu) ortu.style.display='flex';
+  }else{
+    _olcumYap.toplamDuraklamaMs+=Date.now()-_olcumYap.duraklamaBaslangic;
+    _olcumYap.duraklatildiMi=false;
+    _olcumYap.duraklamaBaslangic=null;
+    if(btn) btn.textContent='⏸ Duraklat';
+    if(ortu) ortu.style.display='none';
+  }
+}
+
+// ── METİNLERE DÖN — okuma ekranından ölçümü iptal edip metin listesine döner ──
+function olcumYapMetinlereDon(){
+  if(_olcumYap&&_olcumYap.timerInterval) clearInterval(_olcumYap.timerInterval);
+  _olcumYap=null;
+  olcumYapAc();
+}
+
 function olcumYapOkumayiBitir(){
   clearInterval(_olcumYap.timerInterval);
   _olcumYap.bitisZaman=Date.now();
+  const saniye=Math.max(1,Math.round(olcumYapGecenSureMs()/1000));
+  _olcumYap.finalSaniye=saniye;
   const icerik=document.getElementById('olcum-yap-icerik');
-  const saniye=Math.max(1,Math.round((_olcumYap.bitisZaman-_olcumYap.baslaZaman)/1000));
   const dk=Math.floor(saniye/60),sn=saniye%60;
   const sorular=_olcumYap.metin.sorular;
   icerik.innerHTML=`
@@ -567,7 +679,7 @@ function olcumYapCevapVer(secilenIndex){
 }
 
 function olcumYapSonucGoster(){
-  const saniye=Math.max(1,Math.round((_olcumYap.bitisZaman-_olcumYap.baslaZaman)/1000));
+  const saniye=_olcumYap.finalSaniye||Math.max(1,Math.round(olcumYapGecenSureMs()/1000));
   const kelime=_olcumYap.metin.kelime_sayisi||0;
   const kpm=Math.round(kelime/(saniye/60));
   const sorular=_olcumYap.metin.sorular||[];
@@ -594,10 +706,14 @@ function olcumYapSonucGoster(){
     </div>`;
 }
 
-function olcumYapKapat(){
+function olcumYapKapat(fromPopstate){
   if(_olcumYap&&_olcumYap.timerInterval) clearInterval(_olcumYap.timerInterval);
   _olcumYap=null;
   document.getElementById('olcum-yap-overlay').classList.remove('acik');
+  if(_olcumYapTarihceGirdi && !fromPopstate){
+    _olcumYapTarihceGirdi=false;
+    history.back();
+  }
 }
 async function dersMetinleriYukleOg(){
   const liste=document.getElementById('ders-og-liste');
@@ -627,7 +743,16 @@ function dersMetniGoruntuleOg(baslik,zorlukAdi,metin,kelime){
   document.getElementById('dersOgBaslik').textContent=baslik;
   document.getElementById('dersOgMeta').textContent=zorlukAdi+' · '+kelime+' kelime';
   document.getElementById('dersOgMetin').textContent=metin;
+  document.getElementById('dersOgMetin').style.fontSize='1.05rem';
   modalAc('ders-og-goruntule');
+}
+
+// ── METİN GÖRÜNTÜLEME YAZI BOYUTU (Ders/Ölçüm metinleri okunabilirliği için) ──
+function metinGoruntuleYaziBoyutu(elId,btn){
+  const grup=btn.parentElement;
+  grup.querySelectorAll('.yazi-boyut-btn').forEach(b=>b.classList.remove('secili'));
+  btn.classList.add('secili');
+  document.getElementById(elId).style.fontSize=btn.dataset.boyut+'rem';
 }
 
 // ── ÖLÇÜM METİNLERİ (GÖRÜNTÜLEME) ──
@@ -660,6 +785,7 @@ function olcumMetniGoruntuleOg(baslik,grupAdi,metin,kelime){
   document.getElementById('olcumOgBaslik').textContent=baslik;
   document.getElementById('olcumOgMeta').textContent=grupAdi+' · '+kelime+' kelime';
   document.getElementById('olcumOgMetin').textContent=metin;
+  document.getElementById('olcumOgMetin').style.fontSize='1.05rem';
   modalAc('olcum-og-goruntule');
 }
 
