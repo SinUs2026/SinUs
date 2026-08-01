@@ -38,7 +38,7 @@ body::before {
 .header { display:flex; justify-content:space-between; align-items:center; padding:4px 0 8px; }
 .logo { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; color:var(--accent); letter-spacing:3px; text-shadow:0 0 20px rgba(0,212,255,0.5); }
 .logo span { color:var(--white); }
-.score-pill { display:flex; align-items:center; gap:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:5px 14px; font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; color:var(--accent); }
+.score-pill { display:flex; align-items:center; gap:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:5px 14px; font-family:'Nunito',sans-serif; font-size:0.9rem; font-weight:800; color:var(--accent); }
 
 .screen { display:none; flex-direction:column; align-items:center; flex:1; }
 .screen.active { display:flex; }
@@ -72,12 +72,12 @@ body::before {
 .modal-box .icerik { font-size:0.85rem; color:var(--grey); line-height:1.8; }
 .modal-box .icerik strong { color:var(--white); }
 
-.kilitli-sure-pill { background:rgba(255,215,0,0.08); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px; padding:6px 14px; margin-bottom:10px; text-align:center; font-family:'Orbitron',sans-serif; font-size:0.8rem; font-weight:700; color:var(--gold); width:100%; max-width:480px; }
+.kilitli-sure-pill { background:rgba(255,215,0,0.08); border:1.5px solid rgba(255,215,0,0.3); border-radius:12px; padding:6px 14px; margin-bottom:10px; text-align:center; font-family:'Nunito',sans-serif; font-size:0.8rem; font-weight:800; color:var(--gold); width:100%; max-width:480px; }
 
 .game-hud { display:flex; justify-content:space-between; width:100%; max-width:1100px; padding:10px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-bottom:16px; }
 .hud-item { text-align:center; }
 .hud-lbl { font-size:0.6rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
-.hud-val { font-family:'Orbitron',sans-serif; font-size:0.9rem; font-weight:700; color:var(--accent); margin-top:2px; }
+.hud-val { font-family:'Nunito',sans-serif; font-size:1rem; font-weight:800; color:var(--accent); margin-top:2px; }
 
 .oyun-alan {
   width:100%; max-width:1100px; height:440px;
@@ -98,7 +98,7 @@ body::before {
 .merkez-cizgi-h { position:absolute; left:0; right:0; top:50%; height:1px; background:rgba(0,212,255,0.1); }
 .merkez-cizgi-v { position:absolute; top:0; bottom:0; left:50%; width:1px; background:rgba(0,212,255,0.1); }
 .beliren-deger {
-  position:absolute; font-family:'Orbitron',sans-serif; font-weight:700;
+  position:absolute; font-family:'Nunito',sans-serif; font-weight:800;
   color:var(--white); opacity:0; transition:opacity 0.1s; pointer-events:none;
   text-shadow:0 0 10px rgba(0,212,255,0.5); z-index:5;
 }
@@ -108,7 +108,7 @@ body::before {
 .cevap-soru { font-size:0.9rem; color:var(--grey); margin-bottom:12px; }
 .cevap-soru strong { color:var(--gold); font-size:1.1rem; }
 .cevap-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
-.cevap-btn { padding:12px 6px; background:rgba(0,212,255,0.06); border:1.5px solid rgba(0,212,255,0.25); border-radius:10px; color:var(--white); font-family:'Orbitron',sans-serif; font-size:0.95rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.cevap-btn { padding:12px 6px; background:rgba(0,212,255,0.06); border:1.5px solid rgba(0,212,255,0.25); border-radius:10px; color:var(--white); font-family:'Nunito',sans-serif; font-size:1.05rem; font-weight:800; cursor:pointer; transition:all 0.2s; }
 .cevap-btn:hover { background:rgba(0,212,255,0.16); border-color:var(--accent); }
 .cevap-btn.dogru { background:rgba(0,255,136,0.2); border-color:var(--green); color:var(--green); }
 .cevap-btn.yanlis { background:rgba(255,68,102,0.2); border-color:var(--red); color:var(--red); animation:sallaN 0.3s; }
@@ -128,7 +128,7 @@ body::before {
 .sonuc-icon { font-size:3rem; display:block; margin-bottom:10px; }
 .sonuc-baslik { font-family:'Orbitron',sans-serif; font-size:1.2rem; font-weight:900; color:var(--green); margin-bottom:16px; }
 .stats-row { display:flex; justify-content:space-around; padding:14px 0; border-top:1px solid rgba(255,255,255,0.07); border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:20px; }
-.stat-n { font-family:'Orbitron',sans-serif; font-size:1.2rem; font-weight:700; color:var(--accent); }
+.stat-n { font-family:'Nunito',sans-serif; font-size:1.25rem; font-weight:800; color:var(--accent); }
 .stat-l { font-size:0.68rem; color:var(--grey); margin-top:2px; }
 .btn-row { display:flex; gap:10px; justify-content:center; }
 .btn-play { flex:1; max-width:200px; padding:13px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:12px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; cursor:pointer; }
@@ -251,8 +251,15 @@ body::before {
 </div>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ + TAMAMLANMA SİNYALİ ──
-// (Önceden backBtn hiçbir sinyal göndermeden direkt yönlendiriyordu — düzeltildi.)
+// ── PANELe DÖNÜŞ URL'İ — admin/ogretmen/ogrenci ayrımı doğru yapılıyor ──
+function panelDonusUrl() {
+  const from = new URLSearchParams(window.location.search).get('from');
+  if (from === 'admin') return 'admin.html';
+  if (from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+
+// ── PANELe DÖNÜŞ + TAMAMLANMA SİNYALİ ──
 (function() {
   document.getElementById('backBtn').href = '#';
   document.getElementById('backBtn').addEventListener('click', function(e){
@@ -324,8 +331,7 @@ function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=k
 function kilitliGoreviBitir(){
   clearInterval(kilitliSureInterval);
   gorevTamamlandiSinyaliGonder();
-  const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  const backUrl = panelDonusUrl();
   showScreen('screenMenu');
   document.getElementById('screenMenu').innerHTML = `
     <div style="font-size:2.5rem;margin-top:8px;margin-bottom:4px">✅</div>
@@ -338,9 +344,14 @@ function selMod(m, el) { G.mod = m; document.querySelectorAll('#kartMod .mod-btn
 function selTarafSayisi(n, el) { G.tarafSayisi = n; document.querySelectorAll('#kartTaraf .mod-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
 function selAsama(n, el) { G.asama = n; document.querySelectorAll('.asama-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
 
+// NOT: Harf modunda sadece BÜYÜK harfler ve noktasız harfler kullanılıyor
+// (İ, Ç, Ğ, Ö, Ş, Ü gibi Türkçe özel karakterler ve küçük harfler karışıklık
+// yaratmasın diye hiç kullanılmıyor). Önceden küçük harfler de karışıyordu.
+const HARFLER = 'ABCDEFGHKLMNPRSTYZ';
+
 function rastgeleDeger() {
   if (G.mod === 'sayi') { return String(Math.floor(Math.random() * 90) + 10); }
-  else { const harfler = 'ABCDEFGHKLMNPRSTYZabcdefghklmnprstyz'; return harfler[Math.floor(Math.random() * harfler.length)]; }
+  else { return HARFLER[Math.floor(Math.random() * HARFLER.length)]; }
 }
 
 function yanlisDegerler(dogru) {
@@ -352,8 +363,7 @@ function yanlisDegerler(dogru) {
       const yeni = Math.random() > 0.5 ? base + fark : Math.max(10, base - fark);
       secenekler.add(String(yeni));
     } else {
-      const harfler = 'ABCDEFGHKLMNPRSTYZabcdefghklmnprstyz';
-      secenekler.add(harfler[Math.floor(Math.random() * harfler.length)]);
+      secenekler.add(HARFLER[Math.floor(Math.random() * HARFLER.length)]);
     }
   }
   return karistir([...secenekler]);
@@ -532,7 +542,18 @@ function gorevTamamlandiSinyaliGonder(){
     }
   }catch(e){}
 }
-function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');setTimeout(()=>{window.location.href=from==='ogrenci'?'ogrenci-panel.html':'index.html';},200);}
+// ── "Panele Dön" tıklanınca: sinyali gönder, sonra doğru panele (admin/ogretmen/ogrenci) yönlendir ──
+function sinusTamamlandiSinyalGonderVeDon(){
+  try{
+    const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
+    if(b&&b.tamamlandiMi===false){
+      b.tamamlandiMi=true;b.puan=10;
+      localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+    }
+  }catch(e){}
+  const backUrl = panelDonusUrl();
+  setTimeout(()=>{window.location.href=backUrl;},200);
+}
 
 function tekrarOyna() { oyunuBaslat(); }
 function menuye() { showScreen('screenMenu'); }
