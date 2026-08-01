@@ -181,10 +181,15 @@ body.egzersiz-aktif .header{display:none;}
 </div>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ ──
-(function() {
+// ── PANELe DÖNÜŞ URL'İ — admin/ogretmen/ogrenci ayrımı doğru yapılıyor ──
+function panelDonusUrl() {
   const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  if (from === 'admin') return 'admin.html';
+  if (from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+(function() {
+  const backUrl = panelDonusUrl();
   document.getElementById('backBtn').href = backUrl;
   document.getElementById('backBtn2').href = backUrl;
 })();
@@ -342,8 +347,7 @@ function cevapGonder(){
   gorevTamamlandiSinyaliGonder(basariOrani);
 
   if(KILITLI){
-    const from = new URLSearchParams(window.location.search).get('from');
-    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    const backUrl = panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
   }
 }
