@@ -78,6 +78,13 @@ tr:hover td{background:#f8fafc}
 .modal.acik{display:flex}
 .modal-kutu{background:white;border-radius:20px;padding:2rem;width:480px;max-width:90%;max-height:90vh;overflow-y:auto}
 .modal-kutu.genis{width:680px}
+.modal-kutu.cok-genis{width:960px}
+.metin-devasa{min-height:420px !important;line-height:1.9 !important}
+.yazi-boyut-satir{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap}
+.yazi-boyut-etiket{font-size:0.78rem;font-weight:600;color:#64748b;margin-right:0.2rem}
+.yazi-boyut-btn{padding:0.35rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.78rem;font-family:'DM Sans',sans-serif;color:#475569}
+.yazi-boyut-btn:hover{border-color:#93c5fd}
+.yazi-boyut-btn.secili{border-color:#2563a8;background:#eff6ff;color:#1d4ed8;font-weight:600}
 .modal-baslik{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#0a1628;margin-bottom:1.5rem}
 .form-grup{margin-bottom:1rem}
 .form-grup label{display:block;font-size:0.82rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem}
@@ -468,21 +475,29 @@ tr:hover td{background:#f8fafc}
 </div>
 
 <div class="modal" id="modal-olcum">
-  <div class="modal-kutu genis">
+  <div class="modal-kutu genis cok-genis">
     <div class="modal-baslik">📏 Yeni Ölçüm Metni Ekle</div>
     <div class="form-grid">
       <div class="form-grup"><label>Yaş Grubu</label><select id="o-grup"><option value="1">Grup 1 – 1-2. Sınıf</option><option value="2">Grup 2 – 3-4. Sınıf</option><option value="3">Grup 3 – 5-6. Sınıf</option><option value="4">Grup 4 – 7-8. Sınıf</option><option value="5">Grup 5 – Lise</option><option value="6">Grup 6 – Yetişkin</option></select></div>
       <div class="form-grup"><label>Kelime Sayısı</label><input type="number" id="o-kelime" placeholder="Örn: 150" min="50" max="600"></div>
     </div>
     <div class="form-grup"><label>Metin Başlığı</label><input type="text" id="o-baslik" placeholder="Metnin başlığı..."></div>
-    <div class="form-grup"><label>Metin</label><textarea id="o-metin" placeholder="Ölçüm metnini buraya yapıştırın..." oninput="olcumKelimeSay()"></textarea><div class="sayac" id="olcum-kelime-sayac">0 kelime</div></div>
+    <div class="form-grup">
+      <label>Metin</label>
+      <div class="yazi-boyut-satir"><span class="yazi-boyut-etiket">Yazı Boyutu:</span>
+        <button type="button" class="yazi-boyut-btn" data-boyut="14" onclick="yaziBoyutuAyarla('o-metin',this)">Küçük</button>
+        <button type="button" class="yazi-boyut-btn secili" data-boyut="17" onclick="yaziBoyutuAyarla('o-metin',this)">Orta</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="21" onclick="yaziBoyutuAyarla('o-metin',this)">Büyük</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="26" onclick="yaziBoyutuAyarla('o-metin',this)">Çok Büyük</button>
+      </div>
+      <textarea id="o-metin" class="metin-devasa" placeholder="Ölçüm metnini buraya yapıştırın..." oninput="olcumKelimeSay()"></textarea><div class="sayac" id="olcum-kelime-sayac">0 kelime</div></div>
     <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi-olcum" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi-olcum')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('olcum')">İptal</button><button class="btn-kaydet" id="btn-olcum-kaydet" onclick="olcumMetniKaydet()">💾 Kaydet</button></div>
   </div>
 </div>
 
 <div class="modal" id="modal-olcum-duzenle">
-  <div class="modal-kutu genis">
+  <div class="modal-kutu genis cok-genis">
     <div class="modal-baslik">✏️ Ölçüm Metni Düzenle</div>
     <input type="hidden" id="od-id">
     <div class="form-grid">
@@ -490,7 +505,15 @@ tr:hover td{background:#f8fafc}
       <div class="form-grup"><label>Kelime Sayısı</label><input type="number" id="od-kelime" min="50" max="600"></div>
     </div>
     <div class="form-grup"><label>Metin Başlığı</label><input type="text" id="od-baslik"></div>
-    <div class="form-grup"><label>Metin</label><textarea id="od-metin" oninput="duzenleKelimeSay()"></textarea><div class="sayac" id="duzenle-kelime-sayac">0 kelime</div></div>
+    <div class="form-grup">
+      <label>Metin</label>
+      <div class="yazi-boyut-satir"><span class="yazi-boyut-etiket">Yazı Boyutu:</span>
+        <button type="button" class="yazi-boyut-btn" data-boyut="14" onclick="yaziBoyutuAyarla('od-metin',this)">Küçük</button>
+        <button type="button" class="yazi-boyut-btn secili" data-boyut="17" onclick="yaziBoyutuAyarla('od-metin',this)">Orta</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="21" onclick="yaziBoyutuAyarla('od-metin',this)">Büyük</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="26" onclick="yaziBoyutuAyarla('od-metin',this)">Çok Büyük</button>
+      </div>
+      <textarea id="od-metin" class="metin-devasa" oninput="duzenleKelimeSay()"></textarea><div class="sayac" id="duzenle-kelime-sayac">0 kelime</div></div>
     <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi-olcum-duzenle" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi-olcum-duzenle')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('olcum-duzenle')">İptal</button><button class="btn-kaydet" id="btn-olcum-guncelle" onclick="olcumMetniGuncelle()">💾 Güncelle</button></div>
   </div>
@@ -526,21 +549,30 @@ tr:hover td{background:#f8fafc}
 </div>
 
 <div class="modal" id="modal-ders">
-  <div class="modal-kutu genis">
+  <div class="modal-kutu genis cok-genis">
     <div class="modal-baslik">📖 Yeni Ders Metni Ekle</div>
     <div class="form-grid">
       <div class="form-grup"><label>Zorluk</label><select id="d-zorluk"><option value="basit">Basit – 1-2. Sınıf</option><option value="orta" selected>Orta – 3-5. Sınıf</option><option value="zor">Zor – 6-8. Sınıf</option><option value="cok_zor">Çok Zor – Lise+</option></select></div>
       <div class="form-grup"><label>Kelime Sayısı</label><input type="number" id="d-kelime" placeholder="Otomatik sayılır" min="10" max="2000"></div>
     </div>
     <div class="form-grup"><label>Metin Başlığı</label><input type="text" id="d-baslik" placeholder="Metnin başlığı..."></div>
-    <div class="form-grup"><label>Metin</label><textarea id="d-metin" placeholder="Ders metnini buraya yapıştırın..." oninput="dersKelimeSay()"></textarea><div class="sayac" id="ders-kelime-sayac">0 kelime</div></div>
+    <div class="form-grup">
+      <label>Metin</label>
+      <div class="yazi-boyut-satir"><span class="yazi-boyut-etiket">Yazı Boyutu:</span>
+        <button type="button" class="yazi-boyut-btn" data-boyut="14" onclick="yaziBoyutuAyarla('d-metin',this)">Küçük</button>
+        <button type="button" class="yazi-boyut-btn secili" data-boyut="17" onclick="yaziBoyutuAyarla('d-metin',this)">Orta</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="21" onclick="yaziBoyutuAyarla('d-metin',this)">Büyük</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="26" onclick="yaziBoyutuAyarla('d-metin',this)">Çok Büyük</button>
+      </div>
+      <textarea id="d-metin" class="metin-devasa" placeholder="Ders metnini buraya yapıştırın..." oninput="dersKelimeSay()"></textarea><div class="sayac" id="ders-kelime-sayac">0 kelime</div></div>
+
     <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi-ders" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi-ders')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ders')">İptal</button><button class="btn-kaydet" id="btn-ders-kaydet" onclick="dersMetniKaydet()">💾 Kaydet</button></div>
   </div>
 </div>
 
 <div class="modal" id="modal-ders-duzenle">
-  <div class="modal-kutu genis">
+  <div class="modal-kutu genis cok-genis">
     <div class="modal-baslik">✏️ Ders Metni Düzenle</div>
     <input type="hidden" id="dd-id">
     <div class="form-grid">
@@ -548,7 +580,15 @@ tr:hover td{background:#f8fafc}
       <div class="form-grup"><label>Kelime Sayısı</label><input type="number" id="dd-kelime" min="10" max="2000"></div>
     </div>
     <div class="form-grup"><label>Metin Başlığı</label><input type="text" id="dd-baslik"></div>
-    <div class="form-grup"><label>Metin</label><textarea id="dd-metin" oninput="dersDuzenleKelimeSay()"></textarea><div class="sayac" id="ders-duzenle-kelime-sayac">0 kelime</div></div>
+    <div class="form-grup">
+      <label>Metin</label>
+      <div class="yazi-boyut-satir"><span class="yazi-boyut-etiket">Yazı Boyutu:</span>
+        <button type="button" class="yazi-boyut-btn" data-boyut="14" onclick="yaziBoyutuAyarla('dd-metin',this)">Küçük</button>
+        <button type="button" class="yazi-boyut-btn secili" data-boyut="17" onclick="yaziBoyutuAyarla('dd-metin',this)">Orta</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="21" onclick="yaziBoyutuAyarla('dd-metin',this)">Büyük</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="26" onclick="yaziBoyutuAyarla('dd-metin',this)">Çok Büyük</button>
+      </div>
+      <textarea id="dd-metin" class="metin-devasa" oninput="dersDuzenleKelimeSay()"></textarea><div class="sayac" id="ders-duzenle-kelime-sayac">0 kelime</div></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ders-duzenle')">İptal</button><button class="btn-kaydet" id="btn-ders-guncelle" onclick="dersMetniGuncelle()">💾 Güncelle</button></div>
   </div>
 </div>
@@ -635,9 +675,24 @@ function htmlAttrAdmin(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt
 // ── ÖLÇÜM YAP (canlı test, kaydetmez) ──
 let _olcumYapMetinler=[];
 let _olcumYap=null;
+let _olcumYapTarihceGirdi=false;
+
+// Tarayıcının "Geri" tuşuna basılınca ölçüm ekranı açıkken kullanıcı yanlışlıkla
+// giriş sayfasına atılıp orada kilitlenmesin diye: ölçüm açılırken sahte bir
+// geçmiş kaydı ekleniyor, "geri" tuşu bu kaydı tüketip sadece ölçüm ekranını kapatıyor.
+window.addEventListener('popstate', function(){
+  if(_olcumYapTarihceGirdi && document.getElementById('olcum-yap-overlay').classList.contains('acik')){
+    _olcumYapTarihceGirdi=false;
+    olcumYapKapat(true);
+  }
+});
 
 async function olcumYapAc(){
   document.getElementById('olcum-yap-overlay').classList.add('acik');
+  if(!_olcumYapTarihceGirdi){
+    history.pushState({olcumYap:true},'',location.href);
+    _olcumYapTarihceGirdi=true;
+  }
   const icerik=document.getElementById('olcum-yap-icerik');
   icerik.innerHTML='<div class="bos-durum">⏳ Metinler yükleniyor...</div>';
   try{
@@ -669,37 +724,100 @@ async function olcumYapAc(){
 
 function olcumYapMetinSec(idx){
   const m=_olcumYapMetinler[idx];
-  _olcumYap={metin:m,baslaZaman:null,bitisZaman:null,soruIndex:0,dogruSayisi:0,timerInterval:null};
-  olcumYapOkumaEkraniGoster();
+  _olcumYap={metin:m,baslaZaman:null,bitisZaman:null,soruIndex:0,dogruSayisi:0,timerInterval:null,duraklatildiMi:false,duraklamaBaslangic:null,toplamDuraklamaMs:0,finalSaniye:null};
+  olcumYapGeriSayimGoster();
+}
+
+// ── GERİ SAYIM (3-2-1) — metin ekrana gelmeden önce öğrenci hazırlansın, süre
+// bu geri sayım sırasında BAŞLAMAZ, ancak metin gerçekten göründüğü an başlar. ──
+function olcumYapGeriSayimGoster(){
+  const icerik=document.getElementById('olcum-yap-icerik');
+  let n=3;
+  const ciz=()=>{
+    icerik.innerHTML=`
+      <div style="max-width:520px;margin:0 auto;text-align:center;padding-top:4rem">
+        <div style="font-size:0.85rem;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem">Hazır ol</div>
+        <div style="font-family:'Playfair Display',serif;font-size:6rem;font-weight:700;color:#0a1628">${n}</div>
+        <div style="color:#64748b;margin-top:1rem;font-size:0.9rem">Metin birazdan açılacak, süre o an başlayacak.</div>
+      </div>`;
+  };
+  ciz();
+  const iv=setInterval(()=>{
+    n--;
+    if(n<=0){ clearInterval(iv); olcumYapOkumaEkraniGoster(); }
+    else{ ciz(); }
+  },800);
 }
 
 function olcumYapOkumaEkraniGoster(){
   const icerik=document.getElementById('olcum-yap-icerik');
   icerik.innerHTML=`
     <div style="max-width:720px;margin:0 auto">
-      <div id="olcum-yap-sure" style="position:fixed;top:1.5rem;right:2rem;background:#0a1628;color:white;padding:0.6rem 1.2rem;border-radius:20px;font-weight:700;font-family:'Playfair Display',serif;font-size:1.1rem">00:00</div>
+      <div style="position:fixed;top:1.5rem;left:2rem;right:2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;z-index:5">
+        <button class="btn-iptal" onclick="olcumYapMetinlereDon()" style="padding:0.5rem 1rem">◀ Metinlere Dön</button>
+        <div style="display:flex;gap:0.6rem;align-items:center">
+          <button class="btn-iptal" id="olcum-yap-duraklat-btn" onclick="olcumYapDuraklatToggle()" style="padding:0.5rem 1rem">⏸ Duraklat</button>
+          <div id="olcum-yap-sure" style="background:#0a1628;color:white;padding:0.6rem 1.2rem;border-radius:20px;font-weight:700;font-family:'Playfair Display',serif;font-size:1.1rem">00:00</div>
+        </div>
+      </div>
+      <div style="height:3.5rem"></div>
       <h2 style="font-family:'Playfair Display',serif;margin-bottom:1rem;color:#0a1628">${_olcumYap.metin.baslik}</h2>
-      <div id="olcum-yap-metin-govde" style="font-size:1.05rem;line-height:1.9;color:#1e293b;white-space:pre-wrap">${_olcumYap.metin.metin}</div>
+      <div id="olcum-yap-metin-govde" style="font-size:1.05rem;line-height:1.9;color:#1e293b;white-space:pre-wrap;position:relative">${_olcumYap.metin.metin}
+        <div id="olcum-yap-duraklatildi-ortusu" style="display:none;position:absolute;inset:0;background:rgba(244,246,249,0.92);align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:#64748b">⏸ Duraklatıldı</div>
+      </div>
       <button class="btn-kaydet" style="margin-top:2rem;width:100%;padding:1rem;font-size:1rem" onclick="olcumYapOkumayiBitir()">✅ Okumayı Bitir</button>
     </div>`;
   _olcumYap.baslaZaman=Date.now();
   _olcumYap.timerInterval=setInterval(olcumYapSureGuncelle,250);
 }
 
+function olcumYapGecenSureMs(){
+  const simdi=_olcumYap.bitisZaman||Date.now();
+  const duraklamaEk=_olcumYap.duraklatildiMi?(simdi-_olcumYap.duraklamaBaslangic):0;
+  return simdi-_olcumYap.baslaZaman-_olcumYap.toplamDuraklamaMs-duraklamaEk;
+}
+
 function olcumYapSureGuncelle(){
   const el=document.getElementById('olcum-yap-sure');
-  if(!el||!_olcumYap) return;
-  const gecen=Math.floor((Date.now()-_olcumYap.baslaZaman)/1000);
+  if(!el||!_olcumYap||_olcumYap.duraklatildiMi) return;
+  const gecen=Math.floor(olcumYapGecenSureMs()/1000);
   const dk=String(Math.floor(gecen/60)).padStart(2,'0');
   const sn=String(gecen%60).padStart(2,'0');
   el.textContent=dk+':'+sn;
 }
 
+// ── DURAKLAT / DEVAM ET — süreölçer duraklatma anını sayaçtan hariç tutar ──
+function olcumYapDuraklatToggle(){
+  if(!_olcumYap) return;
+  const btn=document.getElementById('olcum-yap-duraklat-btn');
+  const ortu=document.getElementById('olcum-yap-duraklatildi-ortusu');
+  if(!_olcumYap.duraklatildiMi){
+    _olcumYap.duraklatildiMi=true;
+    _olcumYap.duraklamaBaslangic=Date.now();
+    if(btn) btn.textContent='▶ Devam Et';
+    if(ortu) ortu.style.display='flex';
+  }else{
+    _olcumYap.toplamDuraklamaMs+=Date.now()-_olcumYap.duraklamaBaslangic;
+    _olcumYap.duraklatildiMi=false;
+    _olcumYap.duraklamaBaslangic=null;
+    if(btn) btn.textContent='⏸ Duraklat';
+    if(ortu) ortu.style.display='none';
+  }
+}
+
+// ── METİNLERE DÖN — okuma ekranından ölçümü iptal edip metin listesine döner ──
+function olcumYapMetinlereDon(){
+  if(_olcumYap&&_olcumYap.timerInterval) clearInterval(_olcumYap.timerInterval);
+  _olcumYap=null;
+  olcumYapAc();
+}
+
 function olcumYapOkumayiBitir(){
   clearInterval(_olcumYap.timerInterval);
   _olcumYap.bitisZaman=Date.now();
+  const saniye=Math.max(1,Math.round(olcumYapGecenSureMs()/1000));
+  _olcumYap.finalSaniye=saniye;
   const icerik=document.getElementById('olcum-yap-icerik');
-  const saniye=Math.max(1,Math.round((_olcumYap.bitisZaman-_olcumYap.baslaZaman)/1000));
   const dk=Math.floor(saniye/60),sn=saniye%60;
   const sorular=_olcumYap.metin.sorular;
   icerik.innerHTML=`
@@ -748,7 +866,7 @@ function olcumYapCevapVer(secilenIndex){
 }
 
 function olcumYapSonucGoster(){
-  const saniye=Math.max(1,Math.round((_olcumYap.bitisZaman-_olcumYap.baslaZaman)/1000));
+  const saniye=_olcumYap.finalSaniye||Math.max(1,Math.round(olcumYapGecenSureMs()/1000));
   const kelime=_olcumYap.metin.kelime_sayisi||0;
   const kpm=Math.round(kelime/(saniye/60));
   const sorular=_olcumYap.metin.sorular||[];
@@ -775,10 +893,14 @@ function olcumYapSonucGoster(){
     </div>`;
 }
 
-function olcumYapKapat(){
+function olcumYapKapat(fromPopstate){
   if(_olcumYap&&_olcumYap.timerInterval) clearInterval(_olcumYap.timerInterval);
   _olcumYap=null;
   document.getElementById('olcum-yap-overlay').classList.remove('acik');
+  if(_olcumYapTarihceGirdi && !fromPopstate){
+    _olcumYapTarihceGirdi=false;
+    history.back();
+  }
 }
 function sorulariDoldur(listeId,sorular){
   const liste=document.getElementById(listeId);
@@ -1189,6 +1311,14 @@ function olcumKelimeSay(){const m=document.getElementById('o-metin').value.trim(
 function duzenleKelimeSay(){const m=document.getElementById('od-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('duzenle-kelime-sayac').textContent=s+' kelime';document.getElementById('od-kelime').value=s;}
 function dersKelimeSay(){const m=document.getElementById('d-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('ders-kelime-sayac').textContent=s+' kelime';document.getElementById('d-kelime').value=s;}
 function dersDuzenleKelimeSay(){const m=document.getElementById('dd-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('ders-duzenle-kelime-sayac').textContent=s+' kelime';document.getElementById('dd-kelime').value=s;}
+
+// ── METİN YAZI BOYUTU (Ders/Ölçüm metinleri okunabilirliği için) ──
+function yaziBoyutuAyarla(textareaId,btn){
+  const grup=btn.parentElement;
+  grup.querySelectorAll('.yazi-boyut-btn').forEach(b=>b.classList.remove('secili'));
+  btn.classList.add('secili');
+  document.getElementById(textareaId).style.fontSize=btn.dataset.boyut+'px';
+}
 
 // ── ÖĞRENCİ EKLE / LİSTE / ARA ──
 async function ogrenciKaydet(){
