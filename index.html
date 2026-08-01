@@ -412,11 +412,13 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
       </div>
       <div>
         <div class="ilf">
-          <div class="fg"><input type="text" placeholder="Adınız Soyadınız"></div>
-          <div class="fg"><input type="tel" placeholder="Telefon Numaranız"></div>
-          <div class="fg"><input type="email" placeholder="E-posta Adresiniz"></div>
-          <div class="fg"><textarea placeholder="Mesajınız..."></textarea></div>
-          <button class="bp" style="border:none;cursor:pointer;width:100%;font-size:1rem">Mesaj Gönder &rarr;</button>
+          <div id="iletisimHata" style="display:none;background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);color:#fca5a5;border-radius:8px;padding:0.7rem 1rem;font-size:0.85rem"></div>
+          <div id="iletisimBasari" style="display:none;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:#6ee7b7;border-radius:8px;padding:0.7rem 1rem;font-size:0.85rem">✅ Mesajınız alındı, en kısa sürede dönüş yapacağız.</div>
+          <div class="fg"><input type="text" id="il-ad" placeholder="Adınız Soyadınız"></div>
+          <div class="fg"><input type="tel" id="il-telefon" placeholder="Telefon Numaranız"></div>
+          <div class="fg"><input type="email" id="il-eposta" placeholder="E-posta Adresiniz"></div>
+          <div class="fg"><textarea id="il-mesaj" placeholder="Mesajınız..."></textarea></div>
+          <button class="bp" id="iletisimBtn" style="border:none;cursor:pointer;width:100%;font-size:1rem" onclick="iletisimGonder()">Mesaj Gönder &rarr;</button>
         </div>
       </div>
     </div>
@@ -627,6 +629,60 @@ async function olcumFormGonder(){
     hataEl.style.display='block';
   }
   btn.textContent='Başvuruyu Gönder →';
+  btn.disabled=false;
+}
+
+/* ── İLETİŞİM FORMU (Yanınızdayız bölümü) ──
+   Önceden bu formda hiçbir onclick/id/JS bağlantısı yoktu; "Mesaj Gönder"
+   butonuna basınca hiçbir şey olmuyordu. Şimdi aynı olcum_basvurulari
+   tablosuna, kaynağını ayırt edebilmek için notlar alanının başına
+   "[İletişim Formu]" etiketi eklenerek kaydediliyor. */
+async function iletisimGonder(){
+  const ad=document.getElementById('il-ad').value.trim();
+  const telefon=document.getElementById('il-telefon').value.trim();
+  const eposta=document.getElementById('il-eposta').value.trim();
+  const mesaj=document.getElementById('il-mesaj').value.trim();
+  const hataEl=document.getElementById('iletisimHata');
+  const basariEl=document.getElementById('iletisimBasari');
+  hataEl.style.display='none';
+  basariEl.style.display='none';
+
+  if(!ad || !telefon){
+    hataEl.textContent='Lütfen adınızı ve telefon numaranızı girin.';
+    hataEl.style.display='block';
+    return;
+  }
+  const parcalar=ad.split(/\s+/);
+  const soyad=parcalar.length>1?parcalar.pop():'-';
+  const adKisim=parcalar.join(' ')||ad;
+
+  const btn=document.getElementById('iletisimBtn');
+  btn.textContent='Gönderiliyor...';
+  btn.disabled=true;
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/olcum_basvurulari',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({
+        ad:adKisim, soyad:soyad, telefon:telefon,
+        eposta:eposta||null,
+        notlar:'[İletişim Formu] '+(mesaj||'-')
+      })
+    });
+    if(!res.ok){
+      const h=await res.json().catch(()=>({}));
+      throw new Error(h.message||'Mesaj gönderilemedi.');
+    }
+    basariEl.style.display='block';
+    document.getElementById('il-ad').value='';
+    document.getElementById('il-telefon').value='';
+    document.getElementById('il-eposta').value='';
+    document.getElementById('il-mesaj').value='';
+  }catch(e){
+    hataEl.textContent='❌ '+e.message;
+    hataEl.style.display='block';
+  }
+  btn.textContent='Mesaj Gönder →';
   btn.disabled=false;
 }
 </script>
