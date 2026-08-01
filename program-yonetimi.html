@@ -230,7 +230,7 @@ function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
 
 const EGZERSIZLER={
   goz:[{dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip'},{dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı Takip'},{dosya:'goz-sekil.html',isim:'Şekil Takibi'},{dosya:'goz-genel.html',isim:'Genel Hareket'}],
-  odak:[{dosya:'meteor-takibi.html',isim:'Meteor Takibi'},{dosya:'ev-takibi.html',isim:'Ev Takibi'},{dosya:'sayi-avi.html',isim:'Sayı Avı'},{dosya:'merkez-nokta.html',isim:'Merkez Nokta'},{dosya:'gizli-nesne.html',isim:'Gizli Nesne'}],
+  odak:[{dosya:'meteor-takibi.html',isim:'Meteor Takibi'},{dosya:'ev-takibi.html',isim:'Ev Takibi'},{dosya:'sayi-avi.html',isim:'Sayı Avı'},{dosya:'merkez-nokta.html',isim:'Merkez Nokta'},{dosya:'gizli-nesne.html',isim:'Gizli Nesne'},{dosya:'kritik-kelime-avi.html',isim:'Kritik Kelime Avı'}],
   okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin (Silinen Cümle)'},{dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'},{dosya:'tarama-teknigi.html',isim:'Tarama Tekniği'},{dosya:'beliren-metin.html',isim:'Beliren Metin'},{dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca'},{dosya:'blok-okuma.html',isim:'Blok Okuma'}]
 };
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
@@ -248,9 +248,13 @@ const HIZ_ARALIK={
 };
 const OZEL_HIZ_ARALIK={
   'kelime-bulmaca.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'},
-  'blok-okuma.html':{min:200,max:2000,adim:100,varsayilan:800,birim:' ms'}
+  'blok-okuma.html':{min:200,max:2000,adim:100,varsayilan:800,birim:' ms'},
+  // Kritik Kelime Avı'nda "hiz" alanı aslında metnin görme SÜRESİNİ (saniye)
+  // temsil eder — egzersizin kendi menüsündeki PLUS/Seviye 1-5 karşılıkları
+  // 4/10/20/30/40/50 sn'dir; öğretmen burada da bu aralıkta serbestçe seçebilir.
+  'kritik-kelime-avi.html':{min:4,max:50,adim:1,varsayilan:10,birim:' sn (görme süresi)'}
 };
-const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html'];
+const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html','kritik-kelime-avi.html'];
 const TEMA_GEREKEN_DOSYALAR=['blok-okuma.html'];
 const SEKIL_GEREKEN_DOSYALAR=['goz-sekil.html'];
 const NOKTA_GEREKEN_DOSYALAR=['goz-sag-sol.html','goz-yukari-asagi.html'];
@@ -342,7 +346,9 @@ function listeGuncelle(){
   mevcutGorevler.forEach((g,i)=>{
     const div=document.createElement('div');div.className='gorev-item';
     const isim=g.isim;
-    const hizBirim=(HIZ_ARALIK[g.tip]||{}).birim||'';
+    // Hız/süre birimi: önce egzersize özel aralık (ör. Kritik Kelime Avı'nda "sn"),
+    // yoksa genel tip aralığı (ör. okuma → KPM) kullanılır.
+    const hizBirim=(OZEL_HIZ_ARALIK[g.dosya]||HIZ_ARALIK[g.tip]||{}).birim||'';
     const hizGosterim=(g.hiz!==undefined&&g.hiz!==null)?`<span class="badge" style="background:#f1f5f9;color:#475569">🎚 ${g.hiz}${hizBirim}</span>`:'';
     const metinGosterim=g.metin_id?`<span class="badge" style="background:#fefce8;color:#b45309">📖 ${g.metin_baslik||('#'+g.metin_id)}</span>`:'';
     const temaGosterim=g.tema?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🎨 ${g.tema}</span>`:'';
