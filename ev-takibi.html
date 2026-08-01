@@ -266,10 +266,15 @@
 </style>
 
 <script>
-// ── PANELe DÖNÜŞ URL'İ ──
-(function() {
+// ── PANELe DÖNÜŞ URL'İ — admin/ogretmen/ogrenci ayrımı doğru yapılıyor ──
+function panelDonusUrl() {
   const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  if (from === 'admin') return 'admin.html';
+  if (from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+(function() {
+  const backUrl = panelDonusUrl();
   document.getElementById('backBtn').href = backUrl;
   document.getElementById('backBtn2').href = backUrl;
 })();
@@ -334,8 +339,7 @@ function kilitliDevamEt(){
 function kilitliGoreviBitir(){
   clearInterval(kilitliSureInterval);
   gorevTamamlandiSinyaliGonder();
-  const from = new URLSearchParams(window.location.search).get('from');
-  const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+  const backUrl = panelDonusUrl();
   showScreen('screenMenu');
   document.getElementById('screenMenu').innerHTML = `
     <div class="game-title">✅ Süre Doldu!</div>
