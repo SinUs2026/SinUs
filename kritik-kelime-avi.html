@@ -228,7 +228,10 @@ let G = {
 // ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev) ──
 const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
-const SN_PARAM = parseInt(_kParams.get('sn'));
+// NOT: Program Yönetimi ekranındaki "Hız/Seviye" alanı bu egzersiz için aslında
+// metnin GÖRME SÜRESİNİ (saniye) temsil eder ve URL'e &hiz=X olarak ekler.
+// Doğrudan bu sayfanın kendi parametresi olan &sn=X de desteklenir (öncelikli).
+const SN_PARAM = parseInt(_kParams.get('sn') || _kParams.get('hiz'));
 
 function kilitliModuBaslat(){
   document.getElementById('kartZorluk').style.display='none';
