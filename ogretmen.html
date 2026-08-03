@@ -34,7 +34,7 @@ body{font-family:'DM Sans',sans-serif;background:#f4f6f9;color:#1e293b;display:f
 .ozet-deger{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#0a1628}
 .ozet-alt{font-size:0.75rem;margin-top:0.2rem;color:#64748b}
 
-.kart{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:1.5rem}
+.kart{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:1.5rem;overflow-x:auto}
 .kart-ust{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem}
 .kart-baslik{font-size:0.85rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
 
@@ -132,10 +132,46 @@ tr:hover td{background:#f8fafc}
 .ara-input{padding:0.5rem 1rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none;width:220px}
 .ara-input:focus{border-color:#2563a8}
 
-@media(max-width:768px){.sidebar{display:none}.icerik{margin-left:0}.ozet-grid{grid-template-columns:repeat(2,1fr)}}
+/* ── MOBİL ÜST BAR + HAMBURGER MENÜ ── */
+.mobil-ust-bar{display:none}
+.sidebar-overlay{display:none}
+@media(max-width:768px){
+  .mobil-ust-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#0a1628;padding:0 1.2rem;height:56px;
+    position:fixed;top:0;left:0;right:0;z-index:150;
+  }
+  .mobil-ust-bar .logo-mini{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:white}
+  .mobil-ust-bar .logo-mini span{color:#d4af37}
+  .hamburger-btn{background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;padding:0.3rem 0.6rem;line-height:1}
+  .sidebar{transform:translateX(-100%);transition:transform 0.25s ease;width:250px}
+  .sidebar.acik{transform:translateX(0)}
+  .sidebar-overlay.acik{display:block;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:99}
+  .icerik{margin-left:0;padding:1.2rem 1rem;padding-top:4.5rem}
+  .ozet-grid{grid-template-columns:repeat(2,1fr)}
+  .ust-bar{flex-wrap:wrap;gap:0.8rem}
+  .form-grid{grid-template-columns:1fr}
+  .ara-input{width:100%;max-width:none}
+  .kart-ust{flex-wrap:wrap;gap:0.6rem}
+}
+@media(max-width:480px){
+  .ozet-grid{grid-template-columns:1fr 1fr;gap:0.7rem}
+  .ozet-kart{padding:1rem}
+  .ozet-deger{font-size:1.4rem}
+  .egzersiz-grid{grid-template-columns:1fr}
+  .modal-kutu{padding:1.4rem}
+  .detay-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
+
+<div class="mobil-ust-bar">
+  <button class="hamburger-btn" onclick="mobilMenuAc()">☰</button>
+  <div class="logo-mini">Sin<span>Us</span></div>
+  <div style="width:2rem"></div>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="mobilMenuKapat()"></div>
 
 <div class="sidebar">
   <div class="sidebar-logo">Sin<span>Us</span></div>
@@ -395,6 +431,7 @@ async function rpc(fonksiyon,params){
 }
 
 function cikisYapOgretmen(){
+  mobilMenuKapat();
   const t=oturumToken();
   if(t){fetch(SUPABASE_URL+'/rest/v1/rpc/oturum_kapat',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_token:t})}).catch(()=>{});}
   sessionStorage.clear();
@@ -436,8 +473,19 @@ const MODUL_AD={harf_tamamlama:'Harf Tamamlama',karisik_harf:'Karışık Harf',k
 
 let tumOgrenciler=[];
 
+// ── MOBİL HAMBURGER MENÜ ──
+function mobilMenuAc(){
+  document.querySelector('.sidebar').classList.add('acik');
+  document.getElementById('sidebarOverlay').classList.add('acik');
+}
+function mobilMenuKapat(){
+  document.querySelector('.sidebar').classList.remove('acik');
+  document.getElementById('sidebarOverlay').classList.remove('acik');
+}
+
 // ── SAYFA YÖNETİMİ ──
 function sayfaGoster(sayfa,link){
+  mobilMenuKapat();
   document.querySelectorAll('.sayfa').forEach(s=>s.classList.remove('aktif'));
   document.querySelectorAll('.sidebar-menu li a').forEach(a=>a.classList.remove('aktif'));
   document.getElementById('sayfa-'+sayfa).classList.add('aktif');
