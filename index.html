@@ -86,6 +86,28 @@ section{position:relative;z-index:1;padding:6rem 2rem}
 .oic{width:44px;height:44px;background:rgba(96,165,250,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1.2rem}
 .ok2 h3{font-size:1rem;font-weight:600;color:var(--be);margin-bottom:0.5rem}.ok2 p{font-size:0.88rem;color:var(--gr);line-height:1.65}
 .yg{display:inline-block;font-size:0.65rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--al);background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);padding:0.2rem 0.6rem;border-radius:4px;margin-top:0.8rem}
+.yolculuk{background:var(--la2)}
+.yol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2.5rem}
+.yol-kart{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.12);border-radius:16px;padding:2rem 1.5rem;text-align:center;transition:all 0.3s}
+.yol-kart:hover{transform:translateY(-4px);border-color:rgba(212,175,55,0.25)}
+.yol-sayi{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,4.5vw,2.6rem);font-weight:700;color:var(--al);line-height:1.1;margin-bottom:0.6rem}
+.yol-etiket{font-size:0.95rem;font-weight:600;color:var(--be);margin-bottom:0.5rem}
+.yol-aciklama{font-size:0.82rem;color:var(--gr);line-height:1.6}
+.yol-beceri-blok{margin-top:3.5rem;padding-top:3rem;border-top:1px solid rgba(96,165,250,0.1)}
+.yol-beceri-baslik{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--be);margin-bottom:0.7rem;max-width:600px}
+.yol-beceri-metin{font-size:0.92rem;color:var(--gr);line-height:1.75;max-width:680px;margin-bottom:2rem}
+.yol-beceri-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.yol-beceri{background:rgba(255,255,255,0.02);border:1px solid rgba(96,165,250,0.1);border-radius:12px;padding:1.2rem 1rem;text-align:center;transition:border-color 0.3s}
+.yol-beceri:hover{border-color:rgba(96,165,250,0.3)}
+.yol-beceri-ad{font-size:0.75rem;font-weight:700;letter-spacing:0.12em;color:var(--al);margin-bottom:0.45rem}
+.yol-beceri-alt{font-size:0.78rem;color:var(--gr);line-height:1.55}
+.yol-veli{margin-top:3.5rem;padding:2rem 2.2rem;background:rgba(212,175,55,0.04);border:1px solid rgba(212,175,55,0.18);border-radius:16px}
+.yol-veli h3{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--be);margin-bottom:0.8rem}
+.yol-veli p{font-size:0.92rem;color:var(--ya);opacity:0.8;line-height:1.75;margin-bottom:1.3rem;max-width:680px}
+.yol-adim{display:flex;align-items:center;gap:0.6rem;font-size:0.88rem;color:var(--ya);opacity:0.85;margin-bottom:0.55rem}
+.yol-adim::before{content:'→';color:var(--al);font-weight:700;flex-shrink:0}
+@media(max-width:900px){.yol-grid{grid-template-columns:repeat(2,1fr)}.yol-beceri-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.yol-grid{grid-template-columns:repeat(2,1fr);gap:0.9rem}.yol-kart{padding:1.4rem 1rem}.yol-veli{padding:1.6rem 1.4rem}}
 .grafb{background:var(--la3)}
 .gric{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
 .grf{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.15);border-radius:16px;padding:2rem}
@@ -291,6 +313,42 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
       <div class="ok2"><div class="oic">&#128202;</div><h3>Gelişim Grafiği</h3><p>Her günün okuma hızı ve anlama oranı grafikte. Başlangıçtan bugüne tüm ilerleme kayıt altında.</p></div>
       <div class="ok2"><div class="oic">&#9889;</div><h3>Adaptif Sistem</h3><p>Sonuçlarına göre sistem kendini kalibre eder. Her zaman senin seviyende.</p></div>
       <div class="ok2"><div class="oic">&#129504;</div><h3>Hafıza Oyunları</h3><p>Görsel hafıza ve dikkat oyunları. Öğrenmeyi eğlenceli hale getiren interaktif çalışmalar.</p><span class="yg">Yakında</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="yolculuk" id="yolculuk">
+  <div class="c">
+    <p class="sl">30 Günlük Yolculuk</p>
+    <h2 class="st">30 günün sonunda sadece daha hızlı değil,<br>daha güçlü bir okur.</h2>
+    <p class="sb">SinUs'ta her gün yapılan küçük çalışmalar, 30 günün sonunda büyük bir öğrenme deneyimine dönüşür. Öğrencinizin program boyunca karşılaşacağı eğitim içeriğini daha başlamadan görün.</p>
+
+    <div class="yol-grid">
+      <div class="yol-kart"><div class="yol-sayi">30</div><div class="yol-etiket">Günlük gelişim programı</div><div class="yol-aciklama">Her gün planlı ve sıralı çalışmalar.</div></div>
+      <div class="yol-kart"><div class="yol-sayi">300'e kadar</div><div class="yol-etiket">Anlama sorusu</div><div class="yol-aciklama">Okuduğunu anlamayı ve yorumlamayı ölçen sorular.</div></div>
+      <div class="yol-kart"><div class="yol-sayi">Binlerce</div><div class="yol-etiket">Kelime</div><div class="yol-aciklama">Farklı tür ve zorluklardaki metinlerle yoğun okuma deneyimi.</div></div>
+      <div class="yol-kart"><div class="yol-sayi">30+</div><div class="yol-etiket">Metin</div><div class="yol-aciklama">Öğrencinin seviyesine uygun farklı okuma çalışmaları.</div></div>
+      <div class="yol-kart"><div class="yol-sayi">Onlarca</div><div class="yol-etiket">Deyim ve atasözü</div><div class="yol-aciklama">Metinlerin içerisinde doğal bağlamlarıyla karşılaşma.</div></div>
+      <div class="yol-kart"><div class="yol-sayi">Yüzlerce</div><div class="yol-etiket">Dikkat ve göz çalışması</div><div class="yol-aciklama">Görsel takip, seçici dikkat, odak ve okuma becerilerini destekleyen tekrarlar.</div></div>
+    </div>
+
+    <div class="yol-beceri-blok">
+      <h3 class="yol-beceri-baslik">Mesele sadece kaç soru çözdüğü değil.</h3>
+      <p class="yol-beceri-metin">Her çalışma belirli bir beceriyi geliştirmek için tasarlandı. Okuma metinleri kelime tanıma ve anlama becerisini, sorular yorumlama gücünü, dikkat çalışmaları ise öğrencinin kritik ayrıntıları fark etme becerisini destekler. SinUs bütün bu çalışmaları tek bir gelişim yolculuğunda birleştirir.</p>
+      <div class="yol-beceri-grid">
+        <div class="yol-beceri"><div class="yol-beceri-ad">OKUMA</div><div class="yol-beceri-alt">Kelime tanıma ve okuma akıcılığı</div></div>
+        <div class="yol-beceri"><div class="yol-beceri-ad">ANLAMA</div><div class="yol-beceri-alt">Ana fikir, çıkarım ve yorumlama</div></div>
+        <div class="yol-beceri"><div class="yol-beceri-ad">DİKKAT</div><div class="yol-beceri-alt">Seçici dikkat ve kritik ayrıntıları fark etme</div></div>
+        <div class="yol-beceri"><div class="yol-beceri-ad">ODAK</div><div class="yol-beceri-alt">Sürdürülebilir zihinsel konsantrasyon</div></div>
+      </div>
+    </div>
+
+    <div class="yol-veli">
+      <h3>Daha başlamadan ne alacağınızı bilin.</h3>
+      <p>SinUs'ta eğitim yalnızca "30 günlük program" olarak sunulmaz. Öğrencinin yaptığı çalışmalar, okuduğu metinler, çözdüğü sorular ve gelişim sonuçları ölçülebilir bir eğitim sürecinin parçalarıdır.</p>
+      <div class="yol-adim">Program başladığında hedefi görün.</div>
+      <div class="yol-adim">Program devam ederken gelişimi takip edin.</div>
+      <div class="yol-adim">Program bittiğinde başlangıç ve sonuç arasındaki farkı görün.</div>
     </div>
   </div>
 </section>
