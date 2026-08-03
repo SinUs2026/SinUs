@@ -464,7 +464,13 @@
   let kilitliBitisZamani = null;
   let kilitliSureInterval = null;
 
-  function sinusPanelUrl(){ return FROM_PARAM === 'admin' ? 'admin.html' : 'ogrenci-panel.html'; }
+  // Panel dönüş yönlendirmesi: admin/öğretmen/öğrenci/serbest deneme ayrımını doğru yapar.
+  function sinusPanelUrl(){
+    if(FROM_PARAM === 'ogrenci' || FROM_PARAM === 'ogrenci-serbest') return 'ogrenci-panel.html';
+    if(FROM_PARAM === 'ogretmen') return 'ogretmen.html';
+    if(FROM_PARAM === 'admin') return 'admin.html';
+    return 'index.html';
+  }
 
   // ÖNEMLİ DÜZELTME: Bu dosyada önceden "Panele Dön" linki ve tamamlanma sinyali
   // HİÇ YOKTU — egzersiz bitince öğrenci panelindeki görev asla ilerlemiyordu.
