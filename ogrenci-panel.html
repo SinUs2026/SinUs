@@ -123,7 +123,24 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 .tum-egz-dene-btn{width:100%;padding:0.55rem;background:#0a1628;color:white;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:block;text-align:center}
 .tum-egz-dene-btn:hover{opacity:0.85}
 
-@media(max-width:768px){.grid{grid-template-columns:1fr}.ustbilgi{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+  .grid{grid-template-columns:1fr}
+  .ustbilgi{grid-template-columns:repeat(2,minmax(140px,1fr))}
+}
+@media(max-width:600px){
+  nav{padding:0 4%;height:auto;min-height:60px;flex-wrap:wrap;gap:0.4rem;padding-top:0.6rem;padding-bottom:0.6rem}
+  .nav-sag{gap:0.5rem;flex-wrap:wrap;justify-content:flex-end}
+  .kullanici-ad{display:none}
+  .tum-egz-btn,.cikis-btn{font-size:0.75rem;padding:0.35rem 0.7rem}
+  .ana{padding:1.2rem 4%}
+  .bilgi-kart{padding:1rem}
+  .bilgi-deger{font-size:1.3rem}
+  .kart{padding:1.1rem}
+  #gunuBitirOverlay > div{padding:1.2rem !important}
+  .rozet-grid{grid-template-columns:repeat(3,1fr);gap:0.5rem}
+  .rozet{padding:0.7rem}
+  .rozet-ikon{font-size:1.4rem}
+}
 </style>
 </head>
 <body>
