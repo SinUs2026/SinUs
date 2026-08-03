@@ -360,7 +360,10 @@
   // ---------- PANELe DÖNÜŞ + TAMAMLANMA SİNYALİ ----------
   (function(){
     const from = params.get('from');
-    const backUrl = from === 'admin' ? 'admin.html' : 'ogrenci-panel.html';
+    let backUrl = 'index.html';
+    if(from === 'ogrenci' || from === 'ogrenci-serbest') backUrl = 'ogrenci-panel.html';
+    else if(from === 'ogretmen') backUrl = 'ogretmen.html';
+    else if(from === 'admin') backUrl = 'admin.html';
     backBtn.href = '#';
     backBtn.addEventListener('click', function(e){
       e.preventDefault();
