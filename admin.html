@@ -200,6 +200,7 @@ tr:hover td{background:#f8fafc}
     </li>
 
     <div class="sidebar-alt2">Sistem</div>
+    <li><a href="#" onclick="sayfaGoster('sinus-ortami',this)"><span class="ikon">🌌</span> SinUs Ortamı <span id="ortamRozet" style="display:none;margin-left:auto;background:#dc2626;color:white;font-size:0.68rem;font-weight:700;padding:0.1rem 0.5rem;border-radius:10px"></span></a></li>
     <li><a href="#" onclick="sayfaGoster('basvurular',this)"><span class="ikon">📋</span> Ölçüm Başvuruları <span id="basvuruRozet" style="display:none;margin-left:auto;background:#dc2626;color:white;font-size:0.68rem;font-weight:700;padding:0.1rem 0.5rem;border-radius:10px"></span></a></li>
     <li><a href="#" onclick="sayfaGoster('odemeler',this)"><span class="ikon">💳</span> Ödemeler</a></li>
     <li><a href="#" onclick="sayfaGoster('sifre-islemleri',this)"><span class="ikon">🔑</span> Şifre İşlemleri</a></li>
@@ -344,6 +345,24 @@ tr:hover td{background:#f8fafc}
   <div id="sayfa-odak-egzersizi" class="sayfa">
     <div class="ust-bar"><div id="odak-egzersizi-baslik"><h1>Odak Çalışması</h1><p>Egzersizi başlatın veya hızını ayarlayın.</p></div></div>
     <div id="odak-egzersizi-icerik"></div>
+  </div>
+
+  <!-- SİNUS ORTAMI -->
+  <div id="sayfa-sinus-ortami" class="sayfa">
+    <div class="ust-bar"><div><h1>🌌 SinUs Ortamı</h1><p>Öğrenci paylaşımlarını inceleyin, onaylayın ve yayınlayın.</p></div></div>
+    <div class="kart" style="padding:1rem 1.5rem">
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Durum:</label>
+          <select id="filtre-ortam-durum" onchange="sinusOrtamiYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
+            <option value="bekliyor" selected>Bekliyor</option>
+            <option value="onaylandi">Onaylandı</option>
+            <option value="reddedildi">Reddedildi</option>
+            <option value="">Tümü</option>
+          </select></div>
+        <span id="ortam-sayac" style="font-size:0.82rem;color:#94a3b8;margin-left:auto"></span>
+      </div>
+    </div>
+    <div class="kart"><div id="ortam-liste"><div class="bos-durum">⏳ Yükleniyor...</div></div></div>
   </div>
 
   <!-- ÖLÇÜM BAŞVURULARI -->
@@ -1042,6 +1061,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='kurumlar') kurumlarıYukle();
   if(sayfa==='sifre-islemleri') sifreIslemleriYukle();
   if(sayfa==='basvurular') basvurulariYukle();
+  if(sayfa==='sinus-ortami') sinusOrtamiYukle();
 }
 
 function altMenuToggle(id,link){
@@ -2022,9 +2042,75 @@ async function basvuruRozetGuncelle(){
   }catch(e){}
 }
 
+// ── SİNUS ORTAMI (MODERASYON) ──
+async function sinusOrtamiYukle(){
+  const durum=document.getElementById('filtre-ortam-durum').value;
+  const liste=document.getElementById('ortam-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  try{
+    const data=await rpc('admin_ortam_liste',{p_durum:durum||null});
+    document.getElementById('ortam-sayac').textContent=data.length+' paylaşım';
+
+    // Sidebar rozeti — bekleyen sayısını göster (durum filtresinden bağımsız)
+    if(durum==='bekliyor'){
+      const rozet=document.getElementById('ortamRozet');
+      if(data.length>0){rozet.textContent=data.length;rozet.style.display='inline-block';}
+      else{rozet.style.display='none';}
+    }
+
+    if(!data.length){liste.innerHTML='<div class="bos-durum">📭 Bu durumda paylaşım yok.</div>';return;}
+
+    liste.innerHTML=data.map(p=>{
+      const tarih=new Date(p.olusturulma_tarihi).toLocaleDateString('tr-TR');
+      const durumRenk={bekliyor:'bekliyor',onaylandi:'aktif',reddedildi:'pasif'}[p.moderasyon_durumu]||'bekliyor';
+      const cevapGuvenli=(p.cevap_metni||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<div style="border:1.5px solid #f1f5f9;border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:0.6rem;flex-wrap:wrap">
+          <div>
+            <strong>${p.ad||''} ${p.soyad||''}</strong>
+            <span style="color:#94a3b8;font-size:0.82rem"> · ${p.sinif||'sınıf belirtilmemiş'} · ${p.kullanici_adi||''} · ${tarih}</span>
+          </div>
+          <span class="durum ${durumRenk}">${p.moderasyon_durumu}${p.ortam_yayinda?' · yayında':''}${p.web_aday?' · web adayı':''}</span>
+        </div>
+        <div style="font-size:0.85rem;color:#64748b;margin-bottom:0.3rem">${p.soru_metni||''}</div>
+        <div style="font-size:0.95rem;color:#1e293b;background:#f8fafc;border-radius:8px;padding:0.8rem 1rem;margin-bottom:0.8rem;white-space:pre-wrap">${cevapGuvenli}</div>
+        <div style="font-size:0.82rem;color:#94a3b8;margin-bottom:0.8rem">❤️ ${p.kalp||0}&nbsp;&nbsp;&nbsp;👏 ${p.alkis||0}&nbsp;&nbsp;&nbsp;🚀 ${p.roket||0}&nbsp;&nbsp;&nbsp;💪 ${p.guc||0}</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          ${p.moderasyon_durumu==='bekliyor'?`<button class="islem-btn uzat" onclick="ortamAksiyon(${p.id},'onayla')">✅ Onayla</button><button class="islem-btn sil" onclick="ortamAksiyon(${p.id},'reddet')">❌ Reddet</button>`:''}
+          ${p.moderasyon_durumu==='onaylandi'&&!p.ortam_yayinda?`<button class="islem-btn program" onclick="ortamAksiyon(${p.id},'yayinla')">🌌 SinUs Ortamında Yayınla</button>`:''}
+          ${p.ortam_yayinda?`<button class="islem-btn sil" onclick="ortamAksiyon(${p.id},'kaldir')">🚫 Ortamdan Kaldır</button>`:''}
+          ${!p.web_aday?`<button class="islem-btn duzenle" onclick="ortamAksiyon(${p.id},'web_aday_yap')">⭐ Web Sitesi İçin Seç</button>`:`<button class="islem-btn" style="background:#f1f5f9;color:#64748b" onclick="ortamAksiyon(${p.id},'web_aday_kaldir')">⭐ Adaylıktan Çıkar</button>`}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+async function ortamAksiyon(id,aksiyon){
+  try{
+    await rpc('admin_ortam_yonet',{p_paylasim_id:id,p_aksiyon:aksiyon});
+    bildirimGoster('✅ İşlem tamamlandı.','basari');
+    sinusOrtamiYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function ortamRozetGuncelle(){
+  try{
+    const bekleyenler=await rpc('admin_ortam_liste',{p_durum:'bekliyor'});
+    const rozet=document.getElementById('ortamRozet');
+    if(bekleyenler && bekleyenler.length>0){
+      rozet.textContent=bekleyenler.length;
+      rozet.style.display='inline-block';
+    } else {
+      rozet.style.display='none';
+    }
+  }catch(e){}
+}
+
 // Sayfa yüklendiğinde genel bakışı yükle
 genelBakisYukle();
 basvuruRozetGuncelle();
+ortamRozetGuncelle();
 </script>
 </body>
 </html>
