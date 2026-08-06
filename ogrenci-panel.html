@@ -865,8 +865,18 @@ async function ortamGonder(){
 // Başlat
 panelYukle();
 yolculukYukle();
-ortamSorulariCiz();
-ortamYukle();
+// SinUs Ortamı kutuları HTML'de script etiketinden SONRA yer alıyor.
+// Script çalıştığı anda o kutular henüz DOM'da oluşmamış olabilir,
+// bu yüzden tarayıcı tüm sayfayı okuyup bitirene kadar bekliyoruz.
+function ortamBaslat(){
+  ortamSorulariCiz();
+  ortamYukle();
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', ortamBaslat);
+}else{
+  ortamBaslat();
+}
 
 // ── GEZEGEN TEMALI GELİŞİM YOLCULUĞU ──
 const GEZEGENLER=[
