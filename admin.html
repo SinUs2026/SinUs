@@ -420,9 +420,12 @@ tr:hover td{background:#f8fafc}
     </div>
     <div class="form-grid">
       <div class="form-grup"><label>Seviye</label><select id="og-asama"><option value="2">Seviye-1 – Akıcı Okuma</option><option value="3">Seviye-2 – Hız + Anlama</option><option value="4">Seviye-3 – Sınav Odaklı</option></select></div>
-      <div class="form-grup"><label>Lisans Süresi</label><select id="og-lisans"><option value="6">6 Ay</option><option value="3">3 Ay</option><option value="12">1 Yıl</option></select></div>
+      <div class="form-grup"><label>Sınıf <span style="font-weight:400;color:#dc2626">(zorunlu)</span></label><input type="text" id="og-sinif" placeholder="Örn: 6. Sınıf"></div>
     </div>
-    <div class="form-grup"><label>Telefon</label><input type="text" id="og-telefon" placeholder="Veli/öğrenci telefonu"></div>
+    <div class="form-grid">
+      <div class="form-grup"><label>Lisans Süresi</label><select id="og-lisans"><option value="6">6 Ay</option><option value="3">3 Ay</option><option value="12">1 Yıl</option></select></div>
+      <div class="form-grup"><label>Telefon</label><input type="text" id="og-telefon" placeholder="Veli/öğrenci telefonu"></div>
+    </div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ogrenci')">İptal</button><button class="btn-kaydet" id="btn-ogrenci-kaydet" onclick="ogrenciKaydet()">💾 Kaydet</button></div>
   </div>
 </div>
@@ -1338,7 +1341,7 @@ function modalKapat(tip){
   if(tip==='ders-duzenle'){document.getElementById('dd-baslik').value='';document.getElementById('dd-metin').value='';document.getElementById('dd-kelime').value='';document.getElementById('ders-duzenle-kelime-sayac').textContent='0 kelime';}
   if(tip==='blog'){document.getElementById('b-baslik').value='';document.getElementById('b-ozet').value='';document.getElementById('b-icerik').value='';document.getElementById('b-kategori').value='genel';document.getElementById('b-durum').value='taslak';}
   if(tip==='blog-duzenle'){document.getElementById('bd-baslik').value='';document.getElementById('bd-ozet').value='';document.getElementById('bd-icerik').value='';}
-  if(tip==='ogrenci'){document.getElementById('og-ad').value='';document.getElementById('og-soyad').value='';document.getElementById('og-kullanici').value='';document.getElementById('og-sifre').value='';document.getElementById('og-telefon').value='';}
+  if(tip==='ogrenci'){document.getElementById('og-ad').value='';document.getElementById('og-soyad').value='';document.getElementById('og-kullanici').value='';document.getElementById('og-sifre').value='';document.getElementById('og-telefon').value='';document.getElementById('og-sinif').value='';}
   if(tip==='ogretmen'){document.getElementById('ogr-ad').value='';document.getElementById('ogr-soyad').value='';document.getElementById('ogr-kullanici').value='';document.getElementById('ogr-sifre').value='';}
 }
 function bildirimGoster(mesaj,tip){const el=document.getElementById('bildirim');el.textContent=mesaj;el.className='bildirim '+tip;el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
@@ -1363,10 +1366,12 @@ async function ogrenciKaydet(){
   const kullanici=document.getElementById('og-kullanici').value.trim();
   const sifre=document.getElementById('og-sifre').value;
   const asama=parseInt(document.getElementById('og-asama').value);
+  const sinif=document.getElementById('og-sinif').value.trim();
   if(!ad||!kullanici||!sifre){bildirimGoster('⚠️ Ad, kullanıcı adı ve şifre zorunlu!','hata');return;}
+  if(!sinif){bildirimGoster('⚠️ Sınıf bilgisi zorunlu!','hata');return;}
   const btn=document.getElementById('btn-ogrenci-kaydet');btn.textContent='⏳ Kaydediliyor...';
   try{
-    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogrenci',p_asama:asama});
+    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogrenci',p_asama:asama,p_sinif:sinif});
     bildirimGoster('✅ Öğrenci eklendi!','basari');modalKapat('ogrenci');ogrencileriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
