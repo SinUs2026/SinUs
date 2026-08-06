@@ -666,8 +666,6 @@ function okumayaBasla(){
   document.getElementById('gbOkuBtn').style.display='none';
   const btn=document.getElementById('gbBitirBtn');
   btn.style.display='block';
-  // Yanlışlıkla anında tıklamayı önlemek için kısa bir bekleme (gerçek okuma
-  // süresi asla bu kadar kısa olamaz, bu sadece "çift tık" tipi kazaları önler)
   btn.disabled=true;
   const orijinalMetin=btn.textContent;
   let kalan=3;
@@ -681,14 +679,9 @@ function okumayaBasla(){
 
 function okumayiBitir(){
   gbBitisZaman=Date.now();
-  // "Ölçüm Yap" özelliğiyle birebir aynı hesaplama mantığı:
-  // saniye cinsinden geçen süre (en az 1 sn), kelime sayısı ÷ (saniye/60) = KPM.
   const saniye=Math.max(1,Math.round((gbBitisZaman-gbBaslaZaman)/1000));
   const kelime=mevcutHikaye.kelime_sayisi||0;
   const hamHiz=kelime>0?Math.round(kelime/(saniye/60)):0;
-  // Sistemin desteklediği azami okuma hızı 1000 kelime/dk'dır (bkz. egzersiz
-  // hız ölçekleri). Süre ölçümü ne kadar kısa olursa olsun, kaydedilen/gösterilen
-  // hız bu gerçekçi tavanın üzerine çıkamaz.
   const hiz=Math.min(hamHiz,1000);
   document.getElementById('gbHizSonuc').textContent=(hiz||'—')+' kelime/dakika';
   document.getElementById('gbEkran1').style.display='none';
@@ -713,7 +706,6 @@ function soruOlustur(){
       btn.onmouseover=()=>{if(!btn.dataset.secildi)btn.style.borderColor='#2563a8'};
       btn.onmouseout=()=>{if(!btn.dataset.secildi)btn.style.borderColor='#e2e8f0'};
       btn.onclick=()=>{
-        // Aynı sorunun diğer butonlarını sıfırla
         blok.querySelectorAll('button').forEach(b=>{
           b.style.background='white';b.style.borderColor='#e2e8f0';b.dataset.secildi='';
         });
@@ -744,14 +736,12 @@ function sonuclariGoster(){
   document.getElementById('gbSonucAnlama').textContent='%'+oran;
   document.getElementById('gbSonucDogru').textContent=dogru+' / '+toplam+' doğru';
 
-  // Adaptif mesaj
   let mesaj='';
   if(hiz>0&&oran>=70) mesaj='Harika! Hem hızlı hem anlayarak okudun. 🚀';
   else if(oran<70) mesaj='Anlama oranın biraz düşük. Yavaşlamayı dene. 📖';
   else mesaj='İyi iş! Devam et. 💪';
   document.getElementById('gbAdaptifMesaj').textContent=mesaj;
 
-  // Supabase'e kaydet
   sonucKaydet(hiz,oran,dogru,toplam);
 }
 
@@ -775,7 +765,6 @@ async function sonucKaydet(hiz,anlamaOrani,dogru,toplam){
         tarih:new Date().toISOString().split('T')[0]
       })
     });
-    // Öğrencinin okuma hızını güncelle
     if(hiz>0){
       await rpc('ogrenci_ilerleme_guncelle',{p_okuma_hizi:hiz,p_mevcut_gun:gun+1});
     }
@@ -784,9 +773,6 @@ async function sonucKaydet(hiz,anlamaOrani,dogru,toplam){
   }
 }
 
-// Günü Bitir kapatılıp ana panele dönülürken artık TAM SAYFA YENİLEMEsi
-// yapılmıyor: üst bilgiler, görev listesi, ilerleme ve gezegen yolculuğu
-// yeniden çekiliyor ve kullanıcı olduğu ekranda (panelde) kalıyor.
 async function gunuBitirTamamlaVeDon(){
   gunuBitirKapat();
   await Promise.all([panelYukle(), siralamaYukle(), yolculukYukle()]);
@@ -796,20 +782,102 @@ function gunuBitirKapat(){
   document.getElementById('gunuBitirOverlay').style.display='none';
 }
 
+// ── SİNUS ORTAMI ──
+const ORTAM_SORULARI=[
+  {kod:'nasil',metin:'Sence SinUs nasıl?'},
+  {kod:'sevdigin_egzersiz',metin:"SinUs'ta en sevdiğin egzersiz hangisi?"},
+  {kod:'basari',metin:'Bugün neyi başardın?'},
+  {kod:'tavsiye',metin:'Diğer SinUs öğrencilerine bir tavsiyen var mı?'},
+  {kod:'ekleme',metin:"SinUs'a bir şey ekleyebilseydin ne eklerdin?"}
+];
+const TEPKI_EMOJI={kalp:'❤️',alkis:'👏',roket:'🚀',guc:'💪'};
+
+function ortamSorulariCiz(){
+  const div=document.getElementById('ortamSorular');
+  if(!div) return;
+  div.innerHTML=ORTAM_SORULARI.map(s=>`
+    <div style="margin-bottom:1rem">
+      <label style="display:block;font-size:0.85rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem">${s.metin}</label>
+      <textarea id="ortam-soru-${s.kod}" placeholder="Düşüncelerini yaz..." style="width:100%;min-height:60px;padding:0.6rem 0.9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:0.88rem;resize:vertical;box-sizing:border-box"></textarea>
+    </div>`).join('');
+}
+
+async function ortamYukle(){
+  const feed=document.getElementById('ortamFeed');
+  if(!feed) return;
+  try{
+    const data=await rpc('ortam_feed_getir',{p_limit:20});
+    if(!data||!data.length){
+      feed.innerHTML='<div style="color:#94a3b8;font-size:0.88rem;padding:0.5rem 0">Henüz yayınlanmış paylaşım yok. İlk paylaşımı sen yapabilirsin!</div>';
+      return;
+    }
+    feed.innerHTML=data.map(p=>{
+      const tarih=new Date(p.olusturulma_tarihi).toLocaleDateString('tr-TR');
+      const cevapGuvenli=(p.cevap_metni||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<div style="border:1.5px solid #f1f5f9;border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.9rem">
+        <div style="font-size:0.85rem;color:#64748b;margin-bottom:0.4rem"><strong style="color:#0a1628">${p.ad||'SinUs Öğrencisi'}</strong>${p.sinif?' · '+p.sinif:''} · ${tarih}</div>
+        <div style="font-size:0.92rem;color:#1e293b;margin-bottom:0.7rem;white-space:pre-wrap">${cevapGuvenli}</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          ${Object.keys(TEPKI_EMOJI).map(t=>{
+            const aktif=p.benim_tepkim===t;
+            return `<button onclick="ortamTepkiVer(${p.id},'${t}',this)" data-aktif="${aktif?'1':'0'}" style="background:${aktif?'#eff6ff':'white'};border:1.5px solid ${aktif?'#bfdbfe':'#e2e8f0'};border-radius:20px;padding:0.3rem 0.75rem;font-size:0.82rem;cursor:pointer;font-family:inherit">${TEPKI_EMOJI[t]} ${p[t]||0}</button>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    feed.innerHTML='<div style="color:#94a3b8;font-size:0.85rem">Ortam yüklenemedi.</div>';
+  }
+}
+
+async function ortamTepkiVer(id,tepki,btnEl){
+  const aktifMi=btnEl.dataset.aktif==='1';
+  try{
+    await rpc('ortam_tepki_ver',{p_paylasim_id:id,p_tepki_tipi:aktifMi?null:tepki});
+    ortamYukle();
+  }catch(e){}
+}
+
+async function ortamGonder(){
+  const cevaplar=ORTAM_SORULARI
+    .map(s=>({...s,cevap:(document.getElementById('ortam-soru-'+s.kod).value||'').trim()}))
+    .filter(s=>s.cevap.length>0);
+  if(!cevaplar.length){
+    alert('En az bir soruya cevap yazmalısın 🙂');
+    return;
+  }
+  try{
+    for(const c of cevaplar){
+      await rpc('ortam_paylasim_olustur',{p_soru_kodu:c.kod,p_soru_metni:c.metin,p_cevap_metni:c.cevap});
+    }
+    ORTAM_SORULARI.forEach(s=>{
+      const el=document.getElementById('ortam-soru-'+s.kod);
+      if(el) el.value='';
+    });
+    const tesekkur=document.getElementById('ortamTesekkur');
+    tesekkur.style.display='block';
+    setTimeout(()=>{tesekkur.style.display='none';},5000);
+  }catch(e){
+    alert('❌ '+e.message);
+  }
+}
+
 // Başlat
 panelYukle();
 yolculukYukle();
+ortamSorulariCiz();
+ortamYukle();
 
 // ── GEZEGEN TEMALI GELİŞİM YOLCULUĞU ──
 const GEZEGENLER=[
-  {renk1:'#c9c9c9',renk2:'#84858a'},              // Merkür
-  {renk1:'#f0dcae',renk2:'#c39a5c'},              // Venüs
-  {renk1:'#7fb3e8',renk2:'#1d4a8a'},              // Dünya
-  {renk1:'#e2a184',renk2:'#9c4526'},              // Mars
-  {renk1:'#ecd6ac',renk2:'#a67c4a'},              // Jüpiter
-  {renk1:'#f0e0ab',renk2:'#c9a35f',halka:true},   // Satürn
-  {renk1:'#a9e2e0',renk2:'#4f9797'},              // Uranüs
-  {renk1:'#8b9ce8',renk2:'#2c3a75'}               // Neptün
+  {renk1:'#c9c9c9',renk2:'#84858a'},
+  {renk1:'#f0dcae',renk2:'#c39a5c'},
+  {renk1:'#7fb3e8',renk2:'#1d4a8a'},
+  {renk1:'#e2a184',renk2:'#9c4526'},
+  {renk1:'#ecd6ac',renk2:'#a67c4a'},
+  {renk1:'#f0e0ab',renk2:'#c9a35f',halka:true},
+  {renk1:'#a9e2e0',renk2:'#4f9797'},
+  {renk1:'#8b9ce8',renk2:'#2c3a75'}
 ];
 
 async function yolculukYukle(){
@@ -929,6 +997,21 @@ async function yolculukYukle(){
     <div style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.5rem">🪐 Gelişim Yolculuğu</div>
     <div style="overflow-x:auto;padding-bottom:1rem">
       <div id="yolculukSarici" class="gezegen-sarici"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SİNUS ORTAMI -->
+<div style="max-width:1100px;margin:2rem auto;padding:0 5%">
+  <div class="kart">
+    <div class="kart-baslik">🌌 SinUs Ortamı</div>
+    <div id="ortamFeed"><div class="yukleniyor">⏳ Yükleniyor...</div></div>
+
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1.5px solid #f1f5f9">
+      <div style="font-weight:600;color:#0a1628;margin-bottom:1rem">Sen de ortama katılmak ister misin? 👋</div>
+      <div id="ortamSorular"></div>
+      <button class="basla-btn" style="margin-top:0.5rem" onclick="ortamGonder()">🚀 Ortama Gönder</button>
+      <div id="ortamTesekkur" style="display:none;margin-top:1rem;background:#f0fdf4;color:#15803d;border-radius:10px;padding:0.9rem 1.2rem;font-size:0.88rem">Teşekkürler! Paylaşımın SinUs ekibine ulaştı. Onaylandığında SinUs Ortamı'nda görünebilir.</div>
     </div>
   </div>
 </div>
