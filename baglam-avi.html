@@ -253,6 +253,25 @@ function kilitliModuBaslat(){
 }
 if(KILITLI){ kilitliModuBaslat(); }
 
+// ── GÖREV TAMAMLANDI SİNYALİ (ogrenci-panel.html ile paylaşılan localStorage) ──
+// Diğer kilitli egzersizlerle aynı desen: ogrenci-panel.html, görevi başlatırken
+// 'sinus_bekleyen_gorev' anahtarına {kullanici, asama, gun, idx, tamamlandiMi:false}
+// yazar. Egzersiz bittiğinde bu kaydı tamamlandiMi:true yaparak geri yazmak,
+// panelin görevi "tamamlandı" işaretlemesini ve öğrencinin bir sonraki göreve
+// geçmesini sağlar. Bu fonksiyon olmadan Bağlam Avı kilitli modda asla
+// tamamlanmış sayılmaz.
+function gorevTamamlandiIsaretle(puan){
+  if(!KILITLI) return;
+  try{
+    const veri=localStorage.getItem('sinus_bekleyen_gorev');
+    if(!veri) return;
+    const b=JSON.parse(veri);
+    b.tamamlandiMi=true;
+    if(puan!==undefined && puan!==null) b.puan=puan;
+    localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+  }catch(e){ /* sessizce geç */ }
+}
+
 function selZorluk(el){
   document.querySelectorAll('#zorlukGrid .secim-btn').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');
@@ -385,6 +404,9 @@ function sonucGoster(verilenIndex,dogruMu,cevapSuresiSn){
   sonucKaydet(verilenMetin,dogruMetin,dogruMu,cevapSuresiSn);
 
   if(KILITLI){
+    // Kilitli görev tek soruluk bir kontrol egzersizi; cevaplanır cevaplanmaz
+    // tamamlanmış sayılır. Doğru cevap biraz daha fazla puan kazandırır.
+    gorevTamamlandiIsaretle(dogruMu?10:5);
     const backUrl=panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML='<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
   }
