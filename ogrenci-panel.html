@@ -323,7 +323,8 @@ const TUM_EGZ_OKUMA=[
   {dosya:'tarama-teknigi.html',isim:'Tarama Tekniği',ikon:'🔦'},
   {dosya:'beliren-metin.html',isim:'Beliren Metin',ikon:'🌕'},
   {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩'},
-  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦'}
+  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦'},
+  {dosya:'baglam-avi.html',isim:'Bağlam Avı',ikon:'🧭'}
 ];
 
 function tumEgzKarti(e,gridId){
@@ -493,15 +494,29 @@ function gorevListesiOlustur(){
   }
 }
 
+// Bir görev "kilitli" (öğretmen/admin tarafından ayarlanmış, öğrenci kendi
+// değiştiremez) sayılır eğer KPM tabanlı bir hız (g.hiz) YA DA Bağlam Avı
+// gibi zorluk tabanlı bir ayar (g.zorluk) taşıyorsa. Bu iki alan birbirini
+// dışlar: bir egzersiz ya hiz ile ya da zorluk/mod ile çalışır.
 function gorevUrl(g){
   let url=(g.dosya||'#')+'?from=ogrenci';
-  if(g.hiz!==undefined && g.hiz!==null){
-    url+='&hiz='+g.hiz+'&kilitli=1';
+  const kilitliMi=(g.hiz!==undefined && g.hiz!==null) || (g.zorluk!==undefined && g.zorluk!==null);
+  if(kilitliMi){
+    url+='&kilitli=1';
+    if(g.hiz!==undefined && g.hiz!==null) url+='&hiz='+g.hiz;
+    if(g.zorluk!==undefined && g.zorluk!==null) url+='&zorluk='+encodeURIComponent(g.zorluk);
+    if(g.mod!==undefined && g.mod!==null) url+='&mod='+encodeURIComponent(g.mod);
     if(g.sure!==undefined && g.sure!==null) url+='&sure='+g.sure;
     if(g.metin_id!==undefined && g.metin_id!==null) url+='&metin_id='+g.metin_id;
     if(g.tema!==undefined && g.tema!==null) url+='&tema='+encodeURIComponent(g.tema);
     if(g.sekil!==undefined && g.sekil!==null) url+='&sekil='+encodeURIComponent(g.sekil);
     if(g.nokta!==undefined && g.nokta!==null) url+='&nokta='+encodeURIComponent(g.nokta);
+    // asama/gun: bazı egzersizler (ör. Bağlam Avı) sonucu kaydederken bu
+    // bilgiyi URL'den okuyor; öğrencinin güncel seviye/günü buradan geçirilir.
+    if(ogrenci){
+      if(ogrenci.asama!==undefined && ogrenci.asama!==null) url+='&asama='+ogrenci.asama;
+      if(ogrenci.mevcut_gun!==undefined && ogrenci.mevcut_gun!==null) url+='&gun='+ogrenci.mevcut_gun;
+    }
   }
   return url;
 }
