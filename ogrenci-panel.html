@@ -838,41 +838,65 @@ async function gunuBitirAc(){
       return;
     }
     mevcutHikaye=data[0];
-    hikayeEkraniGoster();
+    gunuBitirBilgilendirmeGoster();
   }catch(e){
     alert('Hikaye yüklenemedi: '+e.message);
   }
 }
 
-function hikayeEkraniGoster(){
+// ── BİLGİLENDİRME EKRANI — metin aniden gelmesin, önce kısa bir hazırlık uyarısı ──
+function gunuBitirBilgilendirmeGoster(){
   const overlay=document.getElementById('gunuBitirOverlay');
   overlay.style.display='flex';
   document.getElementById('gbAsama').textContent=(SEVIYE_ADI[ogrenci.asama]||(ogrenci.asama||1)+'. Seviye')+' · Gün '+(ogrenci.mevcut_gun||1);
-  document.getElementById('gbBaslik').textContent=mevcutHikaye.baslik;
-  document.getElementById('gbMetin').textContent=mevcutHikaye.metin;
-  document.getElementById('gbEkran1').style.display='block';
+  document.getElementById('gbEkran0').style.display='block';
+  document.getElementById('gbEkran1').style.display='none';
   document.getElementById('gbEkran2').style.display='none';
   document.getElementById('gbEkran3').style.display='none';
   gbBaslaZaman=null;
   gbBitisZaman=null;
+  document.getElementById('gbEkran0Icerik').innerHTML=`
+    <div style="max-width:520px;margin:0 auto;text-align:center">
+      <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.4rem;margin-bottom:1.5rem">📋 Günü Bitir</h2>
+      <div style="text-align:left;color:rgba(255,255,255,0.8);font-size:0.95rem;line-height:2;background:rgba(255,255,255,0.05);border-radius:16px;padding:1.5rem 1.8rem;margin-bottom:2rem">
+        • Birazdan bugün için son ölçümü yapacağız.<br>
+        • Mümkünse sessiz bir ortamda ol.<br>
+        • Şu ana kadar sesli okuyorsan, ölçümde de sesli okumaya devam et.<br>
+        • Az sonra önüne bir metin çıkacak — okuyup bitirince ekranın en altındaki <strong style="color:#d4af37">"Okumayı Bitir"</strong> butonuna bas.
+      </div>
+      <button onclick="gunuBitirGeriSayimBaslat()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">🎯 Ölçüme Başla</button>
+    </div>
+  `;
 }
 
-function okumayaBasla(){
+// ── 3-2-1 GERİ SAYIM — süre bu sırada başlamaz, metin gerçekten görününce başlar ──
+function gunuBitirGeriSayimBaslat(){
+  const icerik=document.getElementById('gbEkran0Icerik');
+  let n=3;
+  const ciz=()=>{
+    icerik.innerHTML=`
+      <div style="text-align:center;padding-top:2rem">
+        <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem">Hazır ol</div>
+        <div style="font-family:'Playfair Display',serif;font-size:6rem;font-weight:700;color:#d4af37">${n}</div>
+      </div>`;
+  };
+  ciz();
+  const iv=setInterval(()=>{
+    n--;
+    if(n<=0){ clearInterval(iv); hikayeEkraniGoster(); }
+    else{ ciz(); }
+  },800);
+}
+
+function hikayeEkraniGoster(){
+  document.getElementById('gbBaslik').textContent=mevcutHikaye.baslik;
+  document.getElementById('gbMetin').textContent=mevcutHikaye.metin;
+  document.getElementById('gbEkran0').style.display='none';
+  document.getElementById('gbEkran1').style.display='block';
+  document.getElementById('gbEkran2').style.display='none';
+  document.getElementById('gbEkran3').style.display='none';
+  // Geri sayım zaten bir hazırlık süresi sağladı — metin göründüğü an süre başlar.
   gbBaslaZaman=Date.now();
-  document.getElementById('gbOkuBtn').style.display='none';
-  const btn=document.getElementById('gbBitirBtn');
-  btn.style.display='block';
-  // Yanlışlıkla anında tıklamayı önlemek için kısa bir bekleme (gerçek okuma
-  // süresi asla bu kadar kısa olamaz, bu sadece "çift tık" tipi kazaları önler)
-  btn.disabled=true;
-  const orijinalMetin=btn.textContent;
-  let kalan=3;
-  btn.textContent=`⏳ ${kalan}sn`;
-  const sayac=setInterval(()=>{
-    kalan--;
-    if(kalan<=0){ clearInterval(sayac); btn.disabled=false; btn.textContent=orijinalMetin; }
-    else{ btn.textContent=`⏳ ${kalan}sn`; }
-  },1000);
 }
 
 function okumayiBitir(){
@@ -1119,15 +1143,16 @@ async function yolculukYukle(){
     </div>
     <div style="text-align:center;color:rgba(255,255,255,0.5);font-size:0.8rem;margin-bottom:0.5rem" id="gbAsama"></div>
 
+    <!-- EKRAN 0: BİLGİLENDİRME + 3-2-1 GERİ SAYIM -->
+    <div id="gbEkran0" style="display:none">
+      <div id="gbEkran0Icerik"></div>
+    </div>
+
     <!-- EKRAN 1: HİKAYE -->
-    <div id="gbEkran1">
+    <div id="gbEkran1" style="display:none">
       <h2 id="gbBaslik" style="font-family:'Playfair Display',serif;color:white;font-size:1.8rem;text-align:center;margin-bottom:2rem"></h2>
       <div id="gbMetin" style="color:rgba(255,255,255,0.85);font-size:1.1rem;line-height:1.9;background:rgba(255,255,255,0.05);border-radius:16px;padding:2rem;margin-bottom:2rem"></div>
-      <div style="text-align:center">
-        <button id="gbOkuBtn" onclick="okumayaBasla()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">▶️ Okumaya Başla — Süreyi Başlat</button>
-        <button id="gbBitirBtn" onclick="okumayiBitir()" style="display:none;background:#16a34a;color:white;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">✅ Okumayı Bitirdim</button>
-      </div>
-      <div style="text-align:center;margin-top:1rem;color:rgba(255,255,255,0.4);font-size:0.8rem">"Okumaya Başla"ya bastıktan sonra süre ölçülür.</div>
+      <button id="gbBitirBtn" onclick="okumayiBitir()" style="width:100%;background:#16a34a;color:white;border:none;padding:1rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">✅ Okumayı Bitir</button>
     </div>
 
     <!-- EKRAN 2: SORULAR -->
