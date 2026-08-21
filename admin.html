@@ -203,6 +203,10 @@ tr:hover td{background:#f8fafc}
       <a href="#" onclick="altMenuToggle('odak-alt',this)"><span class="ikon">🎯</span> Odak Çalışmaları <span class="ok">▶</span></a>
       <ul class="alt-menu" id="odak-alt"></ul>
     </li>
+    <li>
+      <a href="#" onclick="altMenuToggle('genel-alt',this)"><span class="ikon">🗂️</span> Genel Egzersizler <span class="ok">▶</span></a>
+      <ul class="alt-menu" id="genel-alt"></ul>
+    </li>
 
     <div class="sidebar-alt2">Sistem</div>
     <li><a href="#" onclick="sayfaGoster('sinus-ortami',this)"><span class="ikon">🌌</span> SinUs Ortamı <span id="ortamRozet" style="display:none;margin-left:auto;background:#dc2626;color:white;font-size:0.68rem;font-weight:700;padding:0.1rem 0.5rem;border-radius:10px"></span></a></li>
@@ -382,6 +386,12 @@ tr:hover td{background:#f8fafc}
   <div id="sayfa-odak-egzersizi" class="sayfa">
     <div class="ust-bar"><div id="odak-egzersizi-baslik"><h1>Odak Çalışması</h1><p>Egzersizi başlatın veya hızını ayarlayın.</p></div></div>
     <div id="odak-egzersizi-icerik"></div>
+  </div>
+
+  <!-- GENEL EGZERSİZ SAYFASI (tek şablon, dinamik — göz/odak/okuma dışında kalanlar) -->
+  <div id="sayfa-genel-egzersizi" class="sayfa">
+    <div class="ust-bar"><div id="genel-egzersizi-baslik"><h1>Genel Egzersiz</h1><p>Egzersizi başlatın veya hızını ayarlayın.</p></div></div>
+    <div id="genel-egzersizi-icerik"></div>
   </div>
 
   <!-- SİNUS ORTAMI -->
@@ -1096,7 +1106,7 @@ const BAGLAM_ZORLUK_ADLARI={baslangic:'Başlangıç',orta:'Orta',ileri:'İleri',
 const BAGLAM_KATEGORI_ADLARI={baglac:'Bağlaç',gecis:'Geçiş İfadesi',neden_sonuc:'Neden-Sonuç',karsilastirma:'Karşılaştırma/Zıtlık',anahtar_kavram:'Anahtar Kavram',fiil:'Fiil',sifat_zarf:'Sıfat/Zarf',ana_dusunce:'Ana Düşünce'};
 const BAGLAM_SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
 
-// ── EGZERSİZ TANIMLARI (3 kategori: okuma, goz, odak) ──
+// ── EGZERSİZ TANIMLARI (4 kategori: okuma, goz, odak, genel) ──
 const EGZERSIZLER={
   okuma:[
     {kod:'akan-kelime',isim:'Akan Kelime',ikon:'🌊',aciklama:'Kelimeler tek tek akar, akıcılık gelişir.',url:'akan-kelime.html'},
@@ -1110,13 +1120,15 @@ const EGZERSIZLER={
     {kod:'beliren-metin',isim:'Beliren Metin',ikon:'🌕',aciklama:'Kelimeler sırayla belirir.',url:'beliren-metin.html'},
     {kod:'kelime-bulmaca',isim:'Kelime Bulmaca',ikon:'🧩',aciklama:'Izgarada gizli kelimeleri bulma.',url:'kelime-bulmaca.html'},
     {kod:'blok-okuma',isim:'Blok Okuma',ikon:'📦',aciklama:'Sabit bakış noktasıyla kelime grubu okuma.',url:'blok-okuma.html'},
-    {kod:'baglam-avi',isim:'Bağlam Avı',ikon:'🧭',aciklama:'Metindeki boşluğu bağlamdan çıkararak tamamlama.',url:'baglam-avi.html'}
+    {kod:'baglam-avi',isim:'Bağlam Avı',ikon:'🧭',aciklama:'Metindeki boşluğu bağlamdan çıkararak tamamlama.',url:'baglam-avi.html'},
+    {kod:'kelime-takibi',isim:'Kelime Takibi',ikon:'🔍',aciklama:'Akan metinde hedef kelimeleri takip ederek okuma.',url:'kelime-takibi.html'}
   ],
   goz:[
     {kod:'sag-sol',isim:'Sağ-Sol Takip',ikon:'↔️',aciklama:'Yatay göz kası egzersizi.',url:'goz-sag-sol.html'},
     {kod:'yukari-asagi',isim:'Yukarı-Aşağı',ikon:'↕️',aciklama:'Dikey göz kası egzersizi.',url:'goz-yukari-asagi.html'},
     {kod:'sekil-takibi',isim:'Şekil Takibi',ikon:'⬡',aciklama:'Geometrik şekil takibi.',url:'goz-sekil.html'},
-    {kod:'genel-hareket',isim:'Genel Hareket',ikon:'🌀',aciklama:'Çok yönlü göz kası egzersizi.',url:'goz-genel.html'}
+    {kod:'genel-hareket',isim:'Genel Hareket',ikon:'🌀',aciklama:'Çok yönlü göz kası egzersizi.',url:'goz-genel.html'},
+    {kod:'goz-rota',isim:'Göz Rotası',ikon:'🛤️',aciklama:'Belirlenen rota boyunca göz takibi.',url:'goz-rota.html'}
   ],
   odak:[
     {kod:'meteor-takibi',isim:'Meteor Takibi',ikon:'☄️',aciklama:'Ekranda hareket eden meteoru gözlerinizle takip edin.',url:'meteor-takibi.html'},
@@ -1125,11 +1137,15 @@ const EGZERSIZLER={
     {kod:'merkez-nokta',isim:'Merkez Nokta',ikon:'👁️',aciklama:'Periferik görüş egzersizi.',url:'merkez-nokta.html'},
     {kod:'gizli-nesne',isim:'Gizli Nesne',ikon:'🔭',aciklama:'Uzay sahnesinde gizlenmiş nesneleri bulun.',url:'gizli-nesne.html'},
     {kod:'kritik-kelime-avi',isim:'Kritik Kelime Avı',ikon:'🔎',aciklama:'Metinde hedef kelimeyi sayarak seçici dikkati güçlendirin.',url:'kritik-kelime-avi.html'}
-  ]
+  ],
+  // Göz/Odak/Okuma tekniklerinin hiçbirine net oturmayan, ileride eklenecek
+  // egzersizler için ayrılmış kategori. Şu an boş — ileride buraya eklenecek.
+  genel:[]
 };
-const KATEGORI_AD={okuma:'Okuma Tekniği',goz:'Göz Kası',odak:'Dikkat & Odak'};
-const KATEGORI_IKON={okuma:'📜',goz:'👁️',odak:'🎯'};
-const KATEGORI_BASLIK={okuma:'Okuma Teknikleri',goz:'Göz Egzersizleri',odak:'Odak Çalışmaları'};
+const KATEGORI_AD={okuma:'Okuma Tekniği',goz:'Göz Kası',odak:'Dikkat & Odak',genel:'Genel'};
+const KATEGORI_IKON={okuma:'📜',goz:'👁️',odak:'🎯',genel:'🗂️'};
+const KATEGORI_BASLIK={okuma:'Okuma Teknikleri',goz:'Göz Egzersizleri',odak:'Odak Çalışmaları',genel:'Genel Egzersizler'};
+const KATEGORI_SAYFA_ID={okuma:'okuma-teknigi',goz:'goz-egzersizi',odak:'odak-egzersizi',genel:'genel-egzersizi'};
 
 function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
 
@@ -1210,10 +1226,17 @@ function altMenuToggle(id,link){
   if(id==='okuma-alt' && !menu.dataset.dolu) altMenuDoldur('okuma',menu);
   if(id==='goz-alt' && !menu.dataset.dolu) altMenuDoldur('goz',menu);
   if(id==='odak-alt' && !menu.dataset.dolu) altMenuDoldur('odak',menu);
+  if(id==='genel-alt' && !menu.dataset.dolu) altMenuDoldur('genel',menu);
 }
 
 function altMenuDoldur(kategori,menuEl){
   menuEl.dataset.dolu='1';
+  if(!EGZERSIZLER[kategori] || !EGZERSIZLER[kategori].length){
+    const li=document.createElement('li');
+    li.innerHTML='<span style="padding:0.55rem 1.5rem;display:block;color:rgba(255,255,255,0.35);font-size:0.8rem">Henüz egzersiz eklenmedi</span>';
+    menuEl.appendChild(li);
+    return;
+  }
   EGZERSIZLER[kategori].forEach((e,idx)=>{
     const li=document.createElement('li');
     const a=document.createElement('a');
@@ -1225,7 +1248,7 @@ function altMenuDoldur(kategori,menuEl){
   });
 }
 
-// ── EGZERSİZ DETAY SAYFASI (okuma/goz/odak ortak şablon) ──
+// ── EGZERSİZ DETAY SAYFASI (okuma/goz/odak/genel ortak şablon) ──
 let egzersizHizlari={};
 async function egzersizHizlariniYukle(){
   if(Object.keys(egzersizHizlari).length) return;
@@ -1236,7 +1259,7 @@ async function egzersizSayfasiAc(kategori,idx,link){
   mobilMenuKapat();
   await egzersizHizlariniYukle();
   const e=EGZERSIZLER[kategori][idx];
-  const sayfaId=kategori==='okuma'?'okuma-teknigi':kategori==='goz'?'goz-egzersizi':'odak-egzersizi';
+  const sayfaId=KATEGORI_SAYFA_ID[kategori]||'genel-egzersizi';
 
   document.querySelectorAll('.sayfa').forEach(s=>s.classList.remove('aktif'));
   document.querySelectorAll('.sidebar-menu li > a').forEach(a=>a.classList.remove('aktif'));
@@ -1332,7 +1355,7 @@ function gunDetayAc(asamaNo,gun,btnEl){
   gunIcerigiYukle(asamaNo,gun);
 }
 
-const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
+const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',genel:'🗂️'};
 async function gunIcerigiYukle(asamaNo,gun){
   const el=document.getElementById('gun-icerik-'+asamaNo+'-'+gun);
   try{
@@ -1405,7 +1428,7 @@ function formSifirla(prefix){
       b.style.background=secili?'#eff6ff':'white';
       b.style.color=secili?'#1d4ed8':'inherit';
     });
-    document.getElementById(prefix+'-kota-bilgi').textContent='Öğretmen 10 öğrenci için şifre tanımlayabilecek.';
+    document.getElementById(prefix+'-kota-bilgi').textContent='Öğretmen '+_secilenKota+' öğrenci için şifre tanımlayabilecek.';
   }
 }
 
