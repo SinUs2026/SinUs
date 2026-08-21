@@ -646,63 +646,94 @@ async function baslangicOlcumuBaslat(){
   const overlay=document.getElementById('baslangicOlcumOverlay');
   overlay.style.display='flex';
   const icerik=document.getElementById('bo-icerik');
-  icerik.innerHTML='<div class="yukleniyor" style="color:rgba(255,255,255,0.6)">⏳ Metinler yükleniyor...</div>';
-  try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/olcum_metinleri?order=yas_grubu,baslik',{
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
-    });
-    const metinler=await res.json();
-    if(!metinler.length){
-      icerik.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.7)">📭 Henüz ölçüm metni eklenmemiş.<br><small>Öğretmeninle iletişime geç.</small></div>';
-      return;
-    }
-    const GRUP_ADLARI={1:'1-2. Sınıf',2:'3-4. Sınıf',3:'5-6. Sınıf',4:'7-8. Sınıf',5:'Lise',6:'Yetişkin'};
-    icerik.innerHTML=`
-      <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.5rem;text-align:center;margin-bottom:0.5rem">📏 Başlangıç Ölçümü</h2>
-      <p style="text-align:center;color:rgba(255,255,255,0.6);margin-bottom:2rem;font-size:0.9rem">Programına başlamadan önce sana en uygun metni seç. Bu ölçüm, ilk okuma hızını belirleyecek.</p>
-      <div style="display:flex;flex-direction:column;gap:0.75rem;max-width:520px;margin:0 auto">
-        ${metinler.map((m,i)=>`
-          <div onclick="baslangicOlcumuMetinSec(${i})" style="cursor:pointer;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;padding:1rem 1.2rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='#d4af37'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)'">
-            <div style="font-weight:700;color:white">${m.baslik}</div>
-            <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-top:0.2rem">${GRUP_ADLARI[m.yas_grubu]||''} · ${m.kelime_sayisi||0} kelime · ${(m.sorular||[]).length} soru</div>
-          </div>`).join('')}
-      </div>
-      <div style="text-align:center;margin-top:1.5rem;color:rgba(255,255,255,0.4);font-size:0.8rem">Sana en yakın sınıf/yaş grubunu seçmen önerilir.</div>
-    `;
-    window._boMetinler=metinler;
-  }catch(e){
-    icerik.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.7)">❌ Metinler yüklenemedi: '+e.message+'</div>';
-  }
-}
-
-function baslangicOlcumuMetinSec(idx){
-  const m=window._boMetinler[idx];
-  _baslangicOlcum={metin:m,baslaZaman:null,bitisZaman:null};
-  const icerik=document.getElementById('bo-icerik');
+  const ad=(ogrenci&&ogrenci.ad)?ogrenci.ad:'Öğrenci';
   icerik.innerHTML=`
-    <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.6rem;text-align:center;margin-bottom:1.5rem">${m.baslik}</h2>
-    <div style="color:rgba(255,255,255,0.85);font-size:1.1rem;line-height:1.9;background:rgba(255,255,255,0.05);border-radius:16px;padding:2rem;margin-bottom:2rem;white-space:pre-wrap">${m.metin}</div>
     <div style="text-align:center">
-      <button id="bo-okuBtn" onclick="baslangicOlcumuOkumayaBasla()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">▶️ Okumaya Başla — Süreyi Başlat</button>
-      <button id="bo-bitirBtn" onclick="baslangicOlcumuOkumayiBitir()" style="display:none;background:#16a34a;color:white;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">✅ Okumayı Bitirdim</button>
+      <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.6rem;margin-bottom:1rem">Merhaba, ${ad}! 👋</h2>
+      <p style="color:rgba(255,255,255,0.75);font-size:1.05rem;line-height:1.7;max-width:480px;margin:0 auto 2rem">Günlük çalışmalara başlamadan önce bir okuma testi yapmamız gerekiyor. Bu test, sana en uygun okuma hızını belirleyecek.</p>
+      <button onclick="baslangicOlcumuGrupEkraniGoster()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">Devam Edelim →</button>
     </div>
   `;
 }
 
-function baslangicOlcumuOkumayaBasla(){
-  _baslangicOlcum.baslaZaman=Date.now();
-  document.getElementById('bo-okuBtn').style.display='none';
-  const btn=document.getElementById('bo-bitirBtn');
-  btn.style.display='block';
-  btn.disabled=true;
-  const orijinalMetin=btn.textContent;
-  let kalan=3;
-  btn.textContent=`⏳ ${kalan}sn`;
-  const sayac=setInterval(()=>{
-    kalan--;
-    if(kalan<=0){ clearInterval(sayac); btn.disabled=false; btn.textContent=orijinalMetin; }
-    else{ btn.textContent=`⏳ ${kalan}sn`; }
-  },1000);
+// ── EKRAN 1: YAŞ / SINIF GRUBU SEÇİMİ — admin panelindeki aynı Yaş Grubu Rehberi ──
+const BO_GRUP_ADI={1:'1-2. Sınıf',2:'3-4. Sınıf',3:'5-6. Sınıf',4:'7-8. Sınıf',5:'Lise',6:'Yetişkin'};
+function baslangicOlcumuGrupEkraniGoster(){
+  const icerik=document.getElementById('bo-icerik');
+  icerik.innerHTML=`
+    <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.4rem;text-align:center;margin-bottom:0.5rem">Sınıf / Yaş Grubunu Seç</h2>
+    <p style="text-align:center;color:rgba(255,255,255,0.6);margin-bottom:1.5rem;font-size:0.88rem">Sana en uygun grubu seçmen, doğru zorlukta bir metinle ölçüm yapmanı sağlar.</p>
+    <div style="display:flex;flex-direction:column;gap:0.7rem;max-width:460px;margin:0 auto">
+      ${[1,2,3,4,5,6].map(g=>`
+        <div onclick="baslangicOlcumuGrupSec(${g})" style="cursor:pointer;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;padding:1rem 1.2rem;transition:border-color 0.2s;display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.borderColor='#d4af37'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)'">
+          <span style="color:white;font-weight:700">Grup ${g}</span>
+          <span style="color:rgba(255,255,255,0.6);font-size:0.9rem">${BO_GRUP_ADI[g]}</span>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+let _boSeciliGrup=null;
+
+// ── EKRAN 2: BİLGİLENDİRME — ölçüme başlamadan önce kısa açıklama ──
+function baslangicOlcumuGrupSec(grupNo){
+  _boSeciliGrup=grupNo;
+  const icerik=document.getElementById('bo-icerik');
+  icerik.innerHTML=`
+    <div style="max-width:520px;margin:0 auto;text-align:center">
+      <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.4rem;margin-bottom:1.5rem">📋 Ölçümden Önce</h2>
+      <div style="text-align:left;color:rgba(255,255,255,0.8);font-size:0.95rem;line-height:2;background:rgba(255,255,255,0.05);border-radius:16px;padding:1.5rem 1.8rem;margin-bottom:2rem">
+        • Mümkünse sessiz bir ortamda ol.<br>
+        • Az sonra önüne bir metin çıkacak — normal okuma hızında oku.<br>
+        • Okumayı bitirince ekranın en altındaki <strong style="color:#d4af37">"Okumayı Bitir"</strong> butonuna bas.<br>
+        • Ardından birkaç anlama sorusu çıkacak.
+      </div>
+      <button onclick="baslangicOlcumuGeriSayimBaslat()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">🎯 Ölçüme Başla</button>
+    </div>
+  `;
+}
+
+// ── EKRAN 3: 3-2-1 GERİ SAYIM — süre bu sırada başlamaz, metin gerçekten görününce başlar ──
+function baslangicOlcumuGeriSayimBaslat(){
+  const icerik=document.getElementById('bo-icerik');
+  let n=3;
+  const ciz=()=>{
+    icerik.innerHTML=`
+      <div style="text-align:center;padding-top:2rem">
+        <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem">Hazır ol</div>
+        <div style="font-family:'Playfair Display',serif;font-size:6rem;font-weight:700;color:#d4af37">${n}</div>
+      </div>`;
+  };
+  ciz();
+  const iv=setInterval(()=>{
+    n--;
+    if(n<=0){ clearInterval(iv); baslangicOlcumuMetinAtaVeGoster(); }
+    else{ ciz(); }
+  },800);
+}
+
+// ── EKRAN 4: SEÇİLEN GRUBA UYGUN METİN OTOMATİK ATANIR VE OKUMA BAŞLAR ──
+async function baslangicOlcumuMetinAtaVeGoster(){
+  const icerik=document.getElementById('bo-icerik');
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/olcum_metinleri?yas_grubu=eq.'+_boSeciliGrup,{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const metinler=await res.json();
+    if(!metinler.length){
+      icerik.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.7)">📭 Bu grup için henüz metin eklenmemiş.<br><small>Öğretmeninle iletişime geç.</small></div>';
+      return;
+    }
+    const m=metinler[Math.floor(Math.random()*metinler.length)];
+    _baslangicOlcum={metin:m,baslaZaman:Date.now(),bitisZaman:null};
+    icerik.innerHTML=`
+      <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.6rem;text-align:center;margin-bottom:1.5rem">${m.baslik}</h2>
+      <div style="color:rgba(255,255,255,0.85);font-size:1.1rem;line-height:1.9;background:rgba(255,255,255,0.05);border-radius:16px;padding:2rem;margin-bottom:2rem;white-space:pre-wrap">${m.metin}</div>
+      <button id="bo-bitirBtn" onclick="baslangicOlcumuOkumayiBitir()" style="width:100%;background:#16a34a;color:white;border:none;padding:1rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">✅ Okumayı Bitir</button>
+    `;
+  }catch(e){
+    icerik.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.7)">❌ Metin yüklenemedi: '+e.message+'</div>';
+  }
 }
 
 function baslangicOlcumuOkumayiBitir(){
