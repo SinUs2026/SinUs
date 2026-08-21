@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Göz Rotası – SinUs</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+:root {
+  --bg: #060d1a; --accent: #00d4ff; --accent2: #0088bb;
+  --gold: #ffd700; --green: #00ff88; --red: #ff4466;
+  --white: #e8f4ff; --grey: #6a8aaa;
+  --yazi-olcek: 1;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); font-family:'Nunito',sans-serif; color:var(--white); min-height:100vh; user-select:none; }
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(2px 2px at 50% 40%, rgba(0,212,255,0.15) 0%, transparent 100%);
+}
+#app { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:16px; min-height:100vh; display:flex; flex-direction:column; }
+.header { display:flex; justify-content:space-between; align-items:center; padding:8px 0 16px; }
+.logo { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; color:var(--accent); letter-spacing:3px; }
+.logo span { color:var(--white); }
+.ust-geri-btn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:var(--white); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1.05rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; }
+.ust-geri-btn:hover { background:rgba(255,255,255,0.16); border-color:var(--accent); color:var(--accent); }
+.mod-pill { background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); border-radius:20px; padding:5px 14px; font-size:0.78rem; color:var(--accent); font-weight:700; }
+.screen { display:none; flex-direction:column; align-items:center; flex:1; }
+.screen.active { display:flex; }
+.game-title { font-family:'Orbitron',sans-serif; font-size:1.6rem; font-weight:900; text-align:center; margin:12px 0 4px; }
+.game-sub { color:var(--grey); font-size:0.8rem; letter-spacing:2px; text-align:center; margin-bottom:24px; }
+.ayar-kart { background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.15); border-radius:16px; padding:20px; width:100%; max-width:560px; margin-bottom:14px; }
+.ayar-kart h3 { font-family:'Orbitron',sans-serif; font-size:0.68rem; color:var(--accent); letter-spacing:2px; margin-bottom:14px; opacity:0.8; }
+
+/* ── METİN SEÇİCİ: tek satır, tıklayınca açılır ── */
+.metin-secici{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.3);border-radius:12px;padding:12px 16px;cursor:pointer;transition:all 0.2s;}
+.metin-secici:hover{background:rgba(0,212,255,0.1);}
+.metin-secici-etiket{font-size:0.9rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.metin-secici-ok{color:var(--accent);font-size:0.8rem;transition:transform 0.2s;flex-shrink:0;}
+.metin-secici.acik .metin-secici-ok{transform:rotate(180deg);}
+.metin-dropdown{margin-top:10px;}
+.metin-liste { display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; }
+.metin-item { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:10px 14px; cursor:pointer; transition:all 0.2s; }
+.metin-item:hover { background:rgba(0,212,255,0.1); border-color:var(--accent); }
+.metin-item.secili { background:rgba(0,212,255,0.15); border-color:var(--accent); }
+.metin-item-baslik { font-weight:700; font-size:0.9rem; color:var(--white); }
+.metin-item-alt { font-size:0.72rem; color:var(--grey); margin-top:3px; }
+.zorluk-etiket { display:inline-block; padding:1px 8px; border-radius:10px; font-size:0.68rem; font-weight:700; margin-right:6px; }
+.zorluk-etiket.basit { background:#f0fdf4; color:#15803d; }
+.zorluk-etiket.orta { background:#fefce8; color:#b45309; }
+.zorluk-etiket.zor { background:#fff1f2; color:#be123c; }
+.zorluk-etiket.cok_zor { background:#fdf4ff; color:#7e22ce; }
+.filtre-row { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.filtre-btn { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:5px 12px; cursor:pointer; font-size:0.78rem; color:var(--grey); transition:all 0.2s; font-family:'Nunito',sans-serif; }
+.filtre-btn:hover, .filtre-btn.aktif { background:rgba(0,212,255,0.1); border-color:var(--accent); color:var(--white); }
+.ayar-satir { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.ayar-etiket { font-size:0.82rem; font-weight:700; color:var(--grey); min-width:140px; }
+.ayar-slider { flex:1; -webkit-appearance:none; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none; cursor:pointer; }
+.ayar-slider::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--accent); cursor:pointer; box-shadow:0 0 8px rgba(0,212,255,0.5); }
+.ayar-deger { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; color:var(--accent); min-width:60px; text-align:right; }
+
+/* Yazı boyutu / kelime sayısı seçicileri (aynı grid pattern) */
+.boyut-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.boyut-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:10px 6px; cursor:pointer; text-align:center; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; transition:all 0.2s; }
+.boyut-btn:hover, .boyut-btn.sel { background:rgba(0,212,255,0.15); border-color:var(--accent); color:var(--white); }
+
+.basla-btn { width:100%; max-width:560px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; margin-top:8px; transition:all 0.2s; }
+.basla-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,212,255,0.3); }
+.basla-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+.geri-btn { margin-top:12px; color:rgba(106,138,170,0.8); font-size:0.8rem; text-decoration:none; display:block; text-align:center; padding:8px; background:none; border:none; cursor:pointer; font-family:'Nunito',sans-serif; }
+
+/* OYUN */
+.oyun-hud { display:flex; justify-content:space-between; align-items:center; width:100%; padding:10px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-bottom:16px; }
+.hud-item { text-align:center; }
+.hud-lbl { font-size:0.6rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
+.hud-val { font-family:'Orbitron',sans-serif; font-size:0.9rem; font-weight:700; color:var(--accent); margin-top:2px; }
+.ilerleme-wrap { width:100%; margin-bottom:12px; }
+.ilerleme-ust { display:flex; justify-content:space-between; font-size:0.72rem; color:var(--grey); margin-bottom:4px; }
+.ilerleme-bar { width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+.ilerleme-ic { height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); border-radius:3px; transition:width 0.3s; }
+
+/* Güvenli gösterim alanı — kelime grupları burada rastgele konumlanır */
+.govde-alan {
+  width:100%;
+  flex:1;
+  min-height:420px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(0,212,255,0.18);
+  border-radius:20px;
+  margin-bottom:12px;
+  position:relative;
+  overflow:hidden;
+}
+.grid-kelime {
+  position:absolute;
+  transform:translate(-50%,-50%);
+  white-space:nowrap;
+  max-width:min(90%,640px);
+  text-align:center;
+  font-family:'Nunito',sans-serif;
+  font-weight:800;
+  font-size:calc(clamp(1.35rem,3.4vw,2.1rem) * var(--yazi-olcek));
+  color:var(--white);
+  opacity:0;
+  transition:opacity 0.32s ease;
+  letter-spacing:0.3px;
+}
+.grid-kelime.gorunur { opacity:1; }
+
+.bitti-overlay {
+  position:absolute; inset:0;
+  background:rgba(6,13,26,0.92);
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-radius:20px;
+}
+.bitti-overlay.gorulur { display:flex; }
+.bitti-icon { font-size:3rem; margin-bottom:8px; }
+.bitti-yazi { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; color:var(--green); }
+
+.durum-msg { font-family:'Orbitron',sans-serif; font-size:0.8rem; color:var(--grey); letter-spacing:2px; text-align:center; margin:6px 0; min-height:20px; }
+
+.kontrol-row { display:flex; gap:10px; justify-content:center; width:100%; max-width:560px; }
+.btn-kontrol { flex:1; padding:13px; border:none; border-radius:12px; font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.btn-durdur { background:rgba(255,68,102,0.15); border:1px solid rgba(255,68,102,0.4); color:var(--red); }
+.btn-durdur:hover { background:rgba(255,68,102,0.25); }
+.btn-bastan { background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); color:var(--accent); }
+.btn-bastan:hover { background:rgba(0,212,255,0.2); }
+.btn-devam { background:linear-gradient(135deg,var(--accent2),var(--accent)); color:var(--bg); }
+
+.oyun-hiz-row { display:flex; align-items:center; gap:10px; width:100%; max-width:560px; margin-top:10px; }
+.oyun-hiz-lbl { font-size:0.78rem; color:var(--grey); white-space:nowrap; }
+.oyun-hiz-slider { flex:1; -webkit-appearance:none; height:5px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none; cursor:pointer; }
+.oyun-hiz-slider::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent); cursor:pointer; }
+.oyun-hiz-deger { font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:700; color:var(--accent); min-width:60px; text-align:right; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="ust-geri-btn" onclick="sinusTamamlandiSinyalGonderVeDon()" title="Panele Dön">←</button>
+      <div class="logo">Sin<span>Us</span></div>
+    </div>
+    <div class="mod-pill">👁️ Göz Rotası</div>
+  </div>
+
+  <!-- AYARLAR -->
+  <div id="screenAyar" class="screen active">
+    <div class="game-title">GÖZ ROTASI</div>
+    <div class="game-sub">GÖZ SIÇRAMASI TEKNİĞİ</div>
+
+    <div class="ayar-kart" id="kartMetinSec">
+      <h3>METİN SEÇ</h3>
+      <div class="metin-secici" id="metinSecici" onclick="metinDropdownToggle()">
+        <span class="metin-secici-etiket" id="metinSeciciEtiket">📄 Metin seçin...</span>
+        <span class="metin-secici-ok">▾</span>
+      </div>
+      <div class="metin-dropdown" id="metinDropdown" style="display:none">
+        <div class="filtre-row">
+          <button class="filtre-btn aktif" onclick="filtreUygula('',this)">Tümü</button>
+          <button class="filtre-btn" onclick="filtreUygula('basit',this)">Basit</button>
+          <button class="filtre-btn" onclick="filtreUygula('orta',this)">Orta</button>
+          <button class="filtre-btn" onclick="filtreUygula('zor',this)">Zor</button>
+          <button class="filtre-btn" onclick="filtreUygula('cok_zor',this)">Çok Zor</button>
+        </div>
+        <div class="metin-liste" id="metinListe">
+          <div style="text-align:center;color:var(--grey);padding:20px;font-size:0.85rem">⏳ Metinler yükleniyor...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ayar-kart" id="kartHiz">
+      <h3>HIZ AYARI</h3>
+      <div class="ayar-satir">
+        <span class="ayar-etiket">KPM (Kelime/Dakika)</span>
+        <input type="range" class="ayar-slider" id="hizSlider" min="50" max="1000" step="50" value="150"
+          oninput="hizGuncelle(this.value)">
+        <span class="ayar-deger" id="hizDeger">150 KPM</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--grey);margin-top:-4px">
+        <span>50 (Yavaş)</span><span>500 (Orta)</span><span>1000 (Hızlı)</span>
+      </div>
+    </div>
+
+    <div class="ayar-kart" id="kartKelimeSayisi">
+      <h3>GÖSTERİLECEK KELİME SAYISI</h3>
+      <div class="boyut-grid">
+        <div class="boyut-btn sel" onclick="selKelimeSayisi(1,this)">1</div>
+        <div class="boyut-btn" onclick="selKelimeSayisi(2,this)">2</div>
+        <div class="boyut-btn" onclick="selKelimeSayisi(3,this)">3</div>
+        <div class="boyut-btn" onclick="selKelimeSayisi(4,this)">4</div>
+      </div>
+    </div>
+
+    <div class="ayar-kart" id="kartYaziBoyutu">
+      <h3>YAZI BOYUTU</h3>
+      <div class="boyut-grid">
+        <div class="boyut-btn" onclick="selYaziBoyutu(0.75,this)">Küçük</div>
+        <div class="boyut-btn sel" onclick="selYaziBoyutu(1,this)">Orta</div>
+        <div class="boyut-btn" onclick="selYaziBoyutu(1.25,this)">Büyük</div>
+        <div class="boyut-btn" onclick="selYaziBoyutu(1.5,this)">Çok Büyük</div>
+      </div>
+    </div>
+
+    <button class="basla-btn" id="baslaBtn" onclick="oyunuBaslat()" disabled>▶ BAŞLAT</button>
+    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+
+  <!-- OYUN -->
+  <div id="screenOyun" class="screen">
+    <div class="oyun-hud">
+      <div class="hud-item"><div class="hud-lbl">Metin</div><div class="hud-val" id="hudMetin">—</div></div>
+      <div class="hud-item"><div class="hud-lbl">Hız</div><div class="hud-val" id="hudHiz">—</div></div>
+      <div class="hud-item"><div class="hud-lbl">Kelime</div><div class="hud-val" id="hudKelime">0/0</div></div>
+    </div>
+
+    <div class="ilerleme-wrap">
+      <div class="ilerleme-ust">
+        <span id="ilerlemeYazi">0 / 0 kelime</span>
+        <span id="ilerlemeYuzde">%0</span>
+      </div>
+      <div class="ilerleme-bar"><div class="ilerleme-ic" id="ilerlemeIc" style="width:0%"></div></div>
+    </div>
+
+    <div class="govde-alan" id="govdeAlan">
+      <div class="bitti-overlay" id="bittiOverlay">
+        <div class="bitti-icon">👁️</div>
+        <div class="bitti-yazi">METİN TAMAMLANDI!</div>
+      </div>
+    </div>
+
+    <div class="durum-msg" id="durumMsg">HAZIR OL...</div>
+
+    <div class="kontrol-row">
+      <button class="btn-kontrol btn-bastan" onclick="bastanAl()">↺ BAŞTAN</button>
+      <button class="btn-kontrol btn-durdur" id="durdurBtn" onclick="durdurDevam()">⏸ DURDUR</button>
+      <button class="btn-kontrol btn-devam" id="menuBtn" onclick="menuye()">☰ MENÜ</button>
+    </div>
+
+    <div class="oyun-hiz-row" id="oyunHizRow">
+      <span class="oyun-hiz-lbl">Hız:</span>
+      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="50" max="1000" step="50" value="150"
+        oninput="oyunHizGuncelle(this.value)">
+      <span class="oyun-hiz-deger" id="oyunHizDeger">150 KPM</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://kwzimkjspdtedqqwztcf.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
+
+(function() {
+  const from = new URLSearchParams(window.location.search).get('from');
+  document.getElementById('backBtn').href='#';
+  document.getElementById('backBtn').addEventListener('click',function(e){e.preventDefault();sinusTamamlandiSinyalGonderVeDon();});
+})();
+
+// ── 3x3 GRID BÖLGELERİ (madde 7) — yüzdesel, sabit piksel yok (madde 11) ──
+const ZONES = [
+  {id:0, name:'Sol Üst',  x:18, y:22},
+  {id:1, name:'Üst Orta', x:50, y:16},
+  {id:2, name:'Sağ Üst',  x:82, y:22},
+  {id:3, name:'Sol Orta', x:14, y:50},
+  {id:4, name:'Merkez',   x:50, y:50},
+  {id:5, name:'Sağ Orta', x:86, y:50},
+  {id:6, name:'Sol Alt',  x:18, y:80},
+  {id:7, name:'Alt Orta', x:50, y:84},
+  {id:8, name:'Sağ Alt',  x:82, y:80}
+];
+
+const G = {
+  metinler: [], seciliMetin: null, kpm: 150, yaziOlcek: 1, kelimeSayisi: 1,
+  kelimeler: [], gruplar: [], mevcutIndex: 0, calisiyor: false, timeout: null, filtre: '',
+  zoneBag: [], lastZoneId: -1
+};
+
+// ── Tercihleri hatırla (yazı boyutu + kelime sayısı) ──
+(function(){
+  try{
+    const kayitliBoyut = parseFloat(localStorage.getItem('sinus_yazi_boyutu'));
+    if(!isNaN(kayitliBoyut)){
+      G.yaziOlcek = kayitliBoyut;
+      document.documentElement.style.setProperty('--yazi-olcek', kayitliBoyut);
+      document.querySelectorAll('#kartYaziBoyutu .boyut-btn').forEach(b=>{
+        b.classList.toggle('sel', parseFloat(b.getAttribute('onclick').match(/selYaziBoyutu\(([\d.]+)/)[1]) === kayitliBoyut);
+      });
+    }
+    const kayitliKS = parseInt(localStorage.getItem('sinus_goz_rotasi_kelime_sayisi'));
+    if(!isNaN(kayitliKS) && kayitliKS>=1 && kayitliKS<=4){
+      G.kelimeSayisi = kayitliKS;
+      document.querySelectorAll('#kartKelimeSayisi .boyut-btn').forEach(b=>{
+        b.classList.toggle('sel', parseInt(b.textContent) === kayitliKS);
+      });
+    }
+  }catch(e){}
+})();
+
+function selYaziBoyutu(v, el){
+  G.yaziOlcek = v;
+  document.querySelectorAll('#kartYaziBoyutu .boyut-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.documentElement.style.setProperty('--yazi-olcek', v);
+  try{ localStorage.setItem('sinus_yazi_boyutu', v); }catch(e){}
+}
+
+function selKelimeSayisi(v, el){
+  G.kelimeSayisi = v;
+  document.querySelectorAll('#kartKelimeSayisi .boyut-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  try{ localStorage.setItem('sinus_goz_rotasi_kelime_sayisi', v); }catch(e){}
+}
+
+// ── METİN SEÇİCİ ──
+let metinDropdownAcik = false;
+function metinDropdownToggle(){
+  metinDropdownAcik = !metinDropdownAcik;
+  document.getElementById('metinDropdown').style.display = metinDropdownAcik ? 'block' : 'none';
+  document.getElementById('metinSecici').classList.toggle('acik', metinDropdownAcik);
+}
+document.addEventListener('click', function(e){
+  const kart = document.getElementById('kartMetinSec');
+  if(metinDropdownAcik && kart && !kart.contains(e.target)){
+    metinDropdownAcik = false;
+    document.getElementById('metinDropdown').style.display = 'none';
+    document.getElementById('metinSecici').classList.remove('acik');
+  }
+});
+
+// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev) ──
+const _kParams = new URLSearchParams(window.location.search);
+const KILITLI = _kParams.get('kilitli') === '1';
+const HIZ_PARAM = parseInt(_kParams.get('hiz'));
+const METIN_ID_PARAM = _kParams.get('metin_id');
+const KELIME_PARAM = parseInt(_kParams.get('kelime'));
+
+function kilitliModuBaslat(){
+  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
+  if(!isNaN(KELIME_PARAM) && KELIME_PARAM>=1 && KELIME_PARAM<=4){
+    G.kelimeSayisi = KELIME_PARAM;
+    document.getElementById('kartKelimeSayisi').style.display='none';
+  }
+  document.getElementById('kartHiz').style.display='none';
+  if(METIN_ID_PARAM){
+    document.getElementById('kartMetinSec').style.display='none';
+  }
+}
+if(KILITLI){ kilitliModuBaslat(); }
+
+async function kilitliMetinYukle(){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/ders_metinleri?id=eq.'+METIN_ID_PARAM,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const data=await res.json();
+    if(data.length){
+      G.seciliMetin=data[0];
+      document.getElementById('baslaBtn').disabled=false;
+    }else{
+      document.getElementById('metinListe').innerHTML='<div style="text-align:center;color:var(--red);padding:20px">❌ Atanan metin bulunamadı</div>';
+    }
+  }catch(e){
+    document.getElementById('metinListe').innerHTML='<div style="text-align:center;color:var(--red);padding:20px">❌ Metin yüklenemedi</div>';
+  }
+}
+
+async function metinleriYukle() {
+  try {
+    let url = SUPABASE_URL + '/rest/v1/ders_metinleri?order=zorluk,baslik';
+    if (G.filtre) url += '&zorluk=eq.' + G.filtre;
+    const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
+    G.metinler = await res.json();
+    metinListesiOlustur();
+  } catch(e) {
+    document.getElementById('metinListe').innerHTML = '<div style="text-align:center;color:var(--red);padding:20px">❌ Metinler yüklenemedi</div>';
+  }
+}
+
+function metinListesiOlustur() {
+  const liste = document.getElementById('metinListe');
+  if (G.metinler.length === 0) { liste.innerHTML = '<div style="text-align:center;color:var(--grey);padding:20px;font-size:0.85rem">📭 Bu filtrede metin bulunamadı</div>'; return; }
+  liste.innerHTML = '';
+  G.metinler.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'metin-item' + (G.seciliMetin && G.seciliMetin.id === m.id ? ' secili' : '');
+    div.onclick = () => metinSec(m, div);
+    div.innerHTML = `<div class="metin-item-baslik">${m.baslik}</div><div class="metin-item-alt"><span class="zorluk-etiket ${m.zorluk}">${zorlukAd(m.zorluk)}</span>${m.kelime_sayisi || '?'} kelime</div>`;
+    liste.appendChild(div);
+  });
+}
+
+function zorlukAd(z) { return {basit:'Basit',orta:'Orta',zor:'Zor',cok_zor:'Çok Zor'}[z] || z; }
+
+function metinSec(m, el) {
+  G.seciliMetin = m;
+  document.querySelectorAll('.metin-item').forEach(i => i.classList.remove('secili'));
+  el.classList.add('secili');
+  document.getElementById('baslaBtn').disabled = false;
+  document.getElementById('metinSeciciEtiket').textContent = '📄 ' + m.baslik;
+  metinDropdownAcik = false;
+  document.getElementById('metinDropdown').style.display = 'none';
+  document.getElementById('metinSecici').classList.remove('acik');
+}
+
+function filtreUygula(zorluk, el) {
+  G.filtre = zorluk; G.seciliMetin = null;
+  document.getElementById('baslaBtn').disabled = true;
+  document.querySelectorAll('.filtre-btn').forEach(b => b.classList.remove('aktif'));
+  el.classList.add('aktif');
+  metinleriYukle();
+}
+
+function hizGuncelle(v) { G.kpm = parseInt(v); document.getElementById('hizDeger').textContent = v + ' KPM'; }
+
+function oyunHizGuncelle(v) {
+  G.kpm = parseInt(v);
+  document.getElementById('oyunHizDeger').textContent = v + ' KPM';
+  document.getElementById('hudHiz').textContent = v + ' KPM';
+}
+
+// ── Metni kelime gruplarına böl (madde 5-6) — sıra korunur, kalan kelimeler son grupta ──
+function metniGrupla(metin, grupBoyutu) {
+  const kelimeler = metin.trim().split(/\s+/).filter(k => k.length > 0);
+  const gruplar = [];
+  for (let i = 0; i < kelimeler.length; i += grupBoyutu) {
+    gruplar.push(kelimeler.slice(i, i + grupBoyutu));
+  }
+  return { kelimeler, gruplar };
+}
+
+// ── Fisher-Yates shuffle ──
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Rastgele-ama-kontrollü bölge seçimi (madde 8, kural 1-4) ──
+// "Torba" yöntemi: 9 bölge karıştırılıp tek tek tüketilir; torba biterse yeniden karıştırılır.
+// Bu, tüm bölgelerin zamanla eşit kullanılmasını (kural 4), art arda aynı bölgenin
+// gelmemesini (kural 1) ve öngörülemez bir sıra oluşmasını (kural 3) garanti eder.
+function sonrakiZonuSec() {
+  if (G.zoneBag.length === 0) {
+    G.zoneBag = shuffle([0,1,2,3,4,5,6,7,8]);
+    if (G.zoneBag[0] === G.lastZoneId) {
+      const swapIdx = 1 + Math.floor(Math.random() * (G.zoneBag.length - 1));
+      [G.zoneBag[0], G.zoneBag[swapIdx]] = [G.zoneBag[swapIdx], G.zoneBag[0]];
+    }
+  }
+  const zoneId = G.zoneBag.shift();
+  G.lastZoneId = zoneId;
+  return ZONES[zoneId];
+}
+
+// ── Kelime grubunu güvenli alan içinde göster (madde 9-10, 21) ──
+function grupGoster(kelimeGrubu) {
+  const alan = document.getElementById('govdeAlan');
+  const zone = sonrakiZonuSec();
+
+  const eski = alan.querySelector('.grid-kelime');
+  if (eski) eski.remove();
+
+  const el = document.createElement('div');
+  el.className = 'grid-kelime';
+  el.textContent = kelimeGrubu.join(' ');
+  el.style.left = zone.x + '%';
+  el.style.top = zone.y + '%';
+  alan.appendChild(el);
+
+  // Bir sonraki frame'de gerçek boyutu ölç ve güvenli alan dışına taşıyorsa kaydır (madde 10)
+  requestAnimationFrame(() => {
+    const cRect = alan.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    const pad = 18;
+    let shiftX = 0, shiftY = 0;
+    if (eRect.left - cRect.left < pad) shiftX = pad - (eRect.left - cRect.left);
+    if (cRect.right - eRect.right < pad) shiftX = -(pad - (cRect.right - eRect.right));
+    if (eRect.top - cRect.top < pad) shiftY = pad - (eRect.top - cRect.top);
+    if (cRect.bottom - eRect.bottom < pad) shiftY = -(pad - (cRect.bottom - eRect.bottom));
+    if (shiftX || shiftY) {
+      const anchorX = (eRect.left + eRect.right) / 2 - cRect.left;
+      const anchorY = (eRect.top + eRect.bottom) / 2 - cRect.top;
+      el.style.left = (anchorX + shiftX) + 'px';
+      el.style.top = (anchorY + shiftY) + 'px';
+    }
+    el.classList.add('gorunur');
+  });
+}
+
+function oyunuBaslat() {
+  if (!G.seciliMetin) return;
+  const { kelimeler, gruplar } = metniGrupla(G.seciliMetin.metin, G.kelimeSayisi);
+  G.kelimeler = kelimeler;
+  G.gruplar = gruplar;
+  G.mevcutIndex = 0;
+  G.calisiyor = false;
+  G.zoneBag = [];
+  G.lastZoneId = -1;
+
+  showScreen('screenOyun');
+  if (KILITLI) { document.getElementById('oyunHizRow').style.display = 'none'; }
+  document.getElementById('govdeAlan').querySelectorAll('.grid-kelime').forEach(e => e.remove());
+  document.getElementById('hudMetin').textContent = G.seciliMetin.baslik.substring(0, 15) + (G.seciliMetin.baslik.length > 15 ? '...' : '');
+  document.getElementById('hudHiz').textContent = G.kpm + ' KPM';
+  document.getElementById('oyunHizSlider').value = G.kpm;
+  document.getElementById('oyunHizDeger').textContent = G.kpm + ' KPM';
+  document.getElementById('bittiOverlay').classList.remove('gorulur');
+  document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
+  ilerlemeGuncelle();
+
+  document.getElementById('durumMsg').textContent = 'BAŞLIYOR...';
+  G.timeout = setTimeout(() => {
+    document.getElementById('durumMsg').textContent = '';
+    G.calisiyor = true;
+    grupAdimi();
+  }, 1000);
+}
+
+// ── Ana döngü: göster → süre bekle → gizle → sonraki (madde 12-13) ──
+function grupAdimi() {
+  if (!G.calisiyor) return;
+  if (G.mevcutIndex >= G.gruplar.length) { bitir(); return; }
+
+  const grup = G.gruplar[G.mevcutIndex];
+  grupGoster(grup);
+  G.mevcutIndex++;
+  ilerlemeGuncelle();
+
+  // Süre kelime sayısına göre hesaplanır: hız hesabı toplam kelime sayısını temel alır (madde 14)
+  const sureMs = grup.length * (60000 / G.kpm);
+  G.timeout = setTimeout(() => {
+    const el = document.querySelector('#govdeAlan .grid-kelime');
+    if (el) el.classList.remove('gorunur');
+    G.timeout = setTimeout(grupAdimi, 350);
+  }, sureMs);
+}
+
+function ilerlemeGuncelle() {
+  let gosterilenKelime = 0;
+  for (let i = 0; i < G.mevcutIndex; i++) gosterilenKelime += (G.gruplar[i] ? G.gruplar[i].length : 0);
+  const toplam = G.kelimeler.length;
+  const yuzde = toplam > 0 ? Math.round(gosterilenKelime / toplam * 100) : 0;
+  document.getElementById('ilerlemeYazi').textContent = gosterilenKelime + ' / ' + toplam + ' kelime';
+  document.getElementById('ilerlemeYuzde').textContent = '%' + yuzde;
+  document.getElementById('ilerlemeIc').style.width = yuzde + '%';
+  document.getElementById('hudKelime').textContent = gosterilenKelime + '/' + toplam;
+}
+
+function bitir() {
+  G.calisiyor = false; clearTimeout(G.timeout);
+  const el = document.querySelector('#govdeAlan .grid-kelime');
+  if (el) el.classList.remove('gorunur');
+  document.getElementById('bittiOverlay').classList.add('gorulur');
+  document.getElementById('durumMsg').textContent = 'TAMAMLANDI! 👁️';
+  document.getElementById('durdurBtn').textContent = '▶ TEKRAR';
+  if (KILITLI) {
+    setTimeout(sinusTamamlandiSinyalGonderVeDon, 1500);
+  }
+}
+
+function durdurDevam() {
+  if (G.mevcutIndex >= G.gruplar.length) { bastanAl(); return; }
+  if (G.calisiyor) {
+    G.calisiyor = false; clearTimeout(G.timeout);
+    document.getElementById('durdurBtn').textContent = '▶ DEVAM';
+    document.getElementById('durumMsg').textContent = 'DURAKLATILDI';
+  } else {
+    G.calisiyor = true;
+    document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
+    document.getElementById('durumMsg').textContent = '';
+    grupAdimi();
+  }
+}
+
+function bastanAl() {
+  G.calisiyor = false; clearTimeout(G.timeout);
+  G.mevcutIndex = 0;
+  G.zoneBag = [];
+  G.lastZoneId = -1;
+  document.getElementById('bittiOverlay').classList.remove('gorulur');
+  document.getElementById('govdeAlan').querySelectorAll('.grid-kelime').forEach(e => e.remove());
+  document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
+  document.getElementById('durumMsg').textContent = 'BAŞLIYOR...';
+  ilerlemeGuncelle();
+  G.timeout = setTimeout(() => {
+    document.getElementById('durumMsg').textContent = '';
+    G.calisiyor = true;
+    grupAdimi();
+  }, 1000);
+}
+
+function menuye() { G.calisiyor = false; clearTimeout(G.timeout); showScreen('screenAyar'); }
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+if (KILITLI && METIN_ID_PARAM) { kilitliMetinYukle(); } else { metinleriYukle(); }
+
+function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');let hedef='index.html';if(from==='ogrenci'||from==='ogrenci-serbest')hedef='ogrenci-panel.html';else if(from==='ogretmen')hedef='ogretmen.html';else if(from==='admin')hedef='admin.html';setTimeout(()=>{window.location.href=hedef;},200);}
+</script>
+</body>
+</html>

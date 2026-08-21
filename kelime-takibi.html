@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kelime Takibi – SinUs</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+:root{--bg:#060d1a;--accent:#00d4ff;--accent2:#0088bb;--gold:#ffd700;--green:#00ff88;--red:#ff5566;--white:#e8f4ff;--grey:#6a8aaa;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min-height:100vh;user-select:none;overflow-x:hidden;}
+#app{max-width:1400px;margin:0 auto;padding:8px 8px;min-height:100vh;display:flex;flex-direction:column;}
+.header{display:flex;justify-content:space-between;align-items:center;padding:4px 0 8px;}
+.logo{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent);letter-spacing:3px;}
+.logo span{color:var(--white);}
+.screen{display:none;flex-direction:column;align-items:center;flex:1;}
+.screen.active{display:flex;}
+#screenMenu.active,#screenGeriSayim.active{justify-content:center;}
+body.egzersiz-aktif .header{display:none;}
+.title-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:2px;}
+.game-title{font-family:'Orbitron',sans-serif;font-size:1.35rem;font-weight:900;text-align:center;}
+.info-btn{width:26px;height:26px;border-radius:50%;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.35);color:var(--accent);font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.info-btn:hover{background:rgba(0,212,255,0.22);}
+.game-sub{color:var(--grey);font-size:0.72rem;letter-spacing:2px;text-align:center;margin-bottom:14px;}
+.menu-card{background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.15);border-radius:14px;padding:14px 16px;width:100%;max-width:500px;margin-bottom:10px;}
+.menu-card h3{font-family:'Orbitron',sans-serif;font-size:0.64rem;color:var(--accent);letter-spacing:2px;margin-bottom:10px;opacity:0.8;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:#0b1830;border:1px solid rgba(0,212,255,0.3);border-radius:18px;padding:22px 20px;max-width:440px;width:100%;position:relative;}
+.modal-close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--grey);font-size:1.3rem;cursor:pointer;line-height:1;}
+.modal-box h3{font-family:'Orbitron',sans-serif;font-size:0.75rem;color:var(--accent);letter-spacing:2px;margin-bottom:14px;padding-right:20px;}
+.modal-box .icerik{font-size:0.85rem;color:var(--grey);line-height:1.8;}
+.modal-box .icerik strong{color:var(--white);}
+@media (max-height: 700px){
+  .menu-card{padding:10px 14px;margin-bottom:8px;}
+  .game-title{font-size:1.15rem;}
+  .game-sub{margin-bottom:10px;}
+  .start-btn{padding:12px;}
+}
+.secim-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.secim-grid.dort{grid-template-columns:repeat(4,1fr);}
+.secim-grid.uc{grid-template-columns:repeat(3,1fr);}
+.secim-btn{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:10px 4px;cursor:pointer;text-align:center;color:var(--grey);}
+.secim-btn .sb-ad{font-family:'Orbitron',sans-serif;font-size:0.7rem;font-weight:700;display:block;}
+.secim-btn .sb-alt{font-size:0.58rem;opacity:0.8;margin-top:2px;display:block;}
+.secim-btn.sel{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--white);}
+.start-btn{width:100%;max-width:500px;padding:16px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:8px;}
+.start-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
+
+/* GERİ SAYIM */
+.geri-sayim-num{font-family:'Orbitron',sans-serif;font-size:5rem;font-weight:900;color:var(--accent);text-shadow:0 0 30px rgba(0,212,255,0.5);animation:pulseIn 0.5s ease;}
+.geri-sayim-basla{font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:900;color:var(--green);text-shadow:0 0 30px rgba(0,255,136,0.5);animation:pulseIn 0.4s ease;}
+@keyframes pulseIn{from{transform:scale(0.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* EGZERSİZ EKRANI */
+.egz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:900px;padding:6px 4px;flex-shrink:0;}
+.egz-ilerleme{font-family:'Orbitron',sans-serif;font-size:0.85rem;color:var(--grey);letter-spacing:1px;padding-top:env(safe-area-inset-top,0px);}
+.egz-duraklat{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--white);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.kelime-alani{position:relative;width:100%;max-width:900px;flex:1;min-height:min(65vh,520px);margin-bottom:10px;}
+.kelime-item{position:absolute;transform:translate(-50%,-50%) scale(0.85);opacity:0;transition:opacity 0.12s linear, transform 0.12s ease-out;font-family:'Orbitron',sans-serif;font-weight:900;color:var(--white);text-align:center;max-width:82vw;white-space:normal;padding:0 8px;text-shadow:0 0 18px rgba(0,212,255,0.25);}
+.kelime-item.gorunur{opacity:1;transform:translate(-50%,-50%) scale(1);}
+
+.pause-overlay{display:none;position:fixed;inset:0;background:rgba(6,13,26,0.92);z-index:90;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.pause-overlay.active{display:flex;}
+.pause-baslik{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--accent);letter-spacing:2px;}
+.devam-btn{padding:14px 40px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;}
+
+/* DİKKAT KONTROLÜ */
+.dikkat-hud{width:100%;max-width:700px;text-align:center;margin-bottom:10px;}
+.dikkat-soru-no{font-size:0.65rem;color:var(--grey);letter-spacing:2px;font-family:'Orbitron',sans-serif;}
+.dikkat-soru{font-family:'Orbitron',sans-serif;font-size:1.15rem;font-weight:900;text-align:center;margin:10px 0 18px;}
+.secenek-listesi{width:100%;max-width:700px;display:flex;flex-direction:column;gap:10px;}
+.secenek-btn{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 18px;cursor:pointer;text-align:left;transition:all 0.15s;}
+.secenek-btn:hover{border-color:rgba(0,212,255,0.4);background:rgba(0,212,255,0.05);}
+.secenek-harf{font-family:'Orbitron',sans-serif;font-weight:900;font-size:0.95rem;color:var(--accent);width:24px;flex-shrink:0;}
+.secenek-metin{font-size:1rem;color:var(--white);}
+.secenek-btn.dogru-isaretli{border-color:var(--green);background:rgba(0,255,136,0.08);}
+.secenek-btn.yanlis-isaretli{border-color:var(--red);background:rgba(255,85,102,0.08);}
+.secenek-btn.disabled{pointer-events:none;opacity:0.55;}
+.secenek-btn.disabled.dogru-isaretli,.secenek-btn.disabled.yanlis-isaretli{opacity:1;}
+
+/* SONUÇ */
+.sonuc-kart{width:100%;max-width:520px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:26px 24px;text-align:center;margin:16px 0;}
+.sonuc-icon{font-size:2.6rem;display:block;margin-bottom:6px;}
+.sonuc-baslik{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;margin-bottom:16px;color:var(--green);}
+.sonuc-satir{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.85rem;}
+.sonuc-satir span:first-child{color:var(--grey);}
+.sonuc-satir span:last-child{color:var(--white);font-weight:700;}
+.btn-row{display:flex;gap:10px;justify-content:center;margin-top:16px;}
+.btn-play{flex:1;max-width:200px;padding:13px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;}
+.btn-back{flex:1;max-width:160px;padding:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:var(--grey);font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;}
+
+@media(max-width:600px){
+  .secim-grid{grid-template-columns:repeat(3,1fr);}
+  .secim-grid.dort{grid-template-columns:repeat(2,1fr);}
+  .secim-grid.uc{grid-template-columns:repeat(1,1fr);}
+  .geri-sayim-num{font-size:3.6rem;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header"><div class="logo">Sin<span>Us</span></div></div>
+
+  <!-- MENÜ -->
+  <div id="screenMenu" class="screen active">
+    <div class="title-row">
+      <div class="game-title">KELİME TAKİBİ</div>
+      <button class="info-btn" onclick="infoAc()" title="Nasıl Yapılır?">ⓘ</button>
+    </div>
+    <div class="game-sub">GÖZ HAREKETİ VE HIZLI ALGI EGZERSİZİ</div>
+
+    <div class="menu-card" id="kartSayi">
+      <h3>KELİME SAYISI</h3>
+      <div class="secim-grid" id="sayiGrid">
+        <div class="secim-btn" data-deger="10" onclick="secSayi(this)"><span class="sb-ad">10</span></div>
+        <div class="secim-btn" data-deger="20" onclick="secSayi(this)"><span class="sb-ad">20</span></div>
+        <div class="secim-btn sel" data-deger="30" onclick="secSayi(this)"><span class="sb-ad">30</span></div>
+        <div class="secim-btn" data-deger="50" onclick="secSayi(this)"><span class="sb-ad">50</span></div>
+        <div class="secim-btn" data-deger="100" onclick="secSayi(this)"><span class="sb-ad">100</span></div>
+      </div>
+    </div>
+
+    <div class="menu-card" id="kartHiz">
+      <h3>HIZ</h3>
+      <div class="secim-grid dort" id="hizGrid">
+        <div class="secim-btn" data-deger="yavas" onclick="secHiz(this)"><span class="sb-ad">YAVAŞ</span><span class="sb-alt">1.2 sn</span></div>
+        <div class="secim-btn sel" data-deger="normal" onclick="secHiz(this)"><span class="sb-ad">NORMAL</span><span class="sb-alt">0.8 sn</span></div>
+        <div class="secim-btn" data-deger="hizli" onclick="secHiz(this)"><span class="sb-ad">HIZLI</span><span class="sb-alt">0.5 sn</span></div>
+        <div class="secim-btn" data-deger="cokhizli" onclick="secHiz(this)"><span class="sb-ad">ÇOK HIZLI</span><span class="sb-alt">0.3 sn</span></div>
+      </div>
+    </div>
+
+    <div class="menu-card" id="kartGosterim">
+      <h3>GÖSTERİM</h3>
+      <div class="secim-grid uc" id="gosterimGrid">
+        <div class="secim-btn sel" data-deger="1" onclick="secGosterim(this)"><span class="sb-ad">1 KELİME</span></div>
+        <div class="secim-btn" data-deger="2" onclick="secGosterim(this)"><span class="sb-ad">2 KELİME</span></div>
+        <div class="secim-btn" data-deger="3" onclick="secGosterim(this)"><span class="sb-ad">3 KELİME</span></div>
+      </div>
+    </div>
+
+    <button class="start-btn" id="mainStartBtn" onclick="egzersiziBaslat()">EGZERSİZİ BAŞLAT ▶</button>
+    <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
+  </div>
+
+  <!-- GERİ SAYIM -->
+  <div id="screenGeriSayim" class="screen">
+    <div id="geriSayimIcerik" class="geri-sayim-num">3</div>
+  </div>
+
+  <!-- EGZERSİZ -->
+  <div id="screenEgzersiz" class="screen">
+    <div class="egz-hud">
+      <div class="egz-ilerleme" id="egzIlerleme">0 / 30</div>
+      <button class="egz-duraklat" onclick="duraklat()" title="Duraklat">⏸</button>
+    </div>
+    <div class="kelime-alani" id="kelimeAlani"></div>
+  </div>
+
+  <!-- DURAKLATMA OVERLAY -->
+  <div class="pause-overlay" id="pauseOverlay">
+    <div class="pause-baslik">DURAKLATILDI</div>
+    <button class="devam-btn" onclick="devamEt()">▶ DEVAM ET</button>
+  </div>
+
+  <!-- DİKKAT KONTROLÜ -->
+  <div id="screenDikkat" class="screen">
+    <div class="dikkat-hud">
+      <div class="dikkat-soru-no" id="dikkatSoruNo">SORU 1 / 3</div>
+      <div class="dikkat-soru">Hangisini gördün?</div>
+    </div>
+    <div class="secenek-listesi" id="dikkatSecenekler"></div>
+  </div>
+
+  <!-- SONUÇ -->
+  <div id="screenSonuc" class="screen">
+    <div class="sonuc-kart">
+      <span class="sonuc-icon">🎯</span>
+      <div class="sonuc-baslik">Harika! Kelime Takibi egzersizini tamamladın.</div>
+      <div class="sonuc-satir"><span>Gösterim</span><span id="sonGosterimSayisi">—</span></div>
+      <div class="sonuc-satir"><span>Hız</span><span id="sonHiz">—</span></div>
+      <div class="sonuc-satir"><span>Gösterim Biçimi</span><span id="sonGosterimBicimi">—</span></div>
+      <div class="sonuc-satir"><span>Toplam Süre</span><span id="sonSure">—</span></div>
+      <div class="sonuc-satir"><span>Dikkat Kontrolü</span><span id="sonDikkat">—</span></div>
+      <div class="btn-row" id="sonucBtnRow">
+        <button class="btn-play" onclick="tekrarYap()">▶ TEKRAR YAP</button>
+        <button class="btn-back" onclick="menuyeDon()">EGZERSİZLERE DÖN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NASIL YAPILIR? MODAL -->
+<div class="modal-overlay" id="infoModal" onclick="if(event.target===this) infoKapat()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="infoKapat()">×</button>
+    <h3>NASIL YAPILIR?</h3>
+    <div class="icerik">
+      👁️ Başını mümkün olduğunca sabit tut, kelimeleri yalnızca <strong>gözlerinle</strong> takip et<br>
+      🎯 Kelime ekranın farklı bir noktasında belirecek, gözünü oraya taşı ve algıla<br>
+      ⚡ Kelime kısa süre görünür sonra kaybolur, sıradaki kelime başka bir noktada belirir<br>
+      🧠 Bu bir anlam testi değil, göz hareketi ve hızlı algı çalışmasıdır<br>
+      ✅ Egzersiz sonunda gördüğün kelimeleri gerçekten takip edip etmediğini ölçen kısa bir kontrol yapılacak
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
+
+const SECENEK_HARF=['A','B','C','D'];
+const HIZ_MS={yavas:1200,normal:800,hizli:500,cokhizli:300};
+const HIZ_ADI={yavas:'Yavaş',normal:'Normal',hizli:'Hızlı',cokhizli:'Çok Hızlı'};
+
+// 9 bölgeli konum grid'i (row=floor(i/3), col=i%3)
+const POZISYONLAR=[
+  {ad:'sol-ust',left:15,top:18},{ad:'ust-orta',left:50,top:14},{ad:'sag-ust',left:85,top:18},
+  {ad:'sol-orta',left:11,top:50},{ad:'merkez',left:50,top:50},{ad:'sag-orta',left:89,top:50},
+  {ad:'sol-alt',left:15,top:83},{ad:'alt-orta',left:50,top:87},{ad:'sag-alt',left:85,top:83}
+];
+
+// ── KELİME HAVUZLARI ──
+const HAVUZ_1=["kitap","merak","bilgi","düşünce","keşif","öğrenmek","araştırmak","yolculuk","başarı","dikkat","odaklanmak","gözlem","deneyim","hayal","gelecek","bilim","doğa","teknoloji","gezegen","enerji","zeka","hafıza","algı","sezgi","ilham","cesaret","azim","sabır","disiplin","hedef","plan","strateji","yaratıcılık","keşfetmek","gözlemlemek","araştırma","buluş","icat","deney","laboratuvar","evren","yıldız","galaksi","uzay","atom","molekül","hücre","canlı","ekosistem","iklim","orman","okyanus","nehir","dağ","mağara","rüzgar","güneş","ay","bulut","yağmur","kar","mevsim","tarih","uygarlık","kültür","sanat","müzik","edebiyat","şiir","roman","yazar","kahraman","macera","gizem","harita","pusula","rota","keşifçi","kaşif","gemi","uçak","robot","robotik","bilgisayar","internet","yazılım","kod","mühendis","mimar","mimarlık","tasarım","fikir","çözüm","problem","soru","cevap","mantık","akıl","zihin","beyin","sinir","refleks","hız","çeviklik","denge","esneklik","güç","dayanıklılık","spor","antrenman"];
+const HAVUZ_2=["yeni fikirler","büyük hedefler","meraklı gözler","güçlü hafıza","hızlı düşünme","derin öğrenme","bilim dünyası","uzay yolculuğu","dikkat merkezi","başarı yolculuğu","gizli hazine","uzak galaksi","parlak yıldız","güçlü rüzgar","doğal denge","canlı ekosistem","tarihi eser","sanat eseri","yaratıcı fikir","cesur adım","sabırlı çalışma","disiplinli çalışma","akıllı çözüm","mantıklı cevap","zihinsel güç","fiziksel denge","teknik beceri","dijital dünya","sanal gerçeklik","doğal kaynak","temiz enerji","güneş enerjisi","derin okyanus","yüksek dağ","gizemli mağara","eski harita","doğru pusula","uzun yolculuk","kısa mesafe","hızlı tepki","keskin zeka","geniş bakış","farklı bakış","ortak hedef","güçlü irade","sağlam temel","net hedef","açık fikir","taze bilgi","cesur kaşif"];
+const HAVUZ_3=["merak etmeye devam","yeni bilgiler keşfet","dikkatini burada topla","öğrenmeye devam et","hedefine doğru ilerle","bilginin peşinden git","düşünmeye devam et","çevreni dikkatle gözlemle","sabırla çalışmaya devam","azimle hedefe koş","yeni fikirler üret","cesaretle adım at","bilim dünyasını keşfet","doğayı yakından tanı","uzayın derinliklerine bak","zihnini açık tut","hafızanı güçlü tut","hızlı ve doğru düşün","dengeyi korumaya çalış","yaratıcı fikirler geliştir","problemi dikkatle incele","çözüm yolu bul","mantıklı sonuca ulaş","güçlü bir temel kur","geleceğe umutla bak","tarihten ders çıkar","sanatla ilgilenmeye başla","yeni bir dil öğren","kitap okumaya devam","bilgiyi paylaşmaktan çekinme","takım halinde çalış","hedefe kilitlenmiş kal","küçük adımlarla ilerle","büyük resmi gör","detaylara dikkat et","sorular sormaktan çekinme","cevapları araştırarak bul","zamanını verimli kullan","enerjini doğru yönet","kendine güvenmeyi öğren"];
+function havuzSec(gosterim){ return gosterim===1?HAVUZ_1:(gosterim===2?HAVUZ_2:HAVUZ_3); }
+
+// ── PANELE DÖNÜŞ (mevcut SinUs deseni) ──
+function panelDonusUrl(){
+  const from=new URLSearchParams(window.location.search).get('from');
+  if(from==='admin') return 'admin.html';
+  if(from==='ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+document.getElementById('backBtn').href=panelDonusUrl();
+
+function infoAc(){document.getElementById('infoModal').classList.add('active');}
+function infoKapat(){document.getElementById('infoModal').classList.remove('active');}
+
+function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
+function kullaniciAdi(){return sessionStorage.getItem('sinus_kullanici_adi')||'';}
+function kullaniciId(){
+  try{
+    const obj=JSON.parse(localStorage.getItem('sinus_kullanici_obj')||'null');
+    if(obj && obj.id) return obj.id;
+  }catch(e){}
+  return null;
+}
+
+let W={
+  kelimeSayisi:30, hiz:'normal', gosterim:1,
+  from:new URLSearchParams(window.location.search).get('from'),
+  gosterimSirasi:[], mevcutIndex:0,
+  pozGecmisIndex:null, kullanilanKelimeler:new Set(),
+  duraklatildi:false, resumeResolver:null, iptalEdildi:false,
+  baslangicZamanMs:0, toplamAktifSureMs:0, sonSayacBaslangic:0,
+  dikkatDogru:0, dikkatToplam:3
+};
+
+// ── KİLİTLİ MOD ──
+const _kParams=new URLSearchParams(window.location.search);
+const KILITLI=_kParams.get('kilitli')==='1';
+const ASAMA_PARAM=_kParams.get('asama');
+const GUN_PARAM=_kParams.get('gun');
+if(KILITLI){
+  const ks=_kParams.get('kelimeSayisi'); const hz=_kParams.get('hiz'); const gs=_kParams.get('gosterim');
+  if(ks) W.kelimeSayisi=parseInt(ks);
+  if(hz) W.hiz=hz;
+  if(gs) W.gosterim=parseInt(gs);
+  document.getElementById('kartSayi').style.display='none';
+  document.getElementById('kartHiz').style.display='none';
+  document.getElementById('kartGosterim').style.display='none';
+  document.getElementById('backBtn').style.display='none';
+}
+
+function secSayi(el){ document.querySelectorAll('#sayiGrid .secim-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); W.kelimeSayisi=parseInt(el.dataset.deger); }
+function secHiz(el){ document.querySelectorAll('#hizGrid .secim-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); W.hiz=el.dataset.deger; }
+function secGosterim(el){ document.querySelectorAll('#gosterimGrid .secim-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); W.gosterim=parseInt(el.dataset.deger); }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{s.style.display='none';s.classList.remove('active');});
+  const el=document.getElementById(id);
+  el.style.display='flex'; el.classList.add('active');
+  document.body.classList.toggle('egzersiz-aktif', id==='screenEgzersiz'||id==='screenGeriSayim'||id==='screenDikkat');
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function geriSayimOynat(sonMesaj){
+  showScreen('screenGeriSayim');
+  const el=document.getElementById('geriSayimIcerik');
+  for(const n of [3,2,1]){
+    el.className='geri-sayim-num'; el.textContent=n;
+    void el.offsetWidth; el.style.animation='none'; void el.offsetWidth; el.style.animation='';
+    await sleep(700);
+  }
+  el.className='geri-sayim-basla'; el.textContent=sonMesaj||'Başla!';
+  await sleep(500);
+}
+
+// ── ANA AKIŞ ──
+async function egzersiziBaslat(){
+  W.gosterimSirasi=[]; W.mevcutIndex=0; W.pozGecmisIndex=null;
+  W.kullanilanKelimeler=new Set(); W.iptalEdildi=false; W.duraklatildi=false;
+  W.toplamAktifSureMs=0; W.dikkatDogru=0;
+
+  await geriSayimOynat('Başla!');
+  showScreen('screenEgzersiz');
+  ilerlemeGuncelle(0);
+  W.sonSayacBaslangic=Date.now();
+  await gosterimDongusu();
+  if(W.iptalEdildi) return;
+  W.toplamAktifSureMs+=(Date.now()-W.sonSayacBaslangic);
+  dikkatKontroluBaslat();
+}
+
+function ilerlemeGuncelle(n){
+  document.getElementById('egzIlerleme').textContent=n+' / '+W.kelimeSayisi;
+}
+
+function sonrakiKelimeSec(){
+  const havuz=havuzSec(W.gosterim);
+  let secilebilir=havuz.filter(k=>!W.kullanilanKelimeler.has(k));
+  if(secilebilir.length===0){ W.kullanilanKelimeler.clear(); secilebilir=havuz.slice(); }
+  const kelime=secilebilir[Math.floor(Math.random()*secilebilir.length)];
+  W.kullanilanKelimeler.add(kelime);
+  return kelime;
+}
+
+function komsuMu(a,b){
+  if(a===b) return true;
+  const rA=Math.floor(a/3), cA=a%3, rB=Math.floor(b/3), cB=b%3;
+  return Math.abs(rA-rB)<=1 && Math.abs(cA-cB)<=1;
+}
+function sonrakiPozisyonSec(){
+  const adaylar=[0,1,2,3,4,5,6,7,8].filter(i=>i!==W.pozGecmisIndex);
+  let secilen;
+  if(W.pozGecmisIndex===null){
+    secilen=adaylar[Math.floor(Math.random()*adaylar.length)];
+  }else{
+    const agirlikli=[];
+    adaylar.forEach(i=>{
+      const agirlik=komsuMu(i,W.pozGecmisIndex)?1:3;
+      for(let k=0;k<agirlik;k++) agirlikli.push(i);
+    });
+    secilen=agirlikli[Math.floor(Math.random()*agirlikli.length)];
+  }
+  W.pozGecmisIndex=secilen;
+  return POZISYONLAR[secilen];
+}
+
+function bekle(ms){
+  return new Promise(resolve=>{
+    let kalan=ms;
+    function adim(){
+      if(W.iptalEdildi) return resolve();
+      if(W.duraklatildi){ W.resumeResolver=adim; return; }
+      const parca=Math.min(50,kalan);
+      setTimeout(()=>{
+        kalan-=parca;
+        if(kalan<=0) resolve(); else adim();
+      },parca);
+    }
+    adim();
+  });
+}
+
+async function gosterimDongusu(){
+  const alan=document.getElementById('kelimeAlani');
+  const sureMs=HIZ_MS[W.hiz];
+  const gecisMs=Math.min(120, Math.round(sureMs*0.25));
+
+  for(let i=0;i<W.kelimeSayisi;i++){
+    if(W.iptalEdildi) return;
+    const kelime=sonrakiKelimeSec();
+    const poz=sonrakiPozisyonSec();
+    W.gosterimSirasi.push(kelime);
+
+    alan.innerHTML='';
+    const span=document.createElement('div');
+    span.className='kelime-item';
+    span.style.left=poz.left+'%';
+    span.style.top=poz.top+'%';
+    span.style.transitionDuration=gecisMs+'ms';
+    span.style.fontSize = W.gosterim===1 ? 'clamp(1.7rem,6vw,2.8rem)' : (W.gosterim===2 ? 'clamp(1.3rem,4.6vw,2.1rem)' : 'clamp(1.05rem,3.8vw,1.7rem)');
+    span.textContent=kelime;
+    alan.appendChild(span);
+    requestAnimationFrame(()=>span.classList.add('gorunur'));
+
+    ilerlemeGuncelle(i+1);
+    await bekle(sureMs-gecisMs);
+    if(W.iptalEdildi) return;
+    span.classList.remove('gorunur');
+    await bekle(gecisMs);
+  }
+  document.getElementById('kelimeAlani').innerHTML='';
+}
+
+function duraklat(){
+  if(W.duraklatildi) return;
+  W.duraklatildi=true;
+  W.toplamAktifSureMs+=(Date.now()-W.sonSayacBaslangic);
+  document.getElementById('pauseOverlay').classList.add('active');
+}
+async function devamEt(){
+  document.getElementById('pauseOverlay').classList.remove('active');
+  await geriSayimAlanicinde();
+  W.duraklatildi=false;
+  W.sonSayacBaslangic=Date.now();
+  if(W.resumeResolver){ const r=W.resumeResolver; W.resumeResolver=null; r(); }
+}
+async function geriSayimAlanicinde(){
+  showScreen('screenGeriSayim');
+  const el=document.getElementById('geriSayimIcerik');
+  for(const n of [3,2,1]){
+    el.className='geri-sayim-num'; el.textContent=n;
+    await sleep(600);
+  }
+  showScreen('screenEgzersiz');
+}
+
+// ── DİKKAT KONTROLÜ ──
+let dikkatSorular=[];
+function dikkatKontroluBaslat(){
+  const havuz=havuzSec(W.gosterim);
+  const gorulenBenzersiz=[...new Set(W.gosterimSirasi)];
+  const soruSayisi=Math.min(3, gorulenBenzersiz.length);
+  const secilenDogrular=gorulenBenzersiz.sort(()=>Math.random()-0.5).slice(0,soruSayisi);
+  const gorulmeyenler=havuz.filter(k=>!W.gosterimSirasi.includes(k));
+
+  dikkatSorular=secilenDogrular.map(dogru=>{
+    const yanlisAday=gorulmeyenler.filter(k=>k!==dogru);
+    const yanlislar=[];
+    const havuzKopya=yanlisAday.slice();
+    while(yanlislar.length<3 && havuzKopya.length){
+      const idx=Math.floor(Math.random()*havuzKopya.length);
+      yanlislar.push(havuzKopya.splice(idx,1)[0]);
+    }
+    const secenekler=[dogru,...yanlislar].sort(()=>Math.random()-0.5);
+    return {dogru, secenekler, dogruIndex:secenekler.indexOf(dogru)};
+  });
+  W.dikkatToplam=dikkatSorular.length;
+  W.dikkatDogru=0;
+  dikkatSoruGoster(0);
+}
+
+function dikkatSoruGoster(index){
+  if(index>=dikkatSorular.length){ sonucGoster(); return; }
+  showScreen('screenDikkat');
+  document.getElementById('dikkatSoruNo').textContent='SORU '+(index+1)+' / '+dikkatSorular.length;
+  const soru=dikkatSorular[index];
+  const liste=document.getElementById('dikkatSecenekler');
+  liste.innerHTML='';
+  soru.secenekler.forEach((secenek,i)=>{
+    const div=document.createElement('div');
+    div.className='secenek-btn';
+    div.onclick=()=>dikkatCevapVer(index,i);
+    div.innerHTML=`<span class="secenek-harf">${SECENEK_HARF[i]}</span><span class="secenek-metin">${secenek}</span>`;
+    liste.appendChild(div);
+  });
+}
+
+function dikkatCevapVer(soruIndex,secilenIndex){
+  const soru=dikkatSorular[soruIndex];
+  const dogruMu=secilenIndex===soru.dogruIndex;
+  if(dogruMu) W.dikkatDogru++;
+
+  const butonlar=document.querySelectorAll('#dikkatSecenekler .secenek-btn');
+  butonlar.forEach((b,i)=>{
+    b.classList.add('disabled');
+    if(i===soru.dogruIndex) b.classList.add('dogru-isaretli');
+    if(i===secilenIndex && !dogruMu) b.classList.add('yanlis-isaretli');
+  });
+  setTimeout(()=>dikkatSoruGoster(soruIndex+1),650);
+}
+
+// ── SONUÇ ──
+function sonucGoster(){
+  const toplamSn=Math.round(W.toplamAktifSureMs/1000);
+  document.getElementById('sonGosterimSayisi').textContent=W.kelimeSayisi;
+  document.getElementById('sonHiz').textContent=HIZ_ADI[W.hiz];
+  document.getElementById('sonGosterimBicimi').textContent=W.gosterim+' Kelime';
+  document.getElementById('sonSure').textContent=toplamSn+' sn';
+  document.getElementById('sonDikkat').textContent=W.dikkatDogru+' / '+W.dikkatToplam;
+
+  showScreen('screenSonuc');
+  sonucKaydet(toplamSn);
+
+  if(KILITLI){
+    const backUrl=panelDonusUrl();
+    document.getElementById('sonucBtnRow').innerHTML =
+      '<button class="btn-play" onclick="tekrarYap()">▶ TEKRAR YAP</button>' +
+      '<a href="'+backUrl+'" class="btn-back" style="text-decoration:none">Panele Dön →</a>';
+  }
+}
+
+async function sonucKaydet(toplamSn){
+  if(W.from!=='ogrenci') return;
+  const adi=kullaniciAdi();
+  if(!adi) return;
+  const gövde={
+    kullanici_id: kullaniciId(),
+    kullanici_adi: adi,
+    egzersiz_adi: 'Kelime Takibi',
+    kelime_sayisi: W.kelimeSayisi,
+    hiz: W.hiz,
+    gosterim_bicimi: W.gosterim,
+    tamamlanma_durumu: true,
+    toplam_sure_sn: toplamSn,
+    dikkat_dogru: W.dikkatDogru,
+    dikkat_toplam: W.dikkatToplam,
+    asama: ASAMA_PARAM?parseInt(ASAMA_PARAM):null,
+    gun: GUN_PARAM?parseInt(GUN_PARAM):null
+  };
+  try{
+    await fetch(SUPABASE_URL+'/rest/v1/kelime_takibi_sonuclari',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','X-Oturum-Token':oturumToken(),'Prefer':'return=minimal'},
+      body:JSON.stringify(gövde)
+    });
+  }catch(e){ /* sessizce geç, öğrencinin akışını bozma */ }
+}
+
+function tekrarYap(){ egzersiziBaslat(); }
+function menuyeDon(){ showScreen('screenMenu'); }
+
+showScreen('screenMenu');
+</script>
+</body>
+</html>
