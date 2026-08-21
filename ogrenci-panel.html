@@ -123,24 +123,7 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 .tum-egz-dene-btn{width:100%;padding:0.55rem;background:#0a1628;color:white;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:block;text-align:center}
 .tum-egz-dene-btn:hover{opacity:0.85}
 
-@media(max-width:768px){
-  .grid{grid-template-columns:1fr}
-  .ustbilgi{grid-template-columns:repeat(2,minmax(140px,1fr))}
-}
-@media(max-width:600px){
-  nav{padding:0 4%;height:auto;min-height:60px;flex-wrap:wrap;gap:0.4rem;padding-top:0.6rem;padding-bottom:0.6rem}
-  .nav-sag{gap:0.5rem;flex-wrap:wrap;justify-content:flex-end}
-  .kullanici-ad{display:none}
-  .tum-egz-btn,.cikis-btn{font-size:0.75rem;padding:0.35rem 0.7rem}
-  .ana{padding:1.2rem 4%}
-  .bilgi-kart{padding:1rem}
-  .bilgi-deger{font-size:1.3rem}
-  .kart{padding:1.1rem}
-  #gunuBitirOverlay > div{padding:1.2rem !important}
-  .rozet-grid{grid-template-columns:repeat(3,1fr);gap:0.5rem}
-  .rozet{padding:0.7rem}
-  .rozet-ikon{font-size:1.4rem}
-}
+@media(max-width:768px){.grid{grid-template-columns:1fr}.ustbilgi{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -292,6 +275,20 @@ function oturumHeaders(ekstra){
   return Object.assign({'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'X-Oturum-Token':oturumToken()},ekstra||{});
 }
 
+// KPM (okuma hızı) adım listesi — 50'nin altında daha kademeli (5'er ve 10'ar),
+// 50'den sonra 1000'e kadar 50'şer. Adaptif hız hesaplamasında (Günü Bitir sonrası)
+// bulunan sonuç, bu listedeki EN YAKIN adıma yuvarlanır.
+const KPM_ADIMLARI=[10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000];
+function enYakinKpmAdimi(deger){
+  let enYakin=KPM_ADIMLARI[0];
+  let farkMin=Math.abs(deger-enYakin);
+  for(const a of KPM_ADIMLARI){
+    const fark=Math.abs(deger-a);
+    if(fark<farkMin){farkMin=fark;enYakin=a;}
+  }
+  return enYakin;
+}
+
 const ASAMA_AD={1:'Okuma Temeli',2:'Akıcı Okuma',3:'Hız + Anlama',4:'Sınav Odaklı'};
 const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖'};
@@ -323,8 +320,7 @@ const TUM_EGZ_OKUMA=[
   {dosya:'tarama-teknigi.html',isim:'Tarama Tekniği',ikon:'🔦'},
   {dosya:'beliren-metin.html',isim:'Beliren Metin',ikon:'🌕'},
   {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩'},
-  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦'},
-  {dosya:'baglam-avi.html',isim:'Bağlam Avı',ikon:'🧭'}
+  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦'}
 ];
 
 function tumEgzKarti(e,gridId){
@@ -370,6 +366,7 @@ async function panelYukle(){
     programiYukle();
     siralamaYukle();
     if(ogrenci.ilk_giris_tamamlandi===false){ ilkGirisModalGoster(); }
+    baslangicOlcumuGerekliMiKontrolEt();
   }catch(e){
     // Geliştirme modunda demo veri
     ogrenci={ad:'Ali',soyad:'Demir',kullanici_adi:'ali2016',asama:2,mevcut_gun:7,enerji:248,aktif:true};
@@ -494,29 +491,20 @@ function gorevListesiOlustur(){
   }
 }
 
-// Bir görev "kilitli" (öğretmen/admin tarafından ayarlanmış, öğrenci kendi
-// değiştiremez) sayılır eğer KPM tabanlı bir hız (g.hiz) YA DA Bağlam Avı
-// gibi zorluk tabanlı bir ayar (g.zorluk) taşıyorsa. Bu iki alan birbirini
-// dışlar: bir egzersiz ya hiz ile ya da zorluk/mod ile çalışır.
 function gorevUrl(g){
   let url=(g.dosya||'#')+'?from=ogrenci';
-  const kilitliMi=(g.hiz!==undefined && g.hiz!==null) || (g.zorluk!==undefined && g.zorluk!==null);
-  if(kilitliMi){
-    url+='&kilitli=1';
-    if(g.hiz!==undefined && g.hiz!==null) url+='&hiz='+g.hiz;
-    if(g.zorluk!==undefined && g.zorluk!==null) url+='&zorluk='+encodeURIComponent(g.zorluk);
-    if(g.mod!==undefined && g.mod!==null) url+='&mod='+encodeURIComponent(g.mod);
+  if(g.hiz!==undefined && g.hiz!==null){
+    // Okuma tekniği egzersizlerinde hız artık admin'in o gün için belirlediği
+    // ortak değerden değil, öğrencinin GÜNCEL (adaptif) okuma hızından gelir.
+    // Hangi teknik / hangi metin okunacağı admin'in elinde kalmaya devam eder,
+    // sadece HIZ öğrenciye özel olur. Göz/odak egzersizleri bundan etkilenmez.
+    const uygulanacakHiz=(g.tip==='okuma' && ogrenci && ogrenci.okuma_hizi) ? ogrenci.okuma_hizi : g.hiz;
+    url+='&hiz='+uygulanacakHiz+'&kilitli=1';
     if(g.sure!==undefined && g.sure!==null) url+='&sure='+g.sure;
     if(g.metin_id!==undefined && g.metin_id!==null) url+='&metin_id='+g.metin_id;
     if(g.tema!==undefined && g.tema!==null) url+='&tema='+encodeURIComponent(g.tema);
     if(g.sekil!==undefined && g.sekil!==null) url+='&sekil='+encodeURIComponent(g.sekil);
     if(g.nokta!==undefined && g.nokta!==null) url+='&nokta='+encodeURIComponent(g.nokta);
-    // asama/gun: bazı egzersizler (ör. Bağlam Avı) sonucu kaydederken bu
-    // bilgiyi URL'den okuyor; öğrencinin güncel seviye/günü buradan geçirilir.
-    if(ogrenci){
-      if(ogrenci.asama!==undefined && ogrenci.asama!==null) url+='&asama='+ogrenci.asama;
-      if(ogrenci.mevcut_gun!==undefined && ogrenci.mevcut_gun!==null) url+='&gun='+ogrenci.mevcut_gun;
-    }
   }
   return url;
 }
@@ -638,6 +626,168 @@ async function ilkGirisKaydet(){
   }
 }
 
+// ══════════════════════════════════════════════════════════════
+// BAŞLANGIÇ ÖLÇÜMÜ — öğrencinin güncel okuma hızı hiç belirlenmemişse
+// (okuma_hizi boş/0), 30 günlük programa başlamadan önce bir kereliğine
+// yapılması gereken zorunlu ölçüm. Sonuç, öğrencinin İLK "güncel hızı" olur.
+// Bu andan sonra her günün okuma tekniği egzersizi bu hızda açılır ve
+// Günü Bitir sonucuna göre (bkz. sonucKaydet) güncellenir.
+// ══════════════════════════════════════════════════════════════
+let _baslangicOlcum=null;
+
+function baslangicOlcumuGerekliMiKontrolEt(){
+  if(!ogrenci) return;
+  if(!ogrenci.okuma_hizi || ogrenci.okuma_hizi<=0){
+    baslangicOlcumuBaslat();
+  }
+}
+
+async function baslangicOlcumuBaslat(){
+  const overlay=document.getElementById('baslangicOlcumOverlay');
+  overlay.style.display='flex';
+  const icerik=document.getElementById('bo-icerik');
+  icerik.innerHTML='<div class="yukleniyor" style="color:rgba(255,255,255,0.6)">⏳ Metinler yükleniyor...</div>';
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/olcum_metinleri?order=yas_grubu,baslik',{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const metinler=await res.json();
+    if(!metinler.length){
+      icerik.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.7)">📭 Henüz ölçüm metni eklenmemiş.<br><small>Öğretmeninle iletişime geç.</small></div>';
+      return;
+    }
+    const GRUP_ADLARI={1:'1-2. Sınıf',2:'3-4. Sınıf',3:'5-6. Sınıf',4:'7-8. Sınıf',5:'Lise',6:'Yetişkin'};
+    icerik.innerHTML=`
+      <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.5rem;text-align:center;margin-bottom:0.5rem">📏 Başlangıç Ölçümü</h2>
+      <p style="text-align:center;color:rgba(255,255,255,0.6);margin-bottom:2rem;font-size:0.9rem">Programına başlamadan önce sana en uygun metni seç. Bu ölçüm, ilk okuma hızını belirleyecek.</p>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;max-width:520px;margin:0 auto">
+        ${metinler.map((m,i)=>`
+          <div onclick="baslangicOlcumuMetinSec(${i})" style="cursor:pointer;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;padding:1rem 1.2rem;transition:border-color 0.2s" onmouseover="this.style.borderColor='#d4af37'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)'">
+            <div style="font-weight:700;color:white">${m.baslik}</div>
+            <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-top:0.2rem">${GRUP_ADLARI[m.yas_grubu]||''} · ${m.kelime_sayisi||0} kelime · ${(m.sorular||[]).length} soru</div>
+          </div>`).join('')}
+      </div>
+      <div style="text-align:center;margin-top:1.5rem;color:rgba(255,255,255,0.4);font-size:0.8rem">Sana en yakın sınıf/yaş grubunu seçmen önerilir.</div>
+    `;
+    window._boMetinler=metinler;
+  }catch(e){
+    icerik.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.7)">❌ Metinler yüklenemedi: '+e.message+'</div>';
+  }
+}
+
+function baslangicOlcumuMetinSec(idx){
+  const m=window._boMetinler[idx];
+  _baslangicOlcum={metin:m,baslaZaman:null,bitisZaman:null};
+  const icerik=document.getElementById('bo-icerik');
+  icerik.innerHTML=`
+    <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.6rem;text-align:center;margin-bottom:1.5rem">${m.baslik}</h2>
+    <div style="color:rgba(255,255,255,0.85);font-size:1.1rem;line-height:1.9;background:rgba(255,255,255,0.05);border-radius:16px;padding:2rem;margin-bottom:2rem;white-space:pre-wrap">${m.metin}</div>
+    <div style="text-align:center">
+      <button id="bo-okuBtn" onclick="baslangicOlcumuOkumayaBasla()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">▶️ Okumaya Başla — Süreyi Başlat</button>
+      <button id="bo-bitirBtn" onclick="baslangicOlcumuOkumayiBitir()" style="display:none;background:#16a34a;color:white;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">✅ Okumayı Bitirdim</button>
+    </div>
+  `;
+}
+
+function baslangicOlcumuOkumayaBasla(){
+  _baslangicOlcum.baslaZaman=Date.now();
+  document.getElementById('bo-okuBtn').style.display='none';
+  const btn=document.getElementById('bo-bitirBtn');
+  btn.style.display='block';
+  btn.disabled=true;
+  const orijinalMetin=btn.textContent;
+  let kalan=3;
+  btn.textContent=`⏳ ${kalan}sn`;
+  const sayac=setInterval(()=>{
+    kalan--;
+    if(kalan<=0){ clearInterval(sayac); btn.disabled=false; btn.textContent=orijinalMetin; }
+    else{ btn.textContent=`⏳ ${kalan}sn`; }
+  },1000);
+}
+
+function baslangicOlcumuOkumayiBitir(){
+  _baslangicOlcum.bitisZaman=Date.now();
+  const saniye=Math.max(1,Math.round((_baslangicOlcum.bitisZaman-_baslangicOlcum.baslaZaman)/1000));
+  const kelime=_baslangicOlcum.metin.kelime_sayisi||0;
+  const hamHiz=kelime>0?Math.round(kelime/(saniye/60)):0;
+  const hiz=Math.min(hamHiz,1000);
+  window._boHiz=hiz;
+  const sorular=_baslangicOlcum.metin.sorular||[];
+  const icerik=document.getElementById('bo-icerik');
+  if(!sorular.length){
+    baslangicOlcumuTamamla();
+    return;
+  }
+  icerik.innerHTML=`
+    <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:white;font-weight:600">⚡ Okuma Hızın</span>
+      <span style="color:#d4af37;font-size:1.3rem;font-weight:700">${hiz} kpm</span>
+    </div>
+    <h3 style="color:white;margin-bottom:1.5rem;font-size:1.1rem">📝 Anlama Soruları</h3>
+    <div id="bo-sorular" style="background:white;border-radius:16px;padding:1.5rem"></div>
+    <button onclick="baslangicOlcumuSonuclariGoster()" style="width:100%;margin-top:1.5rem;background:#d4af37;color:#0a1628;border:none;padding:1rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">Sonuçları Gör →</button>
+  `;
+  const div=document.getElementById('bo-sorular');
+  sorular.forEach((s,i)=>{
+    const blok=document.createElement('div');
+    blok.style.cssText='margin-bottom:1.5rem';
+    blok.innerHTML=`<div style="font-weight:600;margin-bottom:0.6rem;color:#1e293b">${i+1}. ${s.soru}</div>`;
+    s.secenekler.forEach((sec,j)=>{
+      const btn=document.createElement('button');
+      btn.textContent=sec;
+      btn.style.cssText='display:block;width:100%;text-align:left;padding:0.7rem 1rem;margin-bottom:0.4rem;border:2px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-family:inherit;font-size:0.9rem;transition:all 0.15s';
+      btn.onclick=()=>{
+        blok.querySelectorAll('button').forEach(b=>{b.style.background='white';b.style.borderColor='#e2e8f0';b.dataset.secildi='';});
+        btn.style.background='#eff6ff';btn.style.borderColor='#2563a8';
+        btn.dataset.secildi='1';
+        btn.dataset.dogruMu=(j===s.dogru)?'1':'0';
+      };
+      blok.appendChild(btn);
+    });
+    div.appendChild(blok);
+  });
+}
+
+function baslangicOlcumuSonuclariGoster(){
+  const sorular=_baslangicOlcum.metin.sorular||[];
+  let dogru=0;
+  document.getElementById('bo-sorular').querySelectorAll('div').forEach(blok=>{
+    const secili=blok.querySelector('button[data-secildi="1"]');
+    if(secili&&secili.dataset.dogruMu==='1') dogru++;
+  });
+  window._boAnlamaOrani=sorular.length?Math.round((dogru/sorular.length)*100):null;
+  window._boDogru=dogru;
+  window._boToplam=sorular.length;
+  baslangicOlcumuTamamla();
+}
+
+async function baslangicOlcumuTamamla(){
+  const hiz=window._boHiz||0;
+  const icerik=document.getElementById('bo-icerik');
+  icerik.innerHTML=`
+    <div style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem">🎉</div>
+      <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.8rem;margin-bottom:0.5rem">Başlangıç Hızın Belirlendi!</h2>
+      <div style="color:#d4af37;font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;margin:1.5rem 0">${hiz} kpm</div>
+      <p style="color:rgba(255,255,255,0.6);margin-bottom:2rem">Programın bu hızla başlayacak. Her gün sonunda yapacağın ölçüme göre hızın otomatik güncellenecek.</p>
+      <button onclick="baslangicOlcumuKaydet(${hiz})" style="background:#2563a8;color:white;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">Programa Başla →</button>
+    </div>
+  `;
+}
+
+async function baslangicOlcumuKaydet(hiz){
+  try{
+    await rpc('ogrenci_ilerleme_guncelle',{p_okuma_hizi:hiz});
+    ogrenci.okuma_hizi=hiz;
+  }catch(e){
+    alert('Hız kaydedilemedi, tekrar denenecek: '+e.message);
+    return;
+  }
+  document.getElementById('baslangicOlcumOverlay').style.display='none';
+  bilgileriYukle();
+  programiYukle();
+}
+
 // ── GÜNÜ BİTİR SİSTEMİ ──
 let gbBaslaZaman=null;
 let gbBitisZaman=null;
@@ -681,6 +831,8 @@ function okumayaBasla(){
   document.getElementById('gbOkuBtn').style.display='none';
   const btn=document.getElementById('gbBitirBtn');
   btn.style.display='block';
+  // Yanlışlıkla anında tıklamayı önlemek için kısa bir bekleme (gerçek okuma
+  // süresi asla bu kadar kısa olamaz, bu sadece "çift tık" tipi kazaları önler)
   btn.disabled=true;
   const orijinalMetin=btn.textContent;
   let kalan=3;
@@ -694,9 +846,14 @@ function okumayaBasla(){
 
 function okumayiBitir(){
   gbBitisZaman=Date.now();
+  // "Ölçüm Yap" özelliğiyle birebir aynı hesaplama mantığı:
+  // saniye cinsinden geçen süre (en az 1 sn), kelime sayısı ÷ (saniye/60) = KPM.
   const saniye=Math.max(1,Math.round((gbBitisZaman-gbBaslaZaman)/1000));
   const kelime=mevcutHikaye.kelime_sayisi||0;
   const hamHiz=kelime>0?Math.round(kelime/(saniye/60)):0;
+  // Sistemin desteklediği azami okuma hızı 1000 kelime/dk'dır (bkz. egzersiz
+  // hız ölçekleri). Süre ölçümü ne kadar kısa olursa olsun, kaydedilen/gösterilen
+  // hız bu gerçekçi tavanın üzerine çıkamaz.
   const hiz=Math.min(hamHiz,1000);
   document.getElementById('gbHizSonuc').textContent=(hiz||'—')+' kelime/dakika';
   document.getElementById('gbEkran1').style.display='none';
@@ -721,6 +878,7 @@ function soruOlustur(){
       btn.onmouseover=()=>{if(!btn.dataset.secildi)btn.style.borderColor='#2563a8'};
       btn.onmouseout=()=>{if(!btn.dataset.secildi)btn.style.borderColor='#e2e8f0'};
       btn.onclick=()=>{
+        // Aynı sorunun diğer butonlarını sıfırla
         blok.querySelectorAll('button').forEach(b=>{
           b.style.background='white';b.style.borderColor='#e2e8f0';b.dataset.secildi='';
         });
@@ -751,43 +909,81 @@ function sonuclariGoster(){
   document.getElementById('gbSonucAnlama').textContent='%'+oran;
   document.getElementById('gbSonucDogru').textContent=dogru+' / '+toplam+' doğru';
 
+  // ── ADAPTİF HIZ MANTIĞI ──
+  // Anlama < %70  → güncel hız DEĞİŞMEZ (aynı hızla devam).
+  // Anlama >= %70 → güncel hız, bu ölçümdeki gerçek hızın %20 fazlası olur,
+  //                 en yakın 50'lik KPM adımına yuvarlanır (üst sınır yok).
+  let yeniHiz=ogrenci.okuma_hizi||hiz;
   let mesaj='';
-  if(hiz>0&&oran>=70) mesaj='Harika! Hem hızlı hem anlayarak okudun. 🚀';
-  else if(oran<70) mesaj='Anlama oranın biraz düşük. Yavaşlamayı dene. 📖';
-  else mesaj='İyi iş! Devam et. 💪';
+  if(hiz>0 && oran>=70){
+    const hamYeniHiz=hiz*1.2;
+    yeniHiz=enYakinKpmAdimi(hamYeniHiz);
+    mesaj=`Harika! Anlama oranın %70'in üstünde, hızın ${yeniHiz} kpm'e yükseltildi. 🚀`;
+  } else if(oran<70){
+    mesaj='Anlama oranın %70\'in altında kaldı, hızın bir sonraki gün aynı kalacak. Yavaşlamayı dene. 📖';
+  } else {
+    mesaj='İyi iş! Devam et. 💪';
+  }
   document.getElementById('gbAdaptifMesaj').textContent=mesaj;
+  window._yeniOkumaHizi=yeniHiz;
 
-  sonucKaydet(hiz,oran,dogru,toplam);
+  // Supabase'e kaydet
+  sonucKaydet(hiz,oran,dogru,toplam,yeniHiz);
 }
 
-async function sonucKaydet(hiz,anlamaOrani,dogru,toplam){
+async function sonucKaydet(hiz,anlamaOrani,dogru,toplam,yeniHiz){
   const asama=ogrenci.asama||1;
   const gun=ogrenci.mevcut_gun||1;
   try{
-    await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans',{
-      method:'POST',
-      headers:oturumHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
-      body:JSON.stringify({
-        kullanici_adi:ogrenci.kullanici_adi,
-        asama,gun,
-        okuma_hizi:hiz,
-        anlama_orani:anlamaOrani,
-        dogru_sayisi:dogru,
-        toplam_soru:toplam,
-        sure_dk:window._sure_dk||0,
-        tamamlanan_gun:gun,
-        kazanilan_puan:15,
-        tarih:new Date().toISOString().split('T')[0]
-      })
+    // Aynı gün için daha önce bir "Günü Bitir" kaydı var mı kontrol et
+    // (kullanıcı "Günü Bitir"i birden fazla kez tamamlarsa tabloya ikinci
+    // bir satır eklenmesin, üzerine yazsın).
+    const kontrolRes=await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi)+'&asama=eq.'+asama+'&gun=eq.'+gun+'&select=id',{
+      headers:oturumHeaders()
     });
-    if(hiz>0){
-      await rpc('ogrenci_ilerleme_guncelle',{p_okuma_hizi:hiz,p_mevcut_gun:gun+1});
+    const mevcutKayitlar=await kontrolRes.json().catch(()=>[]);
+
+    const kayitVerisi={
+      kullanici_adi:ogrenci.kullanici_adi,
+      asama,gun,
+      okuma_hizi:hiz,
+      anlama_orani:anlamaOrani,
+      dogru_sayisi:dogru,
+      toplam_soru:toplam,
+      sure_dk:window._sure_dk||0,
+      tamamlanan_gun:gun,
+      kazanilan_puan:15,
+      tarih:new Date().toISOString().split('T')[0]
+    };
+
+    if(mevcutKayitlar && mevcutKayitlar.length){
+      await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?id=eq.'+mevcutKayitlar[0].id,{
+        method:'PATCH',
+        headers:oturumHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+        body:JSON.stringify(kayitVerisi)
+      });
+    }else{
+      await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans',{
+        method:'POST',
+        headers:oturumHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+        body:JSON.stringify(kayitVerisi)
+      });
     }
+
+    // Öğrencinin GÜNCEL okuma hızını güncelle (adaptif mantık — bkz. sonuclariGoster).
+    // Anlama %70 altındaysa yeniHiz zaten mevcut hızla aynı gönderiliyor, yani
+    // hız fiilen değişmemiş oluyor; RPC'ye yine de her seferinde net bir değer
+    // gönderiyoruz ki sunucu tarafında belirsizlik olmasın.
+    await rpc('ogrenci_ilerleme_guncelle',{p_okuma_hizi:yeniHiz,p_mevcut_gun:gun+1});
+    ogrenci.okuma_hizi=yeniHiz;
   }catch(e){
     console.error('Günü Bitir sonucu kaydedilemedi:',e);
   }
 }
 
+// Günü Bitir kapatılıp ana panele dönülürken artık TAM SAYFA YENİLEMEsi
+// yapılmıyor: üst bilgiler, görev listesi, ilerleme ve gezegen yolculuğu
+// yeniden çekiliyor ve kullanıcı olduğu ekranda (panelde) kalıyor.
 async function gunuBitirTamamlaVeDon(){
   gunuBitirKapat();
   await Promise.all([panelYukle(), siralamaYukle(), yolculukYukle()]);
@@ -797,112 +993,20 @@ function gunuBitirKapat(){
   document.getElementById('gunuBitirOverlay').style.display='none';
 }
 
-// ── SİNUS ORTAMI ──
-const ORTAM_SORULARI=[
-  {kod:'nasil',metin:'Sence SinUs nasıl?'},
-  {kod:'sevdigin_egzersiz',metin:"SinUs'ta en sevdiğin egzersiz hangisi?"},
-  {kod:'basari',metin:'Bugün neyi başardın?'},
-  {kod:'tavsiye',metin:'Diğer SinUs öğrencilerine bir tavsiyen var mı?'},
-  {kod:'ekleme',metin:"SinUs'a bir şey ekleyebilseydin ne eklerdin?"}
-];
-const TEPKI_EMOJI={kalp:'❤️',alkis:'👏',roket:'🚀',guc:'💪'};
-
-function ortamSorulariCiz(){
-  const div=document.getElementById('ortamSorular');
-  if(!div) return;
-  div.innerHTML=ORTAM_SORULARI.map(s=>`
-    <div style="margin-bottom:1rem">
-      <label style="display:block;font-size:0.85rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem">${s.metin}</label>
-      <textarea id="ortam-soru-${s.kod}" placeholder="Düşüncelerini yaz..." style="width:100%;min-height:60px;padding:0.6rem 0.9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:0.88rem;resize:vertical;box-sizing:border-box"></textarea>
-    </div>`).join('');
-}
-
-async function ortamYukle(){
-  const feed=document.getElementById('ortamFeed');
-  if(!feed) return;
-  try{
-    const data=await rpc('ortam_feed_getir',{p_limit:20});
-    if(!data||!data.length){
-      feed.innerHTML='<div style="color:#94a3b8;font-size:0.88rem;padding:0.5rem 0">Henüz yayınlanmış paylaşım yok. İlk paylaşımı sen yapabilirsin!</div>';
-      return;
-    }
-    feed.innerHTML=data.map(p=>{
-      const tarih=new Date(p.olusturulma_tarihi).toLocaleDateString('tr-TR');
-      const cevapGuvenli=(p.cevap_metni||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      return `<div style="border:1.5px solid #f1f5f9;border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.9rem">
-        <div style="font-size:0.85rem;color:#64748b;margin-bottom:0.4rem"><strong style="color:#0a1628">${p.ad||'SinUs Öğrencisi'}</strong>${p.sinif?' · '+p.sinif:''} · ${tarih}</div>
-        <div style="font-size:0.92rem;color:#1e293b;margin-bottom:0.7rem;white-space:pre-wrap">${cevapGuvenli}</div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-          ${Object.keys(TEPKI_EMOJI).map(t=>{
-            const aktif=p.benim_tepkim===t;
-            return `<button onclick="ortamTepkiVer(${p.id},'${t}',this)" data-aktif="${aktif?'1':'0'}" style="background:${aktif?'#eff6ff':'white'};border:1.5px solid ${aktif?'#bfdbfe':'#e2e8f0'};border-radius:20px;padding:0.3rem 0.75rem;font-size:0.82rem;cursor:pointer;font-family:inherit">${TEPKI_EMOJI[t]} ${p[t]||0}</button>`;
-          }).join('')}
-        </div>
-      </div>`;
-    }).join('');
-  }catch(e){
-    feed.innerHTML='<div style="color:#94a3b8;font-size:0.85rem">Ortam yüklenemedi.</div>';
-  }
-}
-
-async function ortamTepkiVer(id,tepki,btnEl){
-  const aktifMi=btnEl.dataset.aktif==='1';
-  try{
-    await rpc('ortam_tepki_ver',{p_paylasim_id:id,p_tepki_tipi:aktifMi?null:tepki});
-    ortamYukle();
-  }catch(e){}
-}
-
-async function ortamGonder(){
-  const cevaplar=ORTAM_SORULARI
-    .map(s=>({...s,cevap:(document.getElementById('ortam-soru-'+s.kod).value||'').trim()}))
-    .filter(s=>s.cevap.length>0);
-  if(!cevaplar.length){
-    alert('En az bir soruya cevap yazmalısın 🙂');
-    return;
-  }
-  try{
-    for(const c of cevaplar){
-      await rpc('ortam_paylasim_olustur',{p_soru_kodu:c.kod,p_soru_metni:c.metin,p_cevap_metni:c.cevap});
-    }
-    ORTAM_SORULARI.forEach(s=>{
-      const el=document.getElementById('ortam-soru-'+s.kod);
-      if(el) el.value='';
-    });
-    const tesekkur=document.getElementById('ortamTesekkur');
-    tesekkur.style.display='block';
-    setTimeout(()=>{tesekkur.style.display='none';},5000);
-  }catch(e){
-    alert('❌ '+e.message);
-  }
-}
-
 // Başlat
 panelYukle();
 yolculukYukle();
-// SinUs Ortamı kutuları HTML'de script etiketinden SONRA yer alıyor.
-// Script çalıştığı anda o kutular henüz DOM'da oluşmamış olabilir,
-// bu yüzden tarayıcı tüm sayfayı okuyup bitirene kadar bekliyoruz.
-function ortamBaslat(){
-  ortamSorulariCiz();
-  ortamYukle();
-}
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded', ortamBaslat);
-}else{
-  ortamBaslat();
-}
 
 // ── GEZEGEN TEMALI GELİŞİM YOLCULUĞU ──
 const GEZEGENLER=[
-  {renk1:'#c9c9c9',renk2:'#84858a'},
-  {renk1:'#f0dcae',renk2:'#c39a5c'},
-  {renk1:'#7fb3e8',renk2:'#1d4a8a'},
-  {renk1:'#e2a184',renk2:'#9c4526'},
-  {renk1:'#ecd6ac',renk2:'#a67c4a'},
-  {renk1:'#f0e0ab',renk2:'#c9a35f',halka:true},
-  {renk1:'#a9e2e0',renk2:'#4f9797'},
-  {renk1:'#8b9ce8',renk2:'#2c3a75'}
+  {renk1:'#c9c9c9',renk2:'#84858a'},              // Merkür
+  {renk1:'#f0dcae',renk2:'#c39a5c'},              // Venüs
+  {renk1:'#7fb3e8',renk2:'#1d4a8a'},              // Dünya
+  {renk1:'#e2a184',renk2:'#9c4526'},              // Mars
+  {renk1:'#ecd6ac',renk2:'#a67c4a'},              // Jüpiter
+  {renk1:'#f0e0ab',renk2:'#c9a35f',halka:true},   // Satürn
+  {renk1:'#a9e2e0',renk2:'#4f9797'},              // Uranüs
+  {renk1:'#8b9ce8',renk2:'#2c3a75'}               // Neptün
 ];
 
 async function yolculukYukle(){
@@ -965,6 +1069,16 @@ async function yolculukYukle(){
 }
 </script>
 
+<!-- BAŞLANGIÇ ÖLÇÜMÜ OVERLAY -->
+<div id="baslangicOlcumOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a1628;z-index:1050;flex-direction:column;overflow-y:auto">
+  <div style="max-width:700px;margin:0 auto;padding:2rem;width:100%">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:white">Sin<span style="color:#d4af37">Us</span></div>
+    </div>
+    <div id="bo-icerik"></div>
+  </div>
+</div>
+
 <!-- GÜNÜ BİTİR OVERLAY -->
 <div id="gunuBitirOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a1628;z-index:1000;flex-direction:column;overflow-y:auto">
   <div style="max-width:700px;margin:0 auto;padding:2rem;width:100%">
@@ -1022,21 +1136,6 @@ async function yolculukYukle(){
     <div style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.5rem">🪐 Gelişim Yolculuğu</div>
     <div style="overflow-x:auto;padding-bottom:1rem">
       <div id="yolculukSarici" class="gezegen-sarici"></div>
-    </div>
-  </div>
-</div>
-
-<!-- SİNUS ORTAMI -->
-<div style="max-width:1100px;margin:2rem auto;padding:0 5%">
-  <div class="kart">
-    <div class="kart-baslik">🌌 SinUs Ortamı</div>
-    <div id="ortamFeed"><div class="yukleniyor">⏳ Yükleniyor...</div></div>
-
-    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1.5px solid #f1f5f9">
-      <div style="font-weight:600;color:#0a1628;margin-bottom:1rem">Sen de ortama katılmak ister misin? 👋</div>
-      <div id="ortamSorular"></div>
-      <button class="basla-btn" style="margin-top:0.5rem" onclick="ortamGonder()">🚀 Ortama Gönder</button>
-      <div id="ortamTesekkur" style="display:none;margin-top:1rem;background:#f0fdf4;color:#15803d;border-radius:10px;padding:0.9rem 1.2rem;font-size:0.88rem">Teşekkürler! Paylaşımın SinUs ekibine ulaştı. Onaylandığında SinUs Ortamı'nda görünebilir.</div>
     </div>
   </div>
 </div>
