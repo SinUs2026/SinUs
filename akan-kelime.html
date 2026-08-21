@@ -258,6 +258,7 @@ body::before {
       <div class="hud-item"><div class="hud-lbl">Hız</div><div class="hud-val" id="hudHiz">—</div></div>
       <div class="hud-item"><div class="hud-lbl">Kelime</div><div class="hud-val" id="hudKelime">0/0</div></div>
       <div class="hud-item"><div class="hud-lbl">Grup</div><div class="hud-val" id="hudGrup">—</div></div>
+      <div class="hud-item"><div class="hud-lbl">Süre</div><div class="hud-val" id="hudSure">00:00</div></div>
     </div>
 
     <div class="ilerleme-wrap">
@@ -318,7 +319,10 @@ const G = {
   mevcutGrup: 0,
   calisiyor: false,
   timeout: null,
-  filtre: ''
+  filtre: '',
+  // ── SÜRE SAYACI — bilgi amaçlı, hiçbir şekilde egzersizi durdurmaz ──
+  sureSaniye: 0,
+  sureInterval: null
 };
 
 // ── YAZI BOYUTU TERCİHİ (tarayıcıda hatırlanır) ──
@@ -366,6 +370,9 @@ const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const METIN_ID_PARAM = _kParams.get('metin_id');
+// Admin'in bu görev için seçtiği süre (dakika) — SADECE bilgi/hedef amaçlı gösterilir,
+// süre dolsa da egzersiz kapanmaz/durmaz. Gerçek bitiş her zaman metnin sonuna gelmektir.
+const SURE_HEDEF_DK = parseInt(_kParams.get('sure'));
 
 function kilitliModuBaslat(){
   if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
@@ -476,6 +483,35 @@ function oyunHizGuncelle(v) {
   }
 }
 
+// ── SÜRE SAYACI (yalnızca gösterge — hiçbir zaman egzersizi durdurmaz) ──
+// Sayaç sadece G.calisiyor true iken ilerler (DURDUR'a basılınca duraklar,
+// DEVAM'a basılınca kaldığı yerden devam eder). Süre hedefine (varsa) ulaşınca
+// hiçbir aksiyon alınmaz; öğrenci sadece ne kadar zaman geçtiğini görür.
+function hudSureGoster(){
+  const el = document.getElementById('hudSure');
+  if(!el) return;
+  const dk = String(Math.floor(G.sureSaniye/60)).padStart(2,'0');
+  const sn = String(G.sureSaniye%60).padStart(2,'0');
+  el.textContent = dk+':'+sn + (!isNaN(SURE_HEDEF_DK) ? (' / '+SURE_HEDEF_DK+'dk') : '');
+}
+function sureSayaciBaslat(){
+  if(G.sureInterval) return;
+  G.sureInterval = setInterval(()=>{
+    if(G.calisiyor){
+      G.sureSaniye++;
+      hudSureGoster();
+    }
+  },1000);
+}
+function sureSayaciDurdur(){
+  clearInterval(G.sureInterval);
+  G.sureInterval = null;
+}
+function sureSayaciSifirla(){
+  G.sureSaniye = 0;
+  hudSureGoster();
+}
+
 // ── OYUNU BAŞLAT ──
 function oyunuBaslat() {
   if (!G.seciliMetin) return;
@@ -502,6 +538,9 @@ function oyunuBaslat() {
   if(KILITLI){ document.getElementById('oyunHizRow').style.display='none'; }
   document.getElementById('bittiOverlay').classList.remove('gorulur');
   document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
+
+  sureSayaciSifirla();
+  sureSayaciBaslat();
 
   ilerlemeGuncelle();
 
@@ -564,6 +603,7 @@ function ilerlemeGuncelle() {
 function bitir() {
   G.calisiyor = false;
   clearTimeout(G.timeout);
+  sureSayaciDurdur();
   document.getElementById('bittiOverlay').classList.add('gorulur');
   document.getElementById('durumMsg').textContent = 'TAMAMLANDI! 🎉';
   document.getElementById('durdurBtn').textContent = '▶ DEVAM';
@@ -600,6 +640,7 @@ function bastanAl() {
   document.getElementById('kelimeGoster').textContent = '▶';
   document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
   document.getElementById('durumMsg').textContent = 'BAŞLIYOR...';
+  sureSayaciSifirla();
   ilerlemeGuncelle();
   G.timeout = setTimeout(() => {
     document.getElementById('durumMsg').textContent = '';
@@ -611,6 +652,7 @@ function bastanAl() {
 function menuye() {
   G.calisiyor = false;
   clearTimeout(G.timeout);
+  sureSayaciDurdur();
   showScreen('screenAyar');
 }
 
