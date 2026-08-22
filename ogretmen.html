@@ -234,11 +234,13 @@ tr:hover td{background:#f8fafc}
 
   <!-- EGZERSİZLER -->
   <div id="sayfa-egzersizler" class="sayfa">
-    <div class="ust-bar"><div><h1>Egzersizler</h1><p>Göz ve odak egzersizlerini başlatın.</p></div></div>
+    <div class="ust-bar"><div><h1>Egzersizler</h1><p>Göz, odak ve genel egzersizleri başlatın.</p></div></div>
     <div class="kategori-baslik">👁️ Göz Kası Egzersizleri</div>
     <div class="egzersiz-grid" id="grid-goz-og"></div>
     <div class="kategori-baslik">🎯 Dikkat & Odak Egzersizleri</div>
     <div class="egzersiz-grid" id="grid-odak-og"></div>
+    <div class="kategori-baslik">🗂️ Genel Egzersizler</div>
+    <div class="egzersiz-grid" id="grid-genel-og"></div>
   </div>
 
   <!-- OKUMA TEKNİKLERİ -->
@@ -451,7 +453,13 @@ const EGZERSIZLER_ODAK=[
   {dosya:'sayi-avi.html',isim:'Sayı Avı',ikon:'🔢',aciklama:'Görsel tarama egzersizi.'},
   {dosya:'merkez-nokta.html',isim:'Merkez Nokta',ikon:'👁️',aciklama:'Periferik görüş egzersizi.'},
   {dosya:'gizli-nesne.html',isim:'Gizli Nesne',ikon:'🔭',aciklama:'Görsel tarama ve odak.'},
+];
+const EGZERSIZLER_GENEL=[
   {dosya:'kritik-kelime-avi.html',isim:'Kritik Kelime Avı',ikon:'🔎',aciklama:'Seçici dikkat: metinde hedef kelimeyi sayma egzersizi.'},
+  {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩',aciklama:'Izgarada gizli kelimeleri bulma.'},
+  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦',aciklama:'Sabit bakış noktasıyla kelime grubu okuma.'},
+  {dosya:'baglam-avi.html',isim:'Bağlam Avı',ikon:'🧭',aciklama:'Metindeki boşluğu bağlamdan çıkararak tamamlama.'},
+  {dosya:'kelime-takibi.html',isim:'Kelime Takibi',ikon:'🔍',aciklama:'Akan metinde hedef kelimeleri takip ederek okuma.'},
 ];
 const EGZERSIZLER_OKUMA=[
   {dosya:'akan-kelime.html',isim:'Akan Kelime',ikon:'🌊',aciklama:'Kelimeler tek tek akar, akıcılık gelişir.'},
@@ -463,8 +471,7 @@ const EGZERSIZLER_OKUMA=[
   {dosya:'orp-okuma.html',isim:'ORP Okuma',ikon:'✨',aciklama:'Optimal tanım noktası tekniği.'},
   {dosya:'tarama-teknigi.html',isim:'Tarama Tekniği',ikon:'🔦',aciklama:'Satır başı-sonu sabit nokta tekniği.'},
   {dosya:'beliren-metin.html',isim:'Beliren Metin',ikon:'🌕',aciklama:'Kelimeler sırayla belirir.'},
-  {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩',aciklama:'Izgarada gizli kelimeleri bulma.'},
-  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦',aciklama:'Sabit bakış noktasıyla kelime grubu okuma.'},
+  {dosya:'goz-rotasi.html',isim:'Göz Rotası',ikon:'🛤️',aciklama:'Metin üzerinde göz sıçraması (saccade) tekniğiyle rotalı okuma.'},
 ];
 const ZORLUK_ADLARI={basit:'Basit',orta:'Orta',zor:'Zor',cok_zor:'Çok Zor'};
 const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
@@ -507,8 +514,10 @@ function egzersizKarti(e,gridId){
 function egzersizleriOlustur(){
   document.getElementById('grid-goz-og').innerHTML='';
   document.getElementById('grid-odak-og').innerHTML='';
+  document.getElementById('grid-genel-og').innerHTML='';
   EGZERSIZLER_GOZ.forEach(e=>egzersizKarti(e,'grid-goz-og'));
   EGZERSIZLER_ODAK.forEach(e=>egzersizKarti(e,'grid-odak-og'));
+  EGZERSIZLER_GENEL.forEach(e=>egzersizKarti(e,'grid-genel-og'));
 }
 function okumaTeknikleriOlustur(){
   document.getElementById('grid-okuma-og').innerHTML='';
