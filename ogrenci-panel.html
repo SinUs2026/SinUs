@@ -405,7 +405,7 @@ async function ortamPaylasimGonder(){
   btn.disabled=true; btn.textContent='⏳ Gönderiliyor...';
   try{
     await rpc('ortam_paylasim_olustur',{p_soru_kodu:_ortamSeciliSoru.kod,p_soru_metni:_ortamSeciliSoru.metin,p_cevap_metni:cevap});
-    document.getElementById('ortamYazIcerik').innerHTML='<div class="ortam-basari">✅ Paylaşımın gönderildi! Admin onayından sonra Ortam\\'da görünecek.</div>';
+    document.getElementById('ortamYazIcerik').innerHTML='<div class="ortam-basari">✅ Paylaşımın gönderildi! Admin onayından sonra Ortam\'da görünecek.</div>';
     _ortamSeciliSoru=null;
     setTimeout(()=>{ ortamYeniSoruSec(); },2500);
   }catch(e){
