@@ -216,6 +216,7 @@ body::before {
       <div class="hud-item"><div class="hud-lbl">Metin</div><div class="hud-val" id="hudMetin">—</div></div>
       <div class="hud-item"><div class="hud-lbl">Hız</div><div class="hud-val" id="hudHiz">—</div></div>
       <div class="hud-item"><div class="hud-lbl">Kelime</div><div class="hud-val" id="hudKelime">0/0</div></div>
+      <div class="hud-item"><div class="hud-lbl">Süre</div><div class="hud-val" id="hudSure">00:00</div></div>
     </div>
 
     <div class="ilerleme-wrap">
@@ -263,7 +264,10 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 
 const G = {
   metinler: [], seciliMetin: null, kpm: 150, yaziOlcek: 1,
-  kelimeler: [], mevcutIndex: 0, calisiyor: false, timeout: null, filtre: ''
+  kelimeler: [], mevcutIndex: 0, calisiyor: false, timeout: null, filtre: '',
+  // ── SÜRE SAYACI — bilgi amaçlı, hiçbir şekilde egzersizi durdurmaz ──
+  sureSaniye: 0,
+  sureInterval: null
 };
 
 // ── YAZI BOYUTU TERCİHİ (tarayıcıda hatırlanır) ──
@@ -309,6 +313,9 @@ const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const METIN_ID_PARAM = _kParams.get('metin_id');
+// Admin'in bu görev için seçtiği süre (dakika) — SADECE bilgi/hedef amaçlı gösterilir,
+// süre dolsa da egzersiz kapanmaz/durmaz. Gerçek bitiş her zaman metnin sonuna gelmektir.
+const SURE_HEDEF_DK = parseInt(_kParams.get('sure'));
 
 function kilitliModuBaslat(){
   if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
@@ -321,7 +328,7 @@ if(KILITLI){ kilitliModuBaslat(); }
 
 async function kilitliMetinYukle(){
   try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/ders_metinleri?id=eq.'+METIN_ID_PARAM,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const res=await fetch(SUPABASE_URL+'/rest/v1/hikayeler?id=eq.'+METIN_ID_PARAM,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     const data=await res.json();
     if(data.length){
       G.seciliMetin=data[0];
@@ -389,6 +396,35 @@ function oyunHizGuncelle(v) {
   // Hız değişince bir sonraki kelimenin bekleme süresi otomatik güncellenir (yeni zamanlayıcı bir sonraki tetiklemede devreye girer)
 }
 
+// ── SÜRE SAYACI (yalnızca gösterge — hiçbir zaman egzersizi durdurmaz) ──
+// Sayaç sadece G.calisiyor true iken ilerler (DURDUR'a basılınca duraklar,
+// DEVAM'a basılınca kaldığı yerden devam eder). Süre hedefine (varsa) ulaşınca
+// hiçbir aksiyon alınmaz; öğrenci sadece ne kadar zaman geçtiğini görür.
+function hudSureGoster(){
+  const el = document.getElementById('hudSure');
+  if(!el) return;
+  const dk = String(Math.floor(G.sureSaniye/60)).padStart(2,'0');
+  const sn = String(G.sureSaniye%60).padStart(2,'0');
+  el.textContent = dk+':'+sn + (!isNaN(SURE_HEDEF_DK) ? (' / '+SURE_HEDEF_DK+'dk') : '');
+}
+function sureSayaciBaslat(){
+  if(G.sureInterval) return;
+  G.sureInterval = setInterval(()=>{
+    if(G.calisiyor){
+      G.sureSaniye++;
+      hudSureGoster();
+    }
+  },1000);
+}
+function sureSayaciDurdur(){
+  clearInterval(G.sureInterval);
+  G.sureInterval = null;
+}
+function sureSayaciSifirla(){
+  G.sureSaniye = 0;
+  hudSureGoster();
+}
+
 // Metni kelimelere böl ve her kelimeyi ayrı bir span olarak yerleştir (aralardaki boşluklar korunur)
 function metinGoster(metin) {
   const kelimeler = metin.trim().split(/\s+/).filter(k => k.length > 0);
@@ -412,6 +448,9 @@ function oyunuBaslat() {
   document.getElementById('bittiOverlay').classList.remove('gorulur');
   document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
   ilerlemeGuncelle();
+
+  sureSayaciSifirla();
+  sureSayaciBaslat();
 
   document.getElementById('durumMsg').textContent = 'BAŞLIYOR...';
   G.timeout = setTimeout(() => {
@@ -448,6 +487,7 @@ function ilerlemeGuncelle() {
 
 function bitir() {
   G.calisiyor = false; clearTimeout(G.timeout);
+  sureSayaciDurdur();
   document.getElementById('bittiOverlay').classList.add('gorulur');
   document.getElementById('durumMsg').textContent = 'TAMAMLANDI! 🌑';
   document.getElementById('durdurBtn').textContent = '▶ TEKRAR';
@@ -477,6 +517,7 @@ function bastanAl() {
   document.querySelectorAll('#metinGovde .kelime').forEach(k => k.classList.remove('silindi'));
   document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
   document.getElementById('durumMsg').textContent = 'BAŞLIYOR...';
+  sureSayaciSifirla();
   ilerlemeGuncelle();
   G.timeout = setTimeout(() => {
     document.getElementById('durumMsg').textContent = '';
@@ -485,7 +526,7 @@ function bastanAl() {
   }, 1000);
 }
 
-function menuye() { G.calisiyor = false; clearTimeout(G.timeout); showScreen('screenAyar'); }
+function menuye() { G.calisiyor = false; clearTimeout(G.timeout); sureSayaciDurdur(); showScreen('screenAyar'); }
 function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
 if(KILITLI && METIN_ID_PARAM){ kilitliMetinYukle(); } else { metinleriYukle(); }
