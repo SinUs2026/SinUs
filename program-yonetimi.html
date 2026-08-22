@@ -158,8 +158,8 @@ nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:cente
           <select class="form-select" id="secEgzersiz" onchange="egzersizDegisti()"></select>
         </div>
         <div class="form-grup" id="formGrupMetin" style="display:none">
-          <label>Metin (Okuma Tekniği)</label>
-          <select class="form-select" id="secMetin"><option value="">⏳ Yükleniyor...</option></select>
+          <label>Metin (Okuma Tekniği) — Bu Günün Seviye Metni</label>
+          <div id="metinBilgiIcerik"></div>
         </div>
         <div class="form-grup" id="formGrupTema" style="display:none">
           <label>Tema (Blok Okuma)</label>
@@ -306,21 +306,37 @@ const SEKIL_ISIM={daire:'Daire',kare:'Kare',sekiz:'Sekiz (∞)',ucgen:'Üçgen',
 let mevcutGorevler=[];
 let secilenTip=null;
 let mevcutProgramId=null;
-let metinListesiForm=[];
 
-async function metinleriFormaYukle(asama){
-  const sec=document.getElementById('secMetin');
-  sec.innerHTML='<option value="">⏳ Yükleniyor...</option>';
+// ══════════════════════════════════════════════════════════════
+// GÜNÜN SEVİYE METNİ — okuma tekniği görevleri artık ayrı bir metin
+// seçilerek değil, o günün "hikayeler" kaydından (asama+gun eşleşmesi)
+// OTOMATİK atanır. Bu, gün içi teknik egzersizlerde okunan metinle
+// "Günü Bitir" ekranında çıkan hikayenin HER ZAMAN birebir aynı olmasını
+// garanti eder — admin artık ayrıca bir metin seçmez, yanlış gün seçme
+// riski de ortadan kalkar. "Metin (Okuma Tekniği)" alanı artık salt
+// bilgilendirme amaçlıdır (bkz. metinBilgiKutusunuGuncelle).
+// ══════════════════════════════════════════════════════════════
+let mevcutGunHikayesi=null;
+
+async function gunHikayesiYukle(asama,gun){
+  mevcutGunHikayesi=null;
   try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/hikayeler?asama=eq.'+asama+'&order=gun',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-    metinListesiForm=await res.json();
-    if(metinListesiForm.length){
-      sec.innerHTML='<option value="">— Metin seçilmedi (öğrenci kendi seçer) —</option>'+metinListesiForm.map(m=>`<option value="${m.id}">${m.gun}. Gün — ${m.baslik}</option>`).join('');
-    }else{
-      sec.innerHTML='<option value="">— Bu seviyede henüz metin eklenmemiş —</option>';
-    }
+    const res=await fetch(SUPABASE_URL+'/rest/v1/hikayeler?asama=eq.'+asama+'&gun=eq.'+gun,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const data=await res.json();
+    mevcutGunHikayesi=data.length?data[0]:null;
   }catch(e){
-    sec.innerHTML='<option value="">❌ Metinler yüklenemedi</option>';
+    mevcutGunHikayesi=null;
+  }
+  metinBilgiKutusunuGuncelle();
+}
+
+function metinBilgiKutusunuGuncelle(){
+  const icerikEl=document.getElementById('metinBilgiIcerik');
+  if(!icerikEl) return;
+  if(mevcutGunHikayesi){
+    icerikEl.innerHTML=`<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:0.7rem 0.9rem;font-size:0.85rem;color:#15803d">📖 <strong>${mevcutGunHikayesi.baslik}</strong><div style="color:#64748b;font-size:0.75rem;margin-top:2px">Bu günün Seviye Metni — Günü Bitir'de de aynısı çıkar.</div></div>`;
+  }else{
+    icerikEl.innerHTML=`<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:0.7rem 0.9rem;font-size:0.85rem;color:#dc2626">⚠️ Bu gün için henüz Seviye Metni (hikaye) eklenmemiş.<div style="color:#64748b;font-size:0.75rem;margin-top:2px">Önce "Hikayeler" bölümünden bu günün metnini ekleyin, sonra görevi kaydedin.</div></div>`;
   }
 }
 
@@ -330,7 +346,7 @@ function tipSec(tip){
   document.getElementById('tip'+tip.charAt(0).toUpperCase()+tip.slice(1)).classList.add('secili');
   document.getElementById('formGrupEgzersiz').style.display='block';
   document.getElementById('formGrupHiz').style.display='block';
-  if(tip==='okuma'){ metinleriFormaYukle(document.getElementById('secAsama').value); }
+  if(tip==='okuma'){ metinBilgiKutusunuGuncelle(); }
   document.getElementById('ekleGorevBtn').disabled=false;
   const sec=document.getElementById('secEgzersiz');sec.innerHTML='';
   const liste=EGZERSIZLER[tip]||[];
@@ -388,7 +404,7 @@ async function programYukle(){
   document.getElementById('programBaslik').textContent=(SEVIYE_ADI[asama]||asama+'. Seviye')+' · '+gun+'. Gün';
   document.getElementById('kaydetBtn').disabled=false;
   document.getElementById('hizliDoldurKart').style.display='block';
-  if(secilenTip==='okuma'){ metinleriFormaYukle(asama); }
+  gunHikayesiYukle(asama,gun);
   try{
     const res=await fetch(SUPABASE_URL+'/rest/v1/gunluk_program?asama=eq.'+asama+'&gun=eq.'+gun,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     const data=await res.json();
@@ -453,12 +469,12 @@ function gorevEkle(){
   }
 
   if(secilenTip==='okuma' && !METIN_GEREKMEYEN_DOSYALAR.includes(dosya)){
-    const metinId=document.getElementById('secMetin').value;
-    if(metinId){
-      const m=metinListesiForm.find(x=>String(x.id)===String(metinId));
-      gorev.metin_id=parseInt(metinId);
-      gorev.metin_baslik=m?m.baslik:'';
+    if(!mevcutGunHikayesi){
+      bildirimGoster('❌ Bu gün için Seviye Metni (hikaye) tanımlı değil, önce onu ekleyin.','hata');
+      return;
     }
+    gorev.metin_id=mevcutGunHikayesi.id;
+    gorev.metin_baslik=mevcutGunHikayesi.baslik;
   }
   if(TEMA_GEREKEN_DOSYALAR.includes(dosya)){
     gorev.tema=document.getElementById('secTema').value;
@@ -477,7 +493,23 @@ function siraDegistir(idx,yon){const y=idx+yon;if(y<0||y>=mevcutGorevler.length)
 
 function sablonUygula(s){
   if(mevcutGorevler.length>0&&!confirm('Mevcut görevlerin üzerine yazılacak. Devam edilsin mi?'))return;
-  mevcutGorevler=[...SABLONLAR[s]];listeGuncelle();bildirimGoster('✅ Şablon uygulandı!','basari');
+  // Şablondaki okuma görevleri gorevEkle() akışından geçmediği için metin_id
+  // burada elle eklenir — böylece şablon kullanıldığında da o günün Seviye
+  // Metni otomatik atanmış olur.
+  mevcutGorevler=SABLONLAR[s].map(g=>{
+    const kopya=Object.assign({},g);
+    if(kopya.tip==='okuma' && !METIN_GEREKMEYEN_DOSYALAR.includes(kopya.dosya) && mevcutGunHikayesi){
+      kopya.metin_id=mevcutGunHikayesi.id;
+      kopya.metin_baslik=mevcutGunHikayesi.baslik;
+    }
+    return kopya;
+  });
+  listeGuncelle();
+  if(!mevcutGunHikayesi){
+    bildirimGoster('⚠️ Şablon uygulandı ama bu güne henüz Seviye Metni eklenmemiş — okuma görevleri metinsiz kaldı.','hata');
+  }else{
+    bildirimGoster('✅ Şablon uygulandı!','basari');
+  }
 }
 
 async function programKaydet(){
