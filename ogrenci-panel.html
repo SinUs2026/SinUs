@@ -283,6 +283,9 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 
     <div class="tum-egz-kategori">📖 Okuma Teknikleri</div>
     <div class="tum-egz-grid" id="tumEgzOkuma"></div>
+
+    <div class="tum-egz-kategori">🗂️ Genel Egzersizler</div>
+    <div class="tum-egz-grid" id="tumEgzGenel"></div>
   </div>
 </div>
 
@@ -497,8 +500,14 @@ const TUM_EGZ_ODAK=[
   {dosya:'ev-takibi.html',isim:'Ev Takibi',ikon:'🏠'},
   {dosya:'sayi-avi.html',isim:'Sayı Avı',ikon:'🔢'},
   {dosya:'merkez-nokta.html',isim:'Merkez Nokta',ikon:'👁️'},
-  {dosya:'gizli-nesne.html',isim:'Gizli Nesne',ikon:'🔭'},
-  {dosya:'kritik-kelime-avi.html',isim:'Kritik Kelime Avı',ikon:'🔎'}
+  {dosya:'gizli-nesne.html',isim:'Gizli Nesne',ikon:'🔭'}
+];
+const TUM_EGZ_GENEL=[
+  {dosya:'kritik-kelime-avi.html',isim:'Kritik Kelime Avı',ikon:'🔎'},
+  {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩'},
+  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦'},
+  {dosya:'baglam-avi.html',isim:'Bağlam Avı',ikon:'🧭'},
+  {dosya:'kelime-takibi.html',isim:'Kelime Takibi',ikon:'🔍'}
 ];
 const TUM_EGZ_OKUMA=[
   {dosya:'akan-kelime.html',isim:'Akan Kelime',ikon:'🌊'},
@@ -510,8 +519,7 @@ const TUM_EGZ_OKUMA=[
   {dosya:'orp-okuma.html',isim:'ORP Okuma',ikon:'✨'},
   {dosya:'tarama-teknigi.html',isim:'Tarama Tekniği',ikon:'🔦'},
   {dosya:'beliren-metin.html',isim:'Beliren Metin',ikon:'🌕'},
-  {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩'},
-  {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦'}
+  {dosya:'goz-rotasi.html',isim:'Göz Rotası',ikon:'🛤️'}
 ];
 
 function tumEgzKarti(e,gridId){
@@ -526,6 +534,7 @@ function tumEgzersizlerAc(){
     TUM_EGZ_GOZ.forEach(e=>tumEgzKarti(e,'tumEgzGoz'));
     TUM_EGZ_ODAK.forEach(e=>tumEgzKarti(e,'tumEgzOdak'));
     TUM_EGZ_OKUMA.forEach(e=>tumEgzKarti(e,'tumEgzOkuma'));
+    TUM_EGZ_GENEL.forEach(e=>tumEgzKarti(e,'tumEgzGenel'));
     _tumEgzDolduruldu=true;
   }
   document.getElementById('tumEgzOverlay').classList.add('acik');
