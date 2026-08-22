@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kaybolan Kelime – SinUs</title>
+<title>Kaybolan Metin – SinUs</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -32,7 +32,8 @@ body::before {
 .logo span { color:var(--white); }
 .ust-geri-btn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:var(--white); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1.05rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; }
 .ust-geri-btn:hover { background:rgba(255,255,255,0.16); border-color:var(--accent); color:var(--accent); }
-.mod-pill { background:rgba(147,51,234,0.12); border:1px solid rgba(147,51,234,0.4); border-radius:20px; padding:5px 14px; font-size:0.78rem; color:#c084fc; font-weight:700; }
+/* NOT: Kaybolan Metin (Silinen CÜMLE) — Kaybolan Kelime'den farklı renk/emoji ile kasıtlı olarak ayrıştırıldı. */
+.mod-pill { background:rgba(234,88,12,0.12); border:1px solid rgba(234,88,12,0.4); border-radius:20px; padding:5px 14px; font-size:0.78rem; color:#fb923c; font-weight:700; }
 .screen { display:none; flex-direction:column; align-items:center; flex:1; }
 .screen.active { display:flex; }
 .game-title { font-family:'Orbitron',sans-serif; font-size:1.6rem; font-weight:900; text-align:center; margin:12px 0 4px; }
@@ -67,10 +68,10 @@ body::before {
 .ayar-slider::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--accent); cursor:pointer; box-shadow:0 0 8px rgba(0,212,255,0.5); }
 .ayar-deger { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; color:var(--accent); min-width:60px; text-align:right; }
 
-/* Yazı boyutu seçici */
+/* Yazı boyutu seçici — turuncu tonlarda, Kaybolan Kelime'nin mor tonundan bilerek farklı */
 .boyut-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-.boyut-btn { background:rgba(147,51,234,0.05); border:1px solid rgba(147,51,234,0.25); border-radius:10px; padding:10px 6px; cursor:pointer; text-align:center; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; transition:all 0.2s; }
-.boyut-btn:hover, .boyut-btn.sel { background:rgba(147,51,234,0.18); border-color:#c084fc; color:var(--white); }
+.boyut-btn { background:rgba(234,88,12,0.05); border:1px solid rgba(234,88,12,0.25); border-radius:10px; padding:10px 6px; cursor:pointer; text-align:center; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; transition:all 0.2s; }
+.boyut-btn:hover, .boyut-btn.sel { background:rgba(234,88,12,0.18); border-color:#fb923c; color:var(--white); }
 
 .basla-btn { width:100%; max-width:560px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; margin-top:8px; transition:all 0.2s; }
 .basla-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,212,255,0.3); }
@@ -85,22 +86,21 @@ body::before {
 .ilerleme-wrap { width:100%; margin-bottom:12px; }
 .ilerleme-ust { display:flex; justify-content:space-between; font-size:0.72rem; color:var(--grey); margin-bottom:4px; }
 .ilerleme-bar { width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
-.ilerleme-ic { height:100%; background:linear-gradient(90deg,var(--accent2),#c084fc); border-radius:3px; transition:width 0.3s; }
+.ilerleme-ic { height:100%; background:linear-gradient(90deg,var(--accent2),#fb923c); border-radius:3px; transition:width 0.3s; }
 
-/* Metin gösterim alanı — çerçeve genişledi, kalan dikey alanı da dolduruyor */
+/* Metin gösterim alanı */
 .metin-alan {
   width:100%;
   flex:1;
   min-height:420px;
   background:rgba(255,255,255,0.02);
-  border:1px solid rgba(147,51,234,0.18);
+  border:1px solid rgba(234,88,12,0.18);
   border-radius:20px;
   margin-bottom:12px;
   position:relative;
   overflow-y:auto;
   padding:28px 26px;
 }
-/* Metin sütunu — çerçeve genişlese de okunabilirlik için sabit genişlikte ortalanır */
 .metin-govde {
   max-width:720px;
   margin:0 auto;
@@ -110,11 +110,12 @@ body::before {
   line-height:2;
   color:var(--white);
 }
-.metin-govde .kelime {
-  transition:opacity 0.5s ease;
+/* Cümleler ayrı bloklar halinde, aralarında hafif boşluk — silinirken tüm cümle birlikte kaybolur */
+.metin-govde .cumle {
+  transition:opacity 0.6s ease;
   display:inline;
 }
-.metin-govde .kelime.silindi {
+.metin-govde .cumle.silindi {
   opacity:0;
 }
 
@@ -155,13 +156,13 @@ body::before {
       <button class="ust-geri-btn" onclick="sinusTamamlandiSinyalGonderVeDon()" title="Panele Dön">←</button>
       <div class="logo">Sin<span>Us</span></div>
     </div>
-    <div class="mod-pill">🌑 Kaybolan Kelime</div>
+    <div class="mod-pill">🌒 Kaybolan Metin</div>
   </div>
 
   <!-- AYARLAR -->
   <div id="screenAyar" class="screen active">
-    <div class="game-title">KAYBOLAN KELİME</div>
-    <div class="game-sub">SİLİNEN KELİME TEKNİĞİ</div>
+    <div class="game-title">KAYBOLAN METİN</div>
+    <div class="game-sub">SİLİNEN CÜMLE TEKNİĞİ</div>
 
     <div class="ayar-kart" id="kartMetinSec">
       <h3>METİN SEÇ</h3>
@@ -215,13 +216,13 @@ body::before {
     <div class="oyun-hud">
       <div class="hud-item"><div class="hud-lbl">Metin</div><div class="hud-val" id="hudMetin">—</div></div>
       <div class="hud-item"><div class="hud-lbl">Hız</div><div class="hud-val" id="hudHiz">—</div></div>
-      <div class="hud-item"><div class="hud-lbl">Kelime</div><div class="hud-val" id="hudKelime">0/0</div></div>
+      <div class="hud-item"><div class="hud-lbl">Cümle</div><div class="hud-val" id="hudCumle">0/0</div></div>
       <div class="hud-item"><div class="hud-lbl">Süre</div><div class="hud-val" id="hudSure">00:00</div></div>
     </div>
 
     <div class="ilerleme-wrap">
       <div class="ilerleme-ust">
-        <span id="ilerlemeYazi">0 / 0 kelime</span>
+        <span id="ilerlemeYazi">0 / 0 cümle</span>
         <span id="ilerlemeYuzde">%0</span>
       </div>
       <div class="ilerleme-bar"><div class="ilerleme-ic" id="ilerlemeIc" style="width:0%"></div></div>
@@ -230,7 +231,7 @@ body::before {
     <div class="metin-alan">
       <div class="metin-govde" id="metinGovde"></div>
       <div class="bitti-overlay" id="bittiOverlay">
-        <div class="bitti-icon">🌑</div>
+        <div class="bitti-icon">🌒</div>
         <div class="bitti-yazi">METİN TAMAMLANDI!</div>
       </div>
     </div>
@@ -264,7 +265,7 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 
 const G = {
   metinler: [], seciliMetin: null, kpm: 150, yaziOlcek: 1,
-  kelimeler: [], mevcutIndex: 0, calisiyor: false, timeout: null, filtre: '',
+  cumleler: [], mevcutIndex: 0, calisiyor: false, timeout: null, filtre: '',
   // ── SÜRE SAYACI — bilgi amaçlı, hiçbir şekilde egzersizi durdurmaz ──
   sureSaniye: 0,
   sureInterval: null
@@ -326,6 +327,8 @@ function kilitliModuBaslat(){
 }
 if(KILITLI){ kilitliModuBaslat(); }
 
+// Kilitli modda (program-yonetimi.html'de admin'in seçtiği metin) hikayeler tablosundan okur —
+// aynı gündeki teknik egzersizin, Günü Bitir'deki hikaye ile birebir aynı metni kullanması için.
 async function kilitliMetinYukle(){
   try{
     const res=await fetch(SUPABASE_URL+'/rest/v1/hikayeler?id=eq.'+METIN_ID_PARAM,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
@@ -341,6 +344,7 @@ async function kilitliMetinYukle(){
   }
 }
 
+// Serbest kullanımda (öğretmenin/öğrencinin kendi seçtiği metin) ders_metinleri'nden okur — bu akış değişmedi.
 async function metinleriYukle() {
   try {
     let url = SUPABASE_URL + '/rest/v1/ders_metinleri?order=zorluk,baslik';
@@ -393,13 +397,10 @@ function oyunHizGuncelle(v) {
   G.kpm = parseInt(v);
   document.getElementById('oyunHizDeger').textContent = v + ' KPM';
   document.getElementById('hudHiz').textContent = v + ' KPM';
-  // Hız değişince bir sonraki kelimenin bekleme süresi otomatik güncellenir (yeni zamanlayıcı bir sonraki tetiklemede devreye girer)
+  // Hız değişince, bir sonraki cümlenin bekleme süresi bir sonraki tetiklemede otomatik güncellenir.
 }
 
 // ── SÜRE SAYACI (yalnızca gösterge — hiçbir zaman egzersizi durdurmaz) ──
-// Sayaç sadece G.calisiyor true iken ilerler (DURDUR'a basılınca duraklar,
-// DEVAM'a basılınca kaldığı yerden devam eder). Süre hedefine (varsa) ulaşınca
-// hiçbir aksiyon alınmaz; öğrenci sadece ne kadar zaman geçtiğini görür.
 function hudSureGoster(){
   const el = document.getElementById('hudSure');
   if(!el) return;
@@ -425,12 +426,20 @@ function sureSayaciSifirla(){
   hudSureGoster();
 }
 
-// Metni kelimelere böl ve her kelimeyi ayrı bir span olarak yerleştir (aralardaki boşluklar korunur)
+// ── CÜMLELERE BÖLME — Kaybolan Kelime'den farkı budur: kelime değil, CÜMLE bazında ayrışır ──
+// Cümle sonu noktalama işaretlerini (. ! ?) baz alır, işareti cümlenin sonunda tutar.
+// Ardışık boşlukları/satır sonlarını temizler.
+function cumlelereBol(metin) {
+  const parcalar = metin.trim().match(/[^.!?]+[.!?]+(?:["'”’)\]]*)|[^.!?]+$/g) || [];
+  return parcalar.map(s => s.trim()).filter(s => s.length > 0);
+}
+
+// Her cümleyi ayrı bir span olarak yerleştirir; cümleler arasına okunabilirlik için boşluk bırakılır.
 function metinGoster(metin) {
-  const kelimeler = metin.trim().split(/\s+/).filter(k => k.length > 0);
-  G.kelimeler = kelimeler;
+  const cumleler = cumlelereBol(metin);
+  G.cumleler = cumleler;
   const govde = document.getElementById('metinGovde');
-  govde.innerHTML = kelimeler.map((k,i) => `<span class="kelime" id="kelime-${i}">${k}</span>`).join(' ');
+  govde.innerHTML = cumleler.map((c,i) => `<span class="cumle" id="cumle-${i}">${c}</span>`).join(' ');
 }
 
 function oyunuBaslat() {
@@ -456,40 +465,44 @@ function oyunuBaslat() {
   G.timeout = setTimeout(() => {
     document.getElementById('durumMsg').textContent = '';
     G.calisiyor = true;
-    sonrakiKelime();
+    sonrakiCumle();
   }, 1000);
 }
 
-function sonrakiKelime() {
+// Bir sonraki cümleyi siler. Bekleme süresi, o cümledeki kelime sayısına göre hesaplanır
+// (60000ms / KPM * cümledeki kelime sayısı) — böylece uzun cümleler ekranda kısa cümlelerden
+// orantılı olarak daha uzun kalır, akan-kelime.html'deki grup mantığıyla tutarlıdır.
+function sonrakiCumle() {
   if (!G.calisiyor) return;
-  if (G.mevcutIndex >= G.kelimeler.length) { bitir(); return; }
+  if (G.mevcutIndex >= G.cumleler.length) { bitir(); return; }
 
-  const el = document.getElementById('kelime-' + G.mevcutIndex);
+  const cumleMetni = G.cumleler[G.mevcutIndex];
+  const el = document.getElementById('cumle-' + G.mevcutIndex);
   if (el) el.classList.add('silindi');
 
+  const kelimeSayisi = Math.max(1, cumleMetni.trim().split(/\s+/).length);
   G.mevcutIndex++;
   ilerlemeGuncelle();
 
-  // Her kelime eşit süre ekranda kalır: 60000ms / KPM
-  const bekleme = Math.round(60000 / G.kpm);
-  G.timeout = setTimeout(sonrakiKelime, bekleme);
+  const bekleme = Math.round((60000 / G.kpm) * kelimeSayisi);
+  G.timeout = setTimeout(sonrakiCumle, bekleme);
 }
 
 function ilerlemeGuncelle() {
-  const toplam = G.kelimeler.length;
+  const toplam = G.cumleler.length;
   const mevcut = Math.min(G.mevcutIndex, toplam);
   const yuzde = toplam > 0 ? Math.round(mevcut / toplam * 100) : 0;
-  document.getElementById('ilerlemeYazi').textContent = mevcut + ' / ' + toplam + ' kelime';
+  document.getElementById('ilerlemeYazi').textContent = mevcut + ' / ' + toplam + ' cümle';
   document.getElementById('ilerlemeYuzde').textContent = '%' + yuzde;
   document.getElementById('ilerlemeIc').style.width = yuzde + '%';
-  document.getElementById('hudKelime').textContent = mevcut + '/' + toplam;
+  document.getElementById('hudCumle').textContent = mevcut + '/' + toplam;
 }
 
 function bitir() {
   G.calisiyor = false; clearTimeout(G.timeout);
   sureSayaciDurdur();
   document.getElementById('bittiOverlay').classList.add('gorulur');
-  document.getElementById('durumMsg').textContent = 'TAMAMLANDI! 🌑';
+  document.getElementById('durumMsg').textContent = 'TAMAMLANDI! 🌒';
   document.getElementById('durdurBtn').textContent = '▶ TEKRAR';
   if(KILITLI){
     setTimeout(sinusTamamlandiSinyalGonderVeDon, 1500);
@@ -497,7 +510,7 @@ function bitir() {
 }
 
 function durdurDevam() {
-  if (G.mevcutIndex >= G.kelimeler.length) { bastanAl(); return; }
+  if (G.mevcutIndex >= G.cumleler.length) { bastanAl(); return; }
   if (G.calisiyor) {
     G.calisiyor = false; clearTimeout(G.timeout);
     document.getElementById('durdurBtn').textContent = '▶ DEVAM';
@@ -506,7 +519,7 @@ function durdurDevam() {
     G.calisiyor = true;
     document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
     document.getElementById('durumMsg').textContent = '';
-    sonrakiKelime();
+    sonrakiCumle();
   }
 }
 
@@ -514,7 +527,7 @@ function bastanAl() {
   G.calisiyor = false; clearTimeout(G.timeout);
   G.mevcutIndex = 0;
   document.getElementById('bittiOverlay').classList.remove('gorulur');
-  document.querySelectorAll('#metinGovde .kelime').forEach(k => k.classList.remove('silindi'));
+  document.querySelectorAll('#metinGovde .cumle').forEach(c => c.classList.remove('silindi'));
   document.getElementById('durdurBtn').textContent = '⏸ DURDUR';
   document.getElementById('durumMsg').textContent = 'BAŞLIYOR...';
   sureSayaciSifirla();
@@ -522,7 +535,7 @@ function bastanAl() {
   G.timeout = setTimeout(() => {
     document.getElementById('durumMsg').textContent = '';
     G.calisiyor = true;
-    sonrakiKelime();
+    sonrakiCumle();
   }, 1000);
 }
 
