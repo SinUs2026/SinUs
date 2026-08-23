@@ -685,6 +685,8 @@ function gorevUrl(g){
     if(g.tema!==undefined && g.tema!==null) url+='&tema='+encodeURIComponent(g.tema);
     if(g.sekil!==undefined && g.sekil!==null) url+='&sekil='+encodeURIComponent(g.sekil);
     if(g.nokta!==undefined && g.nokta!==null) url+='&nokta='+encodeURIComponent(g.nokta);
+    if(g.kelimeSayisi!==undefined && g.kelimeSayisi!==null) url+='&kelimeSayisi='+g.kelimeSayisi;
+    if(g.gosterim!==undefined && g.gosterim!==null) url+='&gosterim='+g.gosterim;
   }
   return url;
 }
