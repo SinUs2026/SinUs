@@ -174,10 +174,9 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
   </div>
 </div>
 
+<script src="odak-modu.js"></script>
 <script>
 // ── PANELE DÖNÜŞ URL'İ ──
-// DÜZELTME: 'ogretmen' durumu artık doğru şekilde ogretmen.html'e gidiyor
-// (eskiden yanlışlıkla ogrenci-panel.html'e düşüp anında giris.html'e atıyordu).
 function panelDonusUrl(){
   const from = new URLSearchParams(window.location.search).get('from');
   if(from === 'admin') return 'admin.html';
@@ -321,9 +320,21 @@ window.addEventListener('resize', alanYenidenOlcSonrasiCiz);
 document.addEventListener('fullscreenchange', alanYenidenOlcSonrasiCiz);
 document.addEventListener('webkitfullscreenchange', alanYenidenOlcSonrasiCiz);
 
-function baslat(){
+async function baslat(){
   if(!KILITLI){ G.hiz=parseInt(document.getElementById('hizSlider').value); }
-  G.baslangic=Date.now(); G.t=0; G.tur=1; G.tamamlananTur=0;
+  G.t=0; G.tur=1; G.tamamlananTur=0;
+
+  if(KILITLI){
+    const izinVar = await OdakModu.baslat('goz-sekil', G.sure, function(neden){
+      clearInterval(G.sureInt); cancelAnimationFrame(G.animId); tamEkrandanCik();
+    });
+    if(!izinVar){
+      alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.');
+      return;
+    }
+  }
+
+  G.baslangic=Date.now();
   document.getElementById('hudHiz').textContent=G.hiz+'/10';
   document.getElementById('hudSure').textContent=G.sure+'sn';
   document.getElementById('hudSekil').textContent=SEKIL_ISIM[G.sekil];
@@ -356,19 +367,47 @@ function baslat(){
   }
   G.animId=requestAnimationFrame(animate);
 }
-function bitti(){
+async function bitti(){
   const s=Math.floor((Date.now()-G.baslangic)/1000);
-  document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';
-  gorevTamamlandiSinyaliGonder(s);
   showScreen('screenBitti');
   tamEkrandanCik();
+
   if(KILITLI){
+    const sonuc = await OdakModu.tamamla();
+    if(!sonuc.basarili){
+      document.getElementById('bittiAlt').textContent = 'Bu oturum backend tarafında doğrulanamadı (' + sonuc.mesaj + '). Lütfen egzersizi tekrar yap.';
+      const backUrl = panelDonusUrl();
+      document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+      return;
+    }
+    document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';
+    gorevTamamlandiSinyaliGonder(s, sonuc.oturumId);
     const backUrl = panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+    return;
   }
+
+  document.getElementById('bittiAlt').textContent=s+' saniye tamamlandı. Harika iş!';
+  gorevTamamlandiSinyaliGonder(s, null);
 }
-function gorevTamamlandiSinyaliGonder(sureSn){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=sureSn>=(G.sure*0.5)?10:2;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
-function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();menuye();}
+function gorevTamamlandiSinyaliGonder(sureSn, odakOturumId){
+  const from=new URLSearchParams(window.location.search).get('from');
+  if(from!=='ogrenci')return;
+  try{
+    const veri=localStorage.getItem('sinus_bekleyen_gorev');
+    if(!veri)return;
+    const b=JSON.parse(veri);
+    b.tamamlandiMi=true;
+    b.puan=sureSn>=(G.sure*0.5)?10:2;
+    if(odakOturumId) b.odakOturumId = odakOturumId;
+    localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+  }catch(e){}
+}
+function durdur(){
+  clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();
+  if(KILITLI && OdakModu.aktifMi()) OdakModu.iptal('KULLANICI_DURDURDU');
+  menuye();
+}
 function tekrar(){baslat();}
 function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();showScreen('screenMenu');}
 showScreen('screenMenu');
