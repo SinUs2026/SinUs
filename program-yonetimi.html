@@ -210,6 +210,33 @@ nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:cente
           <input type="range" id="hizSlider" oninput="hizGuncelle()" style="width:100%">
           <div style="font-size:0.7rem;color:#94a3b8;margin-top:0.3rem">Öğrenci bu egzersizi hep bu hızda görecek, kendi değiştiremeyecek.</div>
         </div>
+        <div class="form-grup" id="formGrupKtSayisi" style="display:none">
+          <label>Kelime Sayısı (Kelime Takibi)</label>
+          <select class="form-select" id="secKtSayisi">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div class="form-grup" id="formGrupKtHiz" style="display:none">
+          <label>Hız (Kelime Takibi)</label>
+          <select class="form-select" id="secKtHiz">
+            <option value="yavas">Yavaş (1.2 sn)</option>
+            <option value="normal" selected>Normal (0.8 sn)</option>
+            <option value="hizli">Hızlı (0.5 sn)</option>
+            <option value="cokhizli">Çok Hızlı (0.3 sn)</option>
+          </select>
+        </div>
+        <div class="form-grup" id="formGrupKtGosterim" style="display:none">
+          <label>Gösterim Biçimi (Kelime Takibi)</label>
+          <select class="form-select" id="secKtGosterim">
+            <option value="1" selected>1 Kelime</option>
+            <option value="2">2 Kelime</option>
+            <option value="3">3 Kelime</option>
+          </select>
+        </div>
         <div class="form-grup">
           <label>Süre (dakika)</label>
           <input type="number" class="form-input" id="ekSure" value="3" min="1" max="30">
@@ -302,6 +329,12 @@ const NOKTA_GEREKEN_DOSYALAR=['goz-sag-sol.html','goz-asagi-yukari.html'];
 const ZORLUK_GEREKEN_DOSYALAR=['baglam-avi.html'];
 const ZORLUK_ADI={baslangic:'Başlangıç',orta:'Orta',ileri:'İleri',plus:'Plus'};
 const SEKIL_ISIM={daire:'Daire',kare:'Kare',sekiz:'Sekiz (∞)',ucgen:'Üçgen',zigzag:'Zigzag'};
+// Kelime Takibi kendine özgü 3 parametreli bir sisteme sahip (kelimeSayisi,
+// hiz-ENUM, gosterim) — genel "1-10 hız" ya da KPM tabanlı sistemlerle UYUMSUZ.
+// Yanlışlıkla sayısal bir hız atanırsa egzersiz HIZ_MS['sayı'] undefined
+// döndüğü için sonsuz bekleme döngüsüne girip donar. Bu yüzden ayrı form
+// alanları kullanılır (bkz. formGrupKtSayisi/KtHiz/KtGosterim).
+const KELIME_TAKIBI_DOSYASI=['kelime-takibi.html'];
 
 let mevcutGorevler=[];
 let secilenTip=null;
@@ -362,6 +395,7 @@ function tipSec(tip){
 function egzersizDegisti(){
   const dosya=document.getElementById('secEgzersiz').value;
   const zorlukGerekli = ZORLUK_GEREKEN_DOSYALAR.includes(dosya);
+  const kelimeTakibiMi = KELIME_TAKIBI_DOSYASI.includes(dosya);
 
   const aralik=OZEL_HIZ_ARALIK[dosya]||HIZ_ARALIK[secilenTip];
   document.getElementById('hizSlider').min=aralik.min;
@@ -377,7 +411,10 @@ function egzersizDegisti(){
   document.getElementById('formGrupNokta').style.display = NOKTA_GEREKEN_DOSYALAR.includes(dosya) ? 'block' : 'none';
   document.getElementById('formGrupZorluk').style.display = zorlukGerekli ? 'block' : 'none';
   document.getElementById('formGrupMod').style.display = zorlukGerekli ? 'block' : 'none';
-  document.getElementById('formGrupHiz').style.display = zorlukGerekli ? 'none' : 'block';
+  document.getElementById('formGrupHiz').style.display = (zorlukGerekli || kelimeTakibiMi) ? 'none' : 'block';
+  document.getElementById('formGrupKtSayisi').style.display = kelimeTakibiMi ? 'block' : 'none';
+  document.getElementById('formGrupKtHiz').style.display = kelimeTakibiMi ? 'block' : 'none';
+  document.getElementById('formGrupKtGosterim').style.display = kelimeTakibiMi ? 'block' : 'none';
 }
 
 function hizGuncelle(){
@@ -437,7 +474,9 @@ function listeGuncelle(){
     const noktaGosterim=g.nokta?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">⚪ ${g.nokta} Nokta</span>`:'';
     const zorlukGosterim=g.zorluk?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">🎯 ${ZORLUK_ADI[g.zorluk]||g.zorluk}</span>`:'';
     const modGosterim=g.mod?`<span class="badge" style="background:#f1f5f9;color:#475569">${g.mod==='sureli'?'⏱ Süreli':'○ Normal'}</span>`:'';
-    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${metinGosterim} ${temaGosterim} ${sekilGosterim} ${noktaGosterim} ${zorlukGosterim} ${modGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
+    const ktSayisiGosterim=g.kelimeSayisi?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🔢 ${g.kelimeSayisi} kelime</span>`:'';
+    const ktGosterimBicimi=g.gosterim?`<span class="badge" style="background:#f0f9ff;color:#0369a1">👁 ${g.gosterim} kelime/ekran</span>`:'';
+    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${ktSayisiGosterim} ${ktGosterimBicimi} ${metinGosterim} ${temaGosterim} ${sekilGosterim} ${noktaGosterim} ${zorlukGosterim} ${modGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
     liste.appendChild(div);
   });
   ozetGuncelle();
@@ -463,6 +502,13 @@ function gorevEkle(){
     // Bağlam Avı: hız yerine zorluk + mod kaydedilir.
     gorev.zorluk=document.getElementById('secZorluk').value;
     gorev.mod=document.getElementById('secMod').value;
+  }else if(KELIME_TAKIBI_DOSYASI.includes(dosya)){
+    // Kelime Takibi: hiz bir ENUM string'idir (yavas/normal/hizli/cokhizli),
+    // 1-10 arası sayısal ölçekle KARIŞTIRILMAMALI — egzersiz dosyası bu
+    // stringi HIZ_MS objesinde doğrudan arıyor.
+    gorev.hiz=document.getElementById('secKtHiz').value;
+    gorev.kelimeSayisi=parseInt(document.getElementById('secKtSayisi').value);
+    gorev.gosterim=parseInt(document.getElementById('secKtGosterim').value);
   }else{
     const varsayilanAralik=OZEL_HIZ_ARALIK[dosya]||HIZ_ARALIK[secilenTip];
     gorev.hiz=parseInt(document.getElementById('hizSlider').value)||varsayilanAralik.varsayilan;
