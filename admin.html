@@ -452,7 +452,6 @@ tr:hover td{background:#f8fafc}
   </div>
 
 </div>
-
 <!-- MODALLAR -->
 <div class="modal" id="modal-ogrenci">
   <div class="modal-kutu">
@@ -616,7 +615,6 @@ tr:hover td{background:#f8fafc}
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('blog-duzenle')">İptal</button><button class="btn-kaydet" id="btn-blog-guncelle" onclick="blogYazisiGuncelle()">💾 Güncelle</button></div>
   </div>
 </div>
-
 <!-- BAĞLAM AVI EKLE MODALI -->
 <div class="modal" id="modal-baglam-avi">
   <div class="modal-kutu genis cok-genis">
@@ -831,9 +829,6 @@ let _olcumYapMetinler=[];
 let _olcumYap=null;
 let _olcumYapTarihceGirdi=false;
 
-// Tarayıcının "Geri" tuşuna basılınca ölçüm ekranı açıkken kullanıcı yanlışlıkla
-// giriş sayfasına atılıp orada kilitlenmesin diye: ölçüm açılırken sahte bir
-// geçmiş kaydı ekleniyor, "geri" tuşu bu kaydı tüketip sadece ölçüm ekranını kapatıyor.
 window.addEventListener('popstate', function(){
   if(_olcumYapTarihceGirdi && document.getElementById('olcum-yap-overlay').classList.contains('acik')){
     _olcumYapTarihceGirdi=false;
@@ -882,8 +877,6 @@ function olcumYapMetinSec(idx){
   olcumYapGeriSayimGoster();
 }
 
-// ── GERİ SAYIM (3-2-1) — metin ekrana gelmeden önce öğrenci hazırlansın, süre
-// bu geri sayım sırasında BAŞLAMAZ, ancak metin gerçekten göründüğü an başlar. ──
 function olcumYapGeriSayimGoster(){
   const icerik=document.getElementById('olcum-yap-icerik');
   let n=3;
@@ -932,7 +925,6 @@ function olcumYapOkumaEkraniGoster(){
   _olcumYap.timerInterval=setInterval(olcumYapSureGuncelle,250);
 }
 
-// ── OKUMA EKRANI YAZI BOYUTU — öğrenciye göre büyütülüp küçültülebilir ──
 function olcumYapYaziBoyutu(btn){
   const grup=btn.parentElement;
   grup.querySelectorAll('.yazi-boyut-btn').forEach(b=>b.classList.remove('secili'));
@@ -956,7 +948,6 @@ function olcumYapSureGuncelle(){
   el.textContent=dk+':'+sn;
 }
 
-// ── DURAKLAT / DEVAM ET — süreölçer duraklatma anını sayaçtan hariç tutar ──
 function olcumYapDuraklatToggle(){
   if(!_olcumYap) return;
   const btn=document.getElementById('olcum-yap-duraklat-btn');
@@ -975,7 +966,6 @@ function olcumYapDuraklatToggle(){
   }
 }
 
-// ── METİNLERE DÖN — okuma ekranından ölçümü iptal edip metin listesine döner ──
 function olcumYapMetinlereDon(){
   if(_olcumYap&&_olcumYap.timerInterval) clearInterval(_olcumYap.timerInterval);
   _olcumYap=null;
@@ -1133,8 +1123,6 @@ const EGZERSIZLER={
     {kod:'merkez-nokta',isim:'Merkez Nokta',ikon:'👁️',aciklama:'Periferik görüş egzersizi.',url:'merkez-nokta.html'},
     {kod:'gizli-nesne',isim:'Gizli Nesne',ikon:'🔭',aciklama:'Uzay sahnesinde gizlenmiş nesneleri bulun.',url:'gizli-nesne.html'}
   ],
-  // Göz/Odak/Okuma tekniklerinin hiçbirine net oturmayan egzersizler için
-  // ayrılmış kategori.
   genel:[
     {kod:'kritik-kelime-avi',isim:'Kritik Kelime Avı',ikon:'🔎',aciklama:'Metinde hedef kelimeyi sayarak seçici dikkati güçlendirin.',url:'kritik-kelime-avi.html'},
     {kod:'kelime-bulmaca',isim:'Kelime Bulmaca',ikon:'🧩',aciklama:'Izgarada gizli kelimeleri bulma.',url:'kelime-bulmaca.html'},
@@ -1158,7 +1146,6 @@ async function supabase(metod,tablo,veri,filtre){
   return metod==='DELETE'?true:res.json();
 }
 
-// ── RPC ÇAĞRISI (kullanicilar / kurumlar işlemleri için) ──
 async function rpc(fonksiyon,params){
   const gonderilecek=Object.assign({p_token:oturumToken()},params||{});
   const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+fonksiyon,{
@@ -1179,7 +1166,6 @@ function cikisYapAdmin(){
   window.location.href='giris.html';
 }
 
-// ── MOBİL MENÜ ──
 function mobilMenuToggle(){
   document.getElementById('sidebar').classList.toggle('mobil-acik');
   document.getElementById('mobil-overlay').classList.toggle('acik');
@@ -1189,7 +1175,6 @@ function mobilMenuKapat(){
   document.getElementById('mobil-overlay').classList.remove('acik');
 }
 
-// ── SAYFA / MENÜ YÖNETİMİ ──
 function sayfaGoster(sayfa,link){
   mobilMenuKapat();
   document.querySelectorAll('.sayfa').forEach(s=>s.classList.remove('aktif'));
@@ -1214,16 +1199,13 @@ function sayfaGoster(sayfa,link){
 function altMenuToggle(id,link){
   const menu=document.getElementById(id);
   const acikMi=menu.classList.contains('acik');
-  // Diğer alt menüleri kapat
   document.querySelectorAll('.alt-menu').forEach(m=>m.classList.remove('acik'));
   document.querySelectorAll('.sidebar-menu > li > a').forEach(a=>a.classList.remove('acik'));
   if(!acikMi){
     menu.classList.add('acik');
     link.classList.add('acik');
-    // Açılan menüyü görünür alana kaydır
     setTimeout(()=>{ link.scrollIntoView({block:'nearest',behavior:'smooth'}); },50);
   }
-  // İlk açılışta egzersiz menülerini doldur
   if(id==='okuma-alt' && !menu.dataset.dolu) altMenuDoldur('okuma',menu);
   if(id==='goz-alt' && !menu.dataset.dolu) altMenuDoldur('goz',menu);
   if(id==='odak-alt' && !menu.dataset.dolu) altMenuDoldur('odak',menu);
@@ -1249,7 +1231,6 @@ function altMenuDoldur(kategori,menuEl){
   });
 }
 
-// ── EGZERSİZ DETAY SAYFASI (okuma/goz/odak/genel ortak şablon) ──
 let egzersizHizlari={};
 async function egzersizHizlariniYukle(){
   if(Object.keys(egzersizHizlari).length) return;
@@ -1296,9 +1277,6 @@ async function hizKaydet(kod){
 }
 function egzersizBaslat(url,kod){const slider=document.getElementById('slider-'+kod);const hiz=slider?slider.value:5;window.location.href=url+'?hiz='+hiz+'&from=admin';}
 
-// ── AŞAMA SAYFALARI (program yönetimini içine alır) ──
-// NOT: Aşama 1 kaldırıldı. Veritabanı uyumluluğu için eski asama numaraları (2,3,4)
-// korunuyor, sadece görünen isim Seviye-1/2/3 olarak eşleniyor.
 const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
 function asamaSayfasiAc(asamaNo,link){
   mobilMenuKapat();
@@ -1375,8 +1353,6 @@ async function gunIcerigiYukle(asamaNo,gun){
     }).join('');
   }catch(e){el.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
-
-// ── MODAL YÖNETİMİ ──
 const _kirliAlanlar={};
 function alanKirlendi(id){_kirliAlanlar[id]=true;}
 
@@ -1387,8 +1363,6 @@ function slugify(s){
     .replace(/[^a-z0-9]/g,'');
 }
 
-// prefix: 'og' (öğrenci) veya 'ogr' (öğretmen) — ilgili formun ad/soyad alanlarından
-// kullanıcı_adi ve şifre önerisi üretir. Admin/öğretmen zaten manuel değiştirmişse dokunmaz.
 function otomatikDoldur(prefix){
   const ad=document.getElementById(prefix+'-ad').value;
   const soyad=document.getElementById(prefix+'-soyad').value;
@@ -1506,7 +1480,6 @@ function dersDuzenleKelimeSay(){const m=document.getElementById('dd-metin').valu
 function baglamAviKelimeSay(){const m=document.getElementById('ba-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('baglam-avi-kelime-sayac').textContent=s+' kelime';}
 function baglamAviDuzenleKelimeSay(){const m=document.getElementById('bad-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('baglam-avi-duzenle-kelime-sayac').textContent=s+' kelime';}
 
-// ── METİN YAZI BOYUTU (Ders/Ölçüm metinleri okunabilirliği için) ──
 function yaziBoyutuAyarla(textareaId,btn){
   const grup=btn.parentElement;
   grup.querySelectorAll('.yazi-boyut-btn').forEach(b=>b.classList.remove('secili'));
@@ -1514,7 +1487,6 @@ function yaziBoyutuAyarla(textareaId,btn){
   document.getElementById(textareaId).style.fontSize=btn.dataset.boyut+'px';
 }
 
-// ── ÖĞRENCİ EKLE / LİSTE / ARA ──
 async function ogrenciKaydet(){
   const ad=document.getElementById('og-ad').value.trim();
   const soyad=document.getElementById('og-soyad').value.trim();
@@ -1564,7 +1536,6 @@ function ogrenciAra(q){
   },400);
 }
 
-// ── ÖĞRETMEN EKLE / LİSTE / ARA ──
 let _secilenLisansAy={ogr:6};
 let _secilenKota=10;
 function lisansSureSec(btn,prefix){
@@ -1629,8 +1600,6 @@ async function ogretmenKotaEkle(id,mevcutKota){
     ogretmenleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
-
-// ── ŞİFRE İŞLEMLERİ (Kurum/Öğretmen/Öğrenci gruplu, şifre görünür) ──
 function sifreSatiriOlustur(k,tip){
   const isim = tip==='kurum' ? (k.kurum_adi||'') : ((k.ad||'')+' '+(k.soyad||''));
   return `<tr>
@@ -1770,7 +1739,12 @@ async function kullaniciSil(id){
     sifreIslemleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
-// ── KURUMLAR ──
+async function kullaniciSifreSifirla(id,kullanici){
+  const yeniSifre=prompt(`"${kullanici}" için yeni şifre girin:`);
+  if(!yeniSifre)return;
+  try{await rpc('kullanici_sifre_guncelle',{p_id:id,p_yeni_sifre:yeniSifre});bildirimGoster('✅ Şifre güncellendi!','basari');}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
 async function kurumlarıYukle(aramaMetni=''){
   const liste=document.getElementById('kurumlar-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
@@ -1832,9 +1806,7 @@ async function kurumSil(id){
 }
 function ara(q){document.querySelectorAll('#tablo-govde tr').forEach(r=>{r.style.display=r.innerText.toLowerCase().includes(q.toLowerCase())?'':'none';});}
 
-// ── GENEL BAKIŞ: son kayıt olan öğrenciler ──
 async function genelBakisYukle(){
-  // İstatistik kutuları
   try{
     const ist=await rpc('genel_bakis_istatistik',{});
     if(ist&&ist.length){
@@ -1847,7 +1819,6 @@ async function genelBakisYukle(){
     }
   }catch(e){}
 
-  // Son kayıt olan öğrenciler (genel bakış tablosu)
   const tbody=document.getElementById('tablo-govde');
   try{
     const ogrenciler=await rpc('kullanicilar_listele',{p_rol:'ogrenci',p_limit:20});
@@ -1868,8 +1839,6 @@ async function genelBakisYukle(){
     }).join('');
   }catch(e){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem">❌ '+e.message+'</td></tr>';}
 }
-
-// ── ÖLÇÜM BAŞVURULARI ──
 const BASVURU_DURUM_ADI={bekliyor:'⏳ Bekliyor',aranildi:'📞 Arandı',tamamlandi:'✅ Tamamlandı'};
 const BASVURU_DURUM_RENK={bekliyor:'bekliyor',aranildi:'aktif',tamamlandi:'aktif'};
 
@@ -1922,7 +1891,6 @@ async function basvuruRozetGuncelle(){
   }catch(e){}
 }
 
-// ── SİNUS ORTAMI (MODERASYON) ──
 async function sinusOrtamiYukle(){
   const durum=document.getElementById('filtre-ortam-durum').value;
   const liste=document.getElementById('ortam-liste');
@@ -1931,7 +1899,6 @@ async function sinusOrtamiYukle(){
     const data=await rpc('admin_ortam_liste',{p_durum:durum||null});
     document.getElementById('ortam-sayac').textContent=data.length+' paylaşım';
 
-    // Sidebar rozeti — bekleyen sayısını göster (durum filtresinden bağımsız)
     if(durum==='bekliyor'){
       const rozet=document.getElementById('ortamRozet');
       if(data.length>0){rozet.textContent=data.length;rozet.style.display='inline-block';}
@@ -1985,6 +1952,405 @@ async function ortamRozetGuncelle(){
       rozet.style.display='none';
     }
   }catch(e){}
+}
+
+// ── HİKAYELER ──
+async function hikayeKaydet(){
+  const asama=document.getElementById('h-asama').value,gun=document.getElementById('h-gun').value;
+  const baslik=document.getElementById('h-baslik').value.trim(),metin=document.getElementById('h-metin').value.trim();
+  const kelime=document.getElementById('h-kelime').value;
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
+  const btn=document.getElementById('btn-hikaye-kaydet');btn.textContent='⏳ Kaydediliyor...';
+  try{await supabase('POST','hikayeler',{asama:parseInt(asama),gun:parseInt(gun),baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular});bildirimGoster('✅ Hikâye kaydedildi!','basari');modalKapat('hikaye');hikayeleriYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Kaydet';
+}
+async function hikayeDuzenleAc(id,asama,gun,baslik,metin,kelime){
+  document.getElementById('hd-id').value=id;document.getElementById('hd-asama').value=asama;
+  document.getElementById('hd-gun').value=gun;document.getElementById('hd-baslik').value=baslik;
+  document.getElementById('hd-metin').value=metin;document.getElementById('hd-kelime').value=kelime;
+  document.getElementById('hikaye-duzenle-kelime-sayac').textContent=kelime+' kelime';
+  document.getElementById('soru-listesi-hikaye-duzenle').innerHTML='';
+  modalAc('hikaye-duzenle');
+  try{
+    const veri=await supabase('GET','hikayeler',null,'id=eq.'+id+'&select=sorular');
+    if(veri.length && veri[0].sorular && veri[0].sorular.length){
+      sorulariDoldur('soru-listesi-hikaye-duzenle',veri[0].sorular);
+    }
+  }catch(e){}
+}
+function hikayeDuzenleKelimeSay(){const m=document.getElementById('hd-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('hikaye-duzenle-kelime-sayac').textContent=s+' kelime';document.getElementById('hd-kelime').value=s;}
+async function hikayeGuncelle(){
+  const id=document.getElementById('hd-id').value,asama=document.getElementById('hd-asama').value,gun=document.getElementById('hd-gun').value;
+  const baslik=document.getElementById('hd-baslik').value.trim(),metin=document.getElementById('hd-metin').value.trim();
+  const kelime=document.getElementById('hd-kelime').value;
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi-hikaye-duzenle');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
+  const btn=document.getElementById('btn-hikaye-guncelle');btn.textContent='⏳ Güncelleniyor...';
+  try{
+    await supabase('PATCH','hikayeler',{asama:parseInt(asama),gun:parseInt(gun),baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular},'id=eq.'+id);
+    bildirimGoster('✅ Hikâye güncellendi!','basari');modalKapat('hikaye-duzenle');hikayeleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Güncelle';
+}
+async function hikayeSil(id){
+  if(!confirm('Bu hikâyeyi silmek istediğinize emin misiniz?')) return;
+  try{await supabase('DELETE','hikayeler',null,'id=eq.'+id);bildirimGoster('🗑️ Hikâye silindi.','basari');hikayeleriYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+async function hikayeleriYukle(){
+  const liste=document.getElementById('hikaye-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=asama,gun';
+  const asama=document.getElementById('filtre-asama').value,gun=document.getElementById('filtre-gun').value;
+  if(asama) filtre+='&asama=eq.'+asama;
+  if(gun) filtre+='&gun=eq.'+gun;
+  try{
+    const hikayeler=await supabase('GET','hikayeler',null,filtre);
+    document.getElementById('hikaye-sayac').textContent=hikayeler.length+' hikâye';
+    if(!hikayeler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz hikâye eklenmemiş.</div>';return;}
+    const renkler={'1':'a1','2':'a2','3':'a3','4':'a4'};
+    liste.innerHTML='<table><thead><tr><th>Seviye</th><th>Gün</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="hikaye-tbody"></tbody></table>';
+    const tbody=document.getElementById('hikaye-tbody');
+    hikayeler.forEach(h=>{
+      const tarih=h.created_at?new Date(h.created_at).toLocaleDateString('tr-TR'):'-';
+      const tr=document.createElement('tr');
+      const mG=kacirAdmin(h.metin),bG=kacirAdmin(h.baslik);
+      tr.innerHTML=`<td><span class="asama-badge ${renkler[h.asama]}">${SEVIYE_ADI[h.asama]||h.asama+'. Seviye ⚠️'}</span></td><td>${h.gun}. Gün</td><td><strong>${h.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${h.metin.substring(0,100)}...</div></td><td>${h.kelime_sayisi||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="hikayeDuzenleAc(${h.id},${h.asama},${h.gun},'${bG}','${mG}',${h.kelime_sayisi||0})" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="hikayeSil(${h.id})">🗑️ Sil</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+// ── ÖLÇÜM METİNLERİ ──
+async function olcumMetniKaydet(){
+  const grup=document.getElementById('o-grup').value,baslik=document.getElementById('o-baslik').value.trim();
+  const metin=document.getElementById('o-metin').value.trim(),kelime=document.getElementById('o-kelime').value;
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi-olcum');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
+  const btn=document.getElementById('btn-olcum-kaydet');btn.textContent='⏳ Kaydediliyor...';
+  try{await supabase('POST','olcum_metinleri',{yas_grubu:parseInt(grup),baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular});bildirimGoster('✅ Metin kaydedildi!','basari');modalKapat('olcum');olcumMetinleriYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Kaydet';
+}
+async function olcumMetniSil(id){
+  if(!confirm('Emin misiniz?')) return;
+  try{await supabase('DELETE','olcum_metinleri',null,'id=eq.'+id);bildirimGoster('🗑️ Silindi.','basari');olcumMetinleriYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+async function olcumMetniDuzenle(id,grup,baslik,metin,kelime){
+  document.getElementById('od-id').value=id;document.getElementById('od-grup').value=grup;
+  document.getElementById('od-baslik').value=baslik;document.getElementById('od-metin').value=metin;
+  document.getElementById('od-kelime').value=kelime;document.getElementById('duzenle-kelime-sayac').textContent=kelime+' kelime';
+  document.getElementById('soru-listesi-olcum-duzenle').innerHTML='';
+  modalAc('olcum-duzenle');
+  try{
+    const veri=await supabase('GET','olcum_metinleri',null,'id=eq.'+id+'&select=sorular');
+    if(veri.length && veri[0].sorular && veri[0].sorular.length){
+      sorulariDoldur('soru-listesi-olcum-duzenle',veri[0].sorular);
+    }
+  }catch(e){}
+}
+async function olcumMetniGuncelle(){
+  const id=document.getElementById('od-id').value,grup=document.getElementById('od-grup').value;
+  const baslik=document.getElementById('od-baslik').value.trim(),metin=document.getElementById('od-metin').value.trim();
+  const kelime=document.getElementById('od-kelime').value;
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi-olcum-duzenle');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
+  const btn=document.getElementById('btn-olcum-guncelle');btn.textContent='⏳ Güncelleniyor...';
+  try{
+    await supabase('PATCH','olcum_metinleri',{yas_grubu:parseInt(grup),baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular},'id=eq.'+id);
+    bildirimGoster('✅ Metin güncellendi!','basari');modalKapat('olcum-duzenle');olcumMetinleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Güncelle';
+}
+async function olcumMetinleriYukle(){
+  const liste=document.getElementById('olcum-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=yas_grubu';
+  const grup=document.getElementById('filtre-olcum-grup').value;
+  if(grup) filtre+='&yas_grubu=eq.'+grup;
+  try{
+    const metinler=await supabase('GET','olcum_metinleri',null,filtre);
+    document.getElementById('olcum-sayac').textContent=metinler.length+' metin';
+    if(!metinler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz metin eklenmemiş.</div>';return;}
+    const renkler={'1':'g1','2':'g2','3':'g3','4':'g4','5':'g5','6':'g6'};
+    liste.innerHTML='<table><thead><tr><th>Grup</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="olcum-tbody"></tbody></table>';
+    const tbody=document.getElementById('olcum-tbody');
+    metinler.forEach(m=>{
+      const tarih=m.created_at?new Date(m.created_at).toLocaleDateString('tr-TR'):'-';
+      const tr=document.createElement('tr');
+      const mG=kacirAdmin(m.metin),bG=kacirAdmin(m.baslik);
+      tr.innerHTML=`<td><span class="grup-badge ${renkler[m.yas_grubu]}">${GRUP_ADLARI[m.yas_grubu]}</span></td><td><strong>${m.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${m.metin.substring(0,100)}...</div></td><td>${m.kelime_sayisi||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="olcumMetniDuzenle(${m.id},${m.yas_grubu},'${bG}','${mG}',${m.kelime_sayisi||0})" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="olcumMetniSil(${m.id})">🗑️ Sil</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+// ── BAĞLAM AVI İÇERİKLERİ ──
+function baglamAviSeceneklerTopla(prefix){
+  const secenekler=[];
+  for(let i=0;i<4;i++){
+    const v=document.getElementById(prefix+'-secenek-'+i).value.trim();
+    secenekler.push(v);
+  }
+  if(secenekler.some(s=>!s)) throw new Error('4 şıkkın tamamı doldurulmalı.');
+  const isaretli=document.querySelector('input[name='+prefix+'-dogru]:checked');
+  if(!isaretli) throw new Error('Doğru cevap işaretlenmemiş.');
+  return {secenekler, dogru_index: parseInt(isaretli.value)};
+}
+
+async function baglamAviKaydet(){
+  const zorluk=document.getElementById('ba-zorluk').value;
+  const seviye=parseInt(document.getElementById('ba-seviye').value);
+  const kategori=document.getElementById('ba-kategori').value;
+  const baslik=document.getElementById('ba-baslik').value.trim();
+  const metin=document.getElementById('ba-metin').value.trim();
+  const aciklama=document.getElementById('ba-aciklama').value.trim();
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  if(!/\.{5,}/.test(metin)){bildirimGoster('⚠️ Metin içinde boşluk (en az 5 nokta: .....) bulunmalı!','hata');return;}
+  let secenekVerisi;
+  try{ secenekVerisi=baglamAviSeceneklerTopla('ba'); }
+  catch(e){ bildirimGoster('⚠️ '+e.message,'hata'); return; }
+  const kelime=metin.split(/\s+/).length;
+  const btn=document.getElementById('btn-baglam-avi-kaydet');btn.textContent='⏳ Kaydediliyor...';
+  try{
+    await supabase('POST','baglam_avi_icerikleri',{
+      baslik, metin,
+      secenekler: secenekVerisi.secenekler,
+      dogru_index: secenekVerisi.dogru_index,
+      baglam_kategorisi: kategori,
+      zorluk, sinus_seviyesi: seviye,
+      kelime_sayisi: kelime,
+      aciklama, aktif: true
+    });
+    bildirimGoster('✅ İçerik kaydedildi!','basari');modalKapat('baglam-avi');baglamAviYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Kaydet';
+}
+
+async function baglamAviYukle(){
+  const liste=document.getElementById('baglam-avi-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=created_at.desc';
+  const zorluk=document.getElementById('filtre-baglam-zorluk').value;
+  const seviye=document.getElementById('filtre-baglam-seviye').value;
+  const kategori=document.getElementById('filtre-baglam-kategori').value;
+  if(zorluk) filtre+='&zorluk=eq.'+zorluk;
+  if(seviye) filtre+='&sinus_seviyesi=eq.'+seviye;
+  if(kategori) filtre+='&baglam_kategorisi=eq.'+kategori;
+  try{
+    const icerikler=await supabase('GET','baglam_avi_icerikleri',null,filtre);
+    document.getElementById('baglam-avi-sayac').textContent=icerikler.length+' içerik';
+    if(!icerikler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz içerik eklenmemiş.</div>';return;}
+    liste.innerHTML='<table><thead><tr><th>Zorluk</th><th>Seviye</th><th>Kategori</th><th>Başlık</th><th>Doğru Cevap</th><th>Kelime</th><th>Durum</th><th>İşlem</th></tr></thead><tbody id="baglam-avi-tbody"></tbody></table>';
+    const tbody=document.getElementById('baglam-avi-tbody');
+    icerikler.forEach(ic=>{
+      const tr=document.createElement('tr');
+      const mG=kacirAdmin(ic.metin),bG=kacirAdmin(ic.baslik),aG=kacirAdmin(ic.aciklama||'');
+      const secenekJson=kacirAdmin(JSON.stringify(ic.secenekler||[]));
+      const dogruMetin=(ic.secenekler||[])[ic.dogru_index]||'—';
+      const _svRenk={2:'a2',3:'a3',4:'a4'}[ic.sinus_seviyesi]||'a1';
+      tr.innerHTML=`<td><span class="zorluk-badge ${ic.zorluk}">${BAGLAM_ZORLUK_ADLARI[ic.zorluk]||ic.zorluk}</span></td><td><span class="asama-badge ${_svRenk}">${BAGLAM_SEVIYE_ADI[ic.sinus_seviyesi]||ic.sinus_seviyesi}</span></td><td><span class="kategori-badge">${BAGLAM_KATEGORI_ADLARI[ic.baglam_kategorisi]||ic.baglam_kategorisi}</span></td><td><strong>${ic.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${ic.metin.substring(0,100)}...</div></td><td>${dogruMetin}</td><td>${ic.kelime_sayisi||'-'}</td><td><span class="durum ${ic.aktif?'aktif':'pasif'}">${ic.aktif?'● Aktif':'● Pasif'}</span></td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="baglamAviDuzenleAc(${ic.id},'${ic.zorluk}',${ic.sinus_seviyesi},'${ic.baglam_kategorisi}','${bG}','${mG}',${secenekJson},${ic.dogru_index},'${aG}')" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="baglamAviSil(${ic.id})">🗑️ Sil</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+function baglamAviDuzenleAc(id,zorluk,seviye,kategori,baslik,metin,secenekler,dogruIndex,aciklama){
+  document.getElementById('bad-id').value=id;
+  document.getElementById('bad-zorluk').value=zorluk;
+  document.getElementById('bad-seviye').value=seviye;
+  document.getElementById('bad-kategori').value=kategori;
+  document.getElementById('bad-baslik').value=baslik;
+  document.getElementById('bad-metin').value=metin;
+  document.getElementById('bad-aciklama').value=aciklama||'';
+  const kelime=metin?metin.trim().split(/\s+/).length:0;
+  document.getElementById('baglam-avi-duzenle-kelime-sayac').textContent=kelime+' kelime';
+  for(let i=0;i<4;i++){
+    document.getElementById('bad-secenek-'+i).value=(secenekler&&secenekler[i])||'';
+  }
+  const radio=document.querySelector('input[name=bad-dogru][value="'+dogruIndex+'"]');
+  if(radio) radio.checked=true;
+  modalAc('baglam-avi-duzenle');
+}
+
+async function baglamAviGuncelle(){
+  const id=document.getElementById('bad-id').value;
+  const zorluk=document.getElementById('bad-zorluk').value;
+  const seviye=parseInt(document.getElementById('bad-seviye').value);
+  const kategori=document.getElementById('bad-kategori').value;
+  const baslik=document.getElementById('bad-baslik').value.trim();
+  const metin=document.getElementById('bad-metin').value.trim();
+  const aciklama=document.getElementById('bad-aciklama').value.trim();
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  if(!/\.{5,}/.test(metin)){bildirimGoster('⚠️ Metin içinde boşluk (en az 5 nokta: .....) bulunmalı!','hata');return;}
+  let secenekVerisi;
+  try{ secenekVerisi=baglamAviSeceneklerTopla('bad'); }
+  catch(e){ bildirimGoster('⚠️ '+e.message,'hata'); return; }
+  const kelime=metin.split(/\s+/).length;
+  const btn=document.getElementById('btn-baglam-avi-guncelle');btn.textContent='⏳ Güncelleniyor...';
+  try{
+    await supabase('PATCH','baglam_avi_icerikleri',{
+      baslik, metin,
+      secenekler: secenekVerisi.secenekler,
+      dogru_index: secenekVerisi.dogru_index,
+      baglam_kategorisi: kategori,
+      zorluk, sinus_seviyesi: seviye,
+      kelime_sayisi: kelime,
+      aciklama
+    },'id=eq.'+id);
+    bildirimGoster('✅ İçerik güncellendi!','basari');modalKapat('baglam-avi-duzenle');baglamAviYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Güncelle';
+}
+
+async function baglamAviSil(id){
+  if(!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
+  try{await supabase('DELETE','baglam_avi_icerikleri',null,'id=eq.'+id);bildirimGoster('🗑️ İçerik silindi.','basari');baglamAviYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+// ── DERS METİNLERİ ──
+async function dersMetniKaydet(){
+  const zorluk=document.getElementById('d-zorluk').value,baslik=document.getElementById('d-baslik').value.trim();
+  const metin=document.getElementById('d-metin').value.trim(),kelime=document.getElementById('d-kelime').value;
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  let sorular;
+  try{sorular=soruVerileriniTopla('soru-listesi-ders');}
+  catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
+  const btn=document.getElementById('btn-ders-kaydet');btn.textContent='⏳ Kaydediliyor...';
+  try{await supabase('POST','ders_metinleri',{zorluk,baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular});bildirimGoster('✅ Ders metni kaydedildi!','basari');modalKapat('ders');dersMetinleriYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Kaydet';
+}
+async function dersMetniSil(id){
+  if(!confirm('Emin misiniz?')) return;
+  try{await supabase('DELETE','ders_metinleri',null,'id=eq.'+id);bildirimGoster('🗑️ Silindi.','basari');dersMetinleriYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+function dersMetniDuzenleAc(id,zorluk,baslik,metin,kelime){
+  document.getElementById('dd-id').value=id;document.getElementById('dd-zorluk').value=zorluk;
+  document.getElementById('dd-baslik').value=baslik;document.getElementById('dd-metin').value=metin;
+  document.getElementById('dd-kelime').value=kelime;document.getElementById('ders-duzenle-kelime-sayac').textContent=kelime+' kelime';
+  modalAc('ders-duzenle');
+}
+async function dersMetniGuncelle(){
+  const id=document.getElementById('dd-id').value,zorluk=document.getElementById('dd-zorluk').value;
+  const baslik=document.getElementById('dd-baslik').value.trim(),metin=document.getElementById('dd-metin').value.trim();
+  const kelime=document.getElementById('dd-kelime').value;
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!metin){bildirimGoster('⚠️ Metin boş olamaz!','hata');return;}
+  const btn=document.getElementById('btn-ders-guncelle');btn.textContent='⏳ Güncelleniyor...';
+  try{
+    await supabase('PATCH','ders_metinleri',{zorluk,baslik,metin,kelime_sayisi:parseInt(kelime)||0},'id=eq.'+id);
+    bildirimGoster('✅ Metin güncellendi!','basari');modalKapat('ders-duzenle');dersMetinleriYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Güncelle';
+}
+async function dersMetinleriYukle(){
+  const liste=document.getElementById('ders-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=zorluk,baslik';
+  const zorluk=document.getElementById('filtre-ders-zorluk').value;
+  if(zorluk) filtre+='&zorluk=eq.'+zorluk;
+  try{
+    const metinler=await supabase('GET','ders_metinleri',null,filtre);
+    document.getElementById('ders-sayac').textContent=metinler.length+' metin';
+    if(!metinler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz ders metni eklenmemiş.</div>';return;}
+    liste.innerHTML='<table><thead><tr><th>Zorluk</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="ders-tbody"></tbody></table>';
+    const tbody=document.getElementById('ders-tbody');
+    metinler.forEach(m=>{
+      const tarih=m.created_at?new Date(m.created_at).toLocaleDateString('tr-TR'):'-';
+      const tr=document.createElement('tr');
+      const mG=kacirAdmin(m.metin),bG=kacirAdmin(m.baslik);
+      tr.innerHTML=`<td><span class="zorluk-badge ${m.zorluk}">${ZORLUK_ADLARI[m.zorluk]||m.zorluk}</span></td><td><strong>${m.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${m.metin.substring(0,100)}...</div></td><td>${m.kelime_sayisi||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="dersMetniDuzenleAc(${m.id},'${m.zorluk}','${bG}','${mG}',${m.kelime_sayisi||0})" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="dersMetniSil(${m.id})">🗑️ Sil</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+// ── BLOG YAZILARI ──
+async function blogYazisiKaydet(){
+  const kategori=document.getElementById('b-kategori').value.trim(),durum=document.getElementById('b-durum').value;
+  const baslik=document.getElementById('b-baslik').value.trim(),ozet=document.getElementById('b-ozet').value.trim();
+  const icerik=document.getElementById('b-icerik').value.trim();
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!icerik){bildirimGoster('⚠️ İçerik boş olamaz!','hata');return;}
+  const btn=document.getElementById('btn-blog-kaydet');btn.textContent='⏳ Kaydediliyor...';
+  try{
+    const veri={kategori:kategori||'genel',durum,baslik,ozet,icerik};
+    if(durum==='yayinda') veri.yayin_tarihi=new Date().toISOString();
+    await supabase('POST','blog_yazilari',veri);
+    bildirimGoster('✅ Blog yazısı kaydedildi!','basari');modalKapat('blog');blogYazilariYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Kaydet';
+}
+async function blogYazisiSil(id){
+  if(!confirm('Bu yazıyı silmek istediğinize emin misiniz?')) return;
+  try{await supabase('DELETE','blog_yazilari',null,'id=eq.'+id);bildirimGoster('🗑️ Silindi.','basari');blogYazilariYukle();}
+  catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+function blogYazisiDuzenleAc(id,kategori,durum,baslik,ozet,icerik){
+  document.getElementById('bd-id').value=id;
+  document.getElementById('bd-kategori').value=kategori;
+  document.getElementById('bd-durum').value=durum;
+  document.getElementById('bd-baslik').value=baslik;
+  document.getElementById('bd-ozet').value=ozet;
+  document.getElementById('bd-icerik').value=icerik;
+  modalAc('blog-duzenle');
+}
+async function blogYazisiGuncelle(){
+  const id=document.getElementById('bd-id').value;
+  const kategori=document.getElementById('bd-kategori').value.trim(),durum=document.getElementById('bd-durum').value;
+  const baslik=document.getElementById('bd-baslik').value.trim(),ozet=document.getElementById('bd-ozet').value.trim();
+  const icerik=document.getElementById('bd-icerik').value.trim();
+  if(!baslik){bildirimGoster('⚠️ Başlık boş olamaz!','hata');return;}
+  if(!icerik){bildirimGoster('⚠️ İçerik boş olamaz!','hata');return;}
+  const btn=document.getElementById('btn-blog-guncelle');btn.textContent='⏳ Güncelleniyor...';
+  try{
+    const veri={kategori:kategori||'genel',durum,baslik,ozet,icerik};
+    if(durum==='yayinda') veri.yayin_tarihi=new Date().toISOString();
+    await supabase('PATCH','blog_yazilari',veri,'id=eq.'+id);
+    bildirimGoster('✅ Yazı güncellendi!','basari');modalKapat('blog-duzenle');blogYazilariYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+  btn.textContent='💾 Güncelle';
+}
+async function blogYazilariYukle(){
+  const liste=document.getElementById('blog-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  let filtre='order=created_at.desc';
+  const durum=document.getElementById('filtre-blog-durum').value;
+  if(durum) filtre+='&durum=eq.'+durum;
+  try{
+    const yazilar=await supabase('GET','blog_yazilari',null,filtre);
+    document.getElementById('blog-sayac').textContent=yazilar.length+' yazı';
+    if(!yazilar.length){liste.innerHTML='<div class="bos-durum">📭 Henüz blog yazısı eklenmemiş.</div>';return;}
+    liste.innerHTML='<table><thead><tr><th>Durum</th><th>Kategori</th><th>Başlık</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="blog-tbody"></tbody></table>';
+    const tbody=document.getElementById('blog-tbody');
+    yazilar.forEach(y=>{
+      const tarih=y.created_at?new Date(y.created_at).toLocaleDateString('tr-TR'):'-';
+      const tr=document.createElement('tr');
+      const bG=kacirAdmin(y.baslik),oG=kacirAdmin(y.ozet||''),iG=kacirAdmin(y.icerik),kG=kacirAdmin(y.kategori||'genel');
+      tr.innerHTML=`<td><span class="durum ${y.durum==='yayinda'?'aktif':'bekliyor'}">${y.durum==='yayinda'?'✅ Yayında':'📝 Taslak'}</span></td><td><span class="kategori-badge">${y.kategori||'genel'}</span></td><td><strong>${y.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${(y.ozet||y.icerik||'').substring(0,100)}...</div></td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="blogYazisiDuzenleAc(${y.id},'${kG}','${y.durum}','${bG}','${oG}','${iG}')" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="blogYazisiSil(${y.id})">🗑️ Sil</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
 }
 
 // Sayfa yüklendiğinde genel bakışı yükle
