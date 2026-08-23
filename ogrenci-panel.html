@@ -672,22 +672,29 @@ function gorevListesiOlustur(){
 }
 
 function gorevUrl(g){
-  let url=(g.dosya||'#')+'?from=ogrenci';
+  // NOT: kilitli=1 artık g.hiz'in varlığına bağlı DEĞİL — programdan atanan
+  // HER görev kilitlidir. Önceki haliyle hiz alanı olmayan görevler (örn.
+  // Bağlam Avı; hiz yerine zorluk+mod kullanır) kilitli=1 hiç almıyor, bu
+  // yüzden serbest moda düşüp hem admin'in seçtiği ayarları yok sayıyor hem
+  // de tamamlanma sinyalini hiç göndermiyordu (KILITLI=false olduğu için).
+  let url=(g.dosya||'#')+'?from=ogrenci&kilitli=1';
   if(g.hiz!==undefined && g.hiz!==null){
     // Okuma tekniği egzersizlerinde hız artık admin'in o gün için belirlediği
     // ortak değerden değil, öğrencinin GÜNCEL (adaptif) okuma hızından gelir.
     // Hangi teknik / hangi metin okunacağı admin'in elinde kalmaya devam eder,
     // sadece HIZ öğrenciye özel olur. Göz/odak egzersizleri bundan etkilenmez.
     const uygulanacakHiz=(g.tip==='okuma' && ogrenci && ogrenci.okuma_hizi) ? ogrenci.okuma_hizi : g.hiz;
-    url+='&hiz='+uygulanacakHiz+'&kilitli=1';
-    if(g.sure!==undefined && g.sure!==null) url+='&sure='+g.sure;
-    if(g.metin_id!==undefined && g.metin_id!==null) url+='&metin_id='+g.metin_id;
-    if(g.tema!==undefined && g.tema!==null) url+='&tema='+encodeURIComponent(g.tema);
-    if(g.sekil!==undefined && g.sekil!==null) url+='&sekil='+encodeURIComponent(g.sekil);
-    if(g.nokta!==undefined && g.nokta!==null) url+='&nokta='+encodeURIComponent(g.nokta);
-    if(g.kelimeSayisi!==undefined && g.kelimeSayisi!==null) url+='&kelimeSayisi='+g.kelimeSayisi;
-    if(g.gosterim!==undefined && g.gosterim!==null) url+='&gosterim='+g.gosterim;
+    url+='&hiz='+uygulanacakHiz;
   }
+  if(g.sure!==undefined && g.sure!==null) url+='&sure='+g.sure;
+  if(g.metin_id!==undefined && g.metin_id!==null) url+='&metin_id='+g.metin_id;
+  if(g.tema!==undefined && g.tema!==null) url+='&tema='+encodeURIComponent(g.tema);
+  if(g.sekil!==undefined && g.sekil!==null) url+='&sekil='+encodeURIComponent(g.sekil);
+  if(g.nokta!==undefined && g.nokta!==null) url+='&nokta='+encodeURIComponent(g.nokta);
+  if(g.kelimeSayisi!==undefined && g.kelimeSayisi!==null) url+='&kelimeSayisi='+g.kelimeSayisi;
+  if(g.gosterim!==undefined && g.gosterim!==null) url+='&gosterim='+g.gosterim;
+  if(g.zorluk!==undefined && g.zorluk!==null) url+='&zorluk='+encodeURIComponent(g.zorluk);
+  if(g.mod!==undefined && g.mod!==null) url+='&mod='+encodeURIComponent(g.mod);
   return url;
 }
 
