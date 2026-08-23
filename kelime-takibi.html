@@ -260,7 +260,7 @@ let W={
   pozGecmisIndex:null, kullanilanKelimeler:new Set(),
   duraklatildi:false, resumeResolver:null, iptalEdildi:false,
   baslangicZamanMs:0, toplamAktifSureMs:0, sonSayacBaslangic:0,
-  dikkatDogru:0, dikkatToplam:3
+  dikkatDogru:0, dikkatToplam:3, ardArdaYanlis:0
 };
 
 // ── KİLİTLİ MOD ──
@@ -308,7 +308,7 @@ async function geriSayimOynat(sonMesaj){
 async function egzersiziBaslat(){
   W.gosterimSirasi=[]; W.mevcutIndex=0; W.pozGecmisIndex=null;
   W.kullanilanKelimeler=new Set(); W.iptalEdildi=false; W.duraklatildi=false;
-  W.toplamAktifSureMs=0; W.dikkatDogru=0;
+  W.toplamAktifSureMs=0; W.dikkatDogru=0; W.ardArdaYanlis=0;
 
   await geriSayimOynat('Başla!');
   showScreen('screenEgzersiz');
@@ -469,7 +469,7 @@ function dikkatSoruGoster(index){
 function dikkatCevapVer(soruIndex,secilenIndex){
   const soru=dikkatSorular[soruIndex];
   const dogruMu=secilenIndex===soru.dogruIndex;
-  if(dogruMu) W.dikkatDogru++;
+  if(dogruMu){ W.dikkatDogru++; W.ardArdaYanlis=0; } else { W.ardArdaYanlis++; }
 
   const butonlar=document.querySelectorAll('#dikkatSecenekler .secenek-btn');
   butonlar.forEach((b,i)=>{
@@ -477,7 +477,40 @@ function dikkatCevapVer(soruIndex,secilenIndex){
     if(i===soru.dogruIndex) b.classList.add('dogru-isaretli');
     if(i===secilenIndex && !dogruMu) b.classList.add('yanlis-isaretli');
   });
+
+  // ── DOĞRULUK EŞİĞİ ──
+  // Üst üste 3 yanlış cevap, öğrencinin kelimeleri gerçekten takip etmediğinin
+  // (rastgele tıkladığının) işareti sayılır. Bu durumda egzersiz TAMAMLANMIŞ
+  // sayılmaz, kredi verilmez, öğrenciden tekrar yapması istenir.
+  if(W.ardArdaYanlis>=3){
+    setTimeout(()=>{ esikAsildiGoster(); },650);
+    return;
+  }
   setTimeout(()=>dikkatSoruGoster(soruIndex+1),650);
+}
+
+// "Tekrar deneme zamanı" bildirimi — mevcut .modal-overlay/.modal-box stiliyle
+// tutarlı, suçlayıcı olmayan bir dille.
+function esikAsildiGoster(){
+  let overlay=document.getElementById('esikOverlay');
+  if(!overlay){
+    overlay=document.createElement('div');
+    overlay.id='esikOverlay';
+    overlay.className='modal-overlay active';
+    overlay.innerHTML=
+      '<div class="modal-box">'+
+        '<h3>TEKRAR DENEME ZAMANI</h3>'+
+        '<div class="icerik">Bu bölümde art arda birkaç soruyu yanlış cevapladın. Kelimeleri gerçekten takip edebilmen için egzersizi tekrar yapman gerekiyor.<br><br>Sorun değil, tekrar deneyebilirsin!</div>'+
+        '<button id="esikTekrarBtn" style="margin-top:16px;width:100%;padding:13px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:12px;color:var(--bg);font-family:\'Orbitron\',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer">Tekrar Dene</button>'+
+      '</div>';
+    document.body.appendChild(overlay);
+    document.getElementById('esikTekrarBtn').addEventListener('click',function(){
+      overlay.classList.remove('active');
+      menuyeDon();
+    });
+  }else{
+    overlay.classList.add('active');
+  }
 }
 
 // ── SONUÇ ──
@@ -491,6 +524,7 @@ function sonucGoster(){
 
   showScreen('screenSonuc');
   sonucKaydet(toplamSn);
+  gorevTamamlandiSinyaliGonder(toplamSn);
 
   if(KILITLI){
     const backUrl=panelDonusUrl();
@@ -498,6 +532,28 @@ function sonucGoster(){
       '<button class="btn-play" onclick="tekrarYap()">▶ TEKRAR YAP</button>' +
       '<a href="'+backUrl+'" class="btn-back" style="text-decoration:none">Panele Dön →</a>';
   }
+}
+
+// ── PANELe TAMAMLANMA SİNYALİ ──
+// Kritik eksik: bu egzersiz şimdiye kadar bu sinyali HİÇ göndermiyordu, bu
+// yüzden görev kaç kez bitirilirse bitirilsin panel bunu asla öğrenemiyor
+// ve bir sonraki görev hiç açılmıyordu. Diğer tüm egzersizlerdeki
+// gorevTamamlandiSinyaliGonder deseniyle birebir aynı mekanizma.
+function gorevTamamlandiSinyaliGonder(toplamSn){
+  if(W.from!=='ogrenci') return;
+  try{
+    const veri=localStorage.getItem('sinus_bekleyen_gorev');
+    if(!veri) return;
+    const b=JSON.parse(veri);
+    // Puan doğru cevap oranıyla orantılı (0-10 arası) — panel tarafında
+    // egzersiz_tamamla_kaydet RPC'si bunu sunucuda yeniden hesaplayıp
+    // enerjiye ekliyor, client bu değeri sadece "iddia" olarak taşıyor.
+    const oran = W.dikkatToplam>0 ? (W.dikkatDogru/W.dikkatToplam) : 1;
+    b.tamamlandiMi=true;
+    b.puan=Math.round(10*oran);
+    b.egzersizKodu='kelime-takibi';
+    localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+  }catch(e){}
 }
 
 async function sonucKaydet(toplamSn){
