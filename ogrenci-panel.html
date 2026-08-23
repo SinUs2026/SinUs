@@ -220,7 +220,7 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
             <span style="font-weight:600;color:#2563a8" id="okumHizi">— kpm</span>
           </div>
           <div class="ilerleme-bar"><div class="ilerleme-dolu" id="hizBar" style="width:0%"></div></div>
-          <div class="ilerleme-yazi"><span>Hedef: 200 kpm</span><span id="hizYuzde">%0</span></div>
+          <div class="ilerleme-yazi"><span>Sistem üst sınırı: 1000 kpm</span><span id="hizYuzde">%0</span></div>
         </div>
       </div>
     </div>
@@ -318,31 +318,10 @@ function oturumHeaders(ekstra){
   return Object.assign({'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'X-Oturum-Token':oturumToken()},ekstra||{});
 }
 
-// KPM (okuma hızı) adım listesi — 50'nin altında daha kademeli (5'er ve 10'ar),
-// 50'den sonra 1000'e kadar 50'şer. Adaptif hız hesaplamasında (Günü Bitir sonrası)
-// bulunan sonuç, bu listedeki EN YAKIN adıma yuvarlanır.
-const KPM_ADIMLARI=[10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000];
-function enYakinKpmAdimi(deger){
-  let enYakin=KPM_ADIMLARI[0];
-  let farkMin=Math.abs(deger-enYakin);
-  for(const a of KPM_ADIMLARI){
-    const fark=Math.abs(deger-a);
-    if(fark<farkMin){farkMin=fark;enYakin=a;}
-  }
-  return enYakin;
-}
-
-// ── ADAPTİF HIZ ARTIŞ ORANI ──
-// Sesli/sessiz okuma ayrımı kullanıcıya SORULMAZ — sistem bunu tamamen otomatik,
-// hızın kendisinden çıkarır: sesli okumanın fiziksel tavanı ~150 kpm'dir.
-// 150 kpm ALTI (muhtemelen sesli okuyor) → daha temkinli %10 artış.
-// 150 kpm ve ÜSTÜ (muhtemelen sessiz okuyor) → %20 artış.
-// Böylece öğrenci sessiz okumaya geçtikçe sistem kendiliğinden daha agresif artırır,
-// hâlâ sesli okuyorsa fiziksel sınırını zorlamaz.
-const SESLI_SESSIZ_ESIK_KPM=150;
-function hizArtisYuzdesi(tabanHiz){
-  return tabanHiz>=SESLI_SESSIZ_ESIK_KPM ? 0.20 : 0.10;
-}
+// NOT: KPM basamak yuvarlama ve adaptif hız artış yüzdesi hesaplaması artık
+// istemcide değil, sunucuda (gunu_bitir_kaydet RPC'si → _en_yakin_kpm_adimi
+// fonksiyonu) yapılıyor. Sesli/sessiz okuma ayrımı mantığı (150 kpm eşiği,
+// altında %10 / üstünde %20 artış) da aynı RPC içinde birebir korunuyor.
 
 const ASAMA_AD={1:'Okuma Temeli',2:'Akıcı Okuma',3:'Hız + Anlama',4:'Sınav Odaklı'};
 const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
@@ -491,7 +470,7 @@ async function ortamTepkiVer(paylasimId,tip,btnEl){
 // ── TÜM EGZERSİZLER (serbest deneme listesi — öğretmen panelindekiyle aynı kapsam) ──
 const TUM_EGZ_GOZ=[
   {dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip',ikon:'↔️'},
-  {dosya:'goz-yukari-asagi.html',isim:'Yukarı-Aşağı',ikon:'↕️'},
+  {dosya:'goz-asagi-yukari.html',isim:'Yukarı-Aşağı',ikon:'↕️'},
   {dosya:'goz-sekil.html',isim:'Şekil Takibi',ikon:'⬡'},
   {dosya:'goz-genel.html',isim:'Genel Hareket',ikon:'🌀'}
 ];
@@ -614,7 +593,7 @@ function bilgileriYukle(){
   // Okuma hızı
   const hiz=ogrenci.okuma_hizi||0;
   document.getElementById('okumHizi').textContent=(hiz||'—')+' kpm';
-  const hizYuzde=Math.min(100,Math.round((hiz/200)*100));
+  const hizYuzde=Math.min(100,Math.round((hiz/1000)*100));
   document.getElementById('hizBar').style.width=hizYuzde+'%';
   document.getElementById('hizYuzde').textContent='%'+hizYuzde;
 }
@@ -666,8 +645,9 @@ function gorevListesiOlustur(){
       div.innerHTML=`<div class="gorev-ikon">✅</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''}</div></div><span class="gorev-sure-badge">✓ Tamamlandı</span>`;
     } else if(aktif){
       const url=gorevUrl(g);
+      const hedefEtiketi=(g.tip==='okuma' && ogrenci.okuma_hizi) ? ` · Hedef ${ogrenci.okuma_hizi} kpm` : '';
       div.className='gorev aktif';
-      div.innerHTML=`<div class="gorev-ikon">▶️</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${g.sure} dk</div></div><span class="gorev-sure-badge">Başlat →</span>`;
+      div.innerHTML=`<div class="gorev-ikon">▶️</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${g.sure} dk${hedefEtiketi}</div></div><span class="gorev-sure-badge">Başlat →</span>`;
       div.onclick=()=>gorevAc(i,url);
     } else {
       div.className='gorev kilitli';
@@ -717,6 +697,7 @@ function gorevAc(idx,url){
   localStorage.setItem(bekleyenKey, JSON.stringify({
     kullanici: ogrenci.kullanici_adi,
     asama, gun, idx,
+    egzersizKodu: (mevcutGorevler[idx] && mevcutGorevler[idx].dosya) || null,
     tamamlandiMi: false
   }));
   // Sekme açılır, kullanıcı dönünce kontrol edilecek
@@ -729,39 +710,83 @@ document.addEventListener('visibilitychange', () => {
 });
 setInterval(kontrolEtTamamlandi, 1000);
 
-function kontrolEtTamamlandi(){
+let _kontrolCalisiyor = false;
+async function kontrolEtTamamlandi(){
   if(!ogrenci) return;
+  if(_kontrolCalisiyor) return; // aynı anda iki kontrolün üst üste binmesini engelle
   const bekleyenKey='sinus_bekleyen_gorev';
   const veri=localStorage.getItem(bekleyenKey);
   if(!veri) return;
+  _kontrolCalisiyor = true;
   try{
     const b=JSON.parse(veri);
     const asama=ogrenci.asama||1;
     const gun=ogrenci.mevcut_gun||1;
     if(b.kullanici===ogrenci.kullanici_adi && b.asama===asama && b.gun===gun && b.tamamlandiMi===true){
-      // Görevi tamamlandı yap
+
+      // ── ODAK MODU BACKEND TEYİDİ ──
+      // Bu görev bir Odak Modu oturumuna bağlıysa (göz egzersizleri), kredi
+      // vermeden ÖNCE backend'den "gerçekten completed mı" diye sormadan
+      // ilerlemeyelim. localStorage bayrağı tek başına yeterli değil —
+      // DevTools'tan elle yazılmış sahte bir "tamamlandiMi:true" burada
+      // reddedilir, çünkü backend'de karşılık gelen oturum bulunamaz/completed
+      // olmaz.
+      if(b.odakOturumId){
+        try{
+          const durum = await rpc('odak_oturumu_durum_sorgula',{p_oturum_id:b.odakOturumId});
+          if(!durum || !durum.length || durum[0].durum !== 'completed'){
+            localStorage.removeItem(bekleyenKey);
+            _kontrolCalisiyor = false;
+            return;
+          }
+        }catch(e){
+          // Doğrulama isteği başarısız oldu (ağ vb.) — kredi verme, bir sonraki
+          // otomatik kontrolde (setInterval) tekrar denenecek; bekleyenKey'i
+          // SİLMİYORUZ ki tekrar denenebilsin.
+          _kontrolCalisiyor = false;
+          return;
+        }
+        // Enerji zaten odak_oturumu_tamamla RPC'si İÇİNDE, sunucu tarafında
+        // eklenmiş durumda. Client burada enerji göndermez, sadece profili
+        // tazeleyip güncel enerjiyi ekrana yansıtır.
+        tamamlananIdx=b.idx;
+        localStorage.setItem('sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun,tamamlananIdx);
+        try{
+          const guncel=await rpc('ogrenci_profil_getir',{});
+          if(guncel && guncel.length) ogrenci=guncel[0];
+        }catch(e){}
+        bilgileriYukle();
+        gorevListesiOlustur();
+        localStorage.removeItem(bekleyenKey);
+        _kontrolCalisiyor = false;
+        return;
+      }
+
+      // ── DİĞER EGZERSİZ TÜRLERİ (henüz kendi Odak Modu'na taşınmadı) ──
+      // Enerji artık sınırsız bir değer olarak gönderilmiyor; egzersiz_tamamla_kaydet
+      // RPC'si başarı oranını 0-100 aralığına sıkıştırıp puanı KENDİSİ hesaplıyor
+      // (azami 10 puan). Bu, "999999 enerji" tarzı enjeksiyonu kapatır — tam
+      // sunucu doğrulaması değildir, o egzersiz dosyaları elimize geçtikçe
+      // Odak Modu'ndaki gibi tam doğrulamaya taşınacaktır.
       const key='sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
       const oncekiIdx=parseInt(localStorage.getItem(key)||'-1');
       if(b.idx>oncekiIdx){
         tamamlananIdx=b.idx;
         localStorage.setItem(key,tamamlananIdx);
         gorevListesiOlustur();
-        // Enerji güncelle (egzersiz başarı durumuna göre puan localStorage'dan okunabilir)
-        const kazanilanPuan=b.puan||10;
-        enerjiGuncelle(kazanilanPuan);
+        const basariOrani=Math.max(0,Math.min(100,Math.round(((b.puan||10)/10)*100)));
+        try{
+          const sonuc=await rpc('egzersiz_tamamla_kaydet',{p_egzersiz_kodu:(b.egzersizKodu||'bilinmiyor'),p_basari_orani:basariOrani});
+          if(sonuc && sonuc.length){
+            ogrenci.enerji=(ogrenci.enerji||0)+sonuc[0].puan;
+            document.getElementById('bilgiEnerji').textContent='⚡ '+ogrenci.enerji;
+          }
+        }catch(e){}
       }
       localStorage.removeItem(bekleyenKey);
     }
   }catch(e){}
-}
-
-async function enerjiGuncelle(puan){
-  const yeniEnerji=(ogrenci.enerji||0)+puan;
-  ogrenci.enerji=yeniEnerji;
-  document.getElementById('bilgiEnerji').textContent='⚡ '+yeniEnerji;
-  try{
-    await rpc('ogrenci_ilerleme_guncelle',{p_enerji:yeniEnerji});
-  }catch(e){}
+  _kontrolCalisiyor = false;
 }
 
 // ── SIRALAMA YÜKLE ──
@@ -1149,7 +1174,7 @@ function soruOlustur(){
   });
 }
 
-function sonuclariGoster(){
+async function sonuclariGoster(){
   const sorular=mevcutHikaye.sorular||[];
   let dogru=0;
   document.getElementById('gbSorular').querySelectorAll('div').forEach((blok,i)=>{
@@ -1159,103 +1184,59 @@ function sonuclariGoster(){
   const toplam=sorular.length;
   // Bu hikayede hiç soru yoksa anlama fiilen ölçülemez; öğrenciyi bu eksiklik
   // yüzünden cezalandırmamak için %70 eşiğini geçmiş kabul ediyoruz (oran=100).
-  // Not: Sistemdeki tüm hikayelerde soru mevcut; bu yalnızca gelecekte eksik
-  // veri olursa diye bir güvenlik önlemi.
-  const oran=toplam>0?Math.round((dogru/toplam)*100):100;
+  const oranTahmin=toplam>0?Math.round((dogru/toplam)*100):100;
   const hiz=window._okuma_hizi||0;
+  const asama=ogrenci.asama||1;
+  const gun=ogrenci.mevcut_gun||1;
 
   document.getElementById('gbEkran2').style.display='none';
   document.getElementById('gbEkran3').style.display='block';
   document.getElementById('gbSonucHiz').textContent=(hiz||'—')+' kelime/dakika';
-  document.getElementById('gbSonucAnlama').textContent='%'+oran;
+  document.getElementById('gbSonucAnlama').textContent='%'+oranTahmin;
   document.getElementById('gbSonucDogru').textContent = toplam>0 ? (dogru+' / '+toplam+' doğru') : 'Bu hikayede soru yok';
+  document.getElementById('gbAdaptifMesaj').textContent='Sonuçlar kaydediliyor...';
 
   // ══════════════════════════════════════════════════════════════
-  // ADAPTİF HIZ MANTIĞI
-  // ------------------------------------------------------------
-  // Anlama < %70  → güncel (atanmış) hız DEĞİŞMEZ, aynı hızla bir sonraki gün devam.
-  //
-  // Anlama >= %70 → taban = max(bugünkü ölçülen hız, mevcut atanmış hız).
-  //                 Taban < 150 kpm ise %10, taban >= 150 kpm ise %20 artırılır.
-  //                 (150 kpm, sesli okumanın gerçekçi fiziksel tavanı kabul edilir;
-  //                 öğrenciye sesli/sessiz hiç sorulmaz, sistem bunu SADECE ölçülen
-  //                 hızdan otomatik çıkarır — düşük hızda temkinli, yüksek hızda
-  //                 daha hızlı artırır.)
-  //                 Sonuç en yakın KPM adımına yuvarlanır. Hedef HİÇBİR ZAMAN önceki
-  //                 atanmış hızın altına düşmez: öğrenci bir gün daha yavaş okusa
-  //                 bile, sistem en son ulaştığı en yüksek hızı hedef olarak korur —
-  //                 öğrenci o hedefin üstünde ya da altında okuyabilir, bu serbesttir,
-  //                 ama HEDEF hiç geri gitmez.
+  // Puan, hedef hız artışı, seri ve gün ilerlemesi ARTIK TEK BİR
+  // sunucu-taraflı RPC'de (gunu_bitir_kaydet) hesaplanıyor — client
+  // burada sadece ham ölçüm verisini (hız, doğru/toplam) gönderiyor,
+  // nihai puanı/hedefi sunucu belirliyor. Bu, halka açık sıralamanın
+  // client tarafından manipüle edilememesi için gerekli.
   // ══════════════════════════════════════════════════════════════
-  const mevcutHiz=ogrenci.okuma_hizi||0;
-  let yeniHiz=mevcutHiz||hiz;
-  let mesaj='';
-  if(oran>=70 && hiz>0){
-    const taban=Math.max(hiz,mevcutHiz);
-    const yuzde=hizArtisYuzdesi(taban);
-    const hamYeniHiz=taban*(1+yuzde);
-    yeniHiz=enYakinKpmAdimi(hamYeniHiz);
-    yeniHiz=Math.max(yeniHiz,mevcutHiz); // güvenlik: hedef asla geri gitmez
-    mesaj=`Harika! Anlama oranın %70'in üstünde, hızın ${yeniHiz} kpm'e yükseltildi. 🚀`;
-  } else if(oran<70){
-    mesaj='Anlama oranın %70\'in altında kaldı, hızın bir sonraki gün aynı kalacak. Yavaşlamayı dene. 📖';
-  } else {
-    mesaj='İyi iş! Devam et. 💪';
-  }
-  document.getElementById('gbAdaptifMesaj').textContent=mesaj;
-  window._yeniOkumaHizi=yeniHiz;
-
-  // Supabase'e kaydet
-  sonucKaydet(hiz,oran,dogru,toplam,yeniHiz);
-}
-
-async function sonucKaydet(hiz,anlamaOrani,dogru,toplam,yeniHiz){
-  const asama=ogrenci.asama||1;
-  const gun=ogrenci.mevcut_gun||1;
   try{
-    // Aynı gün için daha önce bir "Günü Bitir" kaydı var mı kontrol et
-    // (kullanıcı "Günü Bitir"i birden fazla kez tamamlarsa tabloya ikinci
-    // bir satır eklenmesin, üzerine yazsın).
-    const kontrolRes=await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi)+'&asama=eq.'+asama+'&gun=eq.'+gun+'&select=id',{
-      headers:oturumHeaders()
+    const sonuc=await rpc('gunu_bitir_kaydet',{
+      p_asama:asama, p_gun:gun,
+      p_olculen_hiz:hiz, p_anlama_orani:oranTahmin,
+      p_dogru_sayisi:dogru, p_toplam_soru:toplam,
+      p_sure_dk:window._sure_dk||0
     });
-    const mevcutKayitlar=await kontrolRes.json().catch(()=>[]);
+    const r=(sonuc && sonuc.length)?sonuc[0]:null;
+    if(!r){ throw new Error('Sunucudan sonuç alınamadı'); }
 
-    const kayitVerisi={
-      kullanici_adi:ogrenci.kullanici_adi,
-      asama,gun,
-      okuma_hizi:hiz,
-      anlama_orani:anlamaOrani,
-      dogru_sayisi:dogru,
-      toplam_soru:toplam,
-      sure_dk:window._sure_dk||0,
-      tamamlanan_gun:gun,
-      kazanilan_puan:15,
-      tarih:new Date().toISOString().split('T')[0]
-    };
-
-    if(mevcutKayitlar && mevcutKayitlar.length){
-      await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?id=eq.'+mevcutKayitlar[0].id,{
-        method:'PATCH',
-        headers:oturumHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
-        body:JSON.stringify(kayitVerisi)
-      });
-    }else{
-      await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans',{
-        method:'POST',
-        headers:oturumHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
-        body:JSON.stringify(kayitVerisi)
-      });
+    let mesaj='';
+    if(!r.ilk_kez){
+      mesaj='Bu günü zaten tamamlamıştın, kayıt güncellendi ama tekrar puan/hız artışı verilmedi.';
+    } else if(oranTahmin>=70 && r.yeni_hiz > (ogrenci.okuma_hizi||0)){
+      mesaj=`Harika! Anlama oranın %70'in üstünde, hızın ${r.yeni_hiz} kpm'e yükseltildi. +${r.puan} puan kazandın. 🚀`;
+    } else if(oranTahmin<70){
+      mesaj=`Anlama oranın %70'in altında kaldı, hızın aynı kaldı. Yine de +${r.puan} puan kazandın, yavaşlamayı dene. 📖`;
+    } else {
+      mesaj=`İyi iş! +${r.puan} puan kazandın. 💪`;
     }
+    if(r.ilk_kez && r.yeni_seri > (ogrenci.gunluk_seri||0)){
+      mesaj += ` 🔥 Serin ${r.yeni_seri} güne çıktı!`;
+    }
+    document.getElementById('gbAdaptifMesaj').textContent=mesaj;
 
-    // Öğrencinin GÜNCEL okuma hızını güncelle (adaptif mantık — bkz. sonuclariGoster).
-    // Anlama %70 altındaysa yeniHiz zaten mevcut hızla aynı gönderiliyor, yani
-    // hız fiilen değişmemiş oluyor; RPC'ye yine de her seferinde net bir değer
-    // gönderiyoruz ki sunucu tarafında belirsizlik olmasın.
-    await rpc('ogrenci_ilerleme_guncelle',{p_okuma_hizi:yeniHiz,p_mevcut_gun:gun+1});
-    ogrenci.okuma_hizi=yeniHiz;
+    ogrenci.okuma_hizi=r.yeni_hiz;
+    if(r.ilk_kez){
+      ogrenci.enerji=(ogrenci.enerji||0)+r.puan;
+      ogrenci.gunluk_seri=r.yeni_seri;
+      ogrenci.mevcut_gun=gun+1;
+    }
   }catch(e){
     console.error('Günü Bitir sonucu kaydedilemedi:',e);
+    document.getElementById('gbAdaptifMesaj').textContent='⚠️ Sonuç kaydedilemedi, tekrar bağlanmayı dene: '+e.message;
   }
 }
 
