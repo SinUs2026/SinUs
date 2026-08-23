@@ -178,11 +178,9 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
   </div>
 </div>
 
+<script src="odak-modu.js"></script>
 <script>
 // ── PANELE DÖNÜŞ URL'İ ──
-// DÜZELTME: eskiden sadece 'admin' ayrı ele alınıyordu, 'ogretmen' durumu
-// yanlışlıkla ogrenci-panel.html'e düşüyordu (o da oturum kontrolünde
-// rol!=='ogrenci' görünce anında giris.html'e atıyordu — "çıkış yapmış gibi" hissi).
 function panelDonusUrl(){
   const from = new URLSearchParams(window.location.search).get('from');
   if(from === 'admin') return 'admin.html';
@@ -317,13 +315,24 @@ function noktaIsaretleriCiz(){
   kapsayici.innerHTML = G.noktalar.map(p=>`<div class="nokta-isaret" style="left:${p.x}%;top:${p.y}%"></div>`).join('');
 }
 
-function baslat(){
+async function baslat(){
   if(!KILITLI){ G.hiz = parseInt(document.getElementById('hizSlider').value); }
   G.noktalar = noktalariOlustur(G.noktaSayisi);
   G.mevcutIdx = 0;
   G.yonIdx = 1;
   G.pos = {x:G.noktalar[0].x, y:G.noktalar[0].y};
   G.tur = 1;
+
+  if(KILITLI){
+    const izinVar = await OdakModu.baslat('goz-asagi-yukari', G.sure, function(neden){
+      clearInterval(G.sureInt); cancelAnimationFrame(G.animId); tamEkrandanCik();
+    });
+    if(!izinVar){
+      alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.');
+      return;
+    }
+  }
+
   G.baslangic = Date.now();
   document.getElementById('hudHiz').textContent = G.hiz + '/10';
   document.getElementById('hudSure').textContent = G.sure + 'sn';
@@ -373,20 +382,32 @@ function animasyonBaslat(){
   G.animId = requestAnimationFrame(animate);
 }
 
-function bitti(){
+async function bitti(){
   const s = Math.floor((Date.now()-G.baslangic)/1000);
-  document.getElementById('bittiAlt').textContent = s + ' saniye tamamlandı. Harika iş! Gözlerini dinlendir.';
   showScreen('screenBitti');
   tamEkrandanCik();
-  gorevTamamlandiSinyaliGonder(s);
+
   if(KILITLI){
+    const sonuc = await OdakModu.tamamla();
+    if(!sonuc.basarili){
+      document.getElementById('bittiAlt').textContent = 'Bu oturum backend tarafında doğrulanamadı (' + sonuc.mesaj + '). Lütfen egzersizi tekrar yap.';
+      const backUrl = panelDonusUrl();
+      document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+      return;
+    }
+    document.getElementById('bittiAlt').textContent = s + ' saniye tamamlandı. Harika iş! Gözlerini dinlendir.';
+    gorevTamamlandiSinyaliGonder(s, sonuc.oturumId);
     const backUrl = panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+    return;
   }
+
+  document.getElementById('bittiAlt').textContent = s + ' saniye tamamlandı. Harika iş! Gözlerini dinlendir.';
+  gorevTamamlandiSinyaliGonder(s, null);
 }
 
 // ── PANELe TAMAMLANMA SİNYALİ ──
-function gorevTamamlandiSinyaliGonder(sureSn){
+function gorevTamamlandiSinyaliGonder(sureSn, odakOturumId){
   const from = new URLSearchParams(window.location.search).get('from');
   if(from !== 'ogrenci') return;
   try{
@@ -396,11 +417,16 @@ function gorevTamamlandiSinyaliGonder(sureSn){
     const basarili = sureSn >= (G.sure * 0.5);
     b.tamamlandiMi = true;
     b.puan = basarili ? 10 : 2;
+    if(odakOturumId) b.odakOturumId = odakOturumId;
     localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
   }catch(e){}
 }
 
-function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();menuye();}
+function durdur(){
+  clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();
+  if(KILITLI && OdakModu.aktifMi()) OdakModu.iptal('KULLANICI_DURDURDU');
+  menuye();
+}
 function tekrar(){baslat();}
 function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();showScreen('screenMenu');}
 showScreen('screenMenu');
