@@ -162,9 +162,9 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
   </div>
 </div>
 
+<script src="odak-modu.js"></script>
 <script>
 // ── PANELE DÖNÜŞ URL'İ ──
-// DÜZELTME: 'ogretmen' durumu artık doğru şekilde ogretmen.html'e gidiyor.
 function panelDonusUrl(){
   const from = new URLSearchParams(window.location.search).get('from');
   if(from === 'admin') return 'admin.html';
@@ -218,13 +218,6 @@ function kilitliModuBaslat(){
 }
 if(KILITLI){ kilitliModuBaslat(); }
 
-function selSure(s,el){G.sure=s;document.querySelectorAll('.sure-btn').forEach(b=>{ if(b.closest('#kartSure')) b.classList.remove('sel'); });el.classList.add('sel');}
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
-  document.getElementById(id).style.display='flex';
-  document.body.classList.toggle('egzersiz-aktif', id === 'screenEgzersiz');
-}
-
 // ── TİK SESİ (Web Audio API — dosya gerektirmez) ──
 let _audioCtx = null;
 function tikSesiCal(){
@@ -242,6 +235,13 @@ function tikSesiCal(){
     osc.start();
     osc.stop(_audioCtx.currentTime + 0.12);
   }catch(e){}
+}
+
+function selSure(s,el){G.sure=s;document.querySelectorAll('.sure-btn').forEach(b=>{ if(b.closest('#kartSure')) b.classList.remove('sel'); });el.classList.add('sel');}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById(id).style.display='flex';
+  document.body.classList.toggle('egzersiz-aktif', id === 'screenEgzersiz');
 }
 
 // ── SABİT DESENLER (rastgele DEĞİL) ──
@@ -293,7 +293,7 @@ function referansNoktalariCiz(){
   kapsayici.innerHTML = noktalar.map(p=>`<div class="referans-nokta" style="left:${p.x}%;top:${p.y}%"></div>`).join('');
 }
 
-function baslat(){
+async function baslat(){
   if(!KILITLI){ G.hiz = parseInt(document.getElementById('hizSlider').value); }
   const {wp, etiket, tur} = kombineDesenDizisiOlustur();
   G.wpDizisi = wp;
@@ -301,6 +301,17 @@ function baslat(){
   G.turDizisi = tur;
   G.mevcutIdx = 0;
   G.pos = {x:wp[0].x, y:wp[0].y};
+
+  if(KILITLI){
+    const izinVar = await OdakModu.baslat('goz-genel', G.sure, function(neden){
+      clearInterval(G.sureInt); cancelAnimationFrame(G.animId); tamEkrandanCik();
+    });
+    if(!izinVar){
+      alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.');
+      return;
+    }
+  }
+
   G.baslangic = Date.now();
   document.getElementById('hudHiz').textContent = G.hiz + '/10';
   document.getElementById('hudSure').textContent = G.sure + 'sn';
@@ -351,20 +362,32 @@ function animasyonBaslat(){
   G.animId = requestAnimationFrame(animate);
 }
 
-function bitti(){
+async function bitti(){
   const s = Math.floor((Date.now()-G.baslangic)/1000);
-  document.getElementById('bittiAlt').textContent = s + ' saniye tamamlandı. Harika iş!';
-  gorevTamamlandiSinyaliGonder(s);
   showScreen('screenBitti');
   tamEkrandanCik();
+
   if(KILITLI){
+    const sonuc = await OdakModu.tamamla();
+    if(!sonuc.basarili){
+      document.getElementById('bittiAlt').textContent = 'Bu oturum backend tarafında doğrulanamadı (' + sonuc.mesaj + '). Lütfen egzersizi tekrar yap.';
+      const backUrl = panelDonusUrl();
+      document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+      return;
+    }
+    document.getElementById('bittiAlt').textContent = s + ' saniye tamamlandı. Harika iş!';
+    gorevTamamlandiSinyaliGonder(s, sonuc.oturumId);
     const backUrl = panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML = '<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
+    return;
   }
+
+  document.getElementById('bittiAlt').textContent = s + ' saniye tamamlandı. Harika iş!';
+  gorevTamamlandiSinyaliGonder(s, null);
 }
 
 // ── PANELe TAMAMLANMA SİNYALİ ──
-function gorevTamamlandiSinyaliGonder(sureSn){
+function gorevTamamlandiSinyaliGonder(sureSn, odakOturumId){
   const from = new URLSearchParams(window.location.search).get('from');
   if(from !== 'ogrenci') return;
   try{
@@ -374,11 +397,16 @@ function gorevTamamlandiSinyaliGonder(sureSn){
     const basarili = sureSn >= (G.sure * 0.5);
     b.tamamlandiMi = true;
     b.puan = basarili ? 10 : 2;
+    if(odakOturumId) b.odakOturumId = odakOturumId;
     localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
   }catch(e){}
 }
 
-function durdur(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();menuye();}
+function durdur(){
+  clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();
+  if(KILITLI && OdakModu.aktifMi()) OdakModu.iptal('KULLANICI_DURDURDU');
+  menuye();
+}
 function tekrar(){baslat();}
 function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();showScreen('screenMenu');}
 showScreen('screenMenu');
