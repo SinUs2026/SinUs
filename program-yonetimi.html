@@ -317,7 +317,12 @@ const OZEL_HIZ_ARALIK={
   // Kritik Kelime Avı'nda "hiz" alanı aslında metnin görme SÜRESİNİ (saniye)
   // temsil eder — egzersizin kendi menüsündeki PLUS/Seviye 1-5 karşılıkları
   // 4/10/20/30/40/50 sn'dir; öğretmen burada da bu aralıkta serbestçe seçebilir.
-  'kritik-kelime-avi.html':{min:4,max:50,adim:1,varsayilan:10,birim:' sn (görme süresi)'}
+  'kritik-kelime-avi.html':{min:4,max:50,adim:1,varsayilan:10,birim:' sn (görme süresi)'},
+  // Ev Takibi'nin kendi menüsünde SABİT 4 seviye var (SEVİYE 1-4). Genel
+  // "odak" kategorisinin 1-10 aralığı burada YANLIŞ — kilitli moddaki kod
+  // her şeyi Math.min(4,...) ile kırptığı için 5'in üstü hiçbir değer hiçbir
+  // zaman görünmüyor, hepsi sessizce "Seviye 4" oluyordu.
+  'ev-takibi.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'}
 };
 const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html','kritik-kelime-avi.html','baglam-avi.html'];
 const TEMA_GEREKEN_DOSYALAR=['blok-okuma.html'];
