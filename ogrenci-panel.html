@@ -616,9 +616,17 @@ async function programiYukle(){
     }
 
     mevcutGorevler=data[0].gorevler;
-    // Tamamlananları localStorage'dan al (sekmeler arası paylaşım için)
-    const keyTamamlanan='sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
-    tamamlananIdx=parseInt(localStorage.getItem(keyTamamlanan)||'-1');
+    // Tamamlananları artık SUNUCUDAN al — localStorage sadece hızlı yerel
+    // önbellek olarak kalır, tek doğruluk kaynağı değil. Böylece farklı
+    // cihaz/tarayıcı/gizli sekmede ilerleme "kaybolmuş" gibi görünmez.
+    try{
+      const sunucuIdx=await rpc('gorev_ilerleme_getir',{p_asama:asama,p_gun:gun});
+      tamamlananIdx=(typeof sunucuIdx==='number')?sunucuIdx:-1;
+    }catch(e){
+      // Sunucuya ulaşılamazsa yerel önbelleğe düş (en kötü ihtimalle eski veri)
+      const keyTamamlanan='sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
+      tamamlananIdx=parseInt(localStorage.getItem(keyTamamlanan)||'-1');
+    }
     gorevListesiOlustur();
 
   }catch(e){
@@ -741,9 +749,10 @@ async function kontrolEtTamamlandi(){
       // reddedilir, çünkü backend'de karşılık gelen oturum bulunamaz/completed
       // olmaz.
       if(b.odakOturumId){
+        let odakDurumu;
         try{
-          const durum = await rpc('odak_oturumu_durum_sorgula',{p_oturum_id:b.odakOturumId});
-          if(!durum || !durum.length || durum[0].durum !== 'completed'){
+          odakDurumu = await rpc('odak_oturumu_durum_sorgula',{p_oturum_id:b.odakOturumId});
+          if(!odakDurumu || !odakDurumu.length || odakDurumu[0].durum !== 'completed'){
             localStorage.removeItem(bekleyenKey);
             _kontrolCalisiyor = false;
             return;
@@ -755,15 +764,34 @@ async function kontrolEtTamamlandi(){
           _kontrolCalisiyor = false;
           return;
         }
-        // Enerji zaten odak_oturumu_tamamla RPC'si İÇİNDE, sunucu tarafında
-        // eklenmiş durumda. Client burada enerji göndermez, sadece profili
-        // tazeleyip güncel enerjiyi ekrana yansıtır.
-        tamamlananIdx=b.idx;
-        localStorage.setItem('sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun,tamamlananIdx);
+
+        // ── SUNUCU TARAFLI GÜNLÜK GÖREV GEÇİDİ ──
+        // Odak Modu oturumu geçerli olsa bile, enerji YALNIZCA bu (asama,gun,idx)
+        // kombinasyonu o gün için İLK KEZ tamamlanıyorsa verilir. Aksi halde
+        // aynı günün aynı görevi tekrar tekrar açılıp bitirilerek enerji
+        // biriktirilebilirdi (session bazlı tekillik gün bazlı değildi).
+        let yeniMi=false, sunucuIdx=b.idx;
         try{
-          const guncel=await rpc('ogrenci_profil_getir',{});
-          if(guncel && guncel.length) ogrenci=guncel[0];
-        }catch(e){}
+          const ilerleme=await rpc('gorev_tamamlandi_kaydet',{p_asama:asama,p_gun:gun,p_idx:b.idx});
+          if(ilerleme && ilerleme.length){ yeniMi=ilerleme[0].yeni_mi; sunucuIdx=ilerleme[0].tamamlanan_idx; }
+        }catch(e){
+          _kontrolCalisiyor = false;
+          return; // sunucuyla anlaşamadıysak bekleyenKey'i silme, tekrar denensin
+        }
+
+        tamamlananIdx=sunucuIdx;
+        localStorage.setItem('sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun,tamamlananIdx);
+
+        if(yeniMi){
+          try{
+            const odul=await rpc('egzersiz_tamamla_kaydet',{p_egzersiz_kodu:(odakDurumu[0].egzersiz_kodu||'goz'),p_basari_orani:100});
+            if(odul && odul.length){
+              ogrenci.enerji=(ogrenci.enerji||0)+odul[0].puan;
+              document.getElementById('bilgiEnerji').textContent='⚡ '+ogrenci.enerji;
+            }
+          }catch(e){}
+        }
+
         bilgileriYukle();
         gorevListesiOlustur();
         localStorage.removeItem(bekleyenKey);
@@ -774,15 +802,20 @@ async function kontrolEtTamamlandi(){
       // ── DİĞER EGZERSİZ TÜRLERİ (henüz kendi Odak Modu'na taşınmadı) ──
       // Enerji artık sınırsız bir değer olarak gönderilmiyor; egzersiz_tamamla_kaydet
       // RPC'si başarı oranını 0-100 aralığına sıkıştırıp puanı KENDİSİ hesaplıyor
-      // (azami 10 puan). Bu, "999999 enerji" tarzı enjeksiyonu kapatır — tam
-      // sunucu doğrulaması değildir, o egzersiz dosyaları elimize geçtikçe
-      // Odak Modu'ndaki gibi tam doğrulamaya taşınacaktır.
-      const key='sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun;
-      const oncekiIdx=parseInt(localStorage.getItem(key)||'-1');
-      if(b.idx>oncekiIdx){
-        tamamlananIdx=b.idx;
-        localStorage.setItem(key,tamamlananIdx);
-        gorevListesiOlustur();
+      // (azami 10 puan). Ayrıca gorev_tamamlandi_kaydet ile aynı gün aynı görev
+      // için ikinci kez ödül verilmesi de engellenir.
+      let yeniMiGenel=false, sunucuIdxGenel=b.idx;
+      try{
+        const ilerleme=await rpc('gorev_tamamlandi_kaydet',{p_asama:asama,p_gun:gun,p_idx:b.idx});
+        if(ilerleme && ilerleme.length){ yeniMiGenel=ilerleme[0].yeni_mi; sunucuIdxGenel=ilerleme[0].tamamlanan_idx; }
+      }catch(e){
+        _kontrolCalisiyor = false;
+        return;
+      }
+      tamamlananIdx=sunucuIdxGenel;
+      localStorage.setItem('sinus_tamamlanan_'+ogrenci.kullanici_adi+'_'+asama+'_'+gun,tamamlananIdx);
+      gorevListesiOlustur();
+      if(yeniMiGenel){
         const basariOrani=Math.max(0,Math.min(100,Math.round(((b.puan||10)/10)*100)));
         try{
           const sonuc=await rpc('egzersiz_tamamla_kaydet',{p_egzersiz_kodu:(b.egzersizKodu||'bilinmiyor'),p_basari_orani:basariOrani});
