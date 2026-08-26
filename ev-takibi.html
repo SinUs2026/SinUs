@@ -297,6 +297,7 @@ function kilitliModuBaslat(){
   S.answerMode = 'choice';
   document.getElementById('backBtn').style.display='none';
   document.getElementById('menuDonBtn').style.display='none';
+  document.getElementById('backBtn2').style.display='none';
   document.getElementById('resultActionRow').innerHTML = '<button class="btn-next" style="max-width:100%" onclick="kilitliDevamEt()">▶ DEVAM ET</button>';
   const startBtn = document.getElementById('mainStartBtn');
   startBtn.textContent = '▶ BAŞLA';
@@ -413,7 +414,7 @@ function showResultDual(isCorrect){let points=0;if(isCorrect){S.correct++;S.stre
 
 function playAgain(){startGame();}
 function goMenu(){gorevTamamlandiSinyaliGonder();showScreen('screenMenu');}
-function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
+function gorevTamamlandiSinyaliGonder(){const from=new URLSearchParams(window.location.search).get('from');if(from!=='ogrenci')return;try{const veri=localStorage.getItem('sinus_bekleyen_gorev');if(!veri)return;const b=JSON.parse(veri);b.tamamlandiMi=true;b.puan=10;b.egzersizKodu='ev-takibi';localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}catch(e){}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function updateHeaderScore(){document.getElementById('headerScore').textContent=S.score;}
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
