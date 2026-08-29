@@ -1146,6 +1146,7 @@ function gunuBitirBilgilendirmeGoster(){
   document.getElementById('gbAsama').textContent=(SEVIYE_ADI[ogrenci.asama]||(ogrenci.asama||1)+'. Seviye')+' · Gün '+(ogrenci.mevcut_gun||1);
   document.getElementById('gbEkran0').style.display='block';
   document.getElementById('gbEkran1').style.display='none';
+  document.getElementById('gbEkranUyari').style.display='none';
   document.getElementById('gbEkran2').style.display='none';
   document.getElementById('gbEkran3').style.display='none';
   gbBaslaZaman=null;
@@ -1205,12 +1206,37 @@ function okumayiBitir(){
   // hız ölçekleri). Süre ölçümü ne kadar kısa olursa olsun, kaydedilen/gösterilen
   // hız bu gerçekçi tavanın üzerine çıkamaz.
   const hiz=Math.min(hamHiz,1000);
+
+  // ── GERÇEKÇİLİK KONTROLÜ ──
+  // Ölçülen hız, mevcut kayıtlı hızın %70'inden fazla artış gösteriyorsa
+  // (örn. metin okunmadan "Okumayı Bitir"e basılmışsa) güvenilir kabul
+  // edilmiyor — cevap sorularına hiç geçilmeden öğrenciye uyarı gösterilip
+  // aynı metni tekrar okuması isteniyor. Bu ölçüm HİÇBİR ŞEKİLDE kaydedilmiyor.
+  const mevcutHiz = (ogrenci && ogrenci.okuma_hizi) || 0;
+  if(mevcutHiz > 0 && hiz > mevcutHiz * 1.7){
+    document.getElementById('gbUyariMetin').textContent =
+      'Ölçülen hız ('+hiz+' kelime/dakika), mevcut hızından ('+mevcutHiz+' kelime/dakika) çok daha yüksek çıktı. '+
+      'Muhtemelen metni tam okumadan bitirdin. Lütfen metni gerçekten okuyarak tekrar dene.';
+    document.getElementById('gbEkran1').style.display='none';
+    document.getElementById('gbEkranUyari').style.display='block';
+    return;
+  }
+
   document.getElementById('gbHizSonuc').textContent=(hiz||'—')+' kelime/dakika';
   document.getElementById('gbEkran1').style.display='none';
   document.getElementById('gbEkran2').style.display='block';
   soruOlustur();
   window._okuma_hizi=hiz;
   window._sure_dk=Math.round((saniye/60)*10)/10;
+}
+
+// Uyarı ekranındaki "Tekrar Dene" — aynı hikayeyi (mevcutHikaye) baştan,
+// yeni bir 3-2-1 geri sayımla tekrar okutur. gbEkran1'in kendi içeriği hiç
+// bozulmadığı için hikayeEkraniGoster() sorunsuz devam eder.
+function gercekciDegilTekrarDene(){
+  document.getElementById('gbEkranUyari').style.display='none';
+  document.getElementById('gbEkran0').style.display='block';
+  gunuBitirGeriSayimBaslat();
 }
 
 function soruOlustur(){
@@ -1425,6 +1451,16 @@ async function yolculukYukle(){
       <h2 id="gbBaslik" style="font-family:'Playfair Display',serif;color:white;font-size:1.8rem;text-align:center;margin-bottom:2rem"></h2>
       <div id="gbMetin" style="color:rgba(255,255,255,0.85);font-size:1.1rem;line-height:1.9;background:rgba(255,255,255,0.05);border-radius:16px;padding:2rem;margin-bottom:2rem"></div>
       <button id="gbBitirBtn" onclick="okumayiBitir()" style="width:100%;background:#16a34a;color:white;border:none;padding:1rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">✅ Okumayı Bitir</button>
+    </div>
+
+    <!-- EKRAN UYARI: Ölçülen hız mevcut hızın %70'inden fazla artış gösteriyorsa
+         (gerçekçi değil, muhtemelen metin okunmadan bitirildi) — cevap sorularına
+         hiç geçilmez, öğrenciye aynı metni tekrar okuması istenir. -->
+    <div id="gbEkranUyari" style="display:none;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🤔</div>
+      <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.4rem;margin-bottom:1rem">Bu Ölçüm Gerçekçi Görünmüyor</h2>
+      <p id="gbUyariMetin" style="color:rgba(255,255,255,0.75);line-height:1.7;margin-bottom:1.5rem;max-width:480px;margin-left:auto;margin-right:auto"></p>
+      <button onclick="gercekciDegilTekrarDene()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">🔁 Tekrar Dene</button>
     </div>
 
     <!-- EKRAN 2: SORULAR -->
