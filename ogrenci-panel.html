@@ -45,7 +45,8 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 /* GÖREV LİSTESİ */
 .gorev-liste{display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.5rem}
 .gorev{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-radius:10px;font-size:0.88rem;transition:all 0.2s;cursor:pointer;text-decoration:none;color:inherit}
-.gorev.tamamlandi{background:#f0fdf4;color:#15803d;cursor:default}
+.gorev.tamamlandi{background:#f0fdf4;color:#15803d;cursor:pointer}
+.gorev.tamamlandi:hover{background:#dcfce7}
 .gorev.aktif{background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe}
 .gorev.aktif:hover{background:#dbeafe}
 .gorev.kilitli{background:#f8fafc;color:#94a3b8;cursor:default;pointer-events:none}
@@ -649,8 +650,15 @@ function gorevListesiOlustur(){
     const div=document.createElement('div');
 
     if(tamamlandi){
+      // Tamamlanmış görevler artık PASİF DEĞİL — öğrenci istediği kadar
+      // tekrar girip aynı egzersizi pratik amaçlı tekrar yapabilir. Bu tekrar
+      // hiçbir ilerleme/enerji RPC'sini tetiklemez (bkz. kontrolEtTamamlandi
+      // içindeki "TEKRAR (REDO) KISA DEVRESİ") — günün ilk sonucu ve daha
+      // önce kazanılan enerji hiç değişmeden kalır.
+      const url=gorevUrl(g);
       div.className='gorev tamamlandi';
-      div.innerHTML=`<div class="gorev-ikon">✅</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''}</div></div><span class="gorev-sure-badge">✓ Tamamlandı</span>`;
+      div.innerHTML=`<div class="gorev-ikon">✅</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''}</div></div><span class="gorev-sure-badge">✓ Tamamlandı · 🔁 Tekrar Dene</span>`;
+      div.onclick=()=>gorevAc(i,url);
     } else if(aktif){
       const url=gorevUrl(g);
       const hedefEtiketi=(g.tip==='okuma' && ogrenci.okuma_hizi) ? ` · Hedef ${ogrenci.okuma_hizi} kpm` : '';
@@ -740,6 +748,19 @@ async function kontrolEtTamamlandi(){
     const asama=ogrenci.asama||1;
     const gun=ogrenci.mevcut_gun||1;
     if(b.kullanici===ogrenci.kullanici_adi && b.asama===asama && b.gun===gun && b.tamamlandiMi===true){
+
+      // ── TEKRAR (REDO) KISA DEVRESİ ──
+      // Bu görev o gün için zaten tamamlanmışsa (idx <= tamamlananIdx),
+      // öğrenci sadece PRATİK amaçlı tekrar girmiştir. Bu durumda hiçbir
+      // ilerleme/ödül RPC'si çağrılmaz (ne odak teyidi, ne gorev_tamamlandi_kaydet,
+      // ne egzersiz_tamamla_kaydet) — günün ilk sonucu ve o gün kazanılan enerji
+      // hiç dokunulmadan olduğu gibi kalır. Bu aynı zamanda backend'deki
+      // tamamlanan_idx'in yanlışlıkla geriye alınması riskini de ortadan kaldırır.
+      if(b.idx<=tamamlananIdx){
+        localStorage.removeItem(bekleyenKey);
+        _kontrolCalisiyor = false;
+        return;
+      }
 
       // ── ODAK MODU BACKEND TEYİDİ ──
       // Bu görev bir Odak Modu oturumuna bağlıysa (göz egzersizleri), kredi
