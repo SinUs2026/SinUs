@@ -148,6 +148,7 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
   </div>
 </div>
 
+<script src="odak-modu.js"></script>
 <script>
 // ── PANELe DÖNÜŞ URL'İ — admin/ogretmen/ogrenci ayrımı doğru yapılıyor ──
 function panelDonusUrl() {
@@ -184,6 +185,19 @@ const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika — toplam göre
 let kilitliBitisZamani = null;
 let kilitliSureInterval = null;
 
+// ── TUR SAYACI + BAŞARI EŞİĞİ ──
+// AÇIK — Önceden bir round'un dahili süresi (ASAMALAR[..].sure) dolduğunda
+// oyunuBitir() KOŞULSUZ çağrılıyordu; öğrenci hiçbir nesneye tıklamasa bile
+// (0 bulunan) görev "tamamlandı" sayılıp sabit puan veriliyordu. Artık bir
+// round'un "başarılı" sayılması için en az %50 nesne bulunmuş olması
+// gerekiyor. En az 3 round oynanmalı; ilk 3 round'un HİÇBİRİ %50'yi
+// geçmezse görev "tekrarı önerilir" uyarısıyla biter.
+const MIN_TUR = 3;
+const BASARI_ESIGI = 0.5;
+let kilitliTurSayaci = 0;
+let kilitliBasariliTurSayaci = 0;
+let oturumIptalEdildi = false;
+
 function kilitliModuBaslat(){
   document.getElementById('kartAsama').style.display='none';
   document.getElementById('backBtn').style.display='none';
@@ -191,12 +205,26 @@ function kilitliModuBaslat(){
   document.getElementById('btnRow').innerHTML = '';
   if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
   document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
-  document.getElementById('mainStartBtn').onclick = function(){
-    if(!isNaN(SURE_PARAM_DK)) kilitliSureyiBaslat(SURE_PARAM_DK);
+  document.getElementById('mainStartBtn').onclick = async function(){
+    const btn=document.getElementById('mainStartBtn');
+    btn.disabled=true; btn.textContent='⏳ Başlatılıyor...';
+    const toplamSureSn = (isNaN(SURE_PARAM_DK)?3:SURE_PARAM_DK)*60;
+    const izinVar = await OdakModu.baslat('gizli-nesne', toplamSureSn, odakIhlalOldu);
+    btn.disabled=false; btn.textContent='▶ BAŞLA';
+    if(!izinVar){ alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.'); return; }
+    kilitliSureyiBaslat(isNaN(SURE_PARAM_DK)?3:SURE_PARAM_DK);
     oyunuBaslat();
   };
 }
 if(KILITLI){ kilitliModuBaslat(); }
+
+// OdakModu kendi ihlal modalını gösterir (sekme değişimi/ekran kapanması) —
+// biz sadece yerel zamanlayıcıları durduruyoruz.
+function odakIhlalOldu(neden){
+  oturumIptalEdildi = true;
+  clearInterval(G.sureInt);
+  clearInterval(kilitliSureInterval);
+}
 
 function kilitliSureyiBaslat(dakika){
   kilitliBitisZamani = Date.now() + dakika*60000;
@@ -214,16 +242,47 @@ function kilitliSureGuncelle(){
 }
 function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
 
-function kilitliGoreviBitir(){
+async function kilitliGoreviBitir(){
   clearInterval(kilitliSureInterval);
-  gorevTamamlandiSinyaliGonder();
+  const sonuc = await OdakModu.tamamla();
   const backUrl = panelDonusUrl();
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById('screenMenu').style.display='flex';
+  if(!sonuc.basarili){
+    document.getElementById('screenMenu').innerHTML = `
+      <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">⚠️</div>
+      <div class="game-title">DOĞRULANAMADI</div>
+      <div class="game-sub">Bu oturum backend tarafında doğrulanamadı (${sonuc.mesaj}). Lütfen egzersizi tekrar yap.</div>
+      <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+    return;
+  }
+  gorevTamamlandiSinyaliGonder(sonuc.oturumId);
   document.getElementById('screenMenu').innerHTML = `
     <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">✅</div>
     <div class="game-title">SÜRE DOLDU!</div>
-    <div class="game-sub">Görev tamamlandı, panele dönebilirsin.</div>
+    <div class="game-sub">${kilitliTurSayaci} tur tamamladın. Görev tamamlandı, panele dönebilirsin.</div>
+    <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+}
+
+async function kilitliTekrariOnerilirBitir(){
+  clearInterval(kilitliSureInterval);
+  const sonuc = await OdakModu.tamamla();
+  const backUrl = panelDonusUrl();
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById('screenMenu').style.display='flex';
+  if(!sonuc.basarili){
+    document.getElementById('screenMenu').innerHTML = `
+      <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">⚠️</div>
+      <div class="game-title">DOĞRULANAMADI</div>
+      <div class="game-sub">Bu oturum backend tarafında doğrulanamadı (${sonuc.mesaj}). Lütfen egzersizi tekrar yap.</div>
+      <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+    return;
+  }
+  gorevTamamlandiSinyaliGonder(sonuc.oturumId);
+  document.getElementById('screenMenu').innerHTML = `
+    <div style="font-size:2.2rem;margin-top:8px;margin-bottom:4px">🔁</div>
+    <div class="game-title">TEKRARI ÖNERİLİR</div>
+    <div class="game-sub">İlk 3 turda nesnelerin en az yarısını bulamadın. Görev tamamlandı sayıldı — dilersen "Tüm Egzersizler"den tekrar dene.</div>
     <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
 }
 
@@ -359,21 +418,32 @@ function hedefBannerGuncelle(){
 function oyunuBitir(){
   clearInterval(G.sureInt);
   const sure = Math.floor((Date.now()-G.baslangic)/1000);
-  const oran = Math.round(G.bulunan.length/G.hedefler.length*100);
+  const oran = G.hedefler.length ? (G.bulunan.length/G.hedefler.length) : 0;
+
+  if(KILITLI){
+    if(oturumIptalEdildi) return;
+    kilitliTurSayaci++;
+    if(oran >= BASARI_ESIGI) kilitliBasariliTurSayaci++;
+
+    if(kilitliTurSayaci === MIN_TUR && kilitliBasariliTurSayaci === 0){
+      kilitliTekrariOnerilirBitir();
+      return;
+    }
+    if(kilitliTurSayaci >= MIN_TUR && kilitliSureBittiMi()){
+      kilitliGoreviBitir();
+      return;
+    }
+    setTimeout(oyunuBaslat, 1200);
+    return;
+  }
 
   // ÖNEMLİ: Önceden bu fonksiyon hiçbir tamamlanma sinyali göndermiyordu —
   // sadece "Panele Dön" linkine tıklanırsa gönderiliyordu. Artık oyun bittiğinde
   // (öğrenci başka bir yere tıklasa bile) görev otomatik "tamamlandı" işaretleniyor.
   gorevTamamlandiSinyaliGonder();
 
-  if(KILITLI){
-    if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
-    setTimeout(oyunuBaslat, 1200);
-    return;
-  }
-
-  document.getElementById('sonucIcon').textContent = oran>=100?'🏆':oran>=60?'🎯':'🔭';
-  document.getElementById('sonucBaslik').textContent = oran>=100?'MÜKEMMEL!':oran>=60?'İYİ İŞ!':'DEVAM ET!';
+  document.getElementById('sonucIcon').textContent = oran>=1?'🏆':oran>=0.6?'🎯':'🔭';
+  document.getElementById('sonucBaslik').textContent = oran>=1?'MÜKEMMEL!':oran>=0.6?'İYİ İŞ!':'DEVAM ET!';
   document.getElementById('sBulunan').textContent = G.bulunan.length+'/'+G.hedefler.length;
   document.getElementById('sSure').textContent = sure+'sn';
   document.getElementById('sPuan').textContent = G.puan;
@@ -381,8 +451,10 @@ function oyunuBitir(){
   document.getElementById('screenSonuc').style.display='flex';
 }
 
-// ── PANELe TAMAMLANMA SİNYALİ (yönlendirmeden, sadece işaretler) ──
-function gorevTamamlandiSinyaliGonder(){
+// ── PANELe TAMAMLANMA SİNYALİ (SADECE gerçek bitişte çağrılır — bkz.
+// kilitliGoreviBitir / kilitliTekrariOnerilirBitir. Odak Modu oturum id'si
+// eklendiğinde panel bunu backend'den doğrulayarak enerji veriyor.) ──
+function gorevTamamlandiSinyaliGonder(odakOturumId){
   const from = new URLSearchParams(window.location.search).get('from');
   if(from !== 'ogrenci') return;
   try{
@@ -392,20 +464,23 @@ function gorevTamamlandiSinyaliGonder(){
     if(b.tamamlandiMi===false){
       b.tamamlandiMi = true;
       b.puan = 10;
+      if(odakOturumId) b.odakOturumId = odakOturumId;
       localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
     }
   }catch(e){}
 }
 
-// ── "Panele Dön" tıklanınca: sinyali gönder, sonra doğru panele (admin/ogretmen/ogrenci) yönlendir ──
+// ── "Panele Dön" tıklanınca (SADECE serbest moddaki menü ekranlarında erişilebilir) ──
 function sinusTamamlandiSinyalGonderVeDon(){
-  try{
-    const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
-    if(b&&b.tamamlandiMi===false){
-      b.tamamlandiMi=true;b.puan=10;
-      localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
-    }
-  }catch(e){}
+  if(!KILITLI){
+    try{
+      const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
+      if(b&&b.tamamlandiMi===false){
+        b.tamamlandiMi=true;b.puan=10;
+        localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+      }
+    }catch(e){}
+  }
   const backUrl = panelDonusUrl();
   setTimeout(()=>{window.location.href=backUrl;},200);
 }
