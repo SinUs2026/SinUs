@@ -183,6 +183,7 @@ body {
   <div id="screenGame" class="screen">
     <div class="oyun-ust-bar">
       <div class="hud-pill"><div class="hud-lbl">Seviye</div><div class="hud-val" id="hudLv">1</div></div>
+      <div class="hud-pill" id="hudTurPill" style="display:none"><div class="hud-lbl">Tur</div><div class="hud-val" id="hudTur">1</div></div>
       <div class="hud-pill"><div class="hud-lbl">Aşama</div><div class="hud-val" id="hudPhase">—</div></div>
       <div class="hud-pill"><div class="hud-lbl">Seri</div><div class="hud-val" id="hudStreak">0 🔥</div></div>
       <div class="hud-pill kilitli-sure-pill" id="kilitliSurePill" style="display:none"><div class="hud-lbl">Kalan Süre</div><div class="hud-val" id="kilitliSureKalan">—</div></div>
@@ -228,6 +229,7 @@ body {
   </div>
 </div>
 
+<script src="odak-modu.js"></script>
 <script>
 // ── PANELe DÖNÜŞ URL'İ — admin/ogretmen/ogrenci ayrımı doğru yapılıyor ──
 function panelDonusUrl() {
@@ -245,8 +247,21 @@ const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const SURE_PARAM_DK = parseInt(_kParams.get('sure'));
-let kilitliBitisZamani = null;
-let kilitliSureInterval = null;
+
+// ── TUR-BAZLI SÜRE BÜTÇESİ ──
+// Süre SADECE "tracking" fazında (meteor hareket halindeyken) tüketilir.
+// Öğrenci seçim yaparken (select fazı) süre AKMAZ — böylece boşta bekleyerek
+// süreyi tüketip görevi "atlatmak" mümkün olmuyor. En az 3 tur ZORUNLU;
+// bütçe dolmuş olsa bile ilk 3 tur her zaman oynanır. 3. tur sonunda hepsi
+// yanlışsa görev "tekrarı önerilir" uyarısıyla biter. Select fazında 60
+// saniyeden uzun yanıt verilmezse otomatik "yanlış" sayılıp sonraki tura geçilir
+// (böylece boşta bırakılan bir oturum sonsuza dek donmuyor).
+const MIN_TUR = 3;
+const SELECT_TIMEOUT_MS = 60000;
+let aktifSureToplamMs = 0;
+let hedefSureMs = 0;
+let selectTimeoutId = null;
+let oturumIptalEdildi = false;
 
 function kilitliModuBaslat(){
   document.getElementById('kartSeviye').style.display='none';
@@ -254,38 +269,77 @@ function kilitliModuBaslat(){
   document.getElementById('backBtn').style.display='none';
   if(!isNaN(HIZ_PARAM)) G.level = Math.min(5, Math.max(1, HIZ_PARAM));
   G.mod = 1;
+  hedefSureMs = (isNaN(SURE_PARAM_DK) ? 3 : SURE_PARAM_DK) * 60000;
+  document.getElementById('hudTurPill').style.display='block';
   document.getElementById('mainStartBtn').textContent='▶ BAŞLA';
-  document.getElementById('mainStartBtn').onclick = function(){
-    if(!isNaN(SURE_PARAM_DK)) kilitliSureyiBaslat(SURE_PARAM_DK);
+  document.getElementById('mainStartBtn').onclick = async function(){
+    const btn=document.getElementById('mainStartBtn');
+    btn.disabled=true; btn.textContent='⏳ Başlatılıyor...';
+    const izinVar = await OdakModu.baslat('meteor-takibi', Math.round(hedefSureMs/1000), odakIhlalOldu);
+    btn.disabled=false; btn.textContent='▶ BAŞLA';
+    if(!izinVar){ alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.'); return; }
     startGame();
   };
 }
 
-function kilitliSureyiBaslat(dakika){
-  kilitliBitisZamani = Date.now() + dakika*60000;
-  document.getElementById('kilitliSurePill').style.display='block';
-  clearInterval(kilitliSureInterval);
-  kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
-  kilitliSureGuncelle();
+// OdakModu kendi ihlal modalını gösterir (sekme değişimi/ekran kapanması) —
+// biz sadece yerel zamanlayıcı/animasyon döngüsünü durduruyoruz ki oyun
+// mantığı arka planda çalışmaya devam etmesin.
+function odakIhlalOldu(neden){
+  oturumIptalEdildi = true;
+  clearTimeout(selectTimeoutId);
+  loopActive = false;
+  cancelAnimationFrame(G.animId);
 }
-function kilitliSureGuncelle(){
-  if(kilitliBitisZamani===null) return;
-  const kalanMs = kilitliBitisZamani - Date.now();
-  if(kalanMs<=0){ document.getElementById('kilitliSureKalan').textContent='0:00'; clearInterval(kilitliSureInterval); return; }
+
+function kilitliHudGuncelle(){
+  if(!KILITLI) return;
+  document.getElementById('hudTur').textContent = (G.correct+G.wrong+1);
+  document.getElementById('kilitliSurePill').style.display='block';
+  const kalanMs = Math.max(0, hedefSureMs - aktifSureToplamMs);
   const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
   document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
 }
-function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
 
-function kilitliGoreviBitir(){
-  clearInterval(kilitliSureInterval);
-  sinusTamamlandiSinyalGonder();
+async function kilitliGoreviBitir(){
+  clearTimeout(selectTimeoutId);
+  const sonuc = await OdakModu.tamamla();
   const backUrl = panelDonusUrl();
   showScreen('screenMenu');
+  if(!sonuc.basarili){
+    document.getElementById('screenMenu').innerHTML = `
+      <div class="meteor-preview">⚠️</div>
+      <div class="game-title">DOĞRULANAMADI</div>
+      <div class="game-sub">Bu oturum backend tarafında doğrulanamadı (${sonuc.mesaj}). Lütfen egzersizi tekrar yap.</div>
+      <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+    return;
+  }
+  sinusTamamlandiSinyalGonder(sonuc.oturumId);
   document.getElementById('screenMenu').innerHTML = `
     <div class="meteor-preview">✅</div>
-    <div class="game-title">SÜRE DOLDU!</div>
-    <div class="game-sub">Görev tamamlandı, panele dönebilirsin.</div>
+    <div class="game-title">GÖREV TAMAM!</div>
+    <div class="game-sub">${G.correct}/${G.correct+G.wrong} doğru. Panele dönebilirsin.</div>
+    <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+}
+
+async function kilitliTekrariOnerilirBitir(){
+  clearTimeout(selectTimeoutId);
+  const sonuc = await OdakModu.tamamla();
+  const backUrl = panelDonusUrl();
+  showScreen('screenMenu');
+  if(!sonuc.basarili){
+    document.getElementById('screenMenu').innerHTML = `
+      <div class="meteor-preview">⚠️</div>
+      <div class="game-title">DOĞRULANAMADI</div>
+      <div class="game-sub">Bu oturum backend tarafında doğrulanamadı (${sonuc.mesaj}). Lütfen egzersizi tekrar yap.</div>
+      <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+    return;
+  }
+  sinusTamamlandiSinyalGonder(sonuc.oturumId);
+  document.getElementById('screenMenu').innerHTML = `
+    <div class="meteor-preview">🔁</div>
+    <div class="game-title">TEKRARI ÖNERİLİR</div>
+    <div class="game-sub">İlk 3 turda hiç isabet olmadı. Görev tamamlandı sayıldı — dilersen "Tüm Egzersizler"den tekrar dene.</div>
     <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
 }
 
@@ -464,6 +518,7 @@ function initMeteors() {
 }
 
 function showOverlay() {
+  if(KILITLI && oturumIptalEdildi) return;
   G.phase='intro';
   document.getElementById('gameOverlay').style.display='flex';
   document.getElementById('timerBarWrap').style.display='none';
@@ -471,6 +526,7 @@ function showOverlay() {
   document.getElementById('hudPhase').textContent='Hazır';
   document.getElementById('hudLv').textContent=G.level;
   document.getElementById('hudStreak').textContent=G.streak+' 🔥';
+  kilitliHudGuncelle();
 
   let desc = '';
   if (G.mod===1) {
@@ -496,6 +552,7 @@ function setOverlay(icon,title,desc,count) {
 }
 
 function runCountdown(n) {
+  if(KILITLI && oturumIptalEdildi) return;
   G.phase='countdown';
   if (n<=0) { document.getElementById('gameOverlay').style.display='none'; startTracking(); return; }
   setOverlay('','',`<span style="color:var(--grey);font-size:0.8rem">Meteoru gözünle takip et!</span>`,n);
@@ -504,6 +561,7 @@ function runCountdown(n) {
 }
 
 function startTracking() {
+  if(KILITLI && oturumIptalEdildi) return;
   G.phase='tracking';
   document.getElementById('hudPhase').textContent='Takip Et';
   const lv=LEVELS[G.level];
@@ -520,6 +578,11 @@ function startTracking() {
 }
 
 function stopTracking() {
+  if(KILITLI && oturumIptalEdildi) return;
+  // Bu "tracking" fazı tam süresince (lv.dur) gerçekten oynandı — kilitli
+  // süre bütçesine SADECE bu an ekleniyor. Seçim beklerken (aşağıdaki select
+  // fazında) bütçe artık akmıyor.
+  if(KILITLI){ aktifSureToplamMs += LEVELS[G.level].dur; kilitliHudGuncelle(); }
   G.phase='select';
   document.getElementById('hudPhase').textContent='Seç!';
   document.getElementById('timerBarWrap').style.display='none';
@@ -534,12 +597,22 @@ function stopTracking() {
     document.getElementById('selectBannerSub').textContent='Takip ettiğin meteoru seç';
   }
   gc.onclick=handleClick; gc.ontouchend=handleTouch;
+
+  if(KILITLI){
+    clearTimeout(selectTimeoutId);
+    selectTimeoutId = setTimeout(()=>{
+      if(G.phase!=='select') return;
+      gc.onclick=null; gc.ontouchend=null;
+      selectCount=0; selectedTargets=[];
+      endRound(false); // 60 sn içinde seçim yapılmadı, otomatik yanlış sayılır
+    }, SELECT_TIMEOUT_MS);
+  }
 }
 
 let selectCount=0; let selectedTargets=[];
 
-function handleClick(e) { const rect=gc.getBoundingClientRect(); processTap(e.clientX-rect.left,e.clientY-rect.top); }
-function handleTouch(e) { e.preventDefault(); const rect=gc.getBoundingClientRect(); const t=e.changedTouches[0]; processTap(t.clientX-rect.left,t.clientY-rect.top); }
+function handleClick(e) { clearTimeout(selectTimeoutId); const rect=gc.getBoundingClientRect(); processTap(e.clientX-rect.left,e.clientY-rect.top); }
+function handleTouch(e) { e.preventDefault(); clearTimeout(selectTimeoutId); const rect=gc.getBoundingClientRect(); const t=e.changedTouches[0]; processTap(t.clientX-rect.left,t.clientY-rect.top); }
 
 function processTap(x,y) {
   let closest=null, minD=Infinity;
@@ -611,21 +684,32 @@ function drawReveal(correct) {
   });
 }
 
-function sinusTamamlandiSinyalGonder(){
+// ── PANELe TAMAMLANMA SİNYALİ (SADECE gerçek bitişte çağrılır — bkz.
+// kilitliGoreviBitir / kilitliTekrariOnerilirBitir. Odak Modu oturum id'si
+// eklendiğinde panel bunu backend'den doğrulayarak enerji veriyor.) ──
+function sinusTamamlandiSinyalGonder(odakOturumId){
   try{
     const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
     if(b&&b.tamamlandiMi===false){
       b.tamamlandiMi=true;b.puan=15;
+      if(odakOturumId) b.odakOturumId=odakOturumId;
       localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
     }
   }catch(e){}
 }
 function showResult(correct,pts) {
-  sinusTamamlandiSinyalGonder();
-
   if (KILITLI) {
-    if (kilitliSureBittiMi()) { setTimeout(kilitliGoreviBitir, 400); return; }
-    // Süre bitmediyse öğrenciye tur seçtirmeden otomatik yeni tur başlat.
+    if(oturumIptalEdildi) return; // ihlal nedeniyle oturum zaten sonlandırıldı
+    const toplamTur = G.correct + G.wrong;
+    if(toplamTur === MIN_TUR && G.correct === 0){
+      kilitliTekrariOnerilirBitir();
+      return;
+    }
+    if(toplamTur >= MIN_TUR && aktifSureToplamMs >= hedefSureMs){
+      kilitliGoreviBitir();
+      return;
+    }
+    // Min tur dolmadı YA DA bütçe hâlâ var — otomatik yeni tur.
     setTimeout(playAgain, 1200);
     return;
   }
@@ -647,9 +731,13 @@ function showResult(correct,pts) {
 }
 
 function playAgain() {
-  sinusTamamlandiSinyalGonder(); loopActive=false; cancelAnimationFrame(G.animId); gc.onclick=null; gc.ontouchend=null; selectCount=0; selectedTargets=[]; startGame(); }
+  if(KILITLI && oturumIptalEdildi) return;
+  loopActive=false; cancelAnimationFrame(G.animId); gc.onclick=null; gc.ontouchend=null; selectCount=0; selectedTargets=[];
+  if(!KILITLI) sinusTamamlandiSinyalGonder();
+  startGame(); }
 function goMenu() {
-  sinusTamamlandiSinyalGonder(); loopActive=false; cancelAnimationFrame(G.animId); gc.onclick=null; gc.ontouchend=null; selectCount=0; selectedTargets=[]; showScreen('screenMenu'); }
+  if(!KILITLI) sinusTamamlandiSinyalGonder();
+  loopActive=false; cancelAnimationFrame(G.animId); gc.onclick=null; gc.ontouchend=null; selectCount=0; selectedTargets=[]; showScreen('screenMenu'); }
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
