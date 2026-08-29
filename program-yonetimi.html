@@ -313,7 +313,12 @@ const HIZ_ARALIK={
 };
 const OZEL_HIZ_ARALIK={
   'kelime-bulmaca.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'},
-  'blok-okuma.html':{min:200,max:2000,adim:100,varsayilan:800,birim:' ms'},
+  // Blok Okuma artık diğer okuma teknikleriyle aynı KPM sistemini kullanıyor
+  // (egzersizin kendi kaydırıcısı: min 50, max 1000, adım 50, varsayılan 200).
+  // ESKİDEN burada "ms" tabanlı 200-2000 aralığı vardı — egzersiz dosyası KPM'e
+  // geçtiği için bu artık yanlıştı (admin "800 ms" sanıp seçerken egzersiz
+  // bunu "800 KPM" olarak okuyordu, birim tamamen farklıydı).
+  'blok-okuma.html':{min:50,max:1000,adim:50,varsayilan:200,birim:' KPM'},
   // Kritik Kelime Avı'nda "hiz" alanı aslında metnin görme SÜRESİNİ (saniye)
   // temsil eder — egzersizin kendi menüsündeki PLUS/Seviye 1-5 karşılıkları
   // 4/10/20/30/40/50 sn'dir; öğretmen burada da bu aralıkta serbestçe seçebilir.
