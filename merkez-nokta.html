@@ -294,17 +294,19 @@ const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika — toplam göre
 const MOD_PARAM = _kParams.get('mod'); // opsiyonel: sayi / harf
 const TARAF_PARAM = parseInt(_kParams.get('taraf')); // opsiyonel: 1 / 2
 
-// ── TUR-BAZLI SÜRE BÜTÇESİ ──
-// Süre SADECE değerin ekranda göründüğü "aktif" fazda tüketilir (ASAMALAR[..].sure
-// ms). Öğrenci cevap seçeneklerini görürken (cevapSor fazı) süre AKMAZ. En az 3
-// tur ZORUNLU. "Tur" sayısı G.dogru+G.yanlis'ten AYRI tutuluyor çünkü Çift Taraf
-// modunda bir turda 2 alt-soru (sol+sağ) oluyor — G.dogru/G.yanlis bu durumda
-// alt-soru sayar, tur sayısını değil. Cevap fazında 60 sn'yi geçen yanıtsızlık
-// otomatik "yanlış" sayılır (donma riski olmasın diye).
+// ── SABİT TUR SAYISI ──
+// Aktif-süre-bütçesi modeli (Meteor Takibi'ndeki gibi) BURADA UYMUYOR: bir
+// turdaki "aktif" gösterim süresi sadece 0.7-1.5 sn olduğu için, birkaç
+// dakikalık bir bütçe 60-100+ tur gibi saçma bir sayıya denk geliyordu ve
+// egzersiz çok uzun sürüyordu. Bunun yerine sabit KILITLI_TUR_SAYISI kadar
+// tur oynanıyor, süre admin'in belirlediği değerden bağımsız. "Tur" sayısı
+// G.dogru+G.yanlis'ten AYRI tutuluyor çünkü Çift Taraf modunda bir turda 2
+// alt-soru (sol+sağ) oluyor — G.dogru/G.yanlis bu durumda alt-soru sayar,
+// tur sayısını değil. Cevap fazında 60 sn'yi geçen yanıtsızlık otomatik
+// "yanlış" sayılır (donma riski olmasın diye).
 const MIN_TUR = 3;
+const KILITLI_TUR_SAYISI = 10;
 const SELECT_TIMEOUT_MS = 60000;
-let aktifSureToplamMs = 0;
-let hedefSureMs = 0;
 let selectTimeoutId = null;
 let oturumIptalEdildi = false;
 let kilitliTurSayaci = 0;
@@ -321,12 +323,14 @@ function kilitliModuBaslat(){
   if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
   if(MOD_PARAM==='sayi'||MOD_PARAM==='harf') G.mod = MOD_PARAM;
   if(TARAF_PARAM===1||TARAF_PARAM===2) G.tarafSayisi = TARAF_PARAM;
-  hedefSureMs = (isNaN(SURE_PARAM_DK) ? 3 : SURE_PARAM_DK) * 60000;
+  // Süre artık tur sayısını belirlemiyor — sadece Odak Modu oturum kaydı için
+  // nominal bir süre gönderiliyor (backend oturumu bu değerle açar).
+  const nominalSureSn = (isNaN(SURE_PARAM_DK) ? 3 : SURE_PARAM_DK) * 60;
   document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
   document.getElementById('mainStartBtn').onclick = async function(){
     const btn=document.getElementById('mainStartBtn');
     btn.disabled=true; btn.textContent='⏳ Başlatılıyor...';
-    const izinVar = await OdakModu.baslat('merkez-nokta', Math.round(hedefSureMs/1000), odakIhlalOldu);
+    const izinVar = await OdakModu.baslat('merkez-nokta', nominalSureSn, odakIhlalOldu);
     btn.disabled=false; btn.textContent='▶ BAŞLA';
     if(!izinVar){ alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.'); return; }
     oyunuBaslat();
@@ -344,13 +348,9 @@ function odakIhlalOldu(neden){
 
 function kilitliHudGuncelle(){
   if(!KILITLI) return;
-  document.getElementById('hudTur').textContent = (kilitliTurSayaci+1);
-  document.getElementById('ilerlemeYazi').textContent = 'Tur ' + (kilitliTurSayaci+1);
-  document.getElementById('kilitliSurePill').style.display='block';
-  const kalanMs = Math.max(0, hedefSureMs - aktifSureToplamMs);
-  const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
-  document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
-  document.getElementById('ilerlemeDolu').style.width = Math.min(100, (aktifSureToplamMs/hedefSureMs*100)) + '%';
+  document.getElementById('hudTur').textContent = (kilitliTurSayaci+1) + '/' + KILITLI_TUR_SAYISI;
+  document.getElementById('ilerlemeYazi').textContent = 'Tur ' + (kilitliTurSayaci+1) + ' / ' + KILITLI_TUR_SAYISI;
+  document.getElementById('ilerlemeDolu').style.width = Math.min(100, (kilitliTurSayaci/KILITLI_TUR_SAYISI*100)) + '%';
 }
 
 async function kilitliGoreviBitir(){
@@ -390,8 +390,6 @@ async function kilitliTekrariOnerilirBitir(){
     <div class="game-sub">İlk 3 turda hiç isabet olmadı. Görev tamamlandı sayıldı — dilersen "Tüm Egzersizler"den tekrar dene.</div>
     <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
 }
-
-function kilitliSureGuncelle(){ /* eski wall-clock sistemi kaldırıldı, bkz. kilitliHudGuncelle */ }
 
 function selMod(m, el) { G.mod = m; document.querySelectorAll('#kartMod .mod-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
 function selTarafSayisi(n, el) { G.tarafSayisi = n; document.querySelectorAll('#kartTaraf .mod-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
@@ -440,8 +438,10 @@ function sonrakiTur() {
   G.cevapBekleniyor = false;
   kilitliTurAltSoruDogru = 0; kilitliTurAltSoruToplam = 0;
   const ayar = ASAMALAR[G.asama];
-  document.getElementById('hudTur').textContent = KILITLI ? (kilitliTurSayaci+1) : (G.tur + '/' + TURLAR);
-  document.getElementById('ilerlemeYazi').textContent = KILITLI ? ('Tur ' + (kilitliTurSayaci+1)) : ('Tur ' + G.tur + ' / ' + TURLAR);
+  if(!KILITLI){
+    document.getElementById('hudTur').textContent = (G.tur + '/' + TURLAR);
+    document.getElementById('ilerlemeYazi').textContent = ('Tur ' + G.tur + ' / ' + TURLAR);
+  }
   document.getElementById('mesafeYazi').textContent = 'Mesafe: ' + ayar.label;
   if(!KILITLI) document.getElementById('ilerlemeDolu').style.width = ((G.tur-1)/TURLAR*100) + '%';
   document.getElementById('cevapAlan').style.display = 'none';
@@ -499,9 +499,6 @@ function sonrakiTur() {
 
   G.timeout = setTimeout(() => {
     if(KILITLI && oturumIptalEdildi) return;
-    // Bu "aktif" faz (değerin görünme süresi) tam kadarıyla oynandı — kilitli
-    // süre bütçesine SADECE bu an ekleniyor. Cevap beklerken bütçe akmıyor.
-    if(KILITLI){ aktifSureToplamMs += ayar.sure; kilitliHudGuncelle(); }
     solEl.classList.remove('gorulur');
     sagEl.classList.remove('gorulur');
     setTimeout(() => cevapSor(), 200);
@@ -602,7 +599,7 @@ function turTamamlandi(){
       kilitliTekrariOnerilirBitir();
       return;
     }
-    if(kilitliTurSayaci >= MIN_TUR && aktifSureToplamMs >= hedefSureMs){
+    if(kilitliTurSayaci >= KILITLI_TUR_SAYISI){
       kilitliGoreviBitir();
       return;
     }
