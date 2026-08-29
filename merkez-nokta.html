@@ -250,6 +250,7 @@ body::before {
   </div>
 </div>
 
+<script src="odak-modu.js"></script>
 <script>
 // ── PANELe DÖNÜŞ URL'İ — admin/ogretmen/ogrenci ayrımı doğru yapılıyor ──
 function panelDonusUrl() {
@@ -292,8 +293,24 @@ const HIZ_PARAM = parseInt(_kParams.get('hiz')); // 1-4 arası aşama olarak yor
 const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika — toplam görev süresi
 const MOD_PARAM = _kParams.get('mod'); // opsiyonel: sayi / harf
 const TARAF_PARAM = parseInt(_kParams.get('taraf')); // opsiyonel: 1 / 2
-let kilitliBitisZamani = null;
-let kilitliSureInterval = null;
+
+// ── TUR-BAZLI SÜRE BÜTÇESİ ──
+// Süre SADECE değerin ekranda göründüğü "aktif" fazda tüketilir (ASAMALAR[..].sure
+// ms). Öğrenci cevap seçeneklerini görürken (cevapSor fazı) süre AKMAZ. En az 3
+// tur ZORUNLU. "Tur" sayısı G.dogru+G.yanlis'ten AYRI tutuluyor çünkü Çift Taraf
+// modunda bir turda 2 alt-soru (sol+sağ) oluyor — G.dogru/G.yanlis bu durumda
+// alt-soru sayar, tur sayısını değil. Cevap fazında 60 sn'yi geçen yanıtsızlık
+// otomatik "yanlış" sayılır (donma riski olmasın diye).
+const MIN_TUR = 3;
+const SELECT_TIMEOUT_MS = 60000;
+let aktifSureToplamMs = 0;
+let hedefSureMs = 0;
+let selectTimeoutId = null;
+let oturumIptalEdildi = false;
+let kilitliTurSayaci = 0;
+let kilitliDogruTurSayaci = 0;
+let kilitliTurAltSoruDogru = 0;
+let kilitliTurAltSoruToplam = 0;
 
 function kilitliModuBaslat(){
   document.getElementById('kartMod').style.display='none';
@@ -304,41 +321,77 @@ function kilitliModuBaslat(){
   if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
   if(MOD_PARAM==='sayi'||MOD_PARAM==='harf') G.mod = MOD_PARAM;
   if(TARAF_PARAM===1||TARAF_PARAM===2) G.tarafSayisi = TARAF_PARAM;
+  hedefSureMs = (isNaN(SURE_PARAM_DK) ? 3 : SURE_PARAM_DK) * 60000;
   document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
-  document.getElementById('mainStartBtn').onclick = function(){
-    if(!isNaN(SURE_PARAM_DK)) kilitliSureyiBaslat(SURE_PARAM_DK);
+  document.getElementById('mainStartBtn').onclick = async function(){
+    const btn=document.getElementById('mainStartBtn');
+    btn.disabled=true; btn.textContent='⏳ Başlatılıyor...';
+    const izinVar = await OdakModu.baslat('merkez-nokta', Math.round(hedefSureMs/1000), odakIhlalOldu);
+    btn.disabled=false; btn.textContent='▶ BAŞLA';
+    if(!izinVar){ alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.'); return; }
     oyunuBaslat();
   };
 }
 if(KILITLI){ kilitliModuBaslat(); }
 
-function kilitliSureyiBaslat(dakika){
-  kilitliBitisZamani = Date.now() + dakika*60000;
-  document.getElementById('kilitliSurePill').style.display='block';
-  clearInterval(kilitliSureInterval);
-  kilitliSureInterval = setInterval(kilitliSureGuncelle, 1000);
-  kilitliSureGuncelle();
+// OdakModu kendi ihlal modalını gösterir (sekme değişimi/ekran kapanması) —
+// biz sadece yerel zamanlayıcıları durduruyoruz.
+function odakIhlalOldu(neden){
+  oturumIptalEdildi = true;
+  clearTimeout(selectTimeoutId);
+  clearTimeout(G.timeout);
 }
-function kilitliSureGuncelle(){
-  if(kilitliBitisZamani===null) return;
-  const kalanMs = kilitliBitisZamani - Date.now();
-  if(kalanMs<=0){ document.getElementById('kilitliSureKalan').textContent='0:00'; clearInterval(kilitliSureInterval); return; }
+
+function kilitliHudGuncelle(){
+  if(!KILITLI) return;
+  document.getElementById('hudTur').textContent = (kilitliTurSayaci+1);
+  document.getElementById('ilerlemeYazi').textContent = 'Tur ' + (kilitliTurSayaci+1);
+  document.getElementById('kilitliSurePill').style.display='block';
+  const kalanMs = Math.max(0, hedefSureMs - aktifSureToplamMs);
   const dk=Math.floor(kalanMs/60000), sn=Math.floor((kalanMs%60000)/1000);
   document.getElementById('kilitliSureKalan').textContent = dk+':'+(sn<10?'0':'')+sn;
+  document.getElementById('ilerlemeDolu').style.width = Math.min(100, (aktifSureToplamMs/hedefSureMs*100)) + '%';
 }
-function kilitliSureBittiMi(){ return kilitliBitisZamani!==null && Date.now()>=kilitliBitisZamani; }
 
-function kilitliGoreviBitir(){
-  clearInterval(kilitliSureInterval);
-  gorevTamamlandiSinyaliGonder();
+async function kilitliGoreviBitir(){
+  clearTimeout(selectTimeoutId); clearTimeout(G.timeout);
+  const sonuc = await OdakModu.tamamla();
   const backUrl = panelDonusUrl();
   showScreen('screenMenu');
+  if(!sonuc.basarili){
+    document.getElementById('screenMenu').innerHTML = `
+      <div class="game-title">DOĞRULANAMADI</div>
+      <div class="game-sub">Bu oturum backend tarafında doğrulanamadı (${sonuc.mesaj}). Lütfen egzersizi tekrar yap.</div>
+      <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+    return;
+  }
+  sinusTamamlandiSinyalGonder(sonuc.oturumId);
   document.getElementById('screenMenu').innerHTML = `
-    <div style="font-size:2.5rem;margin-top:8px;margin-bottom:4px">✅</div>
-    <div class="game-title">SÜRE DOLDU!</div>
-    <div class="game-sub">Görev tamamlandı, panele dönebilirsin.</div>
+    <div class="game-title">GÖREV TAMAM!</div>
+    <div class="game-sub">${G.dogru}/${G.dogru+G.yanlis} doğru. Panele dönebilirsin.</div>
     <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
 }
+
+async function kilitliTekrariOnerilirBitir(){
+  clearTimeout(selectTimeoutId); clearTimeout(G.timeout);
+  const sonuc = await OdakModu.tamamla();
+  const backUrl = panelDonusUrl();
+  showScreen('screenMenu');
+  if(!sonuc.basarili){
+    document.getElementById('screenMenu').innerHTML = `
+      <div class="game-title">DOĞRULANAMADI</div>
+      <div class="game-sub">Bu oturum backend tarafında doğrulanamadı (${sonuc.mesaj}). Lütfen egzersizi tekrar yap.</div>
+      <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+    return;
+  }
+  sinusTamamlandiSinyalGonder(sonuc.oturumId);
+  document.getElementById('screenMenu').innerHTML = `
+    <div class="game-title">TEKRARI ÖNERİLİR</div>
+    <div class="game-sub">İlk 3 turda hiç isabet olmadı. Görev tamamlandı sayıldı — dilersen "Tüm Egzersizler"den tekrar dene.</div>
+    <a href="${backUrl}" class="start-btn" style="display:block;text-align:center;text-decoration:none">Panele Dön →</a>`;
+}
+
+function kilitliSureGuncelle(){ /* eski wall-clock sistemi kaldırıldı, bkz. kilitliHudGuncelle */ }
 
 function selMod(m, el) { G.mod = m; document.querySelectorAll('#kartMod .mod-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
 function selTarafSayisi(n, el) { G.tarafSayisi = n; document.querySelectorAll('#kartTaraf .mod-btn').forEach(b => b.classList.remove('sel')); el.classList.add('sel'); }
@@ -381,16 +434,19 @@ function oyunuBaslat() {
 }
 
 function sonrakiTur() {
-  if (G.tur >= TURLAR) { oyunuBitir(); return; }
+  if(KILITLI && oturumIptalEdildi) return;
+  if(!KILITLI && G.tur >= TURLAR) { oyunuBitir(); return; }
   G.tur++;
   G.cevapBekleniyor = false;
+  kilitliTurAltSoruDogru = 0; kilitliTurAltSoruToplam = 0;
   const ayar = ASAMALAR[G.asama];
-  document.getElementById('hudTur').textContent = G.tur + '/' + TURLAR;
-  document.getElementById('ilerlemeYazi').textContent = 'Tur ' + G.tur + ' / ' + TURLAR;
+  document.getElementById('hudTur').textContent = KILITLI ? (kilitliTurSayaci+1) : (G.tur + '/' + TURLAR);
+  document.getElementById('ilerlemeYazi').textContent = KILITLI ? ('Tur ' + (kilitliTurSayaci+1)) : ('Tur ' + G.tur + ' / ' + TURLAR);
   document.getElementById('mesafeYazi').textContent = 'Mesafe: ' + ayar.label;
-  document.getElementById('ilerlemeDolu').style.width = ((G.tur-1)/TURLAR*100) + '%';
+  if(!KILITLI) document.getElementById('ilerlemeDolu').style.width = ((G.tur-1)/TURLAR*100) + '%';
   document.getElementById('cevapAlan').style.display = 'none';
   document.getElementById('geriBildirim').textContent = '';
+  if(KILITLI) kilitliHudGuncelle();
 
   const alan = document.getElementById('oyunAlan');
   const genislik = alan.offsetWidth;
@@ -442,6 +498,10 @@ function sonrakiTur() {
   G.soruIndex = 0;
 
   G.timeout = setTimeout(() => {
+    if(KILITLI && oturumIptalEdildi) return;
+    // Bu "aktif" faz (değerin görünme süresi) tam kadarıyla oynandı — kilitli
+    // süre bütçesine SADECE bu an ekleniyor. Cevap beklerken bütçe akmıyor.
+    if(KILITLI){ aktifSureToplamMs += ayar.sure; kilitliHudGuncelle(); }
     solEl.classList.remove('gorulur');
     sagEl.classList.remove('gorulur');
     setTimeout(() => cevapSor(), 200);
@@ -449,8 +509,10 @@ function sonrakiTur() {
 }
 
 function cevapSor() {
-  if (G.tur > TURLAR) return;
+  if(KILITLI && oturumIptalEdildi) return;
+  if (G.tur > TURLAR && !KILITLI) return;
   G.cevapBekleniyor = true;
+  kilitliTurAltSoruToplam++;
   const guncel = G.mevcutTaraflar[G.soruIndex];
   const cevapAlan = document.getElementById('cevapAlan');
   const soru = document.getElementById('cevapSoru');
@@ -469,27 +531,31 @@ function cevapSor() {
     grid.appendChild(btn);
   });
   cevapAlan.style.display = 'block';
+
+  if(KILITLI){
+    clearTimeout(selectTimeoutId);
+    selectTimeoutId = setTimeout(()=>{
+      if(!G.cevapBekleniyor) return;
+      cevapKontrolOtomatikYanlis();
+    }, SELECT_TIMEOUT_MS);
+  }
 }
 
-function cevapKontrol(secilen, btn) {
-  if (!G.cevapBekleniyor) return;
-  G.cevapBekleniyor = false;
-  document.querySelectorAll('.cevap-btn').forEach(b => b.onclick = null);
-  const guncel = G.mevcutTaraflar[G.soruIndex];
-  const dogru = secilen === guncel.deger;
+function cevapSonucuIsle(dogruMu, guncel, btnOrNull){
   const gb = document.getElementById('geriBildirim');
-  if (dogru) {
-    btn.classList.add('dogru');
+  if (dogruMu) {
+    if(btnOrNull) btnOrNull.classList.add('dogru');
     G.dogru++; G.seri++;
     const bonus = G.seri >= 5 ? 150 : G.seri >= 3 ? 120 : 100;
     G.puan += bonus;
     gb.textContent = '✓ Doğru! +' + bonus;
     gb.className = 'geri-bildirim dogru';
+    kilitliTurAltSoruDogru++;
   } else {
-    btn.classList.add('yanlis');
+    if(btnOrNull) btnOrNull.classList.add('yanlis');
     document.querySelectorAll('.cevap-btn').forEach(b => { if (b.textContent === guncel.deger) b.classList.add('dogru'); });
     G.yanlis++; G.seri = 0;
-    gb.textContent = '✗ Yanlış! Doğrusu: ' + guncel.deger;
+    gb.textContent = btnOrNull ? ('✗ Yanlış! Doğrusu: ' + guncel.deger) : ('⏱️ Süre doldu! Doğrusu: ' + guncel.deger);
     gb.className = 'geri-bildirim yanlis';
   }
   document.getElementById('hudDogru').textContent = G.dogru;
@@ -501,23 +567,56 @@ function cevapKontrol(secilen, btn) {
   if (G.soruIndex < G.mevcutTaraflar.length) {
     setTimeout(() => cevapSor(), 1000);
   } else {
-    setTimeout(() => sonrakiTur(), 1000);
+    setTimeout(() => turTamamlandi(), 1000);
   }
 }
 
+function cevapKontrol(secilen, btn) {
+  if (!G.cevapBekleniyor) return;
+  clearTimeout(selectTimeoutId);
+  G.cevapBekleniyor = false;
+  document.querySelectorAll('.cevap-btn').forEach(b => b.onclick = null);
+  const guncel = G.mevcutTaraflar[G.soruIndex];
+  cevapSonucuIsle(secilen === guncel.deger, guncel, btn);
+}
+
+// Cevap fazında 60 sn içinde tıklama gelmezse otomatik "yanlış" sayılır —
+// böylece boşta bırakılan bir oturum sonsuza dek donmuyor.
+function cevapKontrolOtomatikYanlis(){
+  if (!G.cevapBekleniyor) return;
+  G.cevapBekleniyor = false;
+  document.querySelectorAll('.cevap-btn').forEach(b => b.onclick = null);
+  const guncel = G.mevcutTaraflar[G.soruIndex];
+  cevapSonucuIsle(false, guncel, null);
+}
+
+// Bir tur içindeki TÜM alt-sorular (tek/çift taraf) cevaplandığında çağrılır.
+function turTamamlandi(){
+  if(KILITLI && oturumIptalEdildi) return;
+  if(KILITLI){
+    kilitliTurSayaci++;
+    const turBasarili = (kilitliTurAltSoruDogru === kilitliTurAltSoruToplam) && kilitliTurAltSoruToplam>0;
+    if(turBasarili) kilitliDogruTurSayaci++;
+
+    if(kilitliTurSayaci === MIN_TUR && kilitliDogruTurSayaci === 0){
+      kilitliTekrariOnerilirBitir();
+      return;
+    }
+    if(kilitliTurSayaci >= MIN_TUR && aktifSureToplamMs >= hedefSureMs){
+      kilitliGoreviBitir();
+      return;
+    }
+  }
+  sonrakiTur();
+}
+
 function oyunuBitir() {
+  // Bu fonksiyon artık SADECE serbest/deneme modunda (KILITLI değilken),
+  // sabit TURLAR (10) turu tamamlanınca çağrılıyor. Kilitli moddaki gerçek
+  // görev tamamlanması artık turTamamlandi() → kilitliGoreviBitir() /
+  // kilitliTekrariOnerilirBitir() üzerinden, Odak Modu backend doğrulamasıyla yürüyor.
   document.getElementById('ilerlemeDolu').style.width = '100%';
   const oran = Math.round(G.dogru / TURLAR * 100);
-
-  // ÖNEMLİ DÜZELTME: Bu fonksiyon önceden burada çağrılıyordu ama HİÇBİR YERDE TANIMLI DEĞİLDİ —
-  // JavaScript hatası fırlatıp sonuç ekranının hiç açılmamasına sebep oluyordu. Şimdi tanımlandı.
-  gorevTamamlandiSinyaliGonder();
-
-  if(KILITLI){
-    if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
-    setTimeout(oyunuBaslat, 1200);
-    return;
-  }
 
   document.getElementById('sonucIcon').textContent = oran >= 80 ? '🎯' : oran >= 60 ? '👁️' : '💪';
   document.getElementById('sonucBaslik').textContent = oran >= 80 ? 'MÜKEMMEL!' : oran >= 60 ? 'İYİ İŞ!' : 'DEVAM ET!';
@@ -527,8 +626,10 @@ function oyunuBitir() {
   showScreen('screenSonuc');
 }
 
-// ── PANELe TAMAMLANMA SİNYALİ (yönlendirmeden, sadece işaretler) ──
-function gorevTamamlandiSinyaliGonder(){
+// ── PANELe TAMAMLANMA SİNYALİ (SADECE gerçek bitişte çağrılır — bkz.
+// kilitliGoreviBitir / kilitliTekrariOnerilirBitir. Odak Modu oturum id'si
+// eklendiğinde panel bunu backend'den doğrulayarak enerji veriyor.) ──
+function sinusTamamlandiSinyalGonder(odakOturumId){
   const from = new URLSearchParams(window.location.search).get('from');
   if(from !== 'ogrenci') return;
   try{
@@ -538,19 +639,22 @@ function gorevTamamlandiSinyaliGonder(){
     if(b.tamamlandiMi===false){
       b.tamamlandiMi = true;
       b.puan = 10;
+      if(odakOturumId) b.odakOturumId = odakOturumId;
       localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
     }
   }catch(e){}
 }
-// ── "Panele Dön" tıklanınca: sinyali gönder, sonra doğru panele (admin/ogretmen/ogrenci) yönlendir ──
+// ── "Panele Dön" tıklanınca (SADECE serbest moddaki menü ekranında erişilebilir) ──
 function sinusTamamlandiSinyalGonderVeDon(){
-  try{
-    const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
-    if(b&&b.tamamlandiMi===false){
-      b.tamamlandiMi=true;b.puan=10;
-      localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
-    }
-  }catch(e){}
+  if(!KILITLI){
+    try{
+      const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
+      if(b&&b.tamamlandiMi===false){
+        b.tamamlandiMi=true;b.puan=10;
+        localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+      }
+    }catch(e){}
+  }
   const backUrl = panelDonusUrl();
   setTimeout(()=>{window.location.href=backUrl;},200);
 }
