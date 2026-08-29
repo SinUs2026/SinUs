@@ -658,13 +658,18 @@ function gorevListesiOlustur(){
       const url=gorevUrl(g);
       div.className='gorev tamamlandi';
       div.innerHTML=`<div class="gorev-ikon">✅</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''}</div></div><span class="gorev-sure-badge">✓ Tamamlandı · 🔁 Tekrar Dene</span>`;
-      div.onclick=()=>gorevAc(i,url);
+      // NOT: Sadece gorevAc() çağırmak YETMEZ — o fonksiyon yalnızca localStorage'a
+      // "hedef görev" bilgisini yazar, sayfa yönlendirmesi yapmaz. Yönlendirme
+      // olmadan tıklama hiçbir şey açmıyordu (bu satır bir <div>, <a> değil).
+      div.onclick=()=>{gorevAc(i,url); location.href=url;};
     } else if(aktif){
       const url=gorevUrl(g);
       const hedefEtiketi=(g.tip==='okuma' && ogrenci.okuma_hizi) ? ` · Hedef ${ogrenci.okuma_hizi} kpm` : '';
       div.className='gorev aktif';
       div.innerHTML=`<div class="gorev-ikon">▶️</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${g.sure} dk${hedefEtiketi}</div></div><span class="gorev-sure-badge">Başlat →</span>`;
-      div.onclick=()=>gorevAc(i,url);
+      // Aynı eksik yönlendirme sorunu burada da vardı (önceden hiç fark
+      // edilmemiş olan aynı hata ailesi) — düzeltildi.
+      div.onclick=()=>{gorevAc(i,url); location.href=url;};
     } else {
       div.className='gorev kilitli';
       div.innerHTML=`<div class="gorev-ikon">🔒</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${g.sure} dk</div></div>`;
