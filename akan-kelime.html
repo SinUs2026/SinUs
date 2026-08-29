@@ -176,7 +176,7 @@ body::before {
 <div id="app">
   <div class="header">
     <div style="display:flex;align-items:center;gap:10px">
-      <button class="ust-geri-btn" onclick="sinusTamamlandiSinyalGonderVeDon()" title="Panele Dön">←</button>
+      <button class="ust-geri-btn" onclick="paneleDon()" title="Panele Dön">←</button>
       <div class="logo">Sin<span>Us</span></div>
     </div>
     <div class="mod-pill">🚀 Akan Kelime</div>
@@ -298,13 +298,26 @@ body::before {
 const SUPABASE_URL = 'https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 
-// ── PANELe DÖNÜŞ + TAMAMLANMA SİNYALİ ──
-(function() {
+// ── PANELe DÖNÜŞ (SİNYAL GÖNDERMEZ) ──
+// backBtn ve header'daki ← butonu SADECE panele döner, tamamlanma sinyali
+// göndermez. Eskiden ikisi de sinusTamamlandiSinyalGonderVeDon()'a bağlıydı,
+// yani öğrenci egzersizi hiç okumadan (daha "BAŞLAT"a bile basmadan) ← tıklarsa
+// görev "tamamlandı" işaretleniyor ve enerji veriliyordu. Artık tamamlanma
+// sinyali SADECE bitir() içinde (metin gerçekten sona erdiğinde) gönderiliyor.
+function panelDonusUrl() {
   const from = new URLSearchParams(window.location.search).get('from');
+  if (from === 'admin') return 'admin.html';
+  if (from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html'; // 'ogrenci', 'ogrenci-serbest' ve tanımsız durumlar
+}
+function paneleDon(){
+  window.location.href = panelDonusUrl();
+}
+(function() {
   document.getElementById('backBtn').href = '#';
   document.getElementById('backBtn').addEventListener('click', function(e) {
     e.preventDefault();
-    sinusTamamlandiSinyalGonderVeDon();
+    paneleDon();
   });
 })();
 
@@ -664,7 +677,17 @@ function showScreen(id) {
 // Sayfa yüklendiğinde metinleri getir
 if(KILITLI && METIN_ID_PARAM){ kilitliMetinYukle(); } else { metinleriYukle(); }
 
-function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');let hedef='index.html';if(from==='ogrenci'||from==='ogrenci-serbest')hedef='ogrenci-panel.html';else if(from==='ogretmen')hedef='ogretmen.html';else if(from==='admin')hedef='admin.html';setTimeout(()=>{window.location.href=hedef;},200);}
+// ── PANELe TAMAMLANMA SİNYALİ + DÖNÜŞ (SADECE bitir()'den çağrılır) ──
+function sinusTamamlandiSinyalGonderVeDon(){
+  try{
+    const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
+    if(b&&b.tamamlandiMi===false){
+      b.tamamlandiMi=true;b.puan=10;
+      localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+    }
+  }catch(e){}
+  setTimeout(()=>{window.location.href=panelDonusUrl();},200);
+}
 </script>
 </body>
 </html>
