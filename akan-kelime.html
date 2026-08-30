@@ -225,14 +225,14 @@ body::before {
       <h3>HIZ AYARI</h3>
       <div class="ayar-satir">
         <span class="ayar-etiket">KPM (Kelime/Dakika)</span>
-        <input type="range" class="ayar-slider" id="hizSlider" min="50" max="1000" step="50" value="150"
+        <input type="range" class="ayar-slider" id="hizSlider" min="10" max="3000" step="1" value="150"
           oninput="hizGuncelle(this.value)">
         <span class="ayar-deger" id="hizDeger">150 KPM</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--grey);margin-top:-4px">
-        <span>50 (Yavaş)</span>
+        <span>10 (Çok Yavaş)</span>
         <span>500 (Orta)</span>
-        <span>1000 (Hızlı)</span>
+        <span>3000 (Çok Hızlı)</span>
       </div>
     </div>
 
@@ -287,7 +287,7 @@ body::before {
 
     <div class="oyun-hiz-row" id="oyunHizRow">
       <span class="oyun-hiz-lbl">Hız:</span>
-      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="50" max="1000" step="50" value="150"
+      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="10" max="3000" step="1" value="150"
         oninput="oyunHizGuncelle(this.value)">
       <span class="oyun-hiz-deger" id="oyunHizDeger">150 KPM</span>
     </div>
@@ -388,7 +388,7 @@ const METIN_ID_PARAM = _kParams.get('metin_id');
 const SURE_HEDEF_DK = parseInt(_kParams.get('sure'));
 
 function kilitliModuBaslat(){
-  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
+  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(3000, Math.max(10, HIZ_PARAM));
   document.getElementById('kartHiz').style.display='none';
   // Kelime grubu için ayrı bir admin ayarı yok; sabit 1 kelime olarak kilitleniyor.
   G.kelimeGrubu = 1;
@@ -480,15 +480,32 @@ function selGrup(n, el) {
   el.classList.add('sel');
 }
 
+// ── KADEMELİ KPM BASAMAKLARI ──
+// İstenen kademe: 10-50 arası 5'er, 50-150 arası 10'ar, 150-1000 arası
+// 50'şer, 1000 üzeri 100'er artıyor. Native <input type=range> tek bir
+// sabit "step" değeri desteklediği için (kademeli adım destekleyemiyor),
+// slider'ın step'i en ince taneli (1) bırakılıp her hareket sonrası
+// buradaki listedeki en yakın basamağa yuvarlanıyor.
+const KPM_ADIMLARI=[10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600,2700,2800,2900,3000];
+function enYakinKpmAdimi(deger){
+  let enYakin=KPM_ADIMLARI[0], farkMin=Math.abs(deger-enYakin);
+  for(const a of KPM_ADIMLARI){ const f=Math.abs(deger-a); if(f<farkMin){farkMin=f;enYakin=a;} }
+  return enYakin;
+}
+
 function hizGuncelle(v) {
-  G.kpm = parseInt(v);
-  document.getElementById('hizDeger').textContent = v + ' KPM';
+  const yuvarlanan=enYakinKpmAdimi(parseInt(v));
+  document.getElementById('hizSlider').value=yuvarlanan;
+  G.kpm = yuvarlanan;
+  document.getElementById('hizDeger').textContent = yuvarlanan + ' KPM';
 }
 
 function oyunHizGuncelle(v) {
-  G.kpm = parseInt(v);
-  document.getElementById('oyunHizDeger').textContent = v + ' KPM';
-  document.getElementById('hudHiz').textContent = v + ' KPM';
+  const yuvarlanan=enYakinKpmAdimi(parseInt(v));
+  document.getElementById('oyunHizSlider').value=yuvarlanan;
+  G.kpm = yuvarlanan;
+  document.getElementById('oyunHizDeger').textContent = yuvarlanan + ' KPM';
+  document.getElementById('hudHiz').textContent = yuvarlanan + ' KPM';
   // Eğer çalışıyorsa yeni hızla devam et
   if (G.calisiyor) {
     clearTimeout(G.timeout);
