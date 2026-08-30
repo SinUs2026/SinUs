@@ -234,9 +234,9 @@ tr:hover td{background:#f8fafc}
     <div class="kart">
       <div class="kart-ust"><span class="kart-baslik">👥 Öğrenci Listesi</span><input class="ara-input" type="text" placeholder="🔍 Öğrenci ara..." oninput="ara(this.value)"></div>
       <table id="tablo">
-        <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Lisans Bitiş</th><th>Durum</th><th>İşlem</th></tr></thead>
+        <thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Hız</th><th>Lisans Bitiş</th><th>Durum</th><th>İşlem</th></tr></thead>
         <tbody id="tablo-govde">
-          <tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem">⏳ Yükleniyor...</td></tr>
+          <tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:2rem">⏳ Yükleniyor...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1514,11 +1514,12 @@ async function ogrencileriYukle(){
 function ogrenciTablosuOlustur(ogrenciler,liste){
   if(!ogrenciler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz öğrenci yok.</div>';return;}
   const renkler={1:'a1',2:'a2',3:'a3',4:'a4'};
-  liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Durum</th><th>İşlem</th></tr></thead><tbody></tbody></table>';
+  liste.innerHTML='<table><thead><tr><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>Seviye</th><th>Gün</th><th>Enerji</th><th>Hız</th><th>Durum</th><th>İşlem</th></tr></thead><tbody></tbody></table>';
   const tbody=liste.querySelector('tbody');
   ogrenciler.forEach(o=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye ⚠️'}</span></td><td>${o.mevcut_gun||1}/30</td><td>⚡ ${o.enerji||0}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td>`;
+    const hizGosterim=o.okuma_hizi?o.okuma_hizi+' kpm':'—';
+    tr.innerHTML=`<td><strong>${o.ad||''} ${o.soyad||''}</strong></td><td>${o.kullanici_adi||'-'}</td><td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye ⚠️'}</span></td><td>${o.mevcut_gun||1}/30</td><td>⚡ ${o.enerji||0}</td><td>${hizGosterim}</td><td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#f0f9ff;color:#0369a1" onclick="ogrenciHizDuzelt(${o.id},'${o.kullanici_adi}',${o.okuma_hizi||0})">⚡ Hız</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1534,6 +1535,23 @@ function ogrenciAra(q){
       ogrenciTablosuOlustur(ogrenciler,liste);
     }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
   },400);
+}
+
+// ── HIZI DÜZELT (hızlı admin müdahalesi — şişmiş/anormal okuma hızını
+// gerçekçi bir değere anında düşürmek/düzeltmek için). Backend'de
+// admin_ogrenci_hiz_duzelt RPC'si 10-1000 kpm aralığını zorunlu kılıyor. ──
+async function ogrenciHizDuzelt(id,kullaniciAdi,mevcutHiz){
+  const girilen=prompt('"'+kullaniciAdi+'" için yeni okuma hızı (kpm, 10-1000):',mevcutHiz||'');
+  if(girilen===null) return;
+  const yeniHiz=parseInt(girilen);
+  if(isNaN(yeniHiz)||yeniHiz<10||yeniHiz>1000){bildirimGoster('⚠️ Geçerli bir sayı girin (10-1000).','hata');return;}
+  try{
+    const sonuc=await rpc('admin_ogrenci_hiz_duzelt',{p_ogrenci_id:id,p_yeni_hiz:yeniHiz});
+    const r=(sonuc&&sonuc.length)?sonuc[0]:null;
+    bildirimGoster('✅ Hız güncellendi: '+(r?r.eski_hiz:mevcutHiz)+' → '+yeniHiz+' kpm','basari');
+    if(document.getElementById('sayfa-ogrenciler').classList.contains('aktif')) ogrencileriYukle();
+    if(document.getElementById('sayfa-genel').classList.contains('aktif')) genelBakisYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 
 let _secilenLisansAy={ogr:6};
@@ -1822,22 +1840,24 @@ async function genelBakisYukle(){
   const tbody=document.getElementById('tablo-govde');
   try{
     const ogrenciler=await rpc('kullanicilar_listele',{p_rol:'ogrenci',p_limit:20});
-    if(!ogrenciler.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:2rem">📭 Henüz öğrenci yok.</td></tr>';return;}
+    if(!ogrenciler.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:2rem">📭 Henüz öğrenci yok.</td></tr>';return;}
     const renkler={1:'a1',2:'a2',3:'a3',4:'a4'};
     tbody.innerHTML=ogrenciler.map(o=>{
       const bitis=o.lisans_bitis?new Date(o.lisans_bitis).toLocaleDateString('tr-TR'):'-';
+      const hizGosterim=o.okuma_hizi?o.okuma_hizi+' kpm':'—';
       return `<tr>
         <td><strong>${o.ad||''} ${o.soyad||''}</strong></td>
         <td>${o.kullanici_adi||'-'}</td>
         <td><span class="asama-badge ${renkler[o.asama]||'a1'}">${SEVIYE_ADI[o.asama]||(o.asama||1)+'. Seviye ⚠️'}</span></td>
         <td>${o.mevcut_gun||1}/30</td>
         <td>⚡ ${o.enerji||0}</td>
+        <td>${hizGosterim}</td>
         <td>${bitis}</td>
         <td><span class="durum ${o.aktif?'aktif':'pasif'}">${o.aktif?'● Aktif':'● Pasif'}</span></td>
-        <td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td>
+        <td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="sifreDuzenle(${o.id})">Düzenle</button> <button class="islem-btn" style="background:#fef3c7;color:#92400e" onclick="kullaniciSifreSifirla(${o.id},'${o.kullanici_adi}')">Şifre</button> <button class="islem-btn" style="background:#f0f9ff;color:#0369a1" onclick="ogrenciHizDuzelt(${o.id},'${o.kullanici_adi}',${o.okuma_hizi||0})">⚡ Hız</button> <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="kullaniciSil(${o.id})">Sil</button></td>
       </tr>`;
     }).join('');
-  }catch(e){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#dc2626;padding:2rem">❌ '+e.message+'</td></tr>';}
+  }catch(e){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#dc2626;padding:2rem">❌ '+e.message+'</td></tr>';}
 }
 const BASVURU_DURUM_ADI={bekliyor:'⏳ Bekliyor',aranildi:'📞 Arandı',tamamlandi:'✅ Tamamlandı'};
 const BASVURU_DURUM_RENK={bekliyor:'bekliyor',aranildi:'aktif',tamamlandi:'aktif'};
