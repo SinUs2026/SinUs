@@ -169,7 +169,7 @@ body::before {
 <div id="app">
   <div class="header">
     <div style="display:flex;align-items:center;gap:10px">
-      <button class="ust-geri-btn" onclick="sinusTamamlandiSinyalGonderVeDon()" title="Panele Dön">←</button>
+      <button class="ust-geri-btn" onclick="paneleDon()" title="Panele Dön">←</button>
       <div class="logo">Sin<span>Us</span></div>
     </div>
     <div class="mod-pill">📜 Akan Cümle</div>
@@ -204,12 +204,12 @@ body::before {
       <h3>HIZ AYARI</h3>
       <div class="ayar-satir">
         <span class="ayar-etiket">KPM (Kelime/Dakika)</span>
-        <input type="range" class="ayar-slider" id="hizSlider" min="50" max="1000" step="50" value="150"
+        <input type="range" class="ayar-slider" id="hizSlider" min="10" max="3000" step="1" value="150"
           oninput="hizGuncelle(this.value)">
         <span class="ayar-deger" id="hizDeger">150 KPM</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--grey);margin-top:-4px">
-        <span>50 (Yavaş)</span><span>500 (Orta)</span><span>1000 (Hızlı)</span>
+        <span>10 (Çok Yavaş)</span><span>500 (Orta)</span><span>3000 (Çok Hızlı)</span>
       </div>
     </div>
 
@@ -263,7 +263,7 @@ body::before {
 
     <div class="oyun-hiz-row" id="oyunHizRow">
       <span class="oyun-hiz-lbl">Hız:</span>
-      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="50" max="1000" step="50" value="150"
+      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="10" max="3000" step="1" value="150"
         oninput="oyunHizGuncelle(this.value)">
       <span class="oyun-hiz-deger" id="oyunHizDeger">150 KPM</span>
     </div>
@@ -274,10 +274,24 @@ body::before {
 const SUPABASE_URL = 'https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 
-(function() {
+// ── PANELe DÖNÜŞ (SİNYAL GÖNDERMEZ) ──
+// backBtn ve header'daki ← butonu SADECE panele döner, tamamlanma sinyali
+// göndermez — eskiden ikisi de sinusTamamlandiSinyalGonderVeDon()'a bağlıydı,
+// yani öğrenci hiç okumadan ← tıklarsa görev "tamamlandı" işaretleniyordu.
+// Artık tamamlanma sinyali SADECE bitir() içinde (metin gerçekten sona
+// erdiğinde) gönderiliyor.
+function panelDonusUrl() {
   const from = new URLSearchParams(window.location.search).get('from');
+  if (from === 'admin') return 'admin.html';
+  if (from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html'; // 'ogrenci', 'ogrenci-serbest' ve tanımsız durumlar
+}
+function paneleDon(){
+  window.location.href = panelDonusUrl();
+}
+(function() {
   document.getElementById('backBtn').href='#';
-document.getElementById('backBtn').addEventListener('click',function(e){e.preventDefault();sinusTamamlandiSinyalGonderVeDon();});
+  document.getElementById('backBtn').addEventListener('click',function(e){e.preventDefault();paneleDon();});
 })();
 
 const G = {
@@ -330,6 +344,19 @@ const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const METIN_ID_PARAM = _kParams.get('metin_id');
 const HEDEF_SURE_DK = parseInt(_kParams.get('sure'));
 
+// ── KADEMELİ KPM BASAMAKLARI ──
+// Kademe: 10-50 arası 5'er, 50-150 arası 10'ar, 150-1000 arası 50'şer,
+// 1000-3000 arası 100'er — tüm okuma tekniklerinde (Akan Kelime dahil)
+// aynı. Native <input type=range> tek sabit "step" desteklediği için
+// slider'ın step'i en ince taneli (1) bırakılıp her hareket sonrası bu
+// listedeki en yakın basamağa yuvarlanıyor.
+const KPM_ADIMLARI=[10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600,2700,2800,2900,3000];
+function enYakinKpmAdimi(deger){
+  let enYakin=KPM_ADIMLARI[0], farkMin=Math.abs(deger-enYakin);
+  for(const a of KPM_ADIMLARI){ const f=Math.abs(deger-a); if(f<farkMin){farkMin=f;enYakin=a;} }
+  return enYakin;
+}
+
 // ── SÜRE SAYACI (bilgi amaçlı — 00:00'dan sayar, admin hedef süresi varsa yanında gösterilir,
 //    ama süre dolduğunda egzersiz KAPANMAZ; sadece metin bitince biter) ──
 let sureSaniye = 0;
@@ -355,7 +382,7 @@ function sureyiDevamEttir(){
 function sureyiDurdur(){ clearInterval(sureInterval); }
 
 function kilitliModuBaslat(){
-  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
+  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(3000, Math.max(10, HIZ_PARAM));
   document.getElementById('kartHiz').style.display='none';
   if(METIN_ID_PARAM){
     document.getElementById('kartMetinSec').style.display='none';
@@ -424,12 +451,19 @@ function filtreUygula(zorluk, el) {
   metinleriYukle();
 }
 
-function hizGuncelle(v) { G.kpm = parseInt(v); document.getElementById('hizDeger').textContent = v + ' KPM'; }
+function hizGuncelle(v) {
+  const yuvarlanan = enYakinKpmAdimi(parseInt(v));
+  document.getElementById('hizSlider').value = yuvarlanan;
+  G.kpm = yuvarlanan;
+  document.getElementById('hizDeger').textContent = yuvarlanan + ' KPM';
+}
 
 function oyunHizGuncelle(v) {
-  G.kpm = parseInt(v);
-  document.getElementById('oyunHizDeger').textContent = v + ' KPM';
-  document.getElementById('hudHiz').textContent = v + ' KPM';
+  const yuvarlanan = enYakinKpmAdimi(parseInt(v));
+  document.getElementById('oyunHizSlider').value = yuvarlanan;
+  G.kpm = yuvarlanan;
+  document.getElementById('oyunHizDeger').textContent = yuvarlanan + ' KPM';
+  document.getElementById('hudHiz').textContent = yuvarlanan + ' KPM';
   if (G.calisiyor) { clearTimeout(G.timeout); sonrakiCumle(); }
 }
 
@@ -545,7 +579,18 @@ function menuye() { G.calisiyor = false; clearTimeout(G.timeout); sureyiDurdur()
 function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
 if(KILITLI && METIN_ID_PARAM){ kilitliMetinYukle(); } else { metinleriYukle(); }
-function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');let hedef='index.html';if(from==='ogrenci'||from==='ogrenci-serbest')hedef='ogrenci-panel.html';else if(from==='ogretmen')hedef='ogretmen.html';else if(from==='admin')hedef='admin.html';setTimeout(()=>{window.location.href=hedef;},200);}
+
+// ── PANELe TAMAMLANMA SİNYALİ + DÖNÜŞ (SADECE bitir()'den çağrılır) ──
+function sinusTamamlandiSinyalGonderVeDon(){
+  try{
+    const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
+    if(b&&b.tamamlandiMi===false){
+      b.tamamlandiMi=true;b.puan=10;
+      localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+    }
+  }catch(e){}
+  setTimeout(()=>{window.location.href=panelDonusUrl();},200);
+}
 </script>
 </body>
 </html>
