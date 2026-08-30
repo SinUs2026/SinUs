@@ -115,6 +115,20 @@ tr:hover td{background:#f8fafc}
 .olcum-yap-secenek-btn{text-align:left;padding:0.9rem 1.2rem;border:1.5px solid #e2e8f0;border-radius:10px;background:white;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.92rem;width:100%;transition:border-color 0.2s}
 .olcum-yap-secenek-btn:hover{border-color:#2563a8}
 .metin-onizleme{background:#f8fafc;border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;line-height:1.6;color:#475569;max-height:80px;overflow:hidden}
+.liste-secici{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.85rem 1.1rem;cursor:pointer;transition:all 0.2s}
+.liste-secici:hover{background:#f0f7ff;border-color:#93c5fd}
+.liste-secici-etiket{font-size:0.9rem;font-weight:700;color:#0a1628}
+.liste-secici-ok{color:#2563a8;font-size:0.8rem;transition:transform 0.2s;flex-shrink:0}
+.liste-secici.acik .liste-secici-ok{transform:rotate(180deg)}
+.liste-govde{display:none;margin-top:0.9rem}
+.liste-govde.acik{display:block}
+.siralama-satir{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem}
+.siralama-satir label{font-size:0.78rem;font-weight:600;color:#64748b}
+.siralama-select{padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none}
+.liste-satir-tek{display:flex;align-items:center;gap:0.7rem;padding:0.6rem 0.7rem;border-radius:8px;font-size:0.85rem;border-bottom:1px solid #f8fafc;flex-wrap:wrap}
+.liste-satir-tek:hover{background:#f8fafc}
+.liste-satir-baslik{flex:1;font-weight:600;color:#1e293b;min-width:140px}
+.liste-satir-meta{color:#94a3b8;font-size:0.78rem;white-space:nowrap}
 .sayfa{display:none}
 .sayfa.aktif{display:block}
 .grup-aciklama{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:0.83rem;color:#0369a1;line-height:1.6}
@@ -849,34 +863,98 @@ async function olcumYapAc(){
       headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
     });
     _olcumYapMetinler=await res.json();
-    if(!_olcumYapMetinler.length){
-      icerik.innerHTML='<div style="max-width:520px;margin:4rem auto;text-align:center"><div class="bos-durum">📭 Henüz ölçüm metni eklenmemiş.</div><button class="btn-iptal" onclick="olcumYapKapat()">Kapat</button></div>';
-      return;
-    }
-    icerik.innerHTML=`
-      <div style="max-width:640px;margin:0 auto">
-        <h2 style="font-family:'Playfair Display',serif;margin-bottom:1.5rem;color:#0a1628">📏 Ölçüm Metni Seç</h2>
-        <div style="display:flex;flex-direction:column;gap:0.75rem">
-          ${_olcumYapMetinler.map((m,i)=>`
-            <div class="olcum-yap-secim-karti" onclick="olcumYapMetinSec(${i})">
-              <div style="font-weight:700;color:#0a1628">${m.baslik}</div>
-              <div style="font-size:0.8rem;color:#64748b;margin-top:0.2rem">${GRUP_ADLARI[m.yas_grubu]||''} · ${m.kelime_sayisi||0} kelime · ${(m.sorular||[]).length} soru</div>
-            </div>
-          `).join('')}
-        </div>
-        <button class="btn-iptal" style="margin-top:1.5rem" onclick="olcumYapKapat()">İptal</button>
-      </div>`;
+    olcumYapGrupEkraniGoster();
   }catch(e){
     icerik.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';
   }
 }
 
-function olcumYapMetinSec(idx){
-  const m=_olcumYapMetinler[idx];
+// ── EKRAN 1: YAŞ GRUBU SEÇİMİ ──
+let _olcumYapSeciliGrup=null;
+function olcumYapGrupEkraniGoster(){
+  const icerik=document.getElementById('olcum-yap-icerik');
+  if(!_olcumYapMetinler.length){
+    icerik.innerHTML='<div style="max-width:520px;margin:4rem auto;text-align:center"><div class="bos-durum">📭 Henüz ölçüm metni eklenmemiş.</div><button class="btn-iptal" onclick="olcumYapKapat()">Kapat</button></div>';
+    return;
+  }
+  icerik.innerHTML=`
+    <div style="max-width:640px;margin:0 auto">
+      <h2 style="font-family:'Playfair Display',serif;margin-bottom:1.5rem;color:#0a1628">📏 Yaş Grubunu Seç</h2>
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        ${[1,2,3,4,5,6].map(g=>{
+          const sayi=_olcumYapMetinler.filter(m=>m.yas_grubu===g).length;
+          return `<div class="olcum-yap-secim-karti" onclick="olcumYapGrupSec(${g})" style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong style="color:#0a1628">Grup ${g}</strong><span style="color:#64748b;margin-left:8px">${GRUP_ADLARI[g]?GRUP_ADLARI[g].split('–')[1].trim():''}</span></div>
+            <span style="font-size:0.8rem;color:#94a3b8">${sayi} metin</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="btn-iptal" style="margin-top:1.5rem" onclick="olcumYapKapat()">İptal</button>
+    </div>`;
+}
+
+function olcumYapGrupSec(grupNo){
+  _olcumYapSeciliGrup=grupNo;
+  _olcumYapSeciliIdx=null;
+  olcumYapMetinListesiGoster();
+}
+
+// ── EKRAN 2: METİN + YAZI BOYUTU SEÇİMİ (aynı ekranda) ──
+let _olcumYapSeciliIdx=null;
+let _olcumYapSeciliBoyut=1.3;
+function olcumYapMetinListesiGoster(){
+  const icerik=document.getElementById('olcum-yap-icerik');
+  const metinler=_olcumYapMetinler.filter(m=>m.yas_grubu===_olcumYapSeciliGrup);
+  icerik.innerHTML=`
+    <div style="max-width:640px;margin:0 auto">
+      <button class="btn-iptal" onclick="olcumYapGrupEkraniGoster()" style="margin-bottom:1rem;padding:0.5rem 1rem">◀ Gruplara Dön</button>
+      <h2 style="font-family:'Playfair Display',serif;margin-bottom:0.2rem;color:#0a1628">📄 Metin Seç</h2>
+      <p style="color:#64748b;font-size:0.85rem;margin-bottom:1.2rem">Grup ${_olcumYapSeciliGrup} — ${GRUP_ADLARI[_olcumYapSeciliGrup]?GRUP_ADLARI[_olcumYapSeciliGrup].split('–')[1].trim():''}</p>
+      ${!metinler.length ? '<div class="bos-durum">📭 Bu grupta henüz metin yok.</div>' : `
+      <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.5rem" id="olcum-yap-metin-liste">
+        ${metinler.map(m=>{
+          const gercekIdx=_olcumYapMetinler.indexOf(m);
+          return `<div class="olcum-yap-secim-karti" data-idx="${gercekIdx}" onclick="olcumYapMetinSeciliYap(${gercekIdx},this)">
+            <div style="font-weight:700;color:#0a1628">${m.baslik}</div>
+            <div style="font-size:0.8rem;color:#64748b;margin-top:0.2rem">${m.kelime_sayisi||0} kelime · ${(m.sorular||[]).length} soru</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="yazi-boyut-satir" style="margin-bottom:1.5rem">
+        <span class="yazi-boyut-etiket">Yazı Boyutu:</span>
+        <button type="button" class="yazi-boyut-btn" data-boyut="1.05" onclick="olcumYapOnBoyutSec(this)">Küçük</button>
+        <button type="button" class="yazi-boyut-btn secili" data-boyut="1.3" onclick="olcumYapOnBoyutSec(this)">Orta</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="1.6" onclick="olcumYapOnBoyutSec(this)">Büyük</button>
+        <button type="button" class="yazi-boyut-btn" data-boyut="2" onclick="olcumYapOnBoyutSec(this)">Çok Büyük</button>
+      </div>
+      <button class="btn-kaydet" id="olcum-yap-baslat-btn" style="width:100%;padding:1rem;font-size:1rem" disabled onclick="olcumYapOlcumeBasla()">🎯 Ölçüme Başla</button>
+      `}
+    </div>`;
+}
+
+function olcumYapMetinSeciliYap(idx,el){
+  _olcumYapSeciliIdx=idx;
+  document.querySelectorAll('#olcum-yap-metin-liste .olcum-yap-secim-karti').forEach(k=>{k.style.borderColor='#e2e8f0';k.style.background='white';});
+  el.style.borderColor='#2563a8'; el.style.background='#eff6ff';
+  const btn=document.getElementById('olcum-yap-baslat-btn');
+  if(btn) btn.disabled=false;
+}
+
+function olcumYapOnBoyutSec(btn){
+  const grup=btn.parentElement;
+  grup.querySelectorAll('.yazi-boyut-btn').forEach(b=>b.classList.remove('secili'));
+  btn.classList.add('secili');
+  _olcumYapSeciliBoyut=parseFloat(btn.dataset.boyut);
+}
+
+function olcumYapOlcumeBasla(){
+  if(_olcumYapSeciliIdx===null) return;
+  const m=_olcumYapMetinler[_olcumYapSeciliIdx];
   _olcumYap={metin:m,baslaZaman:null,bitisZaman:null,soruIndex:0,dogruSayisi:0,timerInterval:null,duraklatildiMi:false,duraklamaBaslangic:null,toplamDuraklamaMs:0,finalSaniye:null};
   olcumYapGeriSayimGoster();
 }
 
+// ── EKRAN 3: 3-2-1 GERİ SAYIM (dokunulmadı) ──
 function olcumYapGeriSayimGoster(){
   const icerik=document.getElementById('olcum-yap-icerik');
   let n=3;
@@ -896,18 +974,21 @@ function olcumYapGeriSayimGoster(){
   },800);
 }
 
+// ── EKRAN 4: OKUMA (Duraklat/Devam Et dokunulmadı — sadece alan genişletildi
+// ve ön-seçilen yazı boyutu burada başlangıç değeri olarak uygulanıyor) ──
 function olcumYapOkumaEkraniGoster(){
   const icerik=document.getElementById('olcum-yap-icerik');
+  const boyutlar=[1.05,1.3,1.6,2];
   icerik.innerHTML=`
-    <div style="max-width:720px;margin:0 auto">
+    <div style="max-width:1400px;margin:0 auto;padding:0 1rem">
       <div style="position:fixed;top:1.5rem;left:2rem;right:2rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;z-index:5;flex-wrap:wrap">
         <button class="btn-iptal" onclick="olcumYapMetinlereDon()" style="padding:0.5rem 1rem">◀ Metinlere Dön</button>
         <div class="yazi-boyut-satir" style="margin-bottom:0">
           <span class="yazi-boyut-etiket">Yazı:</span>
-          <button type="button" class="yazi-boyut-btn" data-boyut="1.05" onclick="olcumYapYaziBoyutu(this)">Küçük</button>
-          <button type="button" class="yazi-boyut-btn secili" data-boyut="1.3" onclick="olcumYapYaziBoyutu(this)">Orta</button>
-          <button type="button" class="yazi-boyut-btn" data-boyut="1.6" onclick="olcumYapYaziBoyutu(this)">Büyük</button>
-          <button type="button" class="yazi-boyut-btn" data-boyut="2" onclick="olcumYapYaziBoyutu(this)">Çok Büyük</button>
+          <button type="button" class="yazi-boyut-btn${_olcumYapSeciliBoyut===1.05?' secili':''}" data-boyut="1.05" onclick="olcumYapYaziBoyutu(this)">Küçük</button>
+          <button type="button" class="yazi-boyut-btn${_olcumYapSeciliBoyut===1.3?' secili':''}" data-boyut="1.3" onclick="olcumYapYaziBoyutu(this)">Orta</button>
+          <button type="button" class="yazi-boyut-btn${_olcumYapSeciliBoyut===1.6?' secili':''}" data-boyut="1.6" onclick="olcumYapYaziBoyutu(this)">Büyük</button>
+          <button type="button" class="yazi-boyut-btn${_olcumYapSeciliBoyut===2?' secili':''}" data-boyut="2" onclick="olcumYapYaziBoyutu(this)">Çok Büyük</button>
         </div>
         <div style="display:flex;gap:0.6rem;align-items:center">
           <button class="btn-iptal" id="olcum-yap-duraklat-btn" onclick="olcumYapDuraklatToggle()" style="padding:0.5rem 1rem">⏸ Duraklat</button>
@@ -916,10 +997,10 @@ function olcumYapOkumaEkraniGoster(){
       </div>
       <div style="height:5rem"></div>
       <h2 style="font-family:'Playfair Display',serif;margin-bottom:1rem;color:#0a1628">${_olcumYap.metin.baslik}</h2>
-      <div id="olcum-yap-metin-govde" style="font-size:1.3rem;line-height:1.9;color:#1e293b;white-space:pre-wrap;position:relative;transition:font-size 0.15s">${_olcumYap.metin.metin}
+      <div id="olcum-yap-metin-govde" style="font-size:${_olcumYapSeciliBoyut}rem;line-height:1.9;color:#1e293b;white-space:pre-wrap;position:relative;transition:font-size 0.15s;min-height:60vh;max-width:1200px">${_olcumYap.metin.metin}
         <div id="olcum-yap-duraklatildi-ortusu" style="display:none;position:absolute;inset:0;background:rgba(244,246,249,0.92);align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:#64748b">⏸ Duraklatıldı</div>
       </div>
-      <button class="btn-kaydet" style="margin-top:2rem;width:100%;padding:1rem;font-size:1rem" onclick="olcumYapOkumayiBitir()">✅ Okumayı Bitir</button>
+      <button class="btn-kaydet" style="margin-top:2rem;width:100%;max-width:1200px;padding:1rem;font-size:1rem" onclick="olcumYapOkumayiBitir()">✅ Okumayı Bitir</button>
     </div>`;
   _olcumYap.baslaZaman=Date.now();
   _olcumYap.timerInterval=setInterval(olcumYapSureGuncelle,250);
@@ -969,7 +1050,8 @@ function olcumYapDuraklatToggle(){
 function olcumYapMetinlereDon(){
   if(_olcumYap&&_olcumYap.timerInterval) clearInterval(_olcumYap.timerInterval);
   _olcumYap=null;
-  olcumYapAc();
+  // Grup zaten seçiliyse aynı grubun metin listesine dön (yeniden grup seçtirmeye gerek yok).
+  if(_olcumYapSeciliGrup){ olcumYapMetinListesiGoster(); } else { olcumYapGrupEkraniGoster(); }
 }
 
 function olcumYapOkumayiBitir(){
@@ -1048,7 +1130,8 @@ function olcumYapSonucGoster(){
           <div style="font-size:0.78rem;color:#94a3b8">${anlamaOrani!==null?_olcumYap.dogruSayisi+'/'+sorular.length+' doğru':'soru yok'}</div>
         </div>
       </div>
-      <button class="btn-kaydet" style="padding:0.8rem 2rem;margin-right:0.5rem" onclick="olcumYapAc()">🔁 Yeni Ölçüm</button>
+      <button class="btn-kaydet" style="padding:0.8rem 2rem;margin-right:0.5rem" onclick="olcumYapMetinListesiGoster()">🔁 Yeni Ölçüm (Aynı Grup)</button>
+      <button class="btn-iptal" style="padding:0.8rem 2rem;margin-right:0.5rem" onclick="olcumYapGrupEkraniGoster()">↺ Grup Değiştir</button>
       <button class="btn-iptal" style="padding:0.8rem 2rem" onclick="olcumYapKapat()">Kapat</button>
     </div>`;
 }
@@ -1472,6 +1555,17 @@ function modalKapat(tip){
   if(tip==='ogretmen'){document.getElementById('ogr-ad').value='';document.getElementById('ogr-soyad').value='';document.getElementById('ogr-kullanici').value='';document.getElementById('ogr-sifre').value='';}
 }
 function bildirimGoster(mesaj,tip){const el=document.getElementById('bildirim');el.textContent=mesaj;el.className='bildirim '+tip;el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
+
+// ── LİSTE SEÇİCİ (Akan Kelime'deki "metin seçici" ile aynı desen) ──
+// Tek satırlık özet bar + tıklayınca açılan liste. Hikayeler, Ölçüm
+// Metinleri ve Ders Metinleri sayfalarının hepsinde aynı davranış.
+function listeToggle(prefix){
+  const secici=document.getElementById(prefix+'-liste-secici');
+  const govde=document.getElementById(prefix+'-liste-govde');
+  if(!secici||!govde) return;
+  const acikMi=govde.classList.toggle('acik');
+  secici.classList.toggle('acik',acikMi);
+}
 function kelimeSay(){const m=document.getElementById('h-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('kelime-sayac').textContent=s+' kelime';document.getElementById('h-kelime').value=s;}
 function olcumKelimeSay(){const m=document.getElementById('o-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('olcum-kelime-sayac').textContent=s+' kelime';document.getElementById('o-kelime').value=s;}
 function duzenleKelimeSay(){const m=document.getElementById('od-metin').value.trim();const s=m?m.split(/\s+/).length:0;document.getElementById('duzenle-kelime-sayac').textContent=s+' kelime';document.getElementById('od-kelime').value=s;}
@@ -2025,6 +2119,9 @@ async function hikayeSil(id){
   try{await supabase('DELETE','hikayeler',null,'id=eq.'+id);bildirimGoster('🗑️ Hikâye silindi.','basari');hikayeleriYukle();}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
+let _hikayelerVeri=[];
+let _hikayeSiralama='yeni';
+
 async function hikayeleriYukle(){
   const liste=document.getElementById('hikaye-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
@@ -2033,20 +2130,59 @@ async function hikayeleriYukle(){
   if(asama) filtre+='&asama=eq.'+asama;
   if(gun) filtre+='&gun=eq.'+gun;
   try{
-    const hikayeler=await supabase('GET','hikayeler',null,filtre);
-    document.getElementById('hikaye-sayac').textContent=hikayeler.length+' hikâye';
-    if(!hikayeler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz hikâye eklenmemiş.</div>';return;}
-    const renkler={'1':'a1','2':'a2','3':'a3','4':'a4'};
-    liste.innerHTML='<table><thead><tr><th>Seviye</th><th>Gün</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="hikaye-tbody"></tbody></table>';
-    const tbody=document.getElementById('hikaye-tbody');
-    hikayeler.forEach(h=>{
-      const tarih=h.created_at?new Date(h.created_at).toLocaleDateString('tr-TR'):'-';
-      const tr=document.createElement('tr');
-      const mG=kacirAdmin(h.metin),bG=kacirAdmin(h.baslik);
-      tr.innerHTML=`<td><span class="asama-badge ${renkler[h.asama]}">${SEVIYE_ADI[h.asama]||h.asama+'. Seviye ⚠️'}</span></td><td>${h.gun}. Gün</td><td><strong>${h.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${h.metin.substring(0,100)}...</div></td><td>${h.kelime_sayisi||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="hikayeDuzenleAc(${h.id},${h.asama},${h.gun},'${bG}','${mG}',${h.kelime_sayisi||0})" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="hikayeSil(${h.id})">🗑️ Sil</button></td>`;
-      tbody.appendChild(tr);
-    });
+    _hikayelerVeri=await supabase('GET','hikayeler',null,filtre);
+    hikayeListesiCiz();
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+function hikayeSiraliVeri(){
+  const v=[..._hikayelerVeri];
+  if(_hikayeSiralama==='seviye') v.sort((a,b)=>(a.asama-b.asama)||(a.gun-b.gun));
+  else if(_hikayeSiralama==='uzunluk') v.sort((a,b)=>(b.kelime_sayisi||0)-(a.kelime_sayisi||0));
+  else v.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  return v;
+}
+
+function hikayeListesiCiz(){
+  const liste=document.getElementById('hikaye-liste');
+  if(!_hikayelerVeri.length){document.getElementById('hikaye-sayac').textContent='0 hikâye';liste.innerHTML='<div class="bos-durum">📭 Henüz hikâye eklenmemiş.</div>';return;}
+  document.getElementById('hikaye-sayac').textContent=_hikayelerVeri.length+' hikâye';
+  const renkler={'1':'a1','2':'a2','3':'a3','4':'a4'};
+  const veri=hikayeSiraliVeri();
+  liste.innerHTML=`
+    <div class="liste-secici" id="hikaye-liste-secici" onclick="listeToggle('hikaye')">
+      <span class="liste-secici-etiket">📚 ${_hikayelerVeri.length} hikâye — tıkla aç/kapat</span>
+      <span class="liste-secici-ok">▾</span>
+    </div>
+    <div class="liste-govde" id="hikaye-liste-govde">
+      <div class="siralama-satir">
+        <label>Sırala:</label>
+        <select class="siralama-select" onchange="hikayeSiralamaDegisti(this.value)">
+          <option value="yeni" ${_hikayeSiralama==='yeni'?'selected':''}>Yeni Eklenen</option>
+          <option value="seviye" ${_hikayeSiralama==='seviye'?'selected':''}>Seviye / Gün</option>
+          <option value="uzunluk" ${_hikayeSiralama==='uzunluk'?'selected':''}>Uzunluk (Kelime)</option>
+        </select>
+      </div>
+      ${veri.map(h=>{
+        const mG=kacirAdmin(h.metin),bG=kacirAdmin(h.baslik);
+        return `<div class="liste-satir-tek">
+          <span class="asama-badge ${renkler[h.asama]}">${SEVIYE_ADI[h.asama]||h.asama+'. Seviye ⚠️'}</span>
+          <span class="liste-satir-meta">${h.gun}. Gün</span>
+          <span class="liste-satir-baslik">${h.baslik}</span>
+          <span class="liste-satir-meta">${h.kelime_sayisi||'-'} kelime</span>
+          <button class="islem-btn duzenle" onclick="event.stopPropagation();hikayeDuzenleAc(${h.id},${h.asama},${h.gun},'${bG}','${mG}',${h.kelime_sayisi||0})">✏️</button>
+          <button class="islem-btn sil" onclick="event.stopPropagation();hikayeSil(${h.id})">🗑️</button>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function hikayeSiralamaDegisti(v){
+  _hikayeSiralama=v;
+  hikayeListesiCiz();
+  const govde=document.getElementById('hikaye-liste-govde'), secici=document.getElementById('hikaye-liste-secici');
+  if(govde) govde.classList.add('acik');
+  if(secici) secici.classList.add('acik');
 }
 // ── ÖLÇÜM METİNLERİ ──
 async function olcumMetniKaydet(){
@@ -2096,6 +2232,9 @@ async function olcumMetniGuncelle(){
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Güncelle';
 }
+let _olcumMetinleriVeri=[];
+let _olcumMetinSiralama='yeni';
+
 async function olcumMetinleriYukle(){
   const liste=document.getElementById('olcum-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
@@ -2103,20 +2242,58 @@ async function olcumMetinleriYukle(){
   const grup=document.getElementById('filtre-olcum-grup').value;
   if(grup) filtre+='&yas_grubu=eq.'+grup;
   try{
-    const metinler=await supabase('GET','olcum_metinleri',null,filtre);
-    document.getElementById('olcum-sayac').textContent=metinler.length+' metin';
-    if(!metinler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz metin eklenmemiş.</div>';return;}
-    const renkler={'1':'g1','2':'g2','3':'g3','4':'g4','5':'g5','6':'g6'};
-    liste.innerHTML='<table><thead><tr><th>Grup</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="olcum-tbody"></tbody></table>';
-    const tbody=document.getElementById('olcum-tbody');
-    metinler.forEach(m=>{
-      const tarih=m.created_at?new Date(m.created_at).toLocaleDateString('tr-TR'):'-';
-      const tr=document.createElement('tr');
-      const mG=kacirAdmin(m.metin),bG=kacirAdmin(m.baslik);
-      tr.innerHTML=`<td><span class="grup-badge ${renkler[m.yas_grubu]}">${GRUP_ADLARI[m.yas_grubu]}</span></td><td><strong>${m.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${m.metin.substring(0,100)}...</div></td><td>${m.kelime_sayisi||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="olcumMetniDuzenle(${m.id},${m.yas_grubu},'${bG}','${mG}',${m.kelime_sayisi||0})" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="olcumMetniSil(${m.id})">🗑️ Sil</button></td>`;
-      tbody.appendChild(tr);
-    });
+    _olcumMetinleriVeri=await supabase('GET','olcum_metinleri',null,filtre);
+    olcumMetinListesiCiz();
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+function olcumMetinSiraliVeri(){
+  const v=[..._olcumMetinleriVeri];
+  if(_olcumMetinSiralama==='grup') v.sort((a,b)=>(a.yas_grubu-b.yas_grubu));
+  else if(_olcumMetinSiralama==='uzunluk') v.sort((a,b)=>(b.kelime_sayisi||0)-(a.kelime_sayisi||0));
+  else v.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  return v;
+}
+
+function olcumMetinListesiCiz(){
+  const liste=document.getElementById('olcum-liste');
+  if(!_olcumMetinleriVeri.length){document.getElementById('olcum-sayac').textContent='0 metin';liste.innerHTML='<div class="bos-durum">📭 Henüz metin eklenmemiş.</div>';return;}
+  document.getElementById('olcum-sayac').textContent=_olcumMetinleriVeri.length+' metin';
+  const renkler={'1':'g1','2':'g2','3':'g3','4':'g4','5':'g5','6':'g6'};
+  const veri=olcumMetinSiraliVeri();
+  liste.innerHTML=`
+    <div class="liste-secici" id="olcum-liste-secici" onclick="listeToggle('olcum')">
+      <span class="liste-secici-etiket">📏 ${_olcumMetinleriVeri.length} metin — tıkla aç/kapat</span>
+      <span class="liste-secici-ok">▾</span>
+    </div>
+    <div class="liste-govde" id="olcum-liste-govde">
+      <div class="siralama-satir">
+        <label>Sırala:</label>
+        <select class="siralama-select" onchange="olcumMetinSiralamaDegisti(this.value)">
+          <option value="yeni" ${_olcumMetinSiralama==='yeni'?'selected':''}>Yeni Eklenen</option>
+          <option value="grup" ${_olcumMetinSiralama==='grup'?'selected':''}>Yaş Grubuna Göre</option>
+          <option value="uzunluk" ${_olcumMetinSiralama==='uzunluk'?'selected':''}>Uzunluk (Kelime)</option>
+        </select>
+      </div>
+      ${veri.map(m=>{
+        const mG=kacirAdmin(m.metin),bG=kacirAdmin(m.baslik);
+        return `<div class="liste-satir-tek">
+          <span class="grup-badge ${renkler[m.yas_grubu]}">${GRUP_ADLARI[m.yas_grubu]}</span>
+          <span class="liste-satir-baslik">${m.baslik}</span>
+          <span class="liste-satir-meta">${m.kelime_sayisi||'-'} kelime</span>
+          <button class="islem-btn duzenle" onclick="event.stopPropagation();olcumMetniDuzenle(${m.id},${m.yas_grubu},'${bG}','${mG}',${m.kelime_sayisi||0})">✏️</button>
+          <button class="islem-btn sil" onclick="event.stopPropagation();olcumMetniSil(${m.id})">🗑️</button>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function olcumMetinSiralamaDegisti(v){
+  _olcumMetinSiralama=v;
+  olcumMetinListesiCiz();
+  const govde=document.getElementById('olcum-liste-govde'), secici=document.getElementById('olcum-liste-secici');
+  if(govde) govde.classList.add('acik');
+  if(secici) secici.classList.add('acik');
 }
 
 // ── BAĞLAM AVI İÇERİKLERİ ──
@@ -2283,6 +2460,9 @@ async function dersMetniGuncelle(){
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Güncelle';
 }
+let _dersMetinleriVeri=[];
+let _dersMetinSiralama='yeni';
+
 async function dersMetinleriYukle(){
   const liste=document.getElementById('ders-liste');
   liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
@@ -2290,19 +2470,58 @@ async function dersMetinleriYukle(){
   const zorluk=document.getElementById('filtre-ders-zorluk').value;
   if(zorluk) filtre+='&zorluk=eq.'+zorluk;
   try{
-    const metinler=await supabase('GET','ders_metinleri',null,filtre);
-    document.getElementById('ders-sayac').textContent=metinler.length+' metin';
-    if(!metinler.length){liste.innerHTML='<div class="bos-durum">📭 Henüz ders metni eklenmemiş.</div>';return;}
-    liste.innerHTML='<table><thead><tr><th>Zorluk</th><th>Başlık</th><th>Kelime</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="ders-tbody"></tbody></table>';
-    const tbody=document.getElementById('ders-tbody');
-    metinler.forEach(m=>{
-      const tarih=m.created_at?new Date(m.created_at).toLocaleDateString('tr-TR'):'-';
-      const tr=document.createElement('tr');
-      const mG=kacirAdmin(m.metin),bG=kacirAdmin(m.baslik);
-      tr.innerHTML=`<td><span class="zorluk-badge ${m.zorluk}">${ZORLUK_ADLARI[m.zorluk]||m.zorluk}</span></td><td><strong>${m.baslik}</strong><div class="metin-onizleme" style="margin-top:0.3rem">${m.metin.substring(0,100)}...</div></td><td>${m.kelime_sayisi||'-'}</td><td>${tarih}</td><td style="white-space:nowrap"><button class="islem-btn duzenle" onclick="dersMetniDuzenleAc(${m.id},'${m.zorluk}','${bG}','${mG}',${m.kelime_sayisi||0})" style="margin-right:4px">✏️ Düzenle</button><button class="islem-btn sil" onclick="dersMetniSil(${m.id})">🗑️ Sil</button></td>`;
-      tbody.appendChild(tr);
-    });
+    _dersMetinleriVeri=await supabase('GET','ders_metinleri',null,filtre);
+    dersMetinListesiCiz();
   }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+const _ZORLUK_SIRA={basit:1,orta:2,zor:3,cok_zor:4};
+function dersMetinSiraliVeri(){
+  const v=[..._dersMetinleriVeri];
+  if(_dersMetinSiralama==='zorluk') v.sort((a,b)=>(_ZORLUK_SIRA[a.zorluk]||99)-(_ZORLUK_SIRA[b.zorluk]||99));
+  else if(_dersMetinSiralama==='uzunluk') v.sort((a,b)=>(b.kelime_sayisi||0)-(a.kelime_sayisi||0));
+  else v.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  return v;
+}
+
+function dersMetinListesiCiz(){
+  const liste=document.getElementById('ders-liste');
+  if(!_dersMetinleriVeri.length){document.getElementById('ders-sayac').textContent='0 metin';liste.innerHTML='<div class="bos-durum">📭 Henüz ders metni eklenmemiş.</div>';return;}
+  document.getElementById('ders-sayac').textContent=_dersMetinleriVeri.length+' metin';
+  const veri=dersMetinSiraliVeri();
+  liste.innerHTML=`
+    <div class="liste-secici" id="ders-liste-secici" onclick="listeToggle('ders')">
+      <span class="liste-secici-etiket">📖 ${_dersMetinleriVeri.length} metin — tıkla aç/kapat</span>
+      <span class="liste-secici-ok">▾</span>
+    </div>
+    <div class="liste-govde" id="ders-liste-govde">
+      <div class="siralama-satir">
+        <label>Sırala:</label>
+        <select class="siralama-select" onchange="dersMetinSiralamaDegisti(this.value)">
+          <option value="yeni" ${_dersMetinSiralama==='yeni'?'selected':''}>Yeni Eklenen</option>
+          <option value="zorluk" ${_dersMetinSiralama==='zorluk'?'selected':''}>Zorluğa Göre</option>
+          <option value="uzunluk" ${_dersMetinSiralama==='uzunluk'?'selected':''}>Uzunluk (Kelime)</option>
+        </select>
+      </div>
+      ${veri.map(m=>{
+        const mG=kacirAdmin(m.metin),bG=kacirAdmin(m.baslik);
+        return `<div class="liste-satir-tek">
+          <span class="zorluk-badge ${m.zorluk}">${ZORLUK_ADLARI[m.zorluk]||m.zorluk}</span>
+          <span class="liste-satir-baslik">${m.baslik}</span>
+          <span class="liste-satir-meta">${m.kelime_sayisi||'-'} kelime</span>
+          <button class="islem-btn duzenle" onclick="event.stopPropagation();dersMetniDuzenleAc(${m.id},'${m.zorluk}','${bG}','${mG}',${m.kelime_sayisi||0})">✏️</button>
+          <button class="islem-btn sil" onclick="event.stopPropagation();dersMetniSil(${m.id})">🗑️</button>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function dersMetinSiralamaDegisti(v){
+  _dersMetinSiralama=v;
+  dersMetinListesiCiz();
+  const govde=document.getElementById('ders-liste-govde'), secici=document.getElementById('ders-liste-secici');
+  if(govde) govde.classList.add('acik');
+  if(secici) secici.classList.add('acik');
 }
 
 // ── BLOG YAZILARI ──
