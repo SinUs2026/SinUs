@@ -276,8 +276,6 @@ const EGZERSIZLER={
   goz:[{dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip'},{dosya:'goz-asagi-yukari.html',isim:'Yukarı-Aşağı Takip'},{dosya:'goz-sekil.html',isim:'Şekil Takibi'},{dosya:'goz-genel.html',isim:'Genel Hareket'}],
   odak:[{dosya:'meteor-takibi.html',isim:'Meteor Takibi'},{dosya:'ev-takibi.html',isim:'Ev Takibi'},{dosya:'sayi-avi.html',isim:'Sayı Avı'},{dosya:'merkez-nokta.html',isim:'Merkez Nokta'},{dosya:'gizli-nesne.html',isim:'Gizli Nesne'}],
   okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin (Silinen Cümle)'},{dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'},{dosya:'tarama-teknigi.html',isim:'Tarama Tekniği'},{dosya:'beliren-metin.html',isim:'Beliren Metin'},{dosya:'goz-rotasi.html',isim:'Göz Rotası'}],
-  // Göz/Odak/Okuma kategorilerinin hiçbirine net oturmayan, cevap/kontrol
-  // mekanizması kendi içinde olan egzersizler burada.
   genel:[{dosya:'kritik-kelime-avi.html',isim:'Kritik Kelime Avı'},{dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca'},{dosya:'blok-okuma.html',isim:'Blok Okuma'},{dosya:'baglam-avi.html',isim:'Bağlam Avı'},{dosya:'kelime-takibi.html',isim:'Kelime Takibi'}]
 };
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',genel:'🗂️'};
@@ -289,10 +287,11 @@ const SABLONLAR={
   anlama:[{tip:'goz',dosya:'goz-genel.html',isim:'Genel Hareket',sure:2,hiz:5},{tip:'odak',dosya:'merkez-nokta.html',isim:'Merkez Nokta',sure:3,hiz:5},{tip:'okuma',dosya:'tarama-teknigi.html',isim:'Tarama Tekniği',sure:5,hiz:250},{tip:'okuma',dosya:'orp-okuma.html',isim:'ORP Okuma',sure:5,hiz:250}]
 };
 // KPM (okuma hızı) adım listesi — 50'nin altında daha kademeli (5'er ve 10'ar),
-// 50'den sonra 1000'e kadar 50'şer. Okuma tekniği hız kaydırıcısı (aşağıdaki
-// "okuma" HIZ_ARALIK'ı kullanan, yani OZEL_HIZ_ARALIK'ta özel tanımı olmayan
-// dosyalar için) artık bu listedeki EN YAKIN değere yuvarlanıyor.
-const KPM_ADIMLARI=[10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000];
+// 50'den 1000'e kadar 50'şer, 1000'den 3000'e kadar daha seyrek (normal üstü
+// hızlı öğrencilere yer açmak için genişletildi). Okuma tekniği hız
+// kaydırıcısı (OZEL_HIZ_ARALIK'ta özel tanımı olmayan dosyalar için) artık
+// bu listedeki EN YAKIN değere yuvarlanıyor.
+const KPM_ADIMLARI=[10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600,2700,2800,2900,3000];
 function enYakinKpmAdimi(deger){
   let enYakin=KPM_ADIMLARI[0];
   let farkMin=Math.abs(deger-enYakin);
@@ -305,60 +304,32 @@ function enYakinKpmAdimi(deger){
 const HIZ_ARALIK={
   goz:{min:1,max:10,adim:1,varsayilan:5,birim:''},
   odak:{min:1,max:10,adim:1,varsayilan:5,birim:''},
-  // min/max 10-1000 aralığına genişletildi (eskiden 50-1000 idi). "adim:5" sadece
-  // kaydırıcının kendi hareketini yumuşatmak için — gerçek kaydedilen değer
-  // hizGuncelle() içinde KPM_ADIMLARI listesindeki en yakın basamağa yuvarlanıyor.
-  okuma:{min:10,max:1000,adim:5,varsayilan:300,birim:' KPM'},
+  // min/max 10-3000 aralığına genişletildi (eskiden 10-1000 idi) — normal üstü
+  // hızlı öğrencilerin adaptif hızına admin'in de yetişebilmesi için. "adim:5"
+  // sadece kaydırıcının kendi hareketini yumuşatmak için — gerçek kaydedilen
+  // değer hizGuncelle() içinde KPM_ADIMLARI listesindeki en yakın basamağa
+  // yuvarlanıyor.
+  okuma:{min:10,max:3000,adim:5,varsayilan:300,birim:' KPM'},
   genel:{min:1,max:10,adim:1,varsayilan:5,birim:''}
 };
 const OZEL_HIZ_ARALIK={
   'kelime-bulmaca.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'},
-  // Blok Okuma artık diğer okuma teknikleriyle aynı KPM sistemini kullanıyor
-  // (egzersizin kendi kaydırıcısı: min 50, max 1000, adım 50, varsayılan 200).
-  // ESKİDEN burada "ms" tabanlı 200-2000 aralığı vardı — egzersiz dosyası KPM'e
-  // geçtiği için bu artık yanlıştı (admin "800 ms" sanıp seçerken egzersiz
-  // bunu "800 KPM" olarak okuyordu, birim tamamen farklıydı).
   'blok-okuma.html':{min:50,max:1000,adim:50,varsayilan:200,birim:' KPM'},
-  // Kritik Kelime Avı'nda "hiz" alanı aslında metnin görme SÜRESİNİ (saniye)
-  // temsil eder — egzersizin kendi menüsündeki PLUS/Seviye 1-5 karşılıkları
-  // 4/10/20/30/40/50 sn'dir; öğretmen burada da bu aralıkta serbestçe seçebilir.
   'kritik-kelime-avi.html':{min:4,max:50,adim:1,varsayilan:10,birim:' sn (görme süresi)'},
-  // Ev Takibi'nin kendi menüsünde SABİT 4 seviye var (SEVİYE 1-4). Genel
-  // "odak" kategorisinin 1-10 aralığı burada YANLIŞ — kilitli moddaki kod
-  // her şeyi Math.min(4,...) ile kırptığı için 5'in üstü hiçbir değer hiçbir
-  // zaman görünmüyor, hepsi sessizce "Seviye 4" oluyordu.
   'ev-takibi.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'}
 };
 const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html','kritik-kelime-avi.html','baglam-avi.html'];
 const TEMA_GEREKEN_DOSYALAR=['blok-okuma.html'];
 const SEKIL_GEREKEN_DOSYALAR=['goz-sekil.html'];
 const NOKTA_GEREKEN_DOSYALAR=['goz-sag-sol.html','goz-asagi-yukari.html'];
-// Bağlam Avı, KPM tabanlı hız yerine zorluk (baslangic/orta/ileri/plus) +
-// çalışma modu (normal/sureli) ile çalışır — kendi içeriğini rastgele seçer,
-// bu yüzden metin seçimi de gerekmez (yukarıdaki METIN_GEREKMEYEN_DOSYALAR'a eklendi).
 const ZORLUK_GEREKEN_DOSYALAR=['baglam-avi.html'];
 const ZORLUK_ADI={baslangic:'Başlangıç',orta:'Orta',ileri:'İleri',plus:'Plus'};
 const SEKIL_ISIM={daire:'Daire',kare:'Kare',sekiz:'Sekiz (∞)',ucgen:'Üçgen',zigzag:'Zigzag'};
-// Kelime Takibi kendine özgü 3 parametreli bir sisteme sahip (kelimeSayisi,
-// hiz-ENUM, gosterim) — genel "1-10 hız" ya da KPM tabanlı sistemlerle UYUMSUZ.
-// Yanlışlıkla sayısal bir hız atanırsa egzersiz HIZ_MS['sayı'] undefined
-// döndüğü için sonsuz bekleme döngüsüne girip donar. Bu yüzden ayrı form
-// alanları kullanılır (bkz. formGrupKtSayisi/KtHiz/KtGosterim).
 const KELIME_TAKIBI_DOSYASI=['kelime-takibi.html'];
 
 let mevcutGorevler=[];
 let secilenTip=null;
 let mevcutProgramId=null;
-
-// ══════════════════════════════════════════════════════════════
-// GÜNÜN SEVİYE METNİ — okuma tekniği görevleri artık ayrı bir metin
-// seçilerek değil, o günün "hikayeler" kaydından (asama+gun eşleşmesi)
-// OTOMATİK atanır. Bu, gün içi teknik egzersizlerde okunan metinle
-// "Günü Bitir" ekranında çıkan hikayenin HER ZAMAN birebir aynı olmasını
-// garanti eder — admin artık ayrıca bir metin seçmez, yanlış gün seçme
-// riski de ortadan kalkar. "Metin (Okuma Tekniği)" alanı artık salt
-// bilgilendirme amaçlıdır (bkz. metinBilgiKutusunuGuncelle).
-// ══════════════════════════════════════════════════════════════
 let mevcutGunHikayesi=null;
 
 async function gunHikayesiYukle(asama,gun){
@@ -433,9 +404,6 @@ function hizGuncelle(){
   const aralik=ozel||HIZ_ARALIK[secilenTip]||HIZ_ARALIK.goz;
   const slider=document.getElementById('hizSlider');
   if(!ozel && secilenTip==='okuma'){
-    // Genel KPM aralığı (özel bir dosya tanımı yoksa): kaydırıcıdaki ham değeri
-    // kademeli KPM_ADIMLARI listesindeki en yakın basamağa yuvarla ve kaydırıcının
-    // kendisini de o değere sabitle — böylece "Listeye Ekle" tam bu değeri kaydeder.
     const yuvarlanan=enYakinKpmAdimi(parseInt(slider.value));
     slider.value=yuvarlanan;
     document.getElementById('hizDeger').textContent=yuvarlanan+aralik.birim;
@@ -474,8 +442,6 @@ function listeGuncelle(){
   mevcutGorevler.forEach((g,i)=>{
     const div=document.createElement('div');div.className='gorev-item';
     const isim=g.isim;
-    // Hız/süre birimi: önce egzersize özel aralık (ör. Kritik Kelime Avı'nda "sn"),
-    // yoksa genel tip aralığı (ör. okuma → KPM) kullanılır.
     const hizBirim=(OZEL_HIZ_ARALIK[g.dosya]||HIZ_ARALIK[g.tip]||{}).birim||'';
     const hizGosterim=(g.hiz!==undefined&&g.hiz!==null)?`<span class="badge" style="background:#f1f5f9;color:#475569">🎚 ${g.hiz}${hizBirim}</span>`:'';
     const metinGosterim=g.metin_id?`<span class="badge" style="background:#fefce8;color:#b45309">📖 ${g.metin_baslik||('#'+g.metin_id)}</span>`:'';
@@ -509,13 +475,9 @@ function gorevEkle(){
   const gorev={tip:secilenTip,dosya,isim:egz?egz.isim:dosya,sure};
 
   if(ZORLUK_GEREKEN_DOSYALAR.includes(dosya)){
-    // Bağlam Avı: hız yerine zorluk + mod kaydedilir.
     gorev.zorluk=document.getElementById('secZorluk').value;
     gorev.mod=document.getElementById('secMod').value;
   }else if(KELIME_TAKIBI_DOSYASI.includes(dosya)){
-    // Kelime Takibi: hiz bir ENUM string'idir (yavas/normal/hizli/cokhizli),
-    // 1-10 arası sayısal ölçekle KARIŞTIRILMAMALI — egzersiz dosyası bu
-    // stringi HIZ_MS objesinde doğrudan arıyor.
     gorev.hiz=document.getElementById('secKtHiz').value;
     gorev.kelimeSayisi=parseInt(document.getElementById('secKtSayisi').value);
     gorev.gosterim=parseInt(document.getElementById('secKtGosterim').value);
@@ -549,9 +511,6 @@ function siraDegistir(idx,yon){const y=idx+yon;if(y<0||y>=mevcutGorevler.length)
 
 function sablonUygula(s){
   if(mevcutGorevler.length>0&&!confirm('Mevcut görevlerin üzerine yazılacak. Devam edilsin mi?'))return;
-  // Şablondaki okuma görevleri gorevEkle() akışından geçmediği için metin_id
-  // burada elle eklenir — böylece şablon kullanıldığında da o günün Seviye
-  // Metni otomatik atanmış olur.
   mevcutGorevler=SABLONLAR[s].map(g=>{
     const kopya=Object.assign({},g);
     if(kopya.tip==='okuma' && !METIN_GEREKMEYEN_DOSYALAR.includes(kopya.dosya) && mevcutGunHikayesi){
