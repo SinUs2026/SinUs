@@ -221,7 +221,7 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
             <span style="font-weight:600;color:#2563a8" id="okumHizi">— kpm</span>
           </div>
           <div class="ilerleme-bar"><div class="ilerleme-dolu" id="hizBar" style="width:0%"></div></div>
-          <div class="ilerleme-yazi"><span>Sistem üst sınırı: 1000 kpm</span><span id="hizYuzde">%0</span></div>
+          <div class="ilerleme-yazi"><span>Sistem üst sınırı: 3000 kpm</span><span id="hizYuzde">%0</span></div>
         </div>
       </div>
     </div>
@@ -594,7 +594,7 @@ function bilgileriYukle(){
   // Okuma hızı
   const hiz=ogrenci.okuma_hizi||0;
   document.getElementById('okumHizi').textContent=(hiz||'—')+' kpm';
-  const hizYuzde=Math.min(100,Math.round((hiz/1000)*100));
+  const hizYuzde=Math.min(100,Math.round((hiz/3000)*100));
   document.getElementById('hizBar').style.width=hizYuzde+'%';
   document.getElementById('hizYuzde').textContent='%'+hizYuzde;
 }
@@ -1034,7 +1034,11 @@ function baslangicOlcumuOkumayiBitir(){
   const saniye=Math.max(1,Math.round((_baslangicOlcum.bitisZaman-_baslangicOlcum.baslaZaman)/1000));
   const kelime=_baslangicOlcum.metin.kelime_sayisi||0;
   const hamHiz=kelime>0?Math.round(kelime/(saniye/60)):0;
-  const hiz=Math.min(hamHiz,1000);
+  // Azami okuma hızı 3000 kelime/dk — bu tavan neredeyse hiçbir zaman
+  // pratikte ulaşılamayacak kadar yüksek; amacı gerçek ölçüm hatası
+  // (örn. kelime_sayisi hatalı girilmiş) sonucu saçma bir değer
+  // kaydedilmesini önlemek, normal üstü hızlı öğrencileri kısıtlamak değil.
+  const hiz=Math.min(hamHiz,3000);
   window._boHiz=hiz;
   const sorular=_baslangicOlcum.metin.sorular||[];
   const icerik=document.getElementById('bo-icerik');
@@ -1202,10 +1206,10 @@ function okumayiBitir(){
   const saniye=Math.max(1,Math.round((gbBitisZaman-gbBaslaZaman)/1000));
   const kelime=mevcutHikaye.kelime_sayisi||0;
   const hamHiz=kelime>0?Math.round(kelime/(saniye/60)):0;
-  // Sistemin desteklediği azami okuma hızı 1000 kelime/dk'dır (bkz. egzersiz
-  // hız ölçekleri). Süre ölçümü ne kadar kısa olursa olsun, kaydedilen/gösterilen
-  // hız bu gerçekçi tavanın üzerine çıkamaz.
-  const hiz=Math.min(hamHiz,1000);
+  // Sistemin desteklediği azami okuma hızı 3000 kelime/dk'dır — normal üstü
+  // hızlı okuyan öğrencileri kısıtlamamak için yüksek tutuldu, sadece ölçüm
+  // hatası kaynaklı saçma değerlere karşı bir güvenlik tavanı.
+  const hiz=Math.min(hamHiz,3000);
 
   // ── GERÇEKÇİLİK KONTROLÜ ──
   // Ölçülen hız, mevcut kayıtlı hızın %70'inden fazla artış gösteriyorsa
@@ -1214,11 +1218,10 @@ function okumayiBitir(){
   // aynı metni tekrar okuması isteniyor. Bu ölçüm HİÇBİR ŞEKİLDE kaydedilmiyor.
   const mevcutHiz = (ogrenci && ogrenci.okuma_hizi) || 0;
   if(mevcutHiz > 0 && hiz > mevcutHiz * 1.7){
-    document.getElementById('gbUyariMetin').textContent =
+    oturumTekrarUyarisiGoster(
       'Ölçülen hız ('+hiz+' kelime/dakika), mevcut hızından ('+mevcutHiz+' kelime/dakika) çok daha yüksek çıktı. '+
-      'Muhtemelen metni tam okumadan bitirdin. Lütfen metni gerçekten okuyarak tekrar dene.';
-    document.getElementById('gbEkran1').style.display='none';
-    document.getElementById('gbEkranUyari').style.display='block';
+      'Muhtemelen metni tam okumadan bitirdin. Lütfen metni gerçekten okuyarak tekrar dene.'
+    );
     return;
   }
 
@@ -1230,10 +1233,20 @@ function okumayiBitir(){
   window._sure_dk=Math.round((saniye/60)*10)/10;
 }
 
+// Günü Bitir akışında iki farklı sebepten (gerçekçi olmayan hız ölçümü YA DA
+// düşük anlama oranı) tetiklenebilen ortak "tekrar dene" ekranı. Hangi ekran
+// aktifse (gbEkran1: hikaye, gbEkran2: sorular) onu gizleyip uyarıyı gösterir.
+function oturumTekrarUyarisiGoster(mesaj){
+  document.getElementById('gbUyariMetin').textContent = mesaj;
+  document.getElementById('gbEkran1').style.display='none';
+  document.getElementById('gbEkran2').style.display='none';
+  document.getElementById('gbEkranUyari').style.display='block';
+}
+
 // Uyarı ekranındaki "Tekrar Dene" — aynı hikayeyi (mevcutHikaye) baştan,
 // yeni bir 3-2-1 geri sayımla tekrar okutur. gbEkran1'in kendi içeriği hiç
 // bozulmadığı için hikayeEkraniGoster() sorunsuz devam eder.
-function gercekciDegilTekrarDene(){
+function gbOturumuTekrarBaslat(){
   document.getElementById('gbEkranUyari').style.display='none';
   document.getElementById('gbEkran0').style.display='block';
   gunuBitirGeriSayimBaslat();
@@ -1279,6 +1292,20 @@ async function sonuclariGoster(){
   // Bu hikayede hiç soru yoksa anlama fiilen ölçülemez; öğrenciyi bu eksiklik
   // yüzünden cezalandırmamak için %70 eşiğini geçmiş kabul ediyoruz (oran=100).
   const oranTahmin=toplam>0?Math.round((dogru/toplam)*100):100;
+
+  // ── MİNİMUM ANLAMA EŞİĞİ (gün ilerlemesi için) ──
+  // Anlama oranı %50'nin altındaysa gün İLERLEMİYOR — sonuç ekranına hiç
+  // geçilmeden, RPC'ye hiç gidilmeden (yani kaydedilmeden) öğrenciye uyarı
+  // gösterilip aynı metni tekrar okuması isteniyor. %50-%69 arası anlama gün
+  // ilerletir ama hız artışı için hâlâ %70 gerekir (ayrı, değişmeyen kural).
+  if(oranTahmin < 50){
+    oturumTekrarUyarisiGoster(
+      'Anlama oranın ('+dogru+'/'+toplam+' doğru, %'+oranTahmin+') %50\'nin altında kaldı. '+
+      'Lütfen okuma testini tekrar et.'
+    );
+    return;
+  }
+
   const hiz=window._okuma_hizi||0;
   const asama=ogrenci.asama||1;
   const gun=ogrenci.mevcut_gun||1;
@@ -1460,7 +1487,7 @@ async function yolculukYukle(){
       <div style="font-size:2.5rem;margin-bottom:1rem">🤔</div>
       <h2 style="font-family:'Playfair Display',serif;color:white;font-size:1.4rem;margin-bottom:1rem">Bu Ölçüm Gerçekçi Görünmüyor</h2>
       <p id="gbUyariMetin" style="color:rgba(255,255,255,0.75);line-height:1.7;margin-bottom:1.5rem;max-width:480px;margin-left:auto;margin-right:auto"></p>
-      <button onclick="gercekciDegilTekrarDene()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">🔁 Tekrar Dene</button>
+      <button onclick="gbOturumuTekrarBaslat()" style="background:#d4af37;color:#0a1628;border:none;padding:1rem 3rem;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit">🔁 Tekrar Dene</button>
     </div>
 
     <!-- EKRAN 2: SORULAR -->
