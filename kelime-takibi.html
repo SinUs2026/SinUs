@@ -51,12 +51,10 @@ body.egzersiz-aktif .header{display:none;}
 .start-btn:disabled{opacity:0.4;cursor:not-allowed;}
 .geri-btn{margin-top:10px;color:rgba(106,138,170,0.8);font-size:0.8rem;text-decoration:none;display:block;text-align:center;padding:8px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;}
 
-/* GERİ SAYIM */
 .geri-sayim-num{font-family:'Orbitron',sans-serif;font-size:5rem;font-weight:900;color:var(--accent);text-shadow:0 0 30px rgba(0,212,255,0.5);animation:pulseIn 0.5s ease;}
 .geri-sayim-basla{font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:900;color:var(--green);text-shadow:0 0 30px rgba(0,255,136,0.5);animation:pulseIn 0.4s ease;}
 @keyframes pulseIn{from{transform:scale(0.5);opacity:0;}to{transform:scale(1);opacity:1;}}
 
-/* EGZERSİZ EKRANI */
 .egz-hud{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:900px;padding:6px 4px;flex-shrink:0;}
 .egz-ilerleme{font-family:'Orbitron',sans-serif;font-size:0.85rem;color:var(--grey);letter-spacing:1px;padding-top:env(safe-area-inset-top,0px);}
 .egz-duraklat{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--white);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
@@ -69,7 +67,6 @@ body.egzersiz-aktif .header{display:none;}
 .pause-baslik{font-family:'Orbitron',sans-serif;font-size:1.1rem;color:var(--accent);letter-spacing:2px;}
 .devam-btn{padding:14px 40px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:14px;color:var(--bg);font-family:'Orbitron',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;}
 
-/* DİKKAT KONTROLÜ */
 .dikkat-hud{width:100%;max-width:700px;text-align:center;margin-bottom:10px;}
 .dikkat-soru-no{font-size:0.65rem;color:var(--grey);letter-spacing:2px;font-family:'Orbitron',sans-serif;}
 .dikkat-soru{font-family:'Orbitron',sans-serif;font-size:1.15rem;font-weight:900;text-align:center;margin:10px 0 18px;}
@@ -83,7 +80,6 @@ body.egzersiz-aktif .header{display:none;}
 .secenek-btn.disabled{pointer-events:none;opacity:0.55;}
 .secenek-btn.disabled.dogru-isaretli,.secenek-btn.disabled.yanlis-isaretli{opacity:1;}
 
-/* SONUÇ */
 .sonuc-kart{width:100%;max-width:520px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:26px 24px;text-align:center;margin:16px 0;}
 .sonuc-icon{font-size:2.6rem;display:block;margin-bottom:6px;}
 .sonuc-baslik{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;margin-bottom:16px;color:var(--green);}
@@ -218,20 +214,17 @@ const SECENEK_HARF=['A','B','C','D'];
 const HIZ_MS={yavas:1200,normal:800,hizli:500,cokhizli:300};
 const HIZ_ADI={yavas:'Yavaş',normal:'Normal',hizli:'Hızlı',cokhizli:'Çok Hızlı'};
 
-// 9 bölgeli konum grid'i (row=floor(i/3), col=i%3)
 const POZISYONLAR=[
   {ad:'sol-ust',left:15,top:18},{ad:'ust-orta',left:50,top:14},{ad:'sag-ust',left:85,top:18},
   {ad:'sol-orta',left:11,top:50},{ad:'merkez',left:50,top:50},{ad:'sag-orta',left:89,top:50},
   {ad:'sol-alt',left:15,top:83},{ad:'alt-orta',left:50,top:87},{ad:'sag-alt',left:85,top:83}
 ];
 
-// ── KELİME HAVUZLARI ──
 const HAVUZ_1=["kitap","merak","bilgi","düşünce","keşif","öğrenmek","araştırmak","yolculuk","başarı","dikkat","odaklanmak","gözlem","deneyim","hayal","gelecek","bilim","doğa","teknoloji","gezegen","enerji","zeka","hafıza","algı","sezgi","ilham","cesaret","azim","sabır","disiplin","hedef","plan","strateji","yaratıcılık","keşfetmek","gözlemlemek","araştırma","buluş","icat","deney","laboratuvar","evren","yıldız","galaksi","uzay","atom","molekül","hücre","canlı","ekosistem","iklim","orman","okyanus","nehir","dağ","mağara","rüzgar","güneş","ay","bulut","yağmur","kar","mevsim","tarih","uygarlık","kültür","sanat","müzik","edebiyat","şiir","roman","yazar","kahraman","macera","gizem","harita","pusula","rota","keşifçi","kaşif","gemi","uçak","robot","robotik","bilgisayar","internet","yazılım","kod","mühendis","mimar","mimarlık","tasarım","fikir","çözüm","problem","soru","cevap","mantık","akıl","zihin","beyin","sinir","refleks","hız","çeviklik","denge","esneklik","güç","dayanıklılık","spor","antrenman"];
 const HAVUZ_2=["yeni fikirler","büyük hedefler","meraklı gözler","güçlü hafıza","hızlı düşünme","derin öğrenme","bilim dünyası","uzay yolculuğu","dikkat merkezi","başarı yolculuğu","gizli hazine","uzak galaksi","parlak yıldız","güçlü rüzgar","doğal denge","canlı ekosistem","tarihi eser","sanat eseri","yaratıcı fikir","cesur adım","sabırlı çalışma","disiplinli çalışma","akıllı çözüm","mantıklı cevap","zihinsel güç","fiziksel denge","teknik beceri","dijital dünya","sanal gerçeklik","doğal kaynak","temiz enerji","güneş enerjisi","derin okyanus","yüksek dağ","gizemli mağara","eski harita","doğru pusula","uzun yolculuk","kısa mesafe","hızlı tepki","keskin zeka","geniş bakış","farklı bakış","ortak hedef","güçlü irade","sağlam temel","net hedef","açık fikir","taze bilgi","cesur kaşif"];
 const HAVUZ_3=["merak etmeye devam","yeni bilgiler keşfet","dikkatini burada topla","öğrenmeye devam et","hedefine doğru ilerle","bilginin peşinden git","düşünmeye devam et","çevreni dikkatle gözlemle","sabırla çalışmaya devam","azimle hedefe koş","yeni fikirler üret","cesaretle adım at","bilim dünyasını keşfet","doğayı yakından tanı","uzayın derinliklerine bak","zihnini açık tut","hafızanı güçlü tut","hızlı ve doğru düşün","dengeyi korumaya çalış","yaratıcı fikirler geliştir","problemi dikkatle incele","çözüm yolu bul","mantıklı sonuca ulaş","güçlü bir temel kur","geleceğe umutla bak","tarihten ders çıkar","sanatla ilgilenmeye başla","yeni bir dil öğren","kitap okumaya devam","bilgiyi paylaşmaktan çekinme","takım halinde çalış","hedefe kilitlenmiş kal","küçük adımlarla ilerle","büyük resmi gör","detaylara dikkat et","sorular sormaktan çekinme","cevapları araştırarak bul","zamanını verimli kullan","enerjini doğru yönet","kendine güvenmeyi öğren"];
 function havuzSec(gosterim){ return gosterim===1?HAVUZ_1:(gosterim===2?HAVUZ_2:HAVUZ_3); }
 
-// ── PANELE DÖNÜŞ (mevcut SinUs deseni) ──
 function panelDonusUrl(){
   const from=new URLSearchParams(window.location.search).get('from');
   if(from==='admin') return 'admin.html';
@@ -263,7 +256,6 @@ let W={
   dikkatDogru:0, dikkatToplam:3, ardArdaYanlis:0
 };
 
-// ── KİLİTLİ MOD ──
 const _kParams=new URLSearchParams(window.location.search);
 const KILITLI=_kParams.get('kilitli')==='1';
 const ASAMA_PARAM=_kParams.get('asama');
@@ -304,7 +296,6 @@ async function geriSayimOynat(sonMesaj){
   await sleep(500);
 }
 
-// ── ANA AKIŞ ──
 async function egzersiziBaslat(){
   W.gosterimSirasi=[]; W.mevcutIndex=0; W.pozGecmisIndex=null;
   W.kullanilanKelimeler=new Set(); W.iptalEdildi=false; W.duraklatildi=false;
@@ -425,7 +416,6 @@ async function geriSayimAlanicinde(){
   showScreen('screenEgzersiz');
 }
 
-// ── DİKKAT KONTROLÜ ──
 let dikkatSorular=[];
 function dikkatKontroluBaslat(){
   const havuz=havuzSec(W.gosterim);
@@ -478,10 +468,6 @@ function dikkatCevapVer(soruIndex,secilenIndex){
     if(i===secilenIndex && !dogruMu) b.classList.add('yanlis-isaretli');
   });
 
-  // ── DOĞRULUK EŞİĞİ ──
-  // Üst üste 3 yanlış cevap, öğrencinin kelimeleri gerçekten takip etmediğinin
-  // (rastgele tıkladığının) işareti sayılır. Bu durumda egzersiz TAMAMLANMIŞ
-  // sayılmaz, kredi verilmez, öğrenciden tekrar yapması istenir.
   if(W.ardArdaYanlis>=3){
     setTimeout(()=>{ esikAsildiGoster(); },650);
     return;
@@ -489,8 +475,6 @@ function dikkatCevapVer(soruIndex,secilenIndex){
   setTimeout(()=>dikkatSoruGoster(soruIndex+1),650);
 }
 
-// "Tekrar deneme zamanı" bildirimi — mevcut .modal-overlay/.modal-box stiliyle
-// tutarlı, suçlayıcı olmayan bir dille.
 function esikAsildiGoster(){
   let overlay=document.getElementById('esikOverlay');
   if(!overlay){
@@ -513,7 +497,6 @@ function esikAsildiGoster(){
   }
 }
 
-// ── SONUÇ ──
 function sonucGoster(){
   const toplamSn=Math.round(W.toplamAktifSureMs/1000);
   document.getElementById('sonGosterimSayisi').textContent=W.kelimeSayisi;
@@ -534,25 +517,25 @@ function sonucGoster(){
   }
 }
 
-// ── PANELe TAMAMLANMA SİNYALİ ──
-// Kritik eksik: bu egzersiz şimdiye kadar bu sinyali HİÇ göndermiyordu, bu
-// yüzden görev kaç kez bitirilirse bitirilsin panel bunu asla öğrenemiyor
-// ve bir sonraki görev hiç açılmıyordu. Diğer tüm egzersizlerdeki
-// gorevTamamlandiSinyaliGonder deseniyle birebir aynı mekanizma.
+// DÜZELTME: Kilitli modda sonuç ekranında hem "TEKRAR YAP" hem "Panele Dön"
+// aynı anda gösteriliyor — yani öğrenci görevi tamamladıktan sonra panele
+// dönmeden TEKRAR deneyebiliyor. Bu fonksiyonda "if(b.tamamlandiMi===false)"
+// koruması YOKTU, yani ikinci (üçüncü, ...) deneme sonucundaki puan ilk
+// denemenin üzerine yazılabiliyordu — diğer tüm dosyalardaki "redo ilk
+// sonucu asla ezmez" kuralına aykırıydı. Artık aynı korumaya sahip.
 function gorevTamamlandiSinyaliGonder(toplamSn){
   if(W.from!=='ogrenci') return;
   try{
     const veri=localStorage.getItem('sinus_bekleyen_gorev');
     if(!veri) return;
     const b=JSON.parse(veri);
-    // Puan doğru cevap oranıyla orantılı (0-10 arası) — panel tarafında
-    // egzersiz_tamamla_kaydet RPC'si bunu sunucuda yeniden hesaplayıp
-    // enerjiye ekliyor, client bu değeri sadece "iddia" olarak taşıyor.
-    const oran = W.dikkatToplam>0 ? (W.dikkatDogru/W.dikkatToplam) : 1;
-    b.tamamlandiMi=true;
-    b.puan=Math.round(10*oran);
-    b.egzersizKodu='kelime-takibi';
-    localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+    if(b.tamamlandiMi===false){
+      const oran = W.dikkatToplam>0 ? (W.dikkatDogru/W.dikkatToplam) : 1;
+      b.tamamlandiMi=true;
+      b.puan=Math.round(10*oran);
+      b.egzersizKodu='kelime-takibi';
+      localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+    }
   }catch(e){}
 }
 
