@@ -39,8 +39,6 @@ body::before {
 .game-sub { color:var(--grey); font-size:0.8rem; letter-spacing:2px; text-align:center; margin-bottom:24px; }
 .ayar-kart { background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.15); border-radius:16px; padding:20px; width:100%; max-width:560px; margin-bottom:14px; }
 .ayar-kart h3 { font-family:'Orbitron',sans-serif; font-size:0.68rem; color:var(--accent); letter-spacing:2px; margin-bottom:14px; opacity:0.8; }
-
-/* ── METİN SEÇİCİ: tek satır, tıklayınca açılır (madde 4.1) ── */
 .metin-secici{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.3);border-radius:12px;padding:12px 16px;cursor:pointer;transition:all 0.2s;}
 .metin-secici:hover{background:rgba(0,212,255,0.1);}
 .metin-secici-etiket{font-size:0.9rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -66,18 +64,13 @@ body::before {
 .ayar-slider { flex:1; -webkit-appearance:none; height:6px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none; cursor:pointer; }
 .ayar-slider::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--accent); cursor:pointer; box-shadow:0 0 8px rgba(0,212,255,0.5); }
 .ayar-deger { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; color:var(--accent); min-width:60px; text-align:right; }
-
-/* Yazı boyutu seçici */
 .boyut-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
 .boyut-btn { background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.2); border-radius:10px; padding:10px 6px; cursor:pointer; text-align:center; color:var(--grey); font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; transition:all 0.2s; }
 .boyut-btn:hover, .boyut-btn.sel { background:rgba(0,212,255,0.15); border-color:var(--accent); color:var(--white); }
-
 .basla-btn { width:100%; max-width:560px; padding:16px; background:linear-gradient(135deg,var(--accent2),var(--accent)); border:none; border-radius:14px; color:var(--bg); font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:2px; cursor:pointer; margin-top:8px; transition:all 0.2s; }
 .basla-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,212,255,0.3); }
 .basla-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
 .geri-btn { margin-top:12px; color:rgba(106,138,170,0.8); font-size:0.8rem; text-decoration:none; display:block; text-align:center; padding:8px; background:none; border:none; cursor:pointer; font-family:'Nunito',sans-serif; }
-
-/* OYUN */
 .oyun-hud { display:flex; justify-content:space-between; align-items:center; width:100%; padding:10px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-bottom:16px; }
 .hud-item { text-align:center; }
 .hud-lbl { font-size:0.6rem; color:var(--grey); letter-spacing:1px; text-transform:uppercase; }
@@ -86,8 +79,6 @@ body::before {
 .ilerleme-ust { display:flex; justify-content:space-between; font-size:0.72rem; color:var(--grey); margin-bottom:4px; }
 .ilerleme-bar { width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
 .ilerleme-ic { height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); border-radius:3px; transition:width 0.3s; }
-
-/* Metin gösterim alanı — çerçeve genişledi, kalan dikey alanı da dolduruyor */
 .metin-alan {
   width:100%;
   flex:1;
@@ -100,7 +91,6 @@ body::before {
   overflow-y:auto;
   padding:28px 26px;
 }
-/* Metin sütunu — çerçeve genişlese de okunabilirlik için sabit genişlikte ortalanır */
 .metin-govde {
   max-width:720px;
   margin:0 auto;
@@ -117,7 +107,6 @@ body::before {
 .metin-govde .kelime.gizli {
   opacity:0;
 }
-
 .bitti-overlay {
   position:absolute; inset:0;
   background:rgba(6,13,26,0.92);
@@ -130,9 +119,7 @@ body::before {
 .bitti-overlay.gorulur { display:flex; }
 .bitti-icon { font-size:3rem; margin-bottom:8px; }
 .bitti-yazi { font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:700; color:var(--green); }
-
 .durum-msg { font-family:'Orbitron',sans-serif; font-size:0.8rem; color:var(--grey); letter-spacing:2px; text-align:center; margin:6px 0; min-height:20px; }
-
 .kontrol-row { display:flex; gap:10px; justify-content:center; width:100%; max-width:560px; }
 .btn-kontrol { flex:1; padding:13px; border:none; border-radius:12px; font-family:'Orbitron',sans-serif; font-size:0.82rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
 .btn-durdur { background:rgba(255,68,102,0.15); border:1px solid rgba(255,68,102,0.4); color:var(--red); }
@@ -140,7 +127,6 @@ body::before {
 .btn-bastan { background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); color:var(--accent); }
 .btn-bastan:hover { background:rgba(0,212,255,0.2); }
 .btn-devam { background:linear-gradient(135deg,var(--accent2),var(--accent)); color:var(--bg); }
-
 .oyun-hiz-row { display:flex; align-items:center; gap:10px; width:100%; max-width:560px; margin-top:10px; }
 .oyun-hiz-lbl { font-size:0.78rem; color:var(--grey); white-space:nowrap; }
 .oyun-hiz-slider { flex:1; -webkit-appearance:none; height:5px; border-radius:3px; background:rgba(255,255,255,0.1); outline:none; cursor:pointer; }
@@ -152,13 +138,12 @@ body::before {
 <div id="app">
   <div class="header">
     <div style="display:flex;align-items:center;gap:10px">
-      <button class="ust-geri-btn" onclick="sinusTamamlandiSinyalGonderVeDon()" title="Panele Dön">←</button>
+      <button class="ust-geri-btn" onclick="paneleDon()" title="Panele Dön">←</button>
       <div class="logo">Sin<span>Us</span></div>
     </div>
     <div class="mod-pill">🌕 Beliren Metin</div>
   </div>
 
-  <!-- AYARLAR -->
   <div id="screenAyar" class="screen active">
     <div class="game-title">BELİREN METİN</div>
     <div class="game-sub">GÖRÜNEN KELİME TEKNİĞİ</div>
@@ -187,12 +172,12 @@ body::before {
       <h3>HIZ AYARI</h3>
       <div class="ayar-satir">
         <span class="ayar-etiket">KPM (Kelime/Dakika)</span>
-        <input type="range" class="ayar-slider" id="hizSlider" min="50" max="1000" step="50" value="150"
+        <input type="range" class="ayar-slider" id="hizSlider" min="10" max="3000" step="1" value="150"
           oninput="hizGuncelle(this.value)">
         <span class="ayar-deger" id="hizDeger">150 KPM</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--grey);margin-top:-4px">
-        <span>50 (Yavaş)</span><span>500 (Orta)</span><span>1000 (Hızlı)</span>
+        <span>10 (Çok Yavaş)</span><span>500 (Orta)</span><span>3000 (Çok Hızlı)</span>
       </div>
     </div>
 
@@ -210,7 +195,6 @@ body::before {
     <a id="backBtn" href="#" class="geri-btn">← Panele Dön</a>
   </div>
 
-  <!-- OYUN -->
   <div id="screenOyun" class="screen">
     <div class="oyun-hud">
       <div class="hud-item"><div class="hud-lbl">Metin</div><div class="hud-val" id="hudMetin">—</div></div>
@@ -245,7 +229,7 @@ body::before {
 
     <div class="oyun-hiz-row" id="oyunHizRow">
       <span class="oyun-hiz-lbl">Hız:</span>
-      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="50" max="1000" step="50" value="150"
+      <input type="range" class="oyun-hiz-slider" id="oyunHizSlider" min="10" max="3000" step="1" value="150"
         oninput="oyunHizGuncelle(this.value)">
       <span class="oyun-hiz-deger" id="oyunHizDeger">150 KPM</span>
     </div>
@@ -256,10 +240,16 @@ body::before {
 const SUPABASE_URL = 'https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 
-(function() {
+function panelDonusUrl() {
   const from = new URLSearchParams(window.location.search).get('from');
+  if (from === 'admin') return 'admin.html';
+  if (from === 'ogretmen') return 'ogretmen.html';
+  return 'ogrenci-panel.html';
+}
+function paneleDon(){ window.location.href = panelDonusUrl(); }
+(function() {
   document.getElementById('backBtn').href='#';
-  document.getElementById('backBtn').addEventListener('click',function(e){e.preventDefault();sinusTamamlandiSinyalGonderVeDon();});
+  document.getElementById('backBtn').addEventListener('click',function(e){e.preventDefault();paneleDon();});
 })();
 
 const G = {
@@ -267,7 +257,6 @@ const G = {
   kelimeler: [], mevcutIndex: 0, calisiyor: false, timeout: null, filtre: ''
 };
 
-// ── YAZI BOYUTU TERCİHİ (tarayıcıda hatırlanır) ──
 (function(){
   try{
     const kayitli = parseFloat(localStorage.getItem('sinus_yazi_boyutu'));
@@ -289,7 +278,6 @@ function selYaziBoyutu(v, el){
   try{ localStorage.setItem('sinus_yazi_boyutu', v); }catch(e){}
 }
 
-// ── METİN SEÇİCİ (madde 4.1 — tek satır, tıklayınca açılır) ──
 let metinDropdownAcik = false;
 function metinDropdownToggle(){
   metinDropdownAcik = !metinDropdownAcik;
@@ -305,15 +293,19 @@ document.addEventListener('click', function(e){
   }
 });
 
-// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev — öğrenci hızı değiştiremez) ──
 const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const METIN_ID_PARAM = _kParams.get('metin_id');
 const HEDEF_SURE_DK = parseInt(_kParams.get('sure'));
 
-// ── SÜRE SAYACI (bilgi amaçlı — 00:00'dan sayar, admin hedef süresi varsa yanında gösterilir,
-//    ama süre dolduğunda egzersiz KAPANMAZ; sadece metin bitince biter) ──
+const KPM_ADIMLARI=[10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120,130,140,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600,2700,2800,2900,3000];
+function enYakinKpmAdimi(deger){
+  let enYakin=KPM_ADIMLARI[0], farkMin=Math.abs(deger-enYakin);
+  for(const a of KPM_ADIMLARI){ const f=Math.abs(deger-a); if(f<farkMin){farkMin=f;enYakin=a;} }
+  return enYakin;
+}
+
 let sureSaniye = 0;
 let sureInterval = null;
 function sureEtiketiGuncelle(){
@@ -337,7 +329,7 @@ function sureyiDevamEttir(){
 function sureyiDurdur(){ clearInterval(sureInterval); }
 
 function kilitliModuBaslat(){
-  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(1000, Math.max(50, HIZ_PARAM));
+  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(3000, Math.max(10, HIZ_PARAM));
   document.getElementById('kartHiz').style.display='none';
   if(METIN_ID_PARAM){
     document.getElementById('kartMetinSec').style.display='none';
@@ -406,16 +398,21 @@ function filtreUygula(zorluk, el) {
   metinleriYukle();
 }
 
-function hizGuncelle(v) { G.kpm = parseInt(v); document.getElementById('hizDeger').textContent = v + ' KPM'; }
-
-function oyunHizGuncelle(v) {
-  G.kpm = parseInt(v);
-  document.getElementById('oyunHizDeger').textContent = v + ' KPM';
-  document.getElementById('hudHiz').textContent = v + ' KPM';
-  // Hız değişince bir sonraki kelimenin bekleme süresi otomatik güncellenir (yeni zamanlayıcı bir sonraki tetiklemede devreye girer)
+function hizGuncelle(v) {
+  const yuvarlanan = enYakinKpmAdimi(parseInt(v));
+  document.getElementById('hizSlider').value = yuvarlanan;
+  G.kpm = yuvarlanan;
+  document.getElementById('hizDeger').textContent = yuvarlanan + ' KPM';
 }
 
-// Metni kelimelere böl; hepsi başta gizli (opacity 0) olarak yerleştirilir
+function oyunHizGuncelle(v) {
+  const yuvarlanan = enYakinKpmAdimi(parseInt(v));
+  document.getElementById('oyunHizSlider').value = yuvarlanan;
+  G.kpm = yuvarlanan;
+  document.getElementById('oyunHizDeger').textContent = yuvarlanan + ' KPM';
+  document.getElementById('hudHiz').textContent = yuvarlanan + ' KPM';
+}
+
 function metinGoster(metin) {
   const kelimeler = metin.trim().split(/\s+/).filter(k => k.length > 0);
   G.kelimeler = kelimeler;
@@ -458,7 +455,6 @@ function sonrakiKelime() {
   G.mevcutIndex++;
   ilerlemeGuncelle();
 
-  // Her kelime eşit süre sonra belirir: 60000ms / KPM
   const bekleme = Math.round(60000 / G.kpm);
   G.timeout = setTimeout(sonrakiKelime, bekleme);
 }
@@ -521,7 +517,16 @@ function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.cl
 
 if(KILITLI && METIN_ID_PARAM){ kilitliMetinYukle(); } else { metinleriYukle(); }
 
-function sinusTamamlandiSinyalGonderVeDon(){try{const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');if(b&&b.tamamlandiMi===false){b.tamamlandiMi=true;b.puan=10;localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));}}catch(e){}const from=new URLSearchParams(window.location.search).get('from');let hedef='index.html';if(from==='ogrenci'||from==='ogrenci-serbest')hedef='ogrenci-panel.html';else if(from==='ogretmen')hedef='ogretmen.html';else if(from==='admin')hedef='admin.html';setTimeout(()=>{window.location.href=hedef;},200);}
+function sinusTamamlandiSinyalGonderVeDon(){
+  try{
+    const b=JSON.parse(localStorage.getItem('sinus_bekleyen_gorev')||'{}');
+    if(b&&b.tamamlandiMi===false){
+      b.tamamlandiMi=true;b.puan=10;
+      localStorage.setItem('sinus_bekleyen_gorev',JSON.stringify(b));
+    }
+  }catch(e){}
+  setTimeout(()=>{window.location.href=panelDonusUrl();},200);
+}
 </script>
 </body>
 </html>
