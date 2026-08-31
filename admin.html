@@ -384,30 +384,6 @@ tr:hover td{background:#f8fafc}
   <div id="sayfa-asama-3" class="sayfa"></div>
   <div id="sayfa-asama-4" class="sayfa"></div>
 
-  <!-- OKUMA TEKNİĞİ EGZERSİZ SAYFASI (tek şablon, dinamik) -->
-  <div id="sayfa-okuma-teknigi" class="sayfa">
-    <div class="ust-bar"><div id="okuma-teknigi-baslik"><h1>Okuma Tekniği</h1><p>Egzersizi başlatın veya hızını ayarlayın.</p></div></div>
-    <div id="okuma-teknigi-icerik"></div>
-  </div>
-
-  <!-- GÖZ EGZERSİZİ SAYFASI (tek şablon, dinamik) -->
-  <div id="sayfa-goz-egzersizi" class="sayfa">
-    <div class="ust-bar"><div id="goz-egzersizi-baslik"><h1>Göz Egzersizi</h1><p>Egzersizi başlatın veya hızını ayarlayın.</p></div></div>
-    <div id="goz-egzersizi-icerik"></div>
-  </div>
-
-  <!-- ODAK EGZERSİZİ SAYFASI (tek şablon, dinamik) -->
-  <div id="sayfa-odak-egzersizi" class="sayfa">
-    <div class="ust-bar"><div id="odak-egzersizi-baslik"><h1>Odak Çalışması</h1><p>Egzersizi başlatın veya hızını ayarlayın.</p></div></div>
-    <div id="odak-egzersizi-icerik"></div>
-  </div>
-
-  <!-- GENEL EGZERSİZ SAYFASI (tek şablon, dinamik — göz/odak/okuma dışında kalanlar) -->
-  <div id="sayfa-genel-egzersizi" class="sayfa">
-    <div class="ust-bar"><div id="genel-egzersizi-baslik"><h1>Genel Egzersiz</h1><p>Egzersizi başlatın veya hızını ayarlayın.</p></div></div>
-    <div id="genel-egzersizi-icerik"></div>
-  </div>
-
   <!-- SİNUS ORTAMI -->
   <div id="sayfa-sinus-ortami" class="sayfa">
     <div class="ust-bar"><div><h1>🌌 SinUs Ortamı</h1><p>Öğrenci paylaşımlarını inceleyin, onaylayın ve yayınlayın.</p></div></div>
@@ -1217,7 +1193,6 @@ const EGZERSIZLER={
 const KATEGORI_AD={okuma:'Okuma Tekniği',goz:'Göz Kası',odak:'Dikkat & Odak',genel:'Genel'};
 const KATEGORI_IKON={okuma:'📜',goz:'👁️',odak:'🎯',genel:'🗂️'};
 const KATEGORI_BASLIK={okuma:'Okuma Teknikleri',goz:'Göz Egzersizleri',odak:'Odak Çalışmaları',genel:'Genel Egzersizler'};
-const KATEGORI_SAYFA_ID={okuma:'okuma-teknigi',goz:'goz-egzersizi',odak:'odak-egzersizi',genel:'genel-egzersizi'};
 
 function oturumToken(){return sessionStorage.getItem('sinus_oturum_token')||'';}
 
@@ -1308,57 +1283,17 @@ function altMenuDoldur(kategori,menuEl){
     const a=document.createElement('a');
     a.href='#';
     a.textContent=e.ikon+' '+e.isim;
-    a.onclick=function(ev){ev.preventDefault();egzersizSayfasiAc(kategori,idx,a);setTimeout(()=>{a.scrollIntoView({block:'nearest',behavior:'smooth'});},50);};
+    // Sidebar'dan bir egzersiz seçildiğinde artık ara bir "hız ayarla + Başlat"
+    // ekranı göstermiyoruz — bu ekran hiçbir yerde (öğrenci panelinde, program
+    // yönetiminde) okunmayan, sadece kendi kendine referans veren bir varsayılan
+    // hız kaydediyordu (egzersiz_ayarlari tablosu). Artık doğrudan egzersizin
+    // KENDİ Ayarlar sekmesine (metin seç / hız / yazı boyutu) gidiyoruz — admin
+    // orada hem hızı hem her şeyi zaten ayarlayabiliyor.
+    a.onclick=function(ev){ev.preventDefault();window.location.href=e.url+'?from=admin';};
     li.appendChild(a);
     menuEl.appendChild(li);
   });
 }
-
-let egzersizHizlari={};
-async function egzersizHizlariniYukle(){
-  if(Object.keys(egzersizHizlari).length) return;
-  try{const ayarlar=await supabase('GET','egzersiz_ayarlari',null,'order=egzersiz_kodu');ayarlar.forEach(a=>{egzersizHizlari[a.egzersiz_kodu]=a.hiz;});}catch(e){}
-}
-
-async function egzersizSayfasiAc(kategori,idx,link){
-  mobilMenuKapat();
-  await egzersizHizlariniYukle();
-  const e=EGZERSIZLER[kategori][idx];
-  const sayfaId=KATEGORI_SAYFA_ID[kategori]||'genel-egzersizi';
-
-  document.querySelectorAll('.sayfa').forEach(s=>s.classList.remove('aktif'));
-  document.querySelectorAll('.sidebar-menu li > a').forEach(a=>a.classList.remove('aktif'));
-  document.querySelectorAll('.alt-menu li a').forEach(a=>a.classList.remove('aktif'));
-  document.getElementById('sayfa-'+sayfaId).classList.add('aktif');
-  if(link) link.classList.add('aktif');
-
-  document.getElementById(sayfaId+'-baslik').innerHTML=`<h1>${e.ikon} ${e.isim}</h1><p>${KATEGORI_AD[kategori]} egzersizi — hızı ayarlayın ve başlatın.</p>`;
-
-  const hiz=egzersizHizlari[e.kod]||5;
-  document.getElementById(sayfaId+'-icerik').innerHTML=`
-    <div class="kart">
-      <div class="egzersiz-kart" style="border:none;box-shadow:none;padding:0">
-        <div class="egzersiz-aciklama" style="font-size:0.95rem;margin-bottom:1.5rem">${e.aciklama}</div>
-        <div class="hiz-satir">
-          <span class="hiz-etiket">Hız:</span>
-          <input type="range" class="hiz-slider" min="1" max="10" value="${hiz}" id="slider-${e.kod}" oninput="document.getElementById('deger-${e.kod}').textContent=this.value">
-          <span class="hiz-deger" id="deger-${e.kod}">${hiz}</span>
-        </div>
-        <div class="egzersiz-kart-alt">
-          <button class="btn-basla" onclick="egzersizBaslat('${e.url}','${e.kod}')">▶ Başlat</button>
-          <button class="btn-kaydet-hiz" id="kaydbet-${e.kod}" onclick="hizKaydet('${e.kod}')">💾 Hızı Kaydet</button>
-        </div>
-      </div>
-    </div>`;
-}
-
-async function hizKaydet(kod){
-  const hiz=parseInt(document.getElementById('slider-'+kod).value);
-  const btn=document.getElementById('kaydbet-'+kod);btn.textContent='⏳';
-  try{await supabase('PATCH','egzersiz_ayarlari',{hiz,guncelleme:new Date().toISOString()},'egzersiz_kodu=eq.'+kod);egzersizHizlari[kod]=hiz;btn.textContent='✅ Kaydedildi';btn.className='btn-kaydet-hiz kaydedildi';setTimeout(()=>{btn.textContent='💾 Hızı Kaydet';btn.className='btn-kaydet-hiz';},2000);bildirimGoster('✅ Hız kaydedildi!','basari');}
-  catch(e){bildirimGoster('❌ '+e.message,'hata');btn.textContent='💾 Hızı Kaydet';}
-}
-function egzersizBaslat(url,kod){const slider=document.getElementById('slider-'+kod);const hiz=slider?slider.value:5;window.location.href=url+'?hiz='+hiz+'&from=admin';}
 
 const SEVIYE_ADI={2:'Seviye-1',3:'Seviye-2',4:'Seviye-3'};
 function asamaSayfasiAc(asamaNo,link){
