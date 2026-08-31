@@ -205,6 +205,20 @@ nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:cente
             <option value="sureli">Süreli</option>
           </select>
         </div>
+        <div class="form-grup" id="formGrupMerkezMod" style="display:none">
+          <label>Mod (Merkez Nokta)</label>
+          <select class="form-select" id="secMerkezMod">
+            <option value="sayi" selected>🔢 Sayı Modu</option>
+            <option value="harf">🔤 Harf Modu</option>
+          </select>
+        </div>
+        <div class="form-grup" id="formGrupMerkezTaraf" style="display:none">
+          <label>Taraf Sayısı (Merkez Nokta)</label>
+          <select class="form-select" id="secMerkezTaraf">
+            <option value="1" selected>1️⃣ Tek Taraf</option>
+            <option value="2">2️⃣ Çift Taraf (Zor)</option>
+          </select>
+        </div>
         <div class="form-grup" id="formGrupHiz" style="display:none">
           <label>Hız / Seviye <span id="hizDeger" style="float:right;color:#2563a8;font-weight:700"></span></label>
           <input type="range" id="hizSlider" oninput="hizGuncelle()" style="width:100%">
@@ -316,13 +330,23 @@ const OZEL_HIZ_ARALIK={
   'kelime-bulmaca.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'},
   'blok-okuma.html':{min:50,max:1000,adim:50,varsayilan:200,birim:' KPM'},
   'kritik-kelime-avi.html':{min:4,max:50,adim:1,varsayilan:10,birim:' sn (görme süresi)'},
-  'ev-takibi.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'}
+  'ev-takibi.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'},
+  // Merkez Nokta'nın kendi "aşama" kavramı 1-4 arası (Yakın/Orta/Uzak/Çok Uzak
+  // — mesafe+süre birlikte değişiyor). Genel "odak" aralığı (1-10) burada
+  // YANLIŞTI: egzersizin kendisi zaten Math.min(4,...) ile kırpıyordu, yani
+  // admin 5-10 arası bir değer seçse bile sessizce 4'e düşüyordu.
+  'merkez-nokta.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (aşama: 1=Yakın, 4=Çok Uzak)'}
 };
-const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html','kritik-kelime-avi.html','baglam-avi.html'];
+const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html','kritik-kelime-avi.html','baglam-avi.html','merkez-nokta.html'];
 const TEMA_GEREKEN_DOSYALAR=['blok-okuma.html'];
 const SEKIL_GEREKEN_DOSYALAR=['goz-sekil.html'];
 const NOKTA_GEREKEN_DOSYALAR=['goz-sag-sol.html','goz-asagi-yukari.html'];
 const ZORLUK_GEREKEN_DOSYALAR=['baglam-avi.html'];
+// Merkez Nokta kendi mod (sayı/harf) ve taraf sayısı (1/2) seçimlerine sahip —
+// Bağlam Avı'nın zorluk/mod çiftinden tamamen bağımsız bir kavram seti.
+const MERKEZ_NOKTA_DOSYASI=['merkez-nokta.html'];
+const MERKEZ_MOD_ADI={sayi:'🔢 Sayı Modu',harf:'🔤 Harf Modu'};
+const MERKEZ_TARAF_ADI={1:'1️⃣ Tek Taraf',2:'2️⃣ Çift Taraf'};
 const ZORLUK_ADI={baslangic:'Başlangıç',orta:'Orta',ileri:'İleri',plus:'Plus'};
 const SEKIL_ISIM={daire:'Daire',kare:'Kare',sekiz:'Sekiz (∞)',ucgen:'Üçgen',zigzag:'Zigzag'};
 const KELIME_TAKIBI_DOSYASI=['kelime-takibi.html'];
@@ -377,6 +401,7 @@ function egzersizDegisti(){
   const dosya=document.getElementById('secEgzersiz').value;
   const zorlukGerekli = ZORLUK_GEREKEN_DOSYALAR.includes(dosya);
   const kelimeTakibiMi = KELIME_TAKIBI_DOSYASI.includes(dosya);
+  const merkezNoktaMi = MERKEZ_NOKTA_DOSYASI.includes(dosya);
 
   const aralik=OZEL_HIZ_ARALIK[dosya]||HIZ_ARALIK[secilenTip];
   document.getElementById('hizSlider').min=aralik.min;
@@ -392,6 +417,8 @@ function egzersizDegisti(){
   document.getElementById('formGrupNokta').style.display = NOKTA_GEREKEN_DOSYALAR.includes(dosya) ? 'block' : 'none';
   document.getElementById('formGrupZorluk').style.display = zorlukGerekli ? 'block' : 'none';
   document.getElementById('formGrupMod').style.display = zorlukGerekli ? 'block' : 'none';
+  document.getElementById('formGrupMerkezMod').style.display = merkezNoktaMi ? 'block' : 'none';
+  document.getElementById('formGrupMerkezTaraf').style.display = merkezNoktaMi ? 'block' : 'none';
   document.getElementById('formGrupHiz').style.display = (zorlukGerekli || kelimeTakibiMi) ? 'none' : 'block';
   document.getElementById('formGrupKtSayisi').style.display = kelimeTakibiMi ? 'block' : 'none';
   document.getElementById('formGrupKtHiz').style.display = kelimeTakibiMi ? 'block' : 'none';
@@ -449,10 +476,15 @@ function listeGuncelle(){
     const sekilGosterim=g.sekil?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🔷 ${SEKIL_ISIM[g.sekil]||g.sekil}</span>`:'';
     const noktaGosterim=g.nokta?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">⚪ ${g.nokta} Nokta</span>`:'';
     const zorlukGosterim=g.zorluk?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">🎯 ${ZORLUK_ADI[g.zorluk]||g.zorluk}</span>`:'';
-    const modGosterim=g.mod?`<span class="badge" style="background:#f1f5f9;color:#475569">${g.mod==='sureli'?'⏱ Süreli':'○ Normal'}</span>`:'';
+    // g.mod iki farklı egzersizde farklı anlama geliyor: Bağlam Avı'nda
+    // normal/sureli, Merkez Nokta'da sayı/harf — dosya adına göre ayırt edilir.
+    const modGosterim=g.mod?(MERKEZ_NOKTA_DOSYASI.includes(g.dosya)
+      ? `<span class="badge" style="background:#f1f5f9;color:#475569">${MERKEZ_MOD_ADI[g.mod]||g.mod}</span>`
+      : `<span class="badge" style="background:#f1f5f9;color:#475569">${g.mod==='sureli'?'⏱ Süreli':'○ Normal'}</span>`):'';
+    const tarafGosterim=g.taraf?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">${MERKEZ_TARAF_ADI[g.taraf]||g.taraf}</span>`:'';
     const ktSayisiGosterim=g.kelimeSayisi?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🔢 ${g.kelimeSayisi} kelime</span>`:'';
     const ktGosterimBicimi=g.gosterim?`<span class="badge" style="background:#f0f9ff;color:#0369a1">👁 ${g.gosterim} kelime/ekran</span>`:'';
-    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${ktSayisiGosterim} ${ktGosterimBicimi} ${metinGosterim} ${temaGosterim} ${sekilGosterim} ${noktaGosterim} ${zorlukGosterim} ${modGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
+    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${ktSayisiGosterim} ${ktGosterimBicimi} ${metinGosterim} ${temaGosterim} ${sekilGosterim} ${noktaGosterim} ${zorlukGosterim} ${modGosterim} ${tarafGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
     liste.appendChild(div);
   });
   ozetGuncelle();
@@ -502,6 +534,10 @@ function gorevEkle(){
   }
   if(NOKTA_GEREKEN_DOSYALAR.includes(dosya)){
     gorev.nokta=parseInt(document.getElementById('secNokta').value);
+  }
+  if(MERKEZ_NOKTA_DOSYASI.includes(dosya)){
+    gorev.mod=document.getElementById('secMerkezMod').value;
+    gorev.taraf=parseInt(document.getElementById('secMerkezTaraf').value);
   }
   mevcutGorevler.push(gorev);listeGuncelle();bildirimGoster('✅ Görev eklendi!','basari');
 }
