@@ -53,7 +53,6 @@ body.egzersiz-aktif .header{display:none;}
 
 .yukleniyor-metin{color:var(--grey);font-size:0.9rem;text-align:center;}
 
-/* SORU EKRANI */
 .soru-hud{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:800px;padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:8px;}
 .hud-item{text-align:center;}
 .hud-lbl{font-size:0.6rem;color:var(--grey);letter-spacing:1px;text-transform:uppercase;}
@@ -71,7 +70,6 @@ body.egzersiz-aktif .header{display:none;}
 .secenek-btn.disabled{pointer-events:none;opacity:0.55;}
 .secenek-btn.disabled.dogru-isaretli,.secenek-btn.disabled.yanlis-isaretli{opacity:1;}
 
-/* SONUÇ / GERİ BİLDİRİM */
 .sonuc-kart{width:100%;max-width:520px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:26px 24px;text-align:center;margin:16px 0;}
 .sonuc-icon{font-size:2.6rem;display:block;margin-bottom:6px;}
 .sonuc-baslik{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;margin-bottom:16px;}
@@ -193,7 +191,6 @@ const BAGLAM_KATEGORI_ADI={
 const ZORLUK_ADI={baslangic:'Başlangıç',orta:'Orta',ileri:'İleri',plus:'Plus'};
 const SECENEK_HARF=['A','B','C','D'];
 
-// ── PANELe DÖNÜŞ ──
 function panelDonusUrl(){
   const from=new URLSearchParams(window.location.search).get('from');
   if(from==='admin') return 'admin.html';
@@ -236,7 +233,6 @@ let G={
   from: new URLSearchParams(window.location.search).get('from')
 };
 
-// ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev) ──
 const _kParams=new URLSearchParams(window.location.search);
 const KILITLI=_kParams.get('kilitli')==='1';
 const ASAMA_PARAM=_kParams.get('asama');
@@ -253,22 +249,22 @@ function kilitliModuBaslat(){
 }
 if(KILITLI){ kilitliModuBaslat(); }
 
-// ── GÖREV TAMAMLANDI SİNYALİ (ogrenci-panel.html ile paylaşılan localStorage) ──
-// Diğer kilitli egzersizlerle aynı desen: ogrenci-panel.html, görevi başlatırken
-// 'sinus_bekleyen_gorev' anahtarına {kullanici, asama, gun, idx, tamamlandiMi:false}
-// yazar. Egzersiz bittiğinde bu kaydı tamamlandiMi:true yaparak geri yazmak,
-// panelin görevi "tamamlandı" işaretlemesini ve öğrencinin bir sonraki göreve
-// geçmesini sağlar. Bu fonksiyon olmadan Bağlam Avı kilitli modda asla
-// tamamlanmış sayılmaz.
+// DÜZELTME: Diğer tüm dosyalarda tamamlanma sinyali "if(b.tamamlandiMi===false)"
+// ile korunuyor — burada bu koruma yoktu (pratikte kilitli modda cevap sonrası
+// tekrar butonu zaten gizlendiği için şu an erişilemez bir durum, ama diğer
+// dosyalarla tutarlılık ve ileride bir "tekrar dene" seçeneği eklenirse
+// güvenlik için ekleniyor).
 function gorevTamamlandiIsaretle(puan){
   if(!KILITLI) return;
   try{
     const veri=localStorage.getItem('sinus_bekleyen_gorev');
     if(!veri) return;
     const b=JSON.parse(veri);
-    b.tamamlandiMi=true;
-    if(puan!==undefined && puan!==null) b.puan=puan;
-    localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+    if(b.tamamlandiMi===false){
+      b.tamamlandiMi=true;
+      if(puan!==undefined && puan!==null) b.puan=puan;
+      localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b));
+    }
   }catch(e){ /* sessizce geç */ }
 }
 
@@ -298,7 +294,6 @@ async function icerikCek(){
   let res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
   let data=await res.json();
   if((!data || !data.length) && seviye){
-    // seviyeye özel içerik yoksa seviye filtresi olmadan tekrar dene
     url=SUPABASE_URL+'/rest/v1/baglam_avi_icerikleri?aktif=eq.true&zorluk=eq.'+encodeURIComponent(G.zorluk)+'&select=*';
     res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     data=await res.json();
@@ -404,15 +399,12 @@ function sonucGoster(verilenIndex,dogruMu,cevapSuresiSn){
   sonucKaydet(verilenMetin,dogruMetin,dogruMu,cevapSuresiSn);
 
   if(KILITLI){
-    // Kilitli görev tek soruluk bir kontrol egzersizi; cevaplanır cevaplanmaz
-    // tamamlanmış sayılır. Doğru cevap biraz daha fazla puan kazandırır.
     gorevTamamlandiIsaretle(dogruMu?10:5);
     const backUrl=panelDonusUrl();
     document.getElementById('bittiBtnRow').innerHTML='<a href="'+backUrl+'" class="btn-play" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;max-width:100%">Panele Dön →</a>';
   }
 }
 
-// ── SONUCU SUPABASE'E KAYDET (sadece öğrenci oturumunda) ──
 async function sonucKaydet(verilenMetin,dogruMetin,dogruMu,cevapSuresiSn){
   if(G.from!=='ogrenci') return;
   const adi=kullaniciAdi();
