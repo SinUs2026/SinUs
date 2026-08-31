@@ -245,11 +245,6 @@
   const params = new URLSearchParams(window.location.search);
 
   // ── KİLİTLİ MOD (admin/öğretmen tarafından atanmış görev) ──
-  // NOT: Bu dosyanın kendi "sure" parametresi TUR BAŞINA SANİYE anlamına geliyor,
-  // ama admin panelindeki genel "sure" parametresi TOPLAM GÖREV DAKİKASI anlamına
-  // geliyor. Bu iki anlam çakışmasın diye kilitli modda URL'deki "sure" değeri
-  // SADECE toplam görev süresi olarak kullanılır; tur içi geri sayım için her
-  // zaman seviyenin kendi varsayılan süresi (cfg.sure) kullanılır.
   const KILITLI = params.get('kilitli') === '1';
   const HIZ_PARAM = parseInt(params.get('hiz'));
   const SEVIYE_PARAM = parseInt(params.get('seviye'));
@@ -259,10 +254,6 @@
     !isNaN(SEVIYE_PARAM) ? SEVIYE_PARAM : (!isNaN(HIZ_PARAM) ? HIZ_PARAM : 1)
   ));
 
-  // Seviye 1: az + kısa + basit kelime, sadece YATAY.
-  // Seviye 2: daha uzun + daha fazla kelime, sadece YATAY.
-  // Seviye 3: basit kelimeler, YATAY + YUKARIDAN AŞAĞI.
-  // Seviye 4: zor + uzun kelimeler, YATAY + YUKARIDAN AŞAĞI + AŞAĞIDAN YUKARI.
   const LEVEL_DEFAULTS = {
     1: { sure: 90, kelimeSayisi: 4, izgara: 7,  yonler: ['H'] },
     2: { sure: 90, kelimeSayisi: 6, izgara: 10, yonler: ['H'] },
@@ -270,8 +261,6 @@
     4: { sure: 60, kelimeSayisi: 9, izgara: 12, yonler: ['H','V','VU'] }
   };
 
-  // Seviyeye bağlı ayarları (cfg, süre, ızgara, yönler, tur sayısı) hesaplar.
-  // Sayfa yüklenince ve kullanıcı "Seviye Seç" panelinden seçim yapınca çağrılır.
   let cfg, SURE, KELIME_SAYISI, IZGARA, YONLER, MAX_TUR;
   function seviyeAyarlariniHesapla(){
     cfg = LEVEL_DEFAULTS[seviye];
@@ -286,18 +275,29 @@
   let kilitliBitisZamani = null;
   let kilitliSureInterval = null;
 
+  // ── MİNİMUM BAŞARI EŞİĞİ ──
+  // Önceden kilitli modda süre dolunca öğrenci HİÇBİR kelimeye tıklamamış
+  // olsa bile (0 bulunan) görev koşulsuz "tamamlandı" sayılıyordu — Odak/Dikkat
+  // kategorisindeki (Meteor Takibi, Gizli Nesne vb.) "en az bir başarılı tur"
+  // kuralına eş bir koruma burada hiç yoktu. Artık toplam kilitli süre boyunca
+  // en az 1 kelime bulunmadıysa görev "tekrarı önerilir" ile bitiyor.
+  let kilitliToplamBulunanKelime = 0;
+
   // ---------- Kelime havuzları ----------
+  // DÜZELTME: Kelimeler önceden ASCII'ye indirgenmiş haldeydi (ogrenci, hizli,
+  // basari, duzen, calisma...) ve ayrı bir DISPLAY_MAP ile ekranda "düzeltilmiş"
+  // Türkçe hali gösteriliyordu — ama ızgaradaki harfler hâlâ ASCII kaynaktan
+  // üretiliyordu. turkishUpper() ı/i ayrımını SADECE kaynak kelimede zaten
+  // doğru yazılmışsa doğru çevirebilir; ASCII kaynakta bu ayrım kaybolduğu için
+  // (ör. "basari" son harfi aslında "ı" olması gerekirken ASCII "i" idi) ızgara
+  // bazen yanlış/tutarsız büyük harfe dönüşüyordu. Artık kelimeler doğrudan
+  // doğru Türkçe yazımıyla tanımlı — hem ızgara hem liste aynı kaynaktan geliyor,
+  // ayrı bir çeviri tablosuna gerek kalmadı.
   const WORD_POOLS = {
-    1: ['ev','top','kus','kedi','anne','elma','okul','masa'],
-    2: ['ogrenci','ogretmen','dikkat','hizli','basari','duzen','calisma','zaman','orman','okuma'],
-    3: ['ev','top','kus','kedi','anne','elma','okul','masa','kalem','kitap'],
-    4: ['paragraf','cikarim','baglam','yorumlama','dusunce','kavram','analiz','gelisim','yontem','strateji']
-  };
-  // Ekranda gösterilecek Türkçe orijinal biçimler (ızgaraya ASCII-normalize konur, listede güzel görünür)
-  const DISPLAY_MAP = {
-    'kus':'kuş','ogrenci':'öğrenci','ogretmen':'öğretmen','hizli':'hızlı','basari':'başarı',
-    'duzen':'düzen','calisma':'çalışma','cikarim':'çıkarım','baglam':'bağlam','dusunce':'düşünce',
-    'gelisim':'gelişim','yontem':'yöntem'
+    1: ['ev','top','kuş','kedi','anne','elma','okul','masa'],
+    2: ['öğrenci','öğretmen','dikkat','hızlı','başarı','düzen','çalışma','zaman','orman','okuma'],
+    3: ['ev','top','kuş','kedi','anne','elma','okul','masa','kalem','kitap'],
+    4: ['paragraf','çıkarım','bağlam','yorumlama','düşünce','kavram','analiz','gelişim','yöntem','strateji']
   };
 
   const TR_LETTERS = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
@@ -308,11 +308,10 @@
       .toLocaleUpperCase('tr-TR');
   }
 
-  // ---------- Durum ----------
   let state = {
     tur: 1,
     grid: [],
-    placements: [], // {word, displayWord, cells:[{r,c}], cellSet:Set}
+    placements: [],
     found: new Set(),
     timeLeft: SURE,
     timerId: null,
@@ -321,7 +320,7 @@
     startCell: null,
     currentPath: [],
     totalScore: 0,
-    roundStats: [] // {total, found, timeUsed}
+    roundStats: []
   };
 
   const gridEl = document.getElementById('grid');
@@ -342,7 +341,6 @@
   }
   seviyeEtiketiGuncelle();
 
-  // ---------- SEVİYE SEÇİMİ ----------
   const seviyeButonlari = document.querySelectorAll('.seviye-btn');
   function seviyeButonlariniGuncelle(){
     seviyeButonlari.forEach(b => b.classList.toggle('sel', parseInt(b.dataset.seviye) === seviye));
@@ -357,31 +355,31 @@
     });
   });
 
-  // ---------- PANELe DÖNÜŞ + TAMAMLANMA SİNYALİ ----------
-  (function(){
+  // ── PANELe DÖNÜŞ URL'İ ──
+  // DÜZELTME: varsayılan (tanımsız "from") artık 'index.html' değil
+  // 'ogrenci-panel.html' — diğer tüm dosyalarla aynı standart.
+  function panelDonusUrl(){
     const from = params.get('from');
-    let backUrl = 'index.html';
-    if(from === 'ogrenci' || from === 'ogrenci-serbest') backUrl = 'ogrenci-panel.html';
-    else if(from === 'ogretmen') backUrl = 'ogretmen.html';
-    else if(from === 'admin') backUrl = 'admin.html';
-    backBtn.href = '#';
-    backBtn.addEventListener('click', function(e){
-      e.preventDefault();
-      sinusTamamlandiSinyalGonderVeDon();
-    });
-    window._sinusBackUrl = backUrl;
-  })();
-
-  function sinusTamamlandiSinyalGonderVeDon(){
-    try{
-      const veri = localStorage.getItem('sinus_bekleyen_gorev');
-      if(veri){
-        const b = JSON.parse(veri);
-        if(b && b.tamamlandiMi===false){ b.tamamlandiMi=true; b.puan=state.totalScore||10; localStorage.setItem('sinus_bekleyen_gorev', JSON.stringify(b)); }
-      }
-    }catch(e){}
-    setTimeout(()=>{ window.location.href = window._sinusBackUrl; }, 200);
+    if (from === 'admin') return 'admin.html';
+    if (from === 'ogretmen') return 'ogretmen.html';
+    return 'ogrenci-panel.html';
   }
+  window._sinusBackUrl = panelDonusUrl();
+
+  // ── "Panele Dön" — SİNYAL GÖNDERMEZ ──
+  // DÜZELTME: Önceden backBtn tıklanınca sinusTamamlandiSinyalGonderVeDon()
+  // çağrılıyordu; bu fonksiyon oyuna hiç başlanmamış olsa bile
+  // (state.totalScore=0) "b.puan = state.totalScore || 10" satırı yüzünden
+  // 0 puan yerine VARSAYILAN 10 PUAN yazıp görevi tamamlanmış işaretliyordu.
+  // Serbest moddaki bir öğrenci hiç oynamadan "Panele Dön"e basarak görevi
+  // ücretsiz tamamlamış sayılabiliyordu. Artık geri dönüş SADECE yönlendiriyor,
+  // hiçbir sinyal göndermiyor — tamamlanma sinyali yalnızca gerçek bitişte
+  // (showResult/kilitliGoreviBitir/kilitliTekrariOnerilirBitir) gönderiliyor.
+  backBtn.href = '#';
+  backBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    window.location.href = window._sinusBackUrl;
+  });
 
   // ---------- KİLİTLİ MOD ----------
   function kilitliModuBaslat(){
@@ -420,10 +418,25 @@
       </div>`;
   }
 
+  // Toplam kilitli süre boyunca hiç kelime bulunamadıysa gösterilir — görev
+  // yine de "tamamlandı" sayılır (sonsuz döngüye girmesin diye), ama öğrenciye
+  // gerçekten katılmadığı açıkça söylenir ve tekrar denemesi önerilir.
+  function kilitliTekrariOnerilirBitir(){
+    clearInterval(kilitliSureInterval);
+    clearInterval(state.timerId);
+    sendCompletionSignal(state.totalScore);
+    document.querySelector('.wrap').innerHTML = `
+      <div style="text-align:center;padding:60px 20px">
+        <div style="font-size:2.5rem;margin-bottom:10px">🔁</div>
+        <h2 style="color:var(--gold-soft);margin-bottom:10px">TEKRARI ÖNERİLİR</h2>
+        <p style="color:var(--text-dim);margin-bottom:24px">Süre boyunca hiç kelime bulamadın. Görev tamamlandı sayıldı — dilersen "Tüm Egzersizler"den tekrar dene.</p>
+        <a href="${window._sinusBackUrl}" class="btn" style="text-decoration:none;display:inline-block">Panele Dön →</a>
+      </div>`;
+  }
+
   // ---------- Kelime seçimi ----------
   function pickWords(){
     const pool = WORD_POOLS[seviye].slice();
-    // karıştır
     for(let i=pool.length-1;i>0;i--){
       const j = Math.floor(Math.random()*(i+1));
       [pool[i],pool[j]] = [pool[j],pool[i]];
@@ -431,13 +444,12 @@
     return pool.slice(0, Math.min(KELIME_SAYISI, pool.length));
   }
 
-  // ---------- Yön vektörleri ----------
   const DIR_VECTORS = {
     H:  {dr:0, dc:1},
-    V:  {dr:1, dc:0},    // yukarıdan aşağı
-    VU: {dr:-1, dc:0},   // aşağıdan yukarı
-    D1: {dr:1, dc:1},   // sol üst -> sağ alt
-    D2: {dr:1, dc:-1}   // sağ üst -> sol alt
+    V:  {dr:1, dc:0},
+    VU: {dr:-1, dc:0},
+    D1: {dr:1, dc:1},
+    D2: {dr:1, dc:-1}
   };
 
   function buildGrid(words){
@@ -445,12 +457,11 @@
     const grid = Array.from({length:size}, () => Array(size).fill(null));
     const placements = [];
 
-    // uzun kelimeleri önce yerleştirmeye çalış (daha iyi paketleme)
     const sorted = words.slice().sort((a,b)=>b.length-a.length);
 
     sorted.forEach(word => {
       const upperWord = turkishUpper(word).replace(/İ/g,'İ');
-      const letters = Array.from(upperWord); // Türkçe karakterleri doğru say
+      const letters = Array.from(upperWord);
       let placed = false;
       let attempts = 0;
 
@@ -458,7 +469,6 @@
         attempts++;
         const dirKey = YONLER[Math.floor(Math.random()*YONLER.length)];
         const dirStart = DIR_VECTORS[dirKey];
-        // D2 sağ üstten başladığı için başlangıç sütunu farklı hesaplanmalı
         let vec = dirStart;
         const len = letters.length;
 
@@ -469,7 +479,6 @@
 
         if(endR < 0 || endR >= size || endC < 0 || endC >= size) continue;
 
-        // uyuşmazlık kontrolü
         let conflict = false;
         const cells = [];
         for(let i=0;i<len;i++){
@@ -481,20 +490,17 @@
         }
         if(conflict) continue;
 
-        // yerleştir
         cells.forEach((cell,i) => { grid[cell.r][cell.c] = letters[i]; });
         placements.push({
           word: word,
-          displayWord: (DISPLAY_MAP[word] || word),
+          displayWord: word,
           cells,
           cellKeySet: new Set(cells.map(c => c.r+','+c.c))
         });
         placed = true;
       }
-      // yerleşemeyen kelime atlanır (ör. çok küçük ızgara); nadir durum
     });
 
-    // boş hücreleri rastgele harflerle doldur
     for(let r=0;r<size;r++){
       for(let c=0;c<size;c++){
         if(!grid[r][c]){
@@ -506,7 +512,6 @@
     return { grid, placements };
   }
 
-  // ---------- Render ----------
   function renderGrid(){
     gridEl.style.gridTemplateColumns = 'repeat(' + IZGARA + ', 1fr)';
     const cellPx = Math.min(38, Math.floor(360 / IZGARA));
@@ -543,7 +548,6 @@
     timerPillEl.classList.toggle('warn', state.timeLeft <= 10);
   }
 
-  // ---------- Oyun akışı ----------
   function startRound(){
     const words = pickWords();
     const built = buildGrid(words);
@@ -572,10 +576,11 @@
     const timeUsed = SURE - Math.max(0, state.timeLeft);
     let roundScore = state.found.size * 10;
     if(allFound){
-      roundScore += Math.max(0, state.timeLeft) * 1; // erken bitirme bonusu
-      roundScore += 25; // tüm kelimeleri bulma bonusu
+      roundScore += Math.max(0, state.timeLeft) * 1;
+      roundScore += 25;
     }
     state.totalScore += roundScore;
+    if(KILITLI) kilitliToplamBulunanKelime += state.found.size;
     state.roundStats.push({
       total: state.placements.length,
       found: state.found.size,
@@ -605,11 +610,17 @@
     const remain = totalWords - totalFound;
     const percent = totalWords ? Math.round((totalFound/totalWords)*100) : 0;
 
-    sendCompletionSignal(state.totalScore);
-
-    // KİLİTLİ MOD: sonuç ekranı yerine, süre bitmediyse otomatik yeni oturum başlat.
+    // KİLİTLİ MOD: sinyal SADECE gerçek bitiş yollarından (kilitliGoreviBitir /
+    // kilitliTekrariOnerilirBitir) gönderilir — ara tur geçişlerinde değil.
     if(KILITLI){
-      if(kilitliSureBittiMi()){ kilitliGoreviBitir(); return; }
+      if(kilitliSureBittiMi()){
+        if(kilitliToplamBulunanKelime === 0){
+          kilitliTekrariOnerilirBitir();
+        } else {
+          kilitliGoreviBitir();
+        }
+        return;
+      }
       setTimeout(()=>{
         state.tur = 1;
         state.totalScore = 0;
@@ -618,6 +629,9 @@
       }, 1500);
       return;
     }
+
+    // Serbest/deneme modu — gerçek tek seferlik bitiş.
+    sendCompletionSignal(state.totalScore);
 
     document.getElementById('resultTitle').textContent =
       percent === 100 ? 'Harika! Hepsini Buldun 🎉' : 'Bulmaca Tamamlandı';
@@ -633,11 +647,8 @@
     resultOverlay.classList.remove('hidden');
   }
 
-  // ÖNEMLİ DÜZELTME: Bu fonksiyon önceden localStorage'daki görev nesnesinin TAMAMINI
-  // {tamamlandiMi, puan} ile değiştiriyordu — bu, ogrenci.html'in görevi eşleştirmek için
-  // kullandığı kullanici/asama/gun/idx alanlarını SİLİYORDU. Sonuç: görev öğrenci
-  // panelinde HİÇBİR ZAMAN tamamlandı olarak işaretlenmiyordu. Artık mevcut nesne
-  // korunuyor, sadece tamamlandiMi ve puan alanları güncelleniyor.
+  // Mevcut görev nesnesi korunur, sadece tamamlandiMi ve puan alanları güncellenir
+  // (ogrenci.html'in eşleştirme için kullandığı diğer alanlar silinmez).
   function sendCompletionSignal(puan){
     try{
       const veri = localStorage.getItem('sinus_bekleyen_gorev');
@@ -667,7 +678,6 @@
     const steps = Math.max(Math.abs(dr), Math.abs(dc));
     if(steps === 0) return [{r:r0,c:c0}];
     const stepR = Math.sign(dr), stepC = Math.sign(dc);
-    // yalnızca yatay, dikey veya tam çapraz çizgilere izin ver
     if(!(dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc))) return null;
     const cells = [];
     for(let i=0;i<=steps;i++){
@@ -738,7 +748,6 @@
     state.selecting = false;
     tryMatchSelection(state.currentPath);
     clearSelectingClasses();
-    // bulunan hücrelerin "found" sınıfı korunur, renderWordList zaten günceller
     state.currentPath.forEach(({r,c}) => {
       const el = gridEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
       if(el && !el.classList.contains('found')) { /* seçim iptal, bir şey yok */ }
