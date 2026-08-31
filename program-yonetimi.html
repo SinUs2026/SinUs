@@ -328,7 +328,10 @@ const HIZ_ARALIK={
 };
 const OZEL_HIZ_ARALIK={
   'kelime-bulmaca.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'},
-  'blok-okuma.html':{min:50,max:1000,adim:50,varsayilan:200,birim:' KPM'},
+  // Blok Okuma artık diğer okuma teknikleriyle aynı KPM sistemini kullanıyor
+  // (10-3000, kademeli basamaklar) — hizGuncelle() bu dosya için özel olarak
+  // kademeli yuvarlamayı da devreye sokuyor.
+  'blok-okuma.html':{min:10,max:3000,adim:1,varsayilan:200,birim:' KPM'},
   'kritik-kelime-avi.html':{min:4,max:50,adim:1,varsayilan:10,birim:' sn (görme süresi)'},
   'ev-takibi.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (seviye)'},
   // Merkez Nokta'nın kendi "aşama" kavramı 1-4 arası (Yakın/Orta/Uzak/Çok Uzak
@@ -430,7 +433,13 @@ function hizGuncelle(){
   const ozel=OZEL_HIZ_ARALIK[dosya];
   const aralik=ozel||HIZ_ARALIK[secilenTip]||HIZ_ARALIK.goz;
   const slider=document.getElementById('hizSlider');
-  if(!ozel && secilenTip==='okuma'){
+  // Blok Okuma diğer okuma teknikleriyle AYNI gerçek KPM sistemini kullanıyor
+  // (kademeli basamaklarla) — kendi özel aralığı olsa bile kademeli
+  // yuvarlamaya dahil ediliyor. Diğer "genel" egzersizlerin 1-10 soyut
+  // ölçeği ya da kendine özgü birimleri (sn, seviye vb.) bu yuvarlamaya
+  // dahil DEĞİL.
+  const kpmSnapUygula = (secilenTip==='okuma' && !ozel) || dosya==='blok-okuma.html';
+  if(kpmSnapUygula){
     const yuvarlanan=enYakinKpmAdimi(parseInt(slider.value));
     slider.value=yuvarlanan;
     document.getElementById('hizDeger').textContent=yuvarlanan+aralik.birim;
