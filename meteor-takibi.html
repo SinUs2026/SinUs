@@ -164,6 +164,11 @@ body {
         <div class="lv-btn" onclick="selLv(3,this)"><span class="lv-n">3</span><span class="lv-d">7 meteor<br>10sn</span></div>
         <div class="lv-btn" onclick="selLv(4,this)"><span class="lv-n">4</span><span class="lv-d">9 meteor<br>15sn</span></div>
         <div class="lv-btn" onclick="selLv(5,this)"><span class="lv-n">5</span><span class="lv-d">12 meteor<br>20sn</span></div>
+        <div class="lv-btn" onclick="selLv(6,this)"><span class="lv-n">6</span><span class="lv-d">14 meteor<br>20sn</span></div>
+        <div class="lv-btn" onclick="selLv(7,this)"><span class="lv-n">7</span><span class="lv-d">16 meteor<br>22sn</span></div>
+        <div class="lv-btn" onclick="selLv(8,this)"><span class="lv-n">8</span><span class="lv-d">18 meteor<br>24sn</span></div>
+        <div class="lv-btn" onclick="selLv(9,this)"><span class="lv-n">9</span><span class="lv-d">20 meteor<br>26sn</span></div>
+        <div class="lv-btn" onclick="selLv(10,this)"><span class="lv-n">10</span><span class="lv-d">22 meteor<br>28sn</span></div>
       </div>
     </div>
 
@@ -247,6 +252,11 @@ const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const SURE_PARAM_DK = parseInt(_kParams.get('sure'));
+// DÜZELTME: Kilitli modda öncesinde G.mod HER ZAMAN 1'e (Tek Meteor) sabitleniyordu
+// — admin/öğretmen panelinden "Çift Meteor" planlanmış olsa bile bu bilgi hiç
+// okunmuyordu. Artık meteorMod parametresi okunuyor (program-yonetimi.html'den
+// gelir), geçersiz/eksikse güvenli varsayılan olarak 1'e (Tek Meteor) düşer.
+const METEOR_MOD_PARAM = parseInt(_kParams.get('meteorMod'));
 
 // ── TUR-BAZLI SÜRE BÜTÇESİ ──
 // Süre SADECE "tracking" fazında (meteor hareket halindeyken) tüketilir.
@@ -267,8 +277,8 @@ function kilitliModuBaslat(){
   document.getElementById('kartSeviye').style.display='none';
   document.getElementById('kartMod').style.display='none';
   document.getElementById('backBtn').style.display='none';
-  if(!isNaN(HIZ_PARAM)) G.level = Math.min(5, Math.max(1, HIZ_PARAM));
-  G.mod = 1;
+  if(!isNaN(HIZ_PARAM)) G.level = Math.min(10, Math.max(1, HIZ_PARAM));
+  G.mod = (METEOR_MOD_PARAM===2) ? 2 : 1;
   hedefSureMs = (isNaN(SURE_PARAM_DK) ? 3 : SURE_PARAM_DK) * 60000;
   document.getElementById('hudTurPill').style.display='block';
   document.getElementById('mainStartBtn').textContent='▶ BAŞLA';
@@ -370,12 +380,25 @@ const G = { level:1, mod:1, score:0, streak:0, correct:0, wrong:0, meteors:[], t
 
 if(KILITLI){ kilitliModuBaslat(); }
 
+// DÜZELTME / ZORLAŞTIRMA: Seviyeler 1-5'ten 1-10'a genişletildi. Admin
+// panelindeki hız kaydırıcısı zaten 1-10 aralığındaydı (HIZ_ARALIK.odak),
+// ama bu dosya sadece 1-5'i kullandığı için 6-10 aralığı hiç işlevsel
+// değildi — artık tamamı anlamlı. Yeni seviyeler (6-10) hem daha fazla
+// meteor hem daha yüksek hız İÇEREN, hem de "revealMs" (gerçek renklerin
+// görünüp tek renge dönüşmesine kadar geçen süre) üst seviyelerde belirgin
+// şekilde kısaltılarak yeni bir zorluk ekseni ekliyor: öğrencinin hedefi
+// "ezberlemek" için daha az zamanı oluyor.
 const LEVELS = {
-  1:{count:3,speedMul:0.6,dur:5000},
-  2:{count:5,speedMul:1.0,dur:8000},
-  3:{count:7,speedMul:1.4,dur:10000},
-  4:{count:9,speedMul:1.8,dur:15000},
-  5:{count:12,speedMul:2.4,dur:20000}
+  1:{count:3,speedMul:0.6,dur:5000,revealMs:3000},
+  2:{count:5,speedMul:1.0,dur:8000,revealMs:3000},
+  3:{count:7,speedMul:1.4,dur:10000,revealMs:2500},
+  4:{count:9,speedMul:1.8,dur:15000,revealMs:2200},
+  5:{count:12,speedMul:2.4,dur:20000,revealMs:2000},
+  6:{count:14,speedMul:2.8,dur:20000,revealMs:1800},
+  7:{count:16,speedMul:3.2,dur:22000,revealMs:1500},
+  8:{count:18,speedMul:3.6,dur:24000,revealMs:1200},
+  9:{count:20,speedMul:4.0,dur:26000,revealMs:1000},
+  10:{count:22,speedMul:4.5,dur:28000,revealMs:800}
 };
 
 const TRACK_COLOR = '#aabbcc';
@@ -568,12 +591,13 @@ function startTracking() {
   G.timerStart=Date.now(); G.timerDur=lv.dur;
   document.getElementById('timerBarWrap').style.display='block';
   G.meteors.forEach(m => { m.tail=[]; });
-  // Meteorlar takip başladığında hemen tek renge dönmüyor —
-  // önce 3 saniye gerçek renkleriyle hareket ediyor, sonra hepsi aynı renge (TRACK_COLOR) dönüşüyor.
+  // Meteorlar takip başladığında hemen tek renge dönmüyor — önce lv.revealMs
+  // süresince gerçek renkleriyle hareket ediyor, sonra hepsi aynı renge
+  // (TRACK_COLOR) dönüşüyor. Bu süre üst seviyelerde giderek kısalır.
   clearTimeout(G.renkTimeout);
   G.renkTimeout = setTimeout(()=>{
     G.meteors.forEach(m => { m.displayColor = TRACK_COLOR; });
-  }, 3000);
+  }, lv.revealMs);
   setTimeout(()=>stopTracking(),lv.dur);
 }
 
