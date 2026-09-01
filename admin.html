@@ -224,6 +224,7 @@ tr:hover td{background:#f8fafc}
 
     <div class="sidebar-alt2">Sistem</div>
     <li><a href="#" onclick="sayfaGoster('sinus-ortami',this)"><span class="ikon">🌌</span> SinUs Ortamı <span id="ortamRozet" style="display:none;margin-left:auto;background:#dc2626;color:white;font-size:0.68rem;font-weight:700;padding:0.1rem 0.5rem;border-radius:10px"></span></a></li>
+    <li><a href="#" onclick="sayfaGoster('veli-degerlendirmeleri',this)"><span class="ikon">👨‍👩‍👧</span> Veli Değerlendirmeleri <span id="veliRozet" style="display:none;margin-left:auto;background:#dc2626;color:white;font-size:0.68rem;font-weight:700;padding:0.1rem 0.5rem;border-radius:10px"></span></a></li>
     <li><a href="#" onclick="sayfaGoster('basvurular',this)"><span class="ikon">📋</span> Ölçüm Başvuruları <span id="basvuruRozet" style="display:none;margin-left:auto;background:#dc2626;color:white;font-size:0.68rem;font-weight:700;padding:0.1rem 0.5rem;border-radius:10px"></span></a></li>
     <li><a href="#" onclick="sayfaGoster('odemeler',this)"><span class="ikon">💳</span> Ödemeler</a></li>
     <li><a href="#" onclick="sayfaGoster('sifre-islemleri',this)"><span class="ikon">🔑</span> Şifre İşlemleri</a></li>
@@ -400,6 +401,24 @@ tr:hover td{background:#f8fafc}
       </div>
     </div>
     <div class="kart"><div id="ortam-liste"><div class="bos-durum">⏳ Yükleniyor...</div></div></div>
+  </div>
+
+  <!-- VELİ DEĞERLENDİRMELERİ -->
+  <div id="sayfa-veli-degerlendirmeleri" class="sayfa">
+    <div class="ust-bar"><div><h1>👨‍👩‍👧 Veli Değerlendirmeleri</h1><p>Velilerin gönderdiği değerlendirmeleri inceleyin, onaylayın ve "Veliler Ne Diyor" vitrininde yayınlayın.</p></div></div>
+    <div class="kart" style="padding:1rem 1.5rem">
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div><label style="font-size:0.8rem;font-weight:600;color:#64748b;margin-right:0.5rem">Durum:</label>
+          <select id="filtre-veli-durum" onchange="veliDegerlendirmeYukle()" style="padding:0.4rem 0.8rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
+            <option value="bekliyor" selected>Bekliyor</option>
+            <option value="onaylandi">Onaylandı</option>
+            <option value="reddedildi">Reddedildi</option>
+            <option value="">Tümü</option>
+          </select></div>
+        <span id="veli-sayac" style="font-size:0.82rem;color:#94a3b8;margin-left:auto"></span>
+      </div>
+    </div>
+    <div class="kart"><div id="veli-liste"><div class="bos-durum">⏳ Yükleniyor...</div></div></div>
   </div>
 
   <!-- ÖLÇÜM BAŞVURULARI -->
@@ -1252,6 +1271,7 @@ function sayfaGoster(sayfa,link){
   if(sayfa==='sifre-islemleri') sifreIslemleriYukle();
   if(sayfa==='basvurular') basvurulariYukle();
   if(sayfa==='sinus-ortami') sinusOrtamiYukle();
+  if(sayfa==='veli-degerlendirmeleri') veliDegerlendirmeYukle();
 }
 
 function altMenuToggle(id,link){
@@ -2003,6 +2023,82 @@ async function ortamRozetGuncelle(){
   }catch(e){}
 }
 
+// ── VELİ DEĞERLENDİRMELERİ (SinUs Ortamı ile aynı desen) ──
+async function veliDegerlendirmeYukle(){
+  const durum=document.getElementById('filtre-veli-durum').value;
+  const liste=document.getElementById('veli-liste');
+  liste.innerHTML='<div class="bos-durum">⏳ Yükleniyor...</div>';
+  try{
+    const data=await rpc('admin_veli_degerlendirme_liste',{p_durum:durum||null});
+    document.getElementById('veli-sayac').textContent=data.length+' değerlendirme';
+
+    if(durum==='bekliyor'){
+      const rozet=document.getElementById('veliRozet');
+      if(data.length>0){rozet.textContent=data.length;rozet.style.display='inline-block';}
+      else{rozet.style.display='none';}
+    }
+
+    if(!data.length){liste.innerHTML='<div class="bos-durum">📭 Bu durumda değerlendirme yok.</div>';return;}
+
+    const HIZ_ADI={evet_kesinlikle:'Evet, kesinlikle',biraz:'Biraz',henuz_yok:'Henüz fark etmedim'};
+    const KEYIF_ADI={evet:'Evet',kismen:'Kısmen',hayir:'Hayır'};
+    const DERS_ADI={evet:'Evet',kismen:'Kısmen',henuz_erken:'Henüz erken'};
+    const TAVSIYE_ADI={evet:'Evet',belki:'Belki',hayir:'Hayır'};
+
+    liste.innerHTML=data.map(d=>{
+      const tarih=new Date(d.olusturulma_tarihi).toLocaleDateString('tr-TR');
+      const durumRenk={bekliyor:'bekliyor',onaylandi:'aktif',reddedildi:'pasif'}[d.moderasyon_durumu]||'bekliyor';
+      const yorumGuvenli=(d.yorum||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const veliAdiGuvenli=(d.veli_adi||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const yildizlar='⭐'.repeat(d.puan||0)+'☆'.repeat(5-(d.puan||0));
+      return `<div style="border:1.5px solid #f1f5f9;border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:0.6rem;flex-wrap:wrap">
+          <div>
+            <strong>${veliAdiGuvenli||'(Ad belirtilmemiş)'}</strong> <span style="color:#94a3b8">· ${d.ad||''} ${d.soyad||''} velisi</span>
+            <span style="color:#94a3b8;font-size:0.82rem"> · ${d.sinif||'sınıf belirtilmemiş'} · ${d.kullanici_adi||''} · ${d.gun_sayisi?d.gun_sayisi+'. gün':''} · ${tarih}</span>
+          </div>
+          <span class="durum ${durumRenk}">${d.moderasyon_durumu}${d.yayinda?' · yayında':''}</span>
+        </div>
+        <div style="font-size:1rem;color:#d97706;margin-bottom:0.6rem">${yildizlar}</div>
+        <div style="font-size:0.85rem;color:#64748b;margin-bottom:0.8rem;line-height:1.9">
+          🚀 Hız gelişimi: <strong>${HIZ_ADI[d.hiz_gelisimi]||'—'}</strong><br>
+          🧠 Anlama gelişimi: <strong>${HIZ_ADI[d.anlama_gelisimi]||'—'}</strong><br>
+          😊 Keyif alıyor mu: <strong>${KEYIF_ADI[d.keyif_aliyor]||'—'}</strong><br>
+          🏫 Derslere etkisi: <strong>${DERS_ADI[d.derslere_etkisi]||'—'}</strong><br>
+          👍 Tavsiye eder mi: <strong>${TAVSIYE_ADI[d.tavsiye_eder]||'—'}</strong>
+        </div>
+        ${yorumGuvenli?`<div style="font-size:0.95rem;color:#1e293b;background:#f8fafc;border-radius:8px;padding:0.8rem 1rem;margin-bottom:0.8rem;white-space:pre-wrap">${yorumGuvenli}</div>`:''}
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          ${d.moderasyon_durumu==='bekliyor'?`<button class="islem-btn uzat" onclick="veliDegerlendirmeAksiyon(${d.id},'onayla')">✅ Onayla</button><button class="islem-btn sil" onclick="veliDegerlendirmeAksiyon(${d.id},'reddet')">❌ Reddet</button>`:''}
+          ${d.moderasyon_durumu==='onaylandi'&&!d.yayinda?`<button class="islem-btn program" onclick="veliDegerlendirmeAksiyon(${d.id},'yayinla')">👨‍👩‍👧 Veliler Ne Diyor'da Yayınla</button>`:''}
+          ${d.yayinda?`<button class="islem-btn sil" onclick="veliDegerlendirmeAksiyon(${d.id},'kaldir')">🚫 Vitrinden Kaldır</button>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){liste.innerHTML='<div class="bos-durum">❌ '+e.message+'</div>';}
+}
+
+async function veliDegerlendirmeAksiyon(id,aksiyon){
+  try{
+    await rpc('admin_veli_degerlendirme_yonet',{p_id:id,p_aksiyon:aksiyon});
+    bildirimGoster('✅ İşlem tamamlandı.','basari');
+    veliDegerlendirmeYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function veliRozetGuncelle(){
+  try{
+    const bekleyenler=await rpc('admin_veli_degerlendirme_liste',{p_durum:'bekliyor'});
+    const rozet=document.getElementById('veliRozet');
+    if(bekleyenler && bekleyenler.length>0){
+      rozet.textContent=bekleyenler.length;
+      rozet.style.display='inline-block';
+    } else {
+      rozet.style.display='none';
+    }
+  }catch(e){}
+}
+
 // ── HİKAYELER ──
 async function hikayeKaydet(){
   const asama=document.getElementById('h-asama').value,gun=document.getElementById('h-gun').value;
@@ -2531,6 +2627,7 @@ async function blogYazilariYukle(){
 genelBakisYukle();
 basvuruRozetGuncelle();
 ortamRozetGuncelle();
+veliRozetGuncelle();
 </script>
 </body>
 </html>
