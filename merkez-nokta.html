@@ -290,7 +290,6 @@ const G = {
 const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz')); // 1-4 arası aşama olarak yorumlanır
-const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika — toplam görev süresi
 const MOD_PARAM = _kParams.get('mod'); // opsiyonel: sayi / harf
 const TARAF_PARAM = parseInt(_kParams.get('taraf')); // opsiyonel: 1 / 2
 
@@ -299,11 +298,11 @@ const TARAF_PARAM = parseInt(_kParams.get('taraf')); // opsiyonel: 1 / 2
 // turdaki "aktif" gösterim süresi sadece 0.7-1.5 sn olduğu için, birkaç
 // dakikalık bir bütçe 60-100+ tur gibi saçma bir sayıya denk geliyordu ve
 // egzersiz çok uzun sürüyordu. Bunun yerine sabit KILITLI_TUR_SAYISI kadar
-// tur oynanıyor, süre admin'in belirlediği değerden bağımsız. "Tur" sayısı
-// G.dogru+G.yanlis'ten AYRI tutuluyor çünkü Çift Taraf modunda bir turda 2
-// alt-soru (sol+sağ) oluyor — G.dogru/G.yanlis bu durumda alt-soru sayar,
-// tur sayısını değil. Cevap fazında 60 sn'yi geçen yanıtsızlık otomatik
-// "yanlış" sayılır (donma riski olmasın diye).
+// tur oynanıyor, admin'in "süre" alanı tamamen YOK SAYILIYOR (artık URL'den
+// bile okunmuyor). "Tur" sayısı G.dogru+G.yanlis'ten AYRI tutuluyor çünkü
+// Çift Taraf modunda bir turda 2 alt-soru (sol+sağ) oluyor — G.dogru/G.yanlis
+// bu durumda alt-soru sayar, tur sayısını değil. Cevap fazında 60 sn'yi
+// geçen yanıtsızlık otomatik "yanlış" sayılır (donma riski olmasın diye).
 const MIN_TUR = 3;
 const KILITLI_TUR_SAYISI = 10;
 const SELECT_TIMEOUT_MS = 60000;
@@ -314,6 +313,25 @@ let kilitliDogruTurSayaci = 0;
 let kilitliTurAltSoruDogru = 0;
 let kilitliTurAltSoruToplam = 0;
 
+// DÜZELTME (kök neden): OdakModu.baslat()'a önceden admin'in "süre" (dakika)
+// alanından türeyen bir "gerekli süre" gönderiliyordu (varsayılan 180 sn).
+// odak_oturumu_tamamla RPC'si backend'de GERÇEK geçen süreyi bu değerle
+// karşılaştırıp azsa oturumu 'yetersiz_sure' diye REDDEDİYOR — bu kontrol
+// Meteor Takibi için doğru (orada süre gerçek bir bütçe) ama Merkez Nokta
+// artık 10 SABİT tur ile çalıştığı için bu turlar çoğu zaman 180 saniyeden
+// çok daha kısa sürüyor ve oturum yanlışlıkla reddediliyordu ("süre yetersiz"
+// şikayeti buradan geliyordu). Çözüm: admin'in süre alanını hiç kullanmadan,
+// 10 turun KENDİ zamanlamasından (aşama gösterim süresi + cevap başına geri
+// bildirim beklemesi) gerçekçi bir alt sınır hesaplayıp göndermek — ve bu
+// hesaba güvenlik payı olarak %55 pay bırakmak (gerçek oynanış her zaman
+// bundan uzun sürer, ama hesap da sıfıra yakın değil, anlamlı bir taban).
+function kilitliGerekliSureSnHesapla(){
+  const ayar = ASAMALAR[G.asama];
+  const turBasinaMs = ayar.sure + (G.tarafSayisi * 1000) + 200; // gösterim + (taraf sayısı × geri bildirim) + geçiş payı
+  const toplamMs = turBasinaMs * KILITLI_TUR_SAYISI;
+  return Math.max(5, Math.round((toplamMs / 1000) * 0.55));
+}
+
 function kilitliModuBaslat(){
   document.getElementById('kartMod').style.display='none';
   document.getElementById('kartTaraf').style.display='none';
@@ -323,14 +341,12 @@ function kilitliModuBaslat(){
   if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
   if(MOD_PARAM==='sayi'||MOD_PARAM==='harf') G.mod = MOD_PARAM;
   if(TARAF_PARAM===1||TARAF_PARAM===2) G.tarafSayisi = TARAF_PARAM;
-  // Süre artık tur sayısını belirlemiyor — sadece Odak Modu oturum kaydı için
-  // nominal bir süre gönderiliyor (backend oturumu bu değerle açar).
-  const nominalSureSn = (isNaN(SURE_PARAM_DK) ? 3 : SURE_PARAM_DK) * 60;
   document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
   document.getElementById('mainStartBtn').onclick = async function(){
     const btn=document.getElementById('mainStartBtn');
     btn.disabled=true; btn.textContent='⏳ Başlatılıyor...';
-    const izinVar = await OdakModu.baslat('merkez-nokta', nominalSureSn, odakIhlalOldu);
+    const gerekliSureSn = kilitliGerekliSureSnHesapla();
+    const izinVar = await OdakModu.baslat('merkez-nokta', gerekliSureSn, odakIhlalOldu);
     btn.disabled=false; btn.textContent='▶ BAŞLA';
     if(!izinVar){ alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.'); return; }
     oyunuBaslat();
