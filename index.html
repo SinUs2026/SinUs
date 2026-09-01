@@ -192,6 +192,18 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
   .ng2{grid-template-columns:1fr}
   .na{border-right:none;border-bottom:1px solid rgba(96,165,250,0.1)}.na:last-child{border-bottom:none}
 }
+
+/* ÖĞRENCİLER NE DİYOR — sosyal medya tarzı bulut konuşma balonları */
+.ogr-yorum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.3rem;margin-top:3rem}
+.ogr-bulut{background:rgba(255,255,255,0.03);border:1px solid rgba(96,165,250,0.14);border-radius:18px 18px 18px 4px;padding:1.6rem 1.7rem;transition:all 0.3s}
+.ogr-bulut:hover{border-color:rgba(96,165,250,0.32);transform:translateY(-3px)}
+.ogr-bulut-ust{display:flex;justify-content:space-between;align-items:baseline;gap:0.8rem;margin-bottom:0.65rem}
+.ogr-bulut-isim{font-size:0.85rem;font-weight:600;color:var(--be)}
+.ogr-bulut-tarih{font-size:0.72rem;color:var(--gr);white-space:nowrap}
+.ogr-bulut-soru{font-size:0.76rem;color:var(--gr);font-style:italic;margin-bottom:0.55rem}
+.ogr-bulut-metin{font-size:0.92rem;color:var(--ya);opacity:0.92;line-height:1.7;margin-bottom:1.1rem}
+.ogr-bulut-tepkiler{display:flex;gap:0.7rem;font-size:0.78rem;color:var(--gr)}
+.ogr-bos, .veli-bos{color:var(--gr);text-align:center;grid-column:1/-1;font-size:0.92rem;padding:1rem 0}
 </style>
 </head>
 <body>
@@ -394,14 +406,23 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(96,165,250,0.08);pa
   </div>
 </section>
 
+<section id="ogrenci-yorumlar">
+  <div class="c">
+    <p class="sl">SinUs Ortamı</p>
+    <h2 class="st">Öğrenciler ne diyor?</h2>
+    <p class="sb">Her gün SinUs Ortamı'nda öğrencilerimiz kendi kelimeleriyle deneyimlerini paylaşıyor. İşte onaylanan birkaç paylaşım.</p>
+    <div class="ogr-yorum-grid" id="ogrenciYorumGrid">
+      <p class="ogr-bos">⏳ Yükleniyor...</p>
+    </div>
+  </div>
+</section>
+
 <section id="yorumlar">
   <div class="c">
-    <p class="sl">Veli Görüşleri</p>
+    <p class="sl">Veliler Ne Diyor</p>
     <h2 class="st">Aileler ne diyor?</h2>
-    <div class="yg2">
-      <div class="yk"><div class="yy">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="yme">İlk iki haftada farkı hissettik. Çocuğum artık kitaplarını çok daha hızlı bitiriyor ve anlattıklarında gerçekten kavradığını görüyorum.</p><div class="yki"><div class="yav">AY</div><div><div class="yin">Ayşe Y.</div><div class="yro">5. Sınıf Öğrencisi Velisi</div></div></div></div>
-      <div class="yk"><div class="yy">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="yme">Gelişim grafiğini her gün kontrol ediyoruz. Sayılara bakınca motivasyonu kendiliğinden artıyor. Sistemi çok beğendik.</p><div class="yki"><div class="yav">MK</div><div><div class="yin">Mehmet K.</div><div class="yro">7. Sınıf Öğrencisi Velisi</div></div></div></div>
-      <div class="yk"><div class="yy">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="yme">Diğer platformları da denedik ama SinUs çok farklı. Egzersizler gerçekten düşünülmüş, çocuk sıkılmıyor.</p><div class="yki"><div class="yav">ZD</div><div><div class="yin">Zeynep D.</div><div class="yro">Lise Öğrencisi Velisi</div></div></div></div>
+    <div class="yg2" id="veliYorumGrid">
+      <p class="veli-bos">⏳ Yükleniyor...</p>
     </div>
   </div>
 </section>
@@ -632,6 +653,77 @@ async function anaBlogYazilariniGetir(){
   }
 }
 anaBlogYazilariniGetir();
+
+/* ── ÖĞRENCİLER NE DİYOR — SinUs Ortamı'ndan, admin'in "web adayı" işaretleyip
+   onayladığı paylaşımlar. Herkese açık, giriş gerektirmeyen ortam_vitrin_getir
+   RPC'sinden besleniyor. Gizlilik için sadece öğrencinin adı (soyadı değil) ve
+   sınıfı gösteriliyor. */
+function ogrKacir(m){const d=document.createElement('div');d.textContent=m||'';return d.innerHTML;}
+async function ogrenciYorumlariGetir(){
+  const grid=document.getElementById('ogrenciYorumGrid');
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/ortam_vitrin_getir',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_limit:9})
+    });
+    const data=await res.json();
+    if(!data || !data.length){
+      grid.innerHTML='<p class="ogr-bos">Yakında burada öğrencilerimizin paylaşımlarını göreceksiniz. 🌟</p>';
+      return;
+    }
+    grid.innerHTML=data.map(p=>{
+      const tarih=new Date(p.olusturulma_tarihi).toLocaleDateString('tr-TR',{day:'numeric',month:'long'});
+      return `<div class="ogr-bulut">
+        <div class="ogr-bulut-ust"><span class="ogr-bulut-isim">${ogrKacir(p.ad||'Bir öğrenci')}${p.sinif?' · '+ogrKacir(p.sinif):''}</span><span class="ogr-bulut-tarih">${tarih}</span></div>
+        <div class="ogr-bulut-soru">💭 ${ogrKacir(p.soru_metni||'')}</div>
+        <div class="ogr-bulut-metin">${ogrKacir(p.cevap_metni||'')}</div>
+        <div class="ogr-bulut-tepkiler"><span>❤️ ${p.kalp||0}</span><span>👏 ${p.alkis||0}</span><span>🚀 ${p.roket||0}</span></div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    grid.innerHTML='<p class="ogr-bos">Şu anda paylaşımlar yüklenemedi.</p>';
+  }
+}
+ogrenciYorumlariGetir();
+
+/* ── VELİLER NE DİYOR — gerçek, admin onaylı ve yayınlanmış veli
+   değerlendirmeleri. Önceden burada 3 sabit/örnek yorum vardı (Ayşe Y.,
+   Mehmet K., Zeynep D.); artık veli_degerlendirmeleri_vitrin_getir RPC'sinden
+   gelen gerçek verilerle dolduruluyor. Yalnızca gerçek bir yorum metni
+   (yorum alanı) olan değerlendirmeler kart olarak gösteriliyor — alıntı
+   olmadan kart anlamsız kalıyor. */
+function veliKacir(m){const d=document.createElement('div');d.textContent=m||'';return d.innerHTML;}
+async function veliYorumlariGetir(){
+  const grid=document.getElementById('veliYorumGrid');
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/veli_degerlendirmeleri_vitrin_getir',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_limit:9})
+    });
+    const data=(await res.json()||[]).filter(d=>d.yorum && d.yorum.trim().length>0);
+    if(!data.length){
+      grid.innerHTML='<p class="veli-bos">Yakında burada velilerimizin gerçek değerlendirmelerini göreceksiniz. 💌</p>';
+      return;
+    }
+    grid.innerHTML=data.map(d=>{
+      const puan=d.puan||5;
+      const yildizlar='★'.repeat(puan)+'☆'.repeat(5-puan);
+      const veliAdi=d.veli_adi || 'Bir SinUs Velisi';
+      const bas=veliAdi.trim().split(/\s+/).map(k=>k[0]).slice(0,2).join('').toUpperCase();
+      const rol=(d.sinif?ogrKacir(d.sinif)+' ':'')+'Öğrencisi Velisi';
+      return `<div class="yk">
+        <div class="yy">${yildizlar}</div>
+        <p class="yme">${veliKacir(d.yorum)}</p>
+        <div class="yki"><div class="yav">${bas||'V'}</div><div><div class="yin">${veliKacir(veliAdi)}</div><div class="yro">${rol}</div></div></div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    grid.innerHTML='<p class="veli-bos">Şu anda değerlendirmeler yüklenemedi.</p>';
+  }
+}
+veliYorumlariGetir();
 
 /* ── ÜCRETSİZ ÖLÇÜM BAŞVURU FORMU ── */
 function olcumFormAc(){
