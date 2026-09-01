@@ -1000,6 +1000,10 @@ function gorevUrl(g){
   if(g.gosterim!==undefined && g.gosterim!==null) url+='&gosterim='+g.gosterim;
   if(g.zorluk!==undefined && g.zorluk!==null) url+='&zorluk='+encodeURIComponent(g.zorluk);
   if(g.mod!==undefined && g.mod!==null) url+='&mod='+encodeURIComponent(g.mod);
+  // Meteor Takibi'nin Tek/Çift Meteor modu — daha önce URL'e hiç eklenmiyordu,
+  // bu yüzden admin panelinden planlansa bile meteor-takibi.html'e ulaşmıyordu
+  // (dosya da zaten kilitli modda hep "Tek Meteor"a sabitleniyordu, o da ayrıca düzeltildi).
+  if(g.meteorMod!==undefined && g.meteorMod!==null) url+='&meteorMod='+g.meteorMod;
   return url;
 }
 
