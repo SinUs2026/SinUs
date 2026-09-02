@@ -191,7 +191,7 @@ tr:hover td{background:#f8fafc}
       <a href="#" onclick="altMenuToggle('hikayeler-alt',this)"><span class="ikon">📚</span> Hikâyeler <span class="ok">▶</span></a>
       <ul class="alt-menu" id="hikayeler-alt">
         <li><a href="#" onclick="sayfaGoster('olcum-metinleri',this)">📏 Ölçüm Metinleri</a></li>
-        <li><a href="#" onclick="sayfaGoster('ders-metinleri',this)">📖 Ders Metinleri</a></li>
+        <li><a href="#" onclick="sayfaGoster('ders-metinleri',this)">📖 Kurs Devam Metinleri</a></li>
         <li><a href="#" onclick="sayfaGoster('hikayeler',this)">📚 Seviye Metinleri</a></li>
       </ul>
     </li>
@@ -319,7 +319,7 @@ tr:hover td{background:#f8fafc}
 
   <!-- DERS METİNLERİ -->
   <div id="sayfa-ders-metinleri" class="sayfa">
-    <div class="ust-bar"><div><h1>Ders Metinleri</h1><p>Okuma tekniklerinde kullanılacak metinleri buradan yönetin.</p></div><button class="yeni-btn" onclick="modalAc('ders')">+ Yeni Metin Ekle</button></div>
+    <div class="ust-bar"><div><h1>Kurs Devam Metinleri</h1><p>Öğrencilerin 2. ve sonraki 30 günlük turlarında okuma tekniklerinde otomatik olarak kullanılan ortak metin havuzu.</p></div><button class="yeni-btn" onclick="modalAc('ders')">+ Yeni Metin Ekle</button></div>
     <div class="grup-aciklama"><strong>Zorluk Rehberi:</strong> Basit → 1-2. Sınıf &nbsp;|&nbsp; Orta → 3-5. Sınıf &nbsp;|&nbsp; Zor → 6-8. Sınıf &nbsp;|&nbsp; Çok Zor → Lise ve Üzeri</div>
     <div class="kart" style="padding:1rem 1.5rem">
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
@@ -711,7 +711,7 @@ tr:hover td{background:#f8fafc}
 
 <div class="modal" id="modal-ders">
   <div class="modal-kutu genis cok-genis">
-    <div class="modal-baslik">📖 Yeni Ders Metni Ekle</div>
+    <div class="modal-baslik">📖 Yeni Metin Ekle</div>
     <div class="form-grid">
       <div class="form-grup"><label>Zorluk</label><select id="d-zorluk"><option value="basit">Basit – 1-2. Sınıf</option><option value="orta" selected>Orta – 3-5. Sınıf</option><option value="zor">Zor – 6-8. Sınıf</option><option value="cok_zor">Çok Zor – Lise+</option></select></div>
       <div class="form-grup"><label>Kelime Sayısı</label><input type="number" id="d-kelime" placeholder="Otomatik sayılır" min="10" max="2000"></div>
@@ -725,7 +725,7 @@ tr:hover td{background:#f8fafc}
         <button type="button" class="yazi-boyut-btn" data-boyut="21" onclick="yaziBoyutuAyarla('d-metin',this)">Büyük</button>
         <button type="button" class="yazi-boyut-btn" data-boyut="26" onclick="yaziBoyutuAyarla('d-metin',this)">Çok Büyük</button>
       </div>
-      <textarea id="d-metin" class="metin-devasa" placeholder="Ders metnini buraya yapıştırın..." oninput="dersKelimeSay()"></textarea><div class="sayac" id="ders-kelime-sayac">0 kelime</div></div>
+      <textarea id="d-metin" class="metin-devasa" placeholder="Metni buraya yapıştırın..." oninput="dersKelimeSay()"></textarea><div class="sayac" id="ders-kelime-sayac">0 kelime</div></div>
 
     <div class="form-grup" style="margin-top:16px"><label style="color:#d4af37;font-weight:600">Sorular</label><div id="soru-listesi-ders" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div><button type="button" onclick="soruEkle('soru-listesi-ders')" style="background:#1e3a5f;color:#60a5fa;border:1px solid #2563a8;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:0.85rem">+ Soru Ekle</button></div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ders')">İptal</button><button class="btn-kaydet" id="btn-ders-kaydet" onclick="dersMetniKaydet()">💾 Kaydet</button></div>
@@ -734,7 +734,7 @@ tr:hover td{background:#f8fafc}
 
 <div class="modal" id="modal-ders-duzenle">
   <div class="modal-kutu genis cok-genis">
-    <div class="modal-baslik">✏️ Ders Metni Düzenle</div>
+    <div class="modal-baslik">✏️ Metin Düzenle</div>
     <input type="hidden" id="dd-id">
     <div class="form-grid">
       <div class="form-grup"><label>Zorluk</label><select id="dd-zorluk"><option value="basit">Basit</option><option value="orta">Orta</option><option value="zor">Zor</option><option value="cok_zor">Çok Zor</option></select></div>
@@ -1513,7 +1513,7 @@ function bildirimGoster(mesaj,tip){const el=document.getElementById('bildirim');
 
 // ── LİSTE SEÇİCİ (Akan Kelime'deki "metin seçici" ile aynı desen) ──
 // Tek satırlık özet bar + tıklayınca açılan liste. Hikayeler, Ölçüm
-// Metinleri ve Ders Metinleri sayfalarının hepsinde aynı davranış.
+// Metinleri ve Kurs Devam Metinleri sayfalarının hepsinde aynı davranış.
 function listeToggle(prefix){
   const secici=document.getElementById(prefix+'-liste-secici');
   const govde=document.getElementById(prefix+'-liste-govde');
@@ -2463,7 +2463,7 @@ async function dersMetniKaydet(){
   try{sorular=soruVerileriniTopla('soru-listesi-ders');}
   catch(e){bildirimGoster('⚠️ '+e.message,'hata');return;}
   const btn=document.getElementById('btn-ders-kaydet');btn.textContent='⏳ Kaydediliyor...';
-  try{await supabase('POST','ders_metinleri',{zorluk,baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular});bildirimGoster('✅ Ders metni kaydedildi!','basari');modalKapat('ders');dersMetinleriYukle();}
+  try{await supabase('POST','ders_metinleri',{zorluk,baslik,metin,kelime_sayisi:parseInt(kelime)||0,sorular});bildirimGoster('✅ Metin kaydedildi!','basari');modalKapat('ders');dersMetinleriYukle();}
   catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
 }
@@ -2517,7 +2517,7 @@ function dersMetinSiraliVeri(){
 
 function dersMetinListesiCiz(){
   const liste=document.getElementById('ders-liste');
-  if(!_dersMetinleriVeri.length){document.getElementById('ders-sayac').textContent='0 metin';liste.innerHTML='<div class="bos-durum">📭 Henüz ders metni eklenmemiş.</div>';return;}
+  if(!_dersMetinleriVeri.length){document.getElementById('ders-sayac').textContent='0 metin';liste.innerHTML='<div class="bos-durum">📭 Henüz metin eklenmemiş.</div>';return;}
   document.getElementById('ders-sayac').textContent=_dersMetinleriVeri.length+' metin';
   const veri=dersMetinSiraliVeri();
   liste.innerHTML=`
