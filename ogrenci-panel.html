@@ -255,6 +255,7 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
           <h3>⚡ Bugünkü Görevler</h3>
           <span class="gun-badge" id="gunBadge">— / 30</span>
         </div>
+        <div id="tur2Notlar"></div>
         <div class="gorev-liste" id="gorevListe">
           <div class="yukleniyor">⏳ Program yükleniyor...</div>
         </div>
@@ -845,19 +846,23 @@ function bilgileriYukle(){
   document.getElementById('hosgeldinBaslik').textContent='Hoş geldin, '+ad+'! 👋';
 
   const asama=ogrenci.asama||1;
-  const gun=ogrenci.mevcut_gun||1;
   const enerji=ogrenci.enerji||0;
+  const turSayisi=ogrenci.tur_sayisi||1;
+  // gunIcinde: turBittiMi() true olduğunda (mevcut_gun turun 30 sınırını
+  // geçtiğinde) 30'da sabitlenir — bu fonksiyon her koşulda güvenle çağrılabilir.
+  const gun=gunIcindeHesapla();
+  const turEtiketi=turSayisi>1?(' · Tur '+turSayisi):'';
 
-  document.getElementById('hosgeldinAlt').textContent=(SEVIYE_ADI[asama]||asama+'. Seviye')+' · '+gun+'. Gün · Hadi başlayalım!';
+  document.getElementById('hosgeldinAlt').textContent=(SEVIYE_ADI[asama]||asama+'. Seviye')+' · '+gun+'. Gün'+turEtiketi+' · Hadi başlayalım!';
   document.getElementById('bilgiEnerji').textContent='⚡ '+enerji;
   document.getElementById('bilgiAsama').textContent=SEVIYE_ADI[asama]||asama+'. Seviye';
-  document.getElementById('bilgiAsamaAlt').textContent=ASAMA_AD[asama]||'';
-  document.getElementById('gunBadge').textContent='Gün '+gun+' / 30';
+  document.getElementById('bilgiAsamaAlt').textContent=(ASAMA_AD[asama]||'')+turEtiketi;
+  document.getElementById('gunBadge').textContent=turBittiMi() ? ('Tur '+turSayisi+' Tamamlandı 🎉') : ('Gün '+gun+' / 30'+turEtiketi);
 
   // İlerleme
   const yuzde=Math.round((gun/30)*100);
   document.getElementById('ilerlemeAsamaAd').textContent=SEVIYE_ADI[asama]||asama+'. Seviye';
-  document.getElementById('ilerlemeGunler').textContent=gun+' / 30 gün';
+  document.getElementById('ilerlemeGunler').textContent=gun+' / 30 gün'+turEtiketi;
   document.getElementById('ilerlemeBar').style.width=yuzde+'%';
   document.getElementById('ilerlemeYuzde').textContent='%'+yuzde+' tamamlandı';
   document.getElementById('ilerlemeKalan').textContent=(30-gun)+' gün kaldı';
@@ -883,10 +888,47 @@ function bilgileriYukle(){
   veliHatirlatmaKontrolEt();
 }
 
+// ── TUR YARDIMCILARI (30 günlük seri sistemi) ──
+// mevcut_gun HİÇ sıfırlanmaz, kümülatif artar: Tur 1 = gün 1-30, Tur 2 = gün
+// 31-60, Tur 3 = gün 61-90... Bu sayede gunluk_performans / gunluk_gorev_ilerleme
+// tabloları hiç değişmeden her turun geçmişi ayrı ayrı saklanır.
+function turBaslangicGunHesapla(){
+  return ((ogrenci.tur_sayisi||1)-1)*30;
+}
+function gunIcindeHesapla(){
+  const gun=Math.max(1,(ogrenci.mevcut_gun||1)-turBaslangicGunHesapla());
+  return Math.min(30,gun);
+}
+function turBittiMi(){
+  return (ogrenci.mevcut_gun||1) > (ogrenci.tur_sayisi||1)*30;
+}
+function tur2NotlariTemizle(){
+  const el=document.getElementById('tur2Notlar');
+  if(el) el.innerHTML='';
+}
+
 // ── PROGRAMI YÜKLE ──
 async function programiYukle(){
   const asama=ogrenci.asama||1;
   const gun=ogrenci.mevcut_gun||1;
+  const turSayisi=ogrenci.tur_sayisi||1;
+
+  // 30 günlük tur gerçekten bitmişse (mevcut_gun turun sınırını geçtiyse)
+  // normal gün ekranı yerine "Yeni Tur Başlat" kartı gösterilir.
+  if(turBittiMi()){
+    tur2NotlariTemizle();
+    turTamamlandiKartiGoster(turSayisi);
+    return;
+  }
+
+  // 2. tur ve sonrasında: göz/odak/genel serbest, sadece okuma teknikleri
+  // günlük rotasyonu takip eder ve metin ortak kütüphaneden (ders_metinleri) gelir.
+  if(turSayisi>=2){
+    await tur2ProgramiYukle(asama, gunIcindeHesapla());
+    return;
+  }
+
+  tur2NotlariTemizle();
 
   try{
     const res=await fetch(SUPABASE_URL+'/rest/v1/gunluk_program?asama=eq.'+asama+'&gun=eq.'+gun,{
@@ -916,6 +958,122 @@ async function programiYukle(){
 
   }catch(e){
     document.getElementById('gorevListe').innerHTML='<div class="bos-program">❌ Program yüklenemedi.</div>';
+  }
+}
+
+// ── 30 GÜNLÜK TUR TAMAMLANDI KARTI ──
+function turTamamlandiKartiGoster(turSayisi){
+  document.getElementById('gunBadge').textContent='Tur '+turSayisi+' Tamamlandı 🎉';
+  document.getElementById('gorevListe').innerHTML=`
+    <div style="text-align:center;padding:1.5rem 1rem">
+      <div style="font-size:2.5rem;margin-bottom:0.8rem">🎉</div>
+      <div style="font-weight:700;color:#0a1628;margin-bottom:0.5rem;font-size:1.05rem">30 Günlük Turu Tamamladın!</div>
+      <div style="color:#64748b;font-size:0.88rem;line-height:1.6">İstersen yeni bir 30 günlük seri başlatabilirsin. Yeni turda göz, odak ve genel egzersizlerini istediğin gibi kendin seçebileceksin.</div>
+    </div>`;
+  document.getElementById('baslaBtn').innerHTML='<button class="basla-btn tamamlandi-btn" onclick="yeniTurModalAc()">🚀 Yeni Tur Başlat</button>';
+}
+
+// ── TUR 2+ GÜNLÜK PROGRAM ──
+// Göz/odak/genel serbest (Tüm Egzersizler'den öğrenci kendi seçer); sadece
+// okuma teknikleri aynı 30 günlük rotasyonu takip eder ama metin artık
+// ders_metinleri ortak kütüphanesinden gelir (tur_metin_getir RPC'si).
+async function tur2ProgramiYukle(asama, gunIcinde){
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/gunluk_program?asama=eq.'+asama+'&gun=eq.'+gunIcinde,{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const data=await res.json();
+    let okumaGorevleri=[];
+    if(data.length && data[0].gorevler && data[0].gorevler.length){
+      okumaGorevleri=data[0].gorevler.filter(g=>g.tip==='okuma').map(g=>Object.assign({},g));
+    }
+
+    if(!okumaGorevleri.length){
+      document.getElementById('gorevListe').innerHTML='<div class="bos-program">📋 Bu gün için okuma görevi tanımlı değil.</div>';
+      document.getElementById('baslaBtn').innerHTML='';
+      tur2NotlariTemizle();
+      return;
+    }
+
+    // O günün ortak metnini al (daha önce seçilmemişse zorluk eşlemesiyle
+    // rastgele seçilip kaydedilir) — o günün tüm okuma görevleri aynı metni paylaşır.
+    let metin=null;
+    try{
+      const metinSonuc=await rpc('tur_metin_getir',{p_asama:asama,p_gun:gunIcinde});
+      metin=(metinSonuc&&metinSonuc.length)?metinSonuc[0]:null;
+    }catch(e){}
+    if(metin){
+      okumaGorevleri.forEach(g=>{ g.metin_id=metin.metin_id; g.metin_baslik=metin.baslik; g.kaynak='ders_metinleri'; });
+    }
+
+    mevcutGorevler=okumaGorevleri;
+    try{
+      const sunucuIdx=await rpc('gorev_ilerleme_getir',{p_asama:asama,p_gun:ogrenci.mevcut_gun});
+      tamamlananIdx=(typeof sunucuIdx==='number')?sunucuIdx:-1;
+    }catch(e){
+      tamamlananIdx=-1;
+    }
+    gorevListesiOlustur();
+    tur2SecbestNotuGoster(metin);
+
+  }catch(e){
+    document.getElementById('gorevListe').innerHTML='<div class="bos-program">❌ Program yüklenemedi.</div>';
+  }
+}
+
+function tur2SecbestNotuGoster(metin){
+  const el=document.getElementById('tur2Notlar');
+  if(!el) return;
+  const metinSatiri = metin ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:10px;padding:0.7rem 1rem;font-size:0.85rem;margin-bottom:0.7rem;display:flex;justify-content:space-between;align-items:center;gap:0.6rem"><span>📖 Bugünün metni: <strong>${metin.baslik}</strong></span><button onclick="turMetniDegistir()" style="background:none;border:1px solid #93c5fd;color:#1d4ed8;border-radius:8px;padding:0.3rem 0.7rem;font-size:0.78rem;cursor:pointer;font-family:inherit;white-space:nowrap">🔀 Değiştir</button></div>` : '';
+  el.innerHTML = metinSatiri + '<div class="tum-egz-not" style="margin-bottom:1rem">🎯 Bu turda göz, odak ve genel egzersizlerini istediğin gibi seçebilirsin — üstteki "🗂 Tüm Egzersizler"den dilediğini dene.</div>';
+}
+
+async function turMetniDegistir(){
+  const asama=ogrenci.asama||1;
+  const gunIcinde=gunIcindeHesapla();
+  try{
+    await rpc('tur_metin_degistir',{p_asama:asama,p_gun:gunIcinde});
+    programiYukle();
+  }catch(e){
+    alert('❌ Metin değiştirilemedi: '+e.message);
+  }
+}
+
+// ── YENİ TUR BAŞLAT ──
+function yeniTurModalAc(){
+  document.getElementById('ytHiz').value='';
+  document.getElementById('ytHata').style.display='none';
+  document.getElementById('yeniTurOverlay').style.display='flex';
+}
+function yeniTurModalKapat(){
+  document.getElementById('yeniTurOverlay').style.display='none';
+}
+async function yeniTurBaslat(){
+  const deger=parseInt(document.getElementById('ytHiz').value);
+  const hataEl=document.getElementById('ytHata');
+  hataEl.style.display='none';
+  if(!deger || deger<10){
+    hataEl.textContent='Lütfen geçerli bir başlangıç hızı gir (en az 10 kpm).';
+    hataEl.style.display='block';
+    return;
+  }
+  const btn=document.getElementById('ytBaslatBtn');
+  btn.disabled=true; btn.textContent='⏳ Başlatılıyor...';
+  try{
+    const sonuc=await rpc('yeni_tur_baslat',{p_baslangic_hizi:deger});
+    const r=(sonuc&&sonuc.length)?sonuc[0]:null;
+    if(!r) throw new Error('Sunucudan sonuç alınamadı');
+    ogrenci.tur_sayisi=r.yeni_tur;
+    ogrenci.okuma_hizi=r.yeni_hiz;
+    yeniTurModalKapat();
+    bilgileriYukle();
+    await programiYukle();
+    yolculukYukle();
+  }catch(e){
+    hataEl.textContent='❌ '+e.message;
+    hataEl.style.display='block';
+  }finally{
+    btn.disabled=false; btn.textContent='🚀 Başlat';
   }
 }
 
@@ -1004,6 +1162,10 @@ function gorevUrl(g){
   // bu yüzden admin panelinden planlansa bile meteor-takibi.html'e ulaşmıyordu
   // (dosya da zaten kilitli modda hep "Tek Meteor"a sabitleniyordu, o da ayrıca düzeltildi).
   if(g.meteorMod!==undefined && g.meteorMod!==null) url+='&meteorMod='+g.meteorMod;
+  // TUR 2+ (bkz. programiYukle/tur2ProgramiYukle): okuma metni artık sabit
+  // hikayeler kaydından değil, ders_metinleri havuzundan geliyorsa egzersiz
+  // dosyasının doğru tablodan çekmesi için bunu bildiriyoruz.
+  if(g.kaynak!==undefined && g.kaynak!==null) url+='&kaynak='+encodeURIComponent(g.kaynak);
   return url;
 }
 
@@ -1410,11 +1572,28 @@ let gbBitisZaman=null;
 let mevcutHikaye=null;
 
 async function gunuBitirAc(){
+  const asama=ogrenci.asama||1;
+  const gun=ogrenci.mevcut_gun||1;
+
+  // TUR 2+: sabit hikaye yerine, o gün için zaten seçilmiş/seçilecek olan
+  // ders_metinleri havuzu metni kullanılır (tur_metin_getir aynı zorluk
+  // eşlemesini uygular, o günün okuma görevleriyle aynı metni paylaşır).
+  if((ogrenci.tur_sayisi||1)>=2){
+    try{
+      const sonuc=await rpc('tur_metin_getir',{p_asama:asama,p_gun:gunIcindeHesapla()});
+      const m=(sonuc&&sonuc.length)?sonuc[0]:null;
+      if(!m){ alert('Bu gün için metin bulunamadı.'); return; }
+      mevcutHikaye=m; // aynı alan adları (baslik, metin, kelime_sayisi, sorular) — mevcut akış değişmeden çalışır
+      gunuBitirBilgilendirmeGoster();
+    }catch(e){
+      alert('Metin yüklenemedi: '+e.message);
+    }
+    return;
+  }
+
   // Günün hikayesini Supabase'den çek — aynı gündeki teknik egzersizlerde de
   // (ve varsa Başlangıç Ölçümü'nde) kullanılan hikaye ile aynı kayıttır (asama+gun
   // ile eşleşir), bu yüzden burada ayrı bir eşleştirme gerekmez.
-  const asama=ogrenci.asama||1;
-  const gun=ogrenci.mevcut_gun||1;
   try{
     const res=await fetch(SUPABASE_URL+'/rest/v1/hikayeler?asama=eq.'+asama+'&gun=eq.'+gun,{
       headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
@@ -1682,21 +1861,25 @@ async function yolculukYukle(){
   if(!ogrenci) { setTimeout(yolculukYukle, 500); return; }
   const sarici = document.getElementById('yolculukSarici');
   sarici.innerHTML = '';
+  // mevcut_gun kümülatif (Tur 1=1-30, Tur 2=31-60, ...) olduğu için 30 node'luk
+  // yolculuk her tur başında sıfırdan görünmeli — sadece MEVCUT turun gün
+  // aralığını çekip 1-30'a haritalıyoruz.
+  const turBaslangicGun = turBaslangicGunHesapla();
   let performans = {};
   try {
-    const res = await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi)+'&asama=eq.'+(ogrenci.asama||1),{
+    const res = await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi)+'&asama=eq.'+(ogrenci.asama||1)+'&gun=gte.'+(turBaslangicGun+1)+'&gun=lte.'+(turBaslangicGun+30),{
       headers:oturumHeaders()
     });
     const data = await res.json();
-    data.forEach(d=>{ performans[d.gun]=d; });
+    data.forEach(d=>{ performans[d.gun-turBaslangicGun]=d; });
   } catch(e){}
 
-  const mevcutGun = ogrenci.mevcut_gun||1;
+  const mevcutGun = gunIcindeHesapla();
 
   for(let g=1; g<=30; g++){
     const p = performans[g];
     const tamamlandi = p && p.okuma_hizi;
-    const bugun = g===mevcutGun;
+    const bugun = g===mevcutGun && !turBittiMi();
     const gezegen = GEZEGENLER[(g-1)%8];
 
     const kutu = document.createElement('div');
@@ -1816,6 +1999,23 @@ async function yolculukYukle(){
     <div style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1.5rem">🪐 Gelişim Yolculuğu</div>
     <div style="overflow-x:auto;padding-bottom:1rem">
       <div id="yolculukSarici" class="gezegen-sarici"></div>
+    </div>
+  </div>
+</div>
+
+<!-- YENİ TUR BAŞLAT -->
+<div id="yeniTurOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,22,40,0.75);z-index:1080;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:420px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.3)">
+    <div style="font-size:1.15rem;font-weight:700;color:#0a1628;margin-bottom:0.6rem">🚀 Yeni Tur Başlat</div>
+    <div style="font-size:0.88rem;color:#475569;margin-bottom:1.3rem;line-height:1.6">Yeni 30 günlük serin için başlangıç okuma hızını gir. Program bu hızdan itibaren aynı adaptif mantıkla ilerleyecek. Bu turda göz, odak ve genel egzersizlerini istediğin gibi kendin seçebileceksin.</div>
+    <div style="margin-bottom:1rem">
+      <label style="display:block;font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:0.4rem">Başlangıç Hızı (kelime/dakika)</label>
+      <input type="number" id="ytHiz" placeholder="örn. 600" style="width:100%;padding:0.6rem 0.9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:0.95rem;outline:none">
+    </div>
+    <div id="ytHata" style="display:none;color:#dc2626;font-size:0.82rem;margin-bottom:1rem"></div>
+    <div style="display:flex;gap:0.6rem">
+      <button onclick="yeniTurModalKapat()" style="flex:1;padding:0.7rem;background:#f1f5f9;color:#475569;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">İptal</button>
+      <button id="ytBaslatBtn" onclick="yeniTurBaslat()" style="flex:1;padding:0.7rem;background:#16a34a;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">🚀 Başlat</button>
     </div>
   </div>
 </div>
