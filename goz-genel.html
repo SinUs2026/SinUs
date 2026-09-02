@@ -56,7 +56,13 @@ body.egzersiz-aktif .header{display:none;}
 .hud-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-top:2px;}
 .alan{width:100%;max-width:1400px;flex:1 1 auto;min-height:480px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;position:relative;overflow:hidden;margin-bottom:8px;}
 .referans-nokta{position:absolute;width:9px;height:9px;border-radius:50%;background:rgba(0,212,255,0.3);transform:translate(-50%,-50%);}
-.nokta{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);box-shadow:0 0 20px rgba(0,212,255,0.8),0 0 40px rgba(0,212,255,0.4);transition:none;z-index:2;}
+.nokta{position:absolute;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:2.3rem;line-height:1;transform:translate(-50%,-50%);z-index:2;filter:drop-shadow(0 0 14px rgba(0,212,255,0.55));}
+@keyframes gezegenBeliri{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(0.45);}
+  55%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1);}
+}
+.nokta.beliriyor{animation:gezegenBeliri 0.32s ease-out;}
 .desen-etiket{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-family:'Orbitron',sans-serif;font-size:0.7rem;color:rgba(0,212,255,0.6);letter-spacing:2px;z-index:5;background:rgba(6,13,26,0.6);padding:4px 12px;border-radius:10px;}
 .sure-bar-wrap{width:100%;max-width:1400px;margin-bottom:6px;}
 .sure-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;}
@@ -125,7 +131,7 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
     <div class="sure-bar-wrap"><div class="sure-bar"><div class="sure-bar-ic" id="sureIc" style="width:100%"></div></div></div>
     <div class="alan" id="alan">
       <button class="tam-ekran-btn" onclick="tamEkranToggle()" title="Tam Ekran">⛶</button>
-      <div class="desen-etiket" id="desenEtiket">KARE TUR</div>
+      <div class="desen-etiket" id="desenEtiket">SOLDAN SAĞA</div>
       <div id="referansNoktalari"></div>
       <div class="nokta" id="nokta"></div>
     </div>
@@ -154,9 +160,11 @@ body.tam-ekran-modu #screenEgzersiz>.geri-btn{position:fixed;bottom:20px;left:50
     <h3>NASIL YAPILIR?</h3>
     <div class="icerik">
       👁️ Başını <strong>hareket ettirme</strong>, sadece gözlerinle takip et<br>
-      🔲 Önce <strong>2 tur köşeden köşeye kare</strong> tur atar<br>
-      ⚡ Sonra <strong>2 tur Z şekli</strong> çizer<br>
-      ♾️ Sonra <strong>2 tur köşelerle sonsuz (∞)</strong> deseni yapar, sonra baştan başlar<br>
+      🪐 Ekranda beliren <strong>gezegeni</strong> gözünle bul ve odaklan<br>
+      ➡️ Önce <strong>2 tur soldan sağa</strong> tarar<br>
+      ⬅️ Sonra <strong>2 tur sağdan sola</strong> tarar<br>
+      ✖️ Sonra <strong>2 tur çapraz</strong> gider<br>
+      ⚡ Sonra <strong>2 tur Z şekli</strong> çizer, sonra baştan başlar<br>
       ⏱️ Süre bitince egzersiz tamamlanır
     </div>
   </div>
@@ -180,7 +188,16 @@ function panelDonusUrl(){
 function infoAc(){ document.getElementById('infoModal').classList.add('active'); }
 function infoKapat(){ document.getElementById('infoModal').classList.remove('active'); }
 
-let G = {hiz:3, sure:60, sesAcik:false, animId:null, sureInt:null, baslangic:0, wpDizisi:[], wpEtiket:[], turDizisi:[], mevcutIdx:0, pos:{x:10,y:12}};
+let G = {hiz:3, sure:60, sesAcik:false, animId:null, sureInt:null, baslangic:0, wpDizisi:[], wpEtiket:[], turDizisi:[], toplamTur:8, mevcutIdx:0, mevcutGezegen:null};
+
+// ── GEZEGEN EMOJİLERİ ──
+const GEZEGENLER = ['🪐','🌍','🌙','☀️','🌎','🌏'];
+function rastgeleGezegenSec(oncekiHaric){
+  let secim;
+  do{ secim = GEZEGENLER[Math.floor(Math.random()*GEZEGENLER.length)]; }
+  while(GEZEGENLER.length > 1 && secim === oncekiHaric);
+  return secim;
+}
 
 // ── SES TERCİHİ (tarayıcıda hatırlanır) ──
 (function(){
@@ -244,67 +261,53 @@ function showScreen(id){
   document.body.classList.toggle('egzersiz-aktif', id === 'screenEgzersiz');
 }
 
-// ── SABİT DESENLER (rastgele DEĞİL) ──
-const KOSELER = { TL:{x:10,y:12}, TR:{x:90,y:12}, BR:{x:90,y:88}, BL:{x:10,y:88} };
+// ── 9'LU GRID (3x3 ekran bölmesi — rastgele DEĞİL, sabit pozisyonlar) ──
+const GRID = {
+  TL:{x:10,y:12}, TM:{x:50,y:12}, TR:{x:90,y:12},
+  ML:{x:10,y:50}, MM:{x:50,y:50}, MR:{x:90,y:50},
+  BL:{x:10,y:88}, BM:{x:50,y:88}, BR:{x:90,y:88}
+};
 
-function kareTurWaypoints(turSayisi){
-  const sira=[KOSELER.TL,KOSELER.TR,KOSELER.BR,KOSELER.BL];
-  const wp=[];
-  for(let t=0;t<turSayisi;t++){ for(let i=1;i<=4;i++) wp.push(sira[i%4]); }
-  return wp;
-}
-function zWaypoints(turSayisi){
-  const ileri=[KOSELER.TL,KOSELER.TR,KOSELER.BL,KOSELER.BR];
-  const geri=[...ileri].reverse();
-  const wp=[];
-  for(let t=0;t<turSayisi;t++){
-    const kaynak = (t%2===0) ? ileri : geri;
-    for(let i=1;i<kaynak.length;i++) wp.push(kaynak[i]);
-  }
-  return wp;
-}
-function sonsuzWaypoints(turSayisi){
-  const sira=[KOSELER.TL,KOSELER.BR,KOSELER.TR,KOSELER.BL];
-  const wp=[];
-  for(let t=0;t<turSayisi;t++){ for(let i=1;i<=4;i++) wp.push(sira[i%4]); }
-  return wp;
-}
+// Her desen tek bir "tur"un ziyaret sırasını tanımlar
+const DESENLER = [
+  { etiket:'SOLDAN SAĞA', lap:[GRID.TL,GRID.TM,GRID.TR, GRID.ML,GRID.MM,GRID.MR, GRID.BL,GRID.BM,GRID.BR] },
+  { etiket:'SAĞDAN SOLA', lap:[GRID.TR,GRID.TM,GRID.TL, GRID.MR,GRID.MM,GRID.ML, GRID.BR,GRID.BM,GRID.BL] },
+  { etiket:'ÇAPRAZ',      lap:[GRID.TL,GRID.MM,GRID.BR, GRID.TR,GRID.MM,GRID.BL] },
+  { etiket:'Z ŞEKLİ',     lap:[GRID.TL,GRID.TM,GRID.TR, GRID.MM, GRID.BL,GRID.BM,GRID.BR] }
+];
+const TUR_PER_DESEN = 2;
 
 function kombineDesenDizisiOlustur(){
-  const wp = [KOSELER.TL];
-  const etiket = ['KARE TUR'];
-  const tur = [1];
-
-  const kare = kareTurWaypoints(2);
-  kare.forEach((p,i)=>{ wp.push(p); etiket.push('KARE TUR'); tur.push(1 + Math.floor(i/4)); });
-
-  const z = zWaypoints(2);
-  z.forEach((p,i)=>{ wp.push(p); etiket.push('Z ŞEKLİ'); tur.push(3 + Math.floor(i/3)); });
-
-  const sonsuz = sonsuzWaypoints(2);
-  sonsuz.forEach((p,i)=>{ wp.push(p); etiket.push('SONSUZ ∞'); tur.push(5 + Math.floor(i/4)); });
-
-  return {wp, etiket, tur};
+  const wp=[], etiket=[], tur=[];
+  let turSayaci = 1;
+  DESENLER.forEach(desen=>{
+    for(let t=0;t<TUR_PER_DESEN;t++){
+      desen.lap.forEach(p=>{ wp.push(p); etiket.push(desen.etiket); tur.push(turSayaci); });
+      turSayaci++;
+    }
+  });
+  return {wp, etiket, tur, toplamTur: turSayaci-1};
 }
 
 function referansNoktalariCiz(){
   const kapsayici = document.getElementById('referansNoktalari');
-  const noktalar = [KOSELER.TL, KOSELER.TR, KOSELER.BR, KOSELER.BL];
+  const noktalar = Object.values(GRID);
   kapsayici.innerHTML = noktalar.map(p=>`<div class="referans-nokta" style="left:${p.x}%;top:${p.y}%"></div>`).join('');
 }
 
 async function baslat(){
   if(!KILITLI){ G.hiz = parseInt(document.getElementById('hizSlider').value); }
-  const {wp, etiket, tur} = kombineDesenDizisiOlustur();
+  const {wp, etiket, tur, toplamTur} = kombineDesenDizisiOlustur();
   G.wpDizisi = wp;
   G.wpEtiket = etiket;
   G.turDizisi = tur;
+  G.toplamTur = toplamTur;
   G.mevcutIdx = 0;
-  G.pos = {x:wp[0].x, y:wp[0].y};
+  G.mevcutGezegen = null;
 
   if(KILITLI){
     const izinVar = await OdakModu.baslat('goz-genel', G.sure, function(neden){
-      clearInterval(G.sureInt); cancelAnimationFrame(G.animId); tamEkrandanCik();
+      clearInterval(G.sureInt); clearInterval(G.animId); tamEkrandanCik();
     });
     if(!izinVar){
       alert('Odak Modu oturumu başlatılamadı, lütfen tekrar dene.');
@@ -315,7 +318,7 @@ async function baslat(){
   G.baslangic = Date.now();
   document.getElementById('hudHiz').textContent = G.hiz + '/10';
   document.getElementById('hudSure').textContent = G.sure + 'sn';
-  document.getElementById('hudTur').textContent = G.turDizisi[0] + ' / 6';
+  document.getElementById('hudTur').textContent = G.turDizisi[0] + ' / ' + G.toplamTur;
   showScreen('screenEgzersiz');
   referansNoktalariCiz();
   tamEkranGirmeyeCalis();
@@ -324,42 +327,39 @@ async function baslat(){
     const kalan = Math.max(0, G.sure - Math.floor((Date.now()-G.baslangic)/1000));
     document.getElementById('hudSure').textContent = kalan + 'sn';
     document.getElementById('sureIc').style.width = (kalan/G.sure*100) + '%';
-    if(kalan <= 0){ clearInterval(G.sureInt); cancelAnimationFrame(G.animId); bitti(); }
+    if(kalan <= 0){ clearInterval(G.sureInt); clearInterval(G.animId); bitti(); }
   }, 500);
 
-  animasyonBaslat();
+  adimlarBaslat();
 }
 
-function animasyonBaslat(){
+// Sürükleme yok: her adımda gezegen yeni bir pozisyonda anında belirir ve yanıp söner
+function adimlarBaslat(){
   const nokta = document.getElementById('nokta');
   const etiketEl = document.getElementById('desenEtiket');
   const turEl = document.getElementById('hudTur');
-  const hizFaktoru = G.hiz * 0.6;
-  nokta.style.left = G.pos.x + '%';
-  nokta.style.top = G.pos.y + '%';
-  etiketEl.textContent = G.wpEtiket[G.mevcutIdx];
+  const adimSuresi = Math.max(350, Math.round(1900 - G.hiz * 150));
 
-  function animate(){
-    const hedefIdx = (G.mevcutIdx + 1) % G.wpDizisi.length;
-    const hedef = G.wpDizisi[hedefIdx];
-    const dx = hedef.x - G.pos.x;
-    const dy = hedef.y - G.pos.y;
-    const mesafe = Math.hypot(dx, dy);
-    if(mesafe <= hizFaktoru){
-      G.pos.x = hedef.x; G.pos.y = hedef.y;
-      G.mevcutIdx = hedefIdx;
-      etiketEl.textContent = G.wpEtiket[G.mevcutIdx];
-      turEl.textContent = G.turDizisi[G.mevcutIdx] + ' / 6';
-      tikSesiCal();
-    } else {
-      G.pos.x += (dx/mesafe) * hizFaktoru;
-      G.pos.y += (dy/mesafe) * hizFaktoru;
-    }
-    nokta.style.left = G.pos.x + '%';
-    nokta.style.top = G.pos.y + '%';
-    G.animId = requestAnimationFrame(animate);
+  function adimGoster(){
+    const p = G.wpDizisi[G.mevcutIdx];
+    nokta.style.left = p.x + '%';
+    nokta.style.top = p.y + '%';
+    G.mevcutGezegen = rastgeleGezegenSec(G.mevcutGezegen);
+    nokta.textContent = G.mevcutGezegen;
+    nokta.classList.remove('beliriyor');
+    void nokta.offsetWidth; // reflow — animasyonu yeniden tetikle
+    nokta.classList.add('beliriyor');
+    etiketEl.textContent = G.wpEtiket[G.mevcutIdx];
+    turEl.textContent = G.turDizisi[G.mevcutIdx] + ' / ' + G.toplamTur;
+    tikSesiCal();
   }
-  G.animId = requestAnimationFrame(animate);
+
+  adimGoster();
+  if(G.animId) clearInterval(G.animId);
+  G.animId = setInterval(()=>{
+    G.mevcutIdx = (G.mevcutIdx + 1) % G.wpDizisi.length;
+    adimGoster();
+  }, adimSuresi);
 }
 
 async function bitti(){
@@ -403,12 +403,12 @@ function gorevTamamlandiSinyaliGonder(sureSn, odakOturumId){
 }
 
 function durdur(){
-  clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();
+  clearInterval(G.sureInt);clearInterval(G.animId);tamEkrandanCik();
   if(KILITLI && OdakModu.aktifMi()) OdakModu.iptal('KULLANICI_DURDURDU');
   menuye();
 }
 function tekrar(){baslat();}
-function menuye(){clearInterval(G.sureInt);cancelAnimationFrame(G.animId);tamEkrandanCik();showScreen('screenMenu');}
+function menuye(){clearInterval(G.sureInt);clearInterval(G.animId);tamEkrandanCik();showScreen('screenMenu');}
 showScreen('screenMenu');
 
 function tamEkranGirmeyeCalis(){
