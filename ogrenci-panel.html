@@ -983,30 +983,43 @@ async function tur2ProgramiYukle(asama, gunIcinde){
       headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
     });
     const data=await res.json();
-    let okumaGorevleri=[];
-    if(data.length && data[0].gorevler && data[0].gorevler.length){
-      okumaGorevleri=data[0].gorevler.filter(g=>g.tip==='okuma').map(g=>Object.assign({},g));
-    }
 
-    if(!okumaGorevleri.length){
-      document.getElementById('gorevListe').innerHTML='<div class="bos-program">📋 Bu gün için okuma görevi tanımlı değil.</div>';
+    if(!data.length||!data[0].gorevler.length){
+      document.getElementById('gorevListe').innerHTML='<div class="bos-program">📋 Bu gün için henüz program oluşturulmamış.</div>';
       document.getElementById('baslaBtn').innerHTML='';
       tur2NotlariTemizle();
       return;
     }
 
-    // O günün ortak metnini al (daha önce seçilmemişse zorluk eşlemesiyle
-    // rastgele seçilip kaydedilir) — o günün tüm okuma görevleri aynı metni paylaşır.
+    // TUR 2+: 1. turdaki AYNI günün TAM görev listesi kullanılır — hangi
+    // teknikler/egzersizler o gün yapılacak admin'in belirlediği gibi kalır,
+    // ilerleme/sıralama mantığı da birebir aynıdır. Tek fark: göz/odak/genel
+    // görevlerinde hız/süre/mod gibi ayar parametreleri BİLİNÇLİ OLARAK
+    // atlanır — öğrenci egzersize girdiğinde kendi ayarlarını seçer (görev
+    // yine kilitli/takip edilir, bitince aynı şekilde ilerleme sinyali
+    // gönderir — bkz. gorevUrl'nin her zaman kilitli=1 eklemesi). Okuma
+    // görevleri değişmeden kalır: hız zaten öğrencinin adaptif hızından
+    // geliyor (bkz. gorevUrl), sadece metin ders_metinleri havuzundan seçilir.
+    const gorevler = data[0].gorevler.map(g=>{
+      if(g.tip==='okuma') return Object.assign({}, g);
+      return { dosya:g.dosya, isim:g.isim, tip:g.tip };
+    });
+
+    // O günün ortak okuma metnini al (daha önce seçilmemişse zorluk
+    // eşlemesiyle rastgele seçilip kaydedilir) — o günün tüm okuma
+    // görevleri aynı metni paylaşır.
     let metin=null;
-    try{
-      const metinSonuc=await rpc('tur_metin_getir',{p_asama:asama,p_gun:gunIcinde});
-      metin=(metinSonuc&&metinSonuc.length)?metinSonuc[0]:null;
-    }catch(e){}
-    if(metin){
-      okumaGorevleri.forEach(g=>{ g.metin_id=metin.metin_id; g.metin_baslik=metin.baslik; g.kaynak='ders_metinleri'; });
+    if(gorevler.some(g=>g.tip==='okuma')){
+      try{
+        const metinSonuc=await rpc('tur_metin_getir',{p_asama:asama,p_gun:gunIcinde});
+        metin=(metinSonuc&&metinSonuc.length)?metinSonuc[0]:null;
+      }catch(e){}
+      if(metin){
+        gorevler.forEach(g=>{ if(g.tip==='okuma'){ g.metin_id=metin.metin_id; g.metin_baslik=metin.baslik; g.kaynak='ders_metinleri'; } });
+      }
     }
 
-    mevcutGorevler=okumaGorevleri;
+    mevcutGorevler=gorevler;
     try{
       const sunucuIdx=await rpc('gorev_ilerleme_getir',{p_asama:asama,p_gun:ogrenci.mevcut_gun});
       tamamlananIdx=(typeof sunucuIdx==='number')?sunucuIdx:-1;
@@ -1014,18 +1027,18 @@ async function tur2ProgramiYukle(asama, gunIcinde){
       tamamlananIdx=-1;
     }
     gorevListesiOlustur();
-    tur2SecbestNotuGoster(metin);
+    tur2NotuGoster(metin);
 
   }catch(e){
     document.getElementById('gorevListe').innerHTML='<div class="bos-program">❌ Program yüklenemedi.</div>';
   }
 }
 
-function tur2SecbestNotuGoster(metin){
+function tur2NotuGoster(metin){
   const el=document.getElementById('tur2Notlar');
   if(!el) return;
-  const metinSatiri = metin ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:10px;padding:0.7rem 1rem;font-size:0.85rem;margin-bottom:0.7rem;display:flex;justify-content:space-between;align-items:center;gap:0.6rem"><span>📖 Bugünün metni: <strong>${metin.baslik}</strong></span><button onclick="turMetniDegistir()" style="background:none;border:1px solid #93c5fd;color:#1d4ed8;border-radius:8px;padding:0.3rem 0.7rem;font-size:0.78rem;cursor:pointer;font-family:inherit;white-space:nowrap">🔀 Değiştir</button></div>` : '';
-  el.innerHTML = metinSatiri + '<div class="tum-egz-not" style="margin-bottom:1rem">🎯 Bu turda göz, odak ve genel egzersizlerini istediğin gibi seçebilirsin — üstteki "🗂 Tüm Egzersizler"den dilediğini dene.</div>';
+  if(!metin){ el.innerHTML=''; return; }
+  el.innerHTML = `<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:10px;padding:0.7rem 1rem;font-size:0.85rem;margin-bottom:0.7rem;display:flex;justify-content:space-between;align-items:center;gap:0.6rem"><span>📖 Bugünün metni: <strong>${metin.baslik}</strong></span><button onclick="turMetniDegistir()" style="background:none;border:1px solid #93c5fd;color:#1d4ed8;border-radius:8px;padding:0.3rem 0.7rem;font-size:0.78rem;cursor:pointer;font-family:inherit;white-space:nowrap">🔀 Değiştir</button></div>`;
 }
 
 async function turMetniDegistir(){
@@ -1107,14 +1120,16 @@ function gorevListesiOlustur(){
     } else if(aktif){
       const url=gorevUrl(g);
       const hedefEtiketi=(g.tip==='okuma' && ogrenci.okuma_hizi) ? ` · Hedef ${ogrenci.okuma_hizi} kpm` : '';
+      const sureEtiketi=(g.sure!==undefined && g.sure!==null) ? (g.sure+' dk') : 'Kendi ayarınla';
       div.className='gorev aktif';
-      div.innerHTML=`<div class="gorev-ikon">▶️</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${g.sure} dk${hedefEtiketi}</div></div><span class="gorev-sure-badge">Başlat →</span>`;
+      div.innerHTML=`<div class="gorev-ikon">▶️</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${sureEtiketi}${hedefEtiketi}</div></div><span class="gorev-sure-badge">Başlat →</span>`;
       // Aynı eksik yönlendirme sorunu burada da vardı (önceden hiç fark
       // edilmemiş olan aynı hata ailesi) — düzeltildi.
       div.onclick=()=>{gorevAc(i,url); location.href=url;};
     } else {
       div.className='gorev kilitli';
-      div.innerHTML=`<div class="gorev-ikon">🔒</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${g.sure} dk</div></div>`;
+      const sureEtiketiKilitli=(g.sure!==undefined && g.sure!==null) ? (g.sure+' dk') : 'Kendi ayarınla';
+      div.innerHTML=`<div class="gorev-ikon">🔒</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-sure">${TIP_AD[g.tip]||''} · ${sureEtiketiKilitli}</div></div>`;
     }
     liste.appendChild(div);
   });
