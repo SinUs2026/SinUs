@@ -172,6 +172,12 @@ nav{background:#0a1628;padding:0 5%;height:65px;display:flex;align-items:center;
 
 /* VELİ ALANI */
 .veli-form-kart{background:white;border-radius:16px;padding:2rem;max-width:640px;margin:0 auto;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.veli-rapor-yukleniyor,.veli-rapor-bos{max-width:640px;margin:0 auto 1.2rem;text-align:center;color:#64748b;font-size:0.88rem;padding:1.5rem 1rem;background:white;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.veli-rapor-baslik{max-width:640px;margin:0 auto 0.8rem;font-weight:800;color:#0a1628;font-size:1.05rem;text-align:center}
+.veli-ozet-kart{max-width:640px;margin:0 auto 1rem;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:14px;padding:0.9rem 1.2rem;text-align:center;font-size:0.92rem;color:#0a1628}
+.veli-grafik-blok{max-width:640px;margin:0 auto 1rem;background:white;border-radius:16px;padding:1.2rem 1.3rem 0.8rem;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.veli-grafik-etiket{font-size:0.82rem;font-weight:700;color:#0a1628;margin-bottom:0.6rem}
+.veli-grafik-tarih-satir{display:flex;justify-content:space-between;font-size:0.72rem;color:#94a3b8;margin-top:0.3rem}
 .veli-form-intro{color:#475569;font-size:0.92rem;line-height:1.6;margin-bottom:1.5rem;text-align:center}
 .veli-form-label{display:block;font-size:0.82rem;font-weight:700;color:#0a1628;margin:1.3rem 0 0.5rem}
 .veli-form-input{width:100%;padding:0.7rem 0.9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:0.92rem;outline:none}
@@ -654,16 +660,120 @@ let _veliPuan=0;
 
 function veliAlaniAc(){
   document.getElementById('veliAlaniOverlay').classList.add('acik');
+  const icerik=document.getElementById('veliAlaniIcerik');
+  icerik.innerHTML='<div id="veliRaporAlani"></div><div id="veliFormAlani"></div>';
+  veliRaporYukle();
   veliAlaniFormCiz();
 }
 function veliAlaniKapat(){
   document.getElementById('veliAlaniOverlay').classList.remove('acik');
 }
 
+// ── GELİŞİM RAPORU (son 30 gün, tur sınırı fark etmeksizin) ──
+async function veliRaporYukle(){
+  const kap=document.getElementById('veliRaporAlani');
+  if(!kap || !ogrenci) return;
+  kap.innerHTML='<div class="veli-rapor-yukleniyor">📊 Gelişim raporu yükleniyor...</div>';
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/gunluk_performans?kullanici_adi=eq.'+encodeURIComponent(ogrenci.kullanici_adi)+'&select=tarih,okuma_hizi,anlama_orani&order=tarih.desc&limit=30',{
+      headers:oturumHeaders()
+    });
+    const veri=(await res.json()).reverse(); // kronolojik sıra (eskiden yeniye)
+
+    if(!veri.length){
+      kap.innerHTML='<div class="veli-rapor-bos">📊 Henüz yeterli veri yok — çocuğunuz birkaç gün pratik yaptıkça burada gelişim grafiği belirecek.</div>';
+      return;
+    }
+
+    const hizVeri=veri.filter(v=>v.okuma_hizi!=null).map(v=>({tarih:v.tarih, deger:v.okuma_hizi}));
+    const anlamaVeri=veri.filter(v=>v.anlama_orani!=null).map(v=>({tarih:v.tarih, deger:v.anlama_orani}));
+
+    let ozetHtml='';
+    if(hizVeri.length>=2){
+      const ilk=hizVeri[0].deger, son=hizVeri[hizVeri.length-1].deger;
+      const artisYuzde=ilk>0?Math.round(((son-ilk)/ilk)*100):0;
+      const yonIkon=artisYuzde>=0?'📈':'📉';
+      const isaret=artisYuzde>=0?'+':'';
+      ozetHtml=`<div class="veli-ozet-kart">${yonIkon} Başlangıç: <strong>${ilk} kpm</strong> → Şu an: <strong>${son} kpm</strong> (${isaret}${artisYuzde}%)</div>`;
+    }
+
+    kap.innerHTML = `
+      <div class="veli-rapor-baslik">📊 Son 30 Günlük Gelişim Raporu</div>
+      ${ozetHtml}
+      <div class="veli-grafik-blok">
+        <div class="veli-grafik-etiket">⚡ Okuma Hızı (kelime/dakika)</div>
+        ${svgCizgiGrafik(hizVeri, '#0088bb', v=>v+' kpm')}
+      </div>
+      <div class="veli-grafik-blok">
+        <div class="veli-grafik-etiket">🎯 Anlama Oranı (%)</div>
+        ${svgCizgiGrafik(anlamaVeri, '#16a34a', v=>v+'%')}
+      </div>
+    `;
+  }catch(e){
+    kap.innerHTML='<div class="veli-rapor-bos">Rapor yüklenemedi.</div>';
+  }
+}
+
+function svgCizgiGrafik(veri, renk, etiketFn){
+  if(!veri.length) return '<div class="veli-rapor-bos" style="padding:0.8rem 0">Bu grafik için henüz veri yok.</div>';
+  if(veri.length===1){
+    return `<div class="veli-rapor-bos" style="padding:0.8rem 0">Tek gün verisi var: ${etiketFn(veri[0].deger)}. Birkaç gün daha pratikle grafik oluşacak.</div>`;
+  }
+
+  const genislik=560, yukseklik=160, dolgu=28;
+  const degerler=veri.map(v=>v.deger);
+  let min=Math.min(...degerler), max=Math.max(...degerler);
+  if(min===max){ min=min-1; max=max+1; }
+  const marjPay=(max-min)*0.1;
+  min-=marjPay; max+=marjPay;
+
+  const xAdim=(genislik-2*dolgu)/(veri.length-1);
+  const yOlcek=(yukseklik-2*dolgu)/(max-min);
+
+  const noktalar=veri.map((v,i)=>{
+    const x=dolgu+i*xAdim;
+    const y=yukseklik-dolgu-(v.deger-min)*yOlcek;
+    return {x,y,deger:v.deger,tarih:v.tarih};
+  });
+
+  const cizgiYolu=noktalar.map((p,i)=>(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+  const dolguYolu=cizgiYolu+` L${noktalar[noktalar.length-1].x.toFixed(1)},${yukseklik-dolgu} L${noktalar[0].x.toFixed(1)},${yukseklik-dolgu} Z`;
+  const renkId=renk.replace('#','');
+
+  const noktaDaireleri=noktalar.map((p,i)=>{
+    const sonNokta=i===noktalar.length-1;
+    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${sonNokta?4.5:3}" fill="${renk}"${sonNokta?' stroke="white" stroke-width="1.5"':''}><title>${p.tarih}: ${etiketFn(p.deger)}</title></circle>`;
+  }).join('');
+
+  const ilkTarih=veri[0].tarih, sonTarih=veri[veri.length-1].tarih;
+
+  return `
+    <svg viewBox="0 0 ${genislik} ${yukseklik}" style="width:100%;height:auto;display:block">
+      <defs>
+        <linearGradient id="grad-${renkId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${renk}" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="${renk}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${dolguYolu}" fill="url(#grad-${renkId})"/>
+      <path d="${cizgiYolu}" fill="none" stroke="${renk}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+      ${noktaDaireleri}
+    </svg>
+    <div class="veli-grafik-tarih-satir"><span>${tarihKisalt(ilkTarih)}</span><span>${tarihKisalt(sonTarih)}</span></div>
+  `;
+}
+
+function tarihKisalt(tarihStr){
+  try{
+    const d=new Date(tarihStr);
+    return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+  }catch(e){ return tarihStr; }
+}
+
 function veliAlaniFormCiz(){
   _veliCevaplar={};
   _veliPuan=0;
-  const icerik=document.getElementById('veliAlaniIcerik');
+  const icerik=document.getElementById('veliFormAlani');
   icerik.innerHTML=`
     <div class="veli-form-kart">
       <div class="veli-form-intro">👋 Merhaba! Çocuğunuzun SinUs'taki gelişimini nasıl buluyorsunuz? Görüşleriniz bizim için çok değerli.</div>
@@ -723,7 +833,7 @@ async function veliAlaniGonder(){
       p_tavsiye_eder: _veliCevaplar.tavsiye_eder||null,
       p_yorum: yorum||null
     });
-    document.getElementById('veliAlaniIcerik').innerHTML='<div class="veli-form-basari">✅ Değerlendirmeniz için teşekkür ederiz!<br>Admin onayından sonra, izin verirseniz web sitemizde yayınlanabilir.</div>';
+    document.getElementById('veliFormAlani').innerHTML='<div class="veli-form-basari">✅ Değerlendirmeniz için teşekkür ederiz!<br>Admin onayından sonra, izin verirseniz web sitemizde yayınlanabilir.</div>';
     try{ if(ogrenci) localStorage.setItem('sinus_veli_hatirlatma_gosterildi_'+ogrenci.kullanici_adi, '1'); }catch(e){}
     document.getElementById('veliHatirlatmaBanner').style.display='none';
   }catch(e){
