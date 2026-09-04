@@ -921,6 +921,40 @@ let mevcutGorevler=[];
 let tamamlananIdx=-1; // en son tamamlanan görevin indeksi
 
 // ── GİRİŞ KONTROL ──
+// ── ROZETLER ──────────────────────────────────────────────────────────
+// Eşikler burada merkezi — ileride ayarlamak istersen sadece bu objeyi değiştir.
+const ROZET_ESIK = { hizUstasi:400, gozUstasi:15, odakUstasi:15, seriGun:7, otuzGun:30 };
+
+async function rozetleriYukle(){
+  const grid=document.getElementById('rozetGrid');
+  if(!grid) return;
+  try{
+    const sonuc=await rpc('rozet_verileri_getir',{});
+    const r=(sonuc&&sonuc.length)?sonuc[0]:null;
+    if(!r) return; // sunucudan veri gelmezse mevcut statik hal aynen kalır
+
+    const k={
+      ilkGun: r.tamamlanan_gun_sayisi>=1,
+      yediGun: r.gunluk_seri>=ROZET_ESIK.seriGun,
+      hizUstasi: r.en_yuksek_hiz>=ROZET_ESIK.hizUstasi,
+      gozUstasi: r.goz_tamamlama_sayisi>=ROZET_ESIK.gozUstasi,
+      odakUstasi: r.odak_tamamlama_sayisi>=ROZET_ESIK.odakUstasi,
+      otuzGun: r.tamamlanan_gun_sayisi>=ROZET_ESIK.otuzGun
+    };
+
+    grid.innerHTML=`
+      <div class="rozet ${k.ilkGun?'kazanildi':''}"><div class="rozet-ikon">📖</div><div class="rozet-isim">İlk Gün</div></div>
+      <div class="rozet ${k.yediGun?'kazanildi':''}"><div class="rozet-ikon">🔥</div><div class="rozet-isim">7 Gün Seri</div></div>
+      <div class="rozet ${k.hizUstasi?'kazanildi':''}"><div class="rozet-ikon">⚡</div><div class="rozet-isim">Hız Ustası</div></div>
+      <div class="rozet ${k.gozUstasi?'kazanildi':''}"><div class="rozet-ikon">🌌</div><div class="rozet-isim">Göz Ustası</div></div>
+      <div class="rozet ${k.odakUstasi?'kazanildi':''}"><div class="rozet-ikon">🎯</div><div class="rozet-isim">Dikkat Ustası</div></div>
+      <div class="rozet ${k.otuzGun?'kazanildi':''}"><div class="rozet-ikon">🏅</div><div class="rozet-isim">30 Gün</div></div>
+    `;
+  }catch(e){
+    // Sessizce mevcut statik hal korunur — sayfa hiç bozulmaz
+  }
+}
+
 async function panelYukle(){
   // localStorage'dan kullanıcı al (giriş sayfası bunu yazıyor)
   const kullaniciObj=localStorage.getItem('sinus_kullanici_obj');
@@ -938,6 +972,7 @@ async function panelYukle(){
     bilgileriYukle();
     programiYukle();
     siralamaYukle();
+    rozetleriYukle();
     if(ogrenci.ilk_giris_tamamlandi===false){ ilkGirisModalGoster(); }
     baslangicOlcumuGerekliMiKontrolEt();
   }catch(e){
