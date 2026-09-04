@@ -478,7 +478,7 @@ tr:hover td{background:#f8fafc}
       <div class="form-grup"><label>Sınıf <span style="font-weight:400;color:#dc2626">(zorunlu)</span></label><input type="text" id="og-sinif" placeholder="Örn: 6. Sınıf"></div>
     </div>
     <div class="form-grid">
-      <div class="form-grup"><label>Lisans Süresi</label><select id="og-lisans"><option value="6">6 Ay</option><option value="3">3 Ay</option><option value="12">1 Yıl</option></select></div>
+      <div class="form-grup"><label>Lisans Süresi</label><select id="og-lisans" onchange="lisansBitisOnizle('og')"><option value="6">6 Ay</option><option value="3">3 Ay</option><option value="12">1 Yıl</option></select><div id="og-lisans-bitis" style="font-size:0.78rem;color:#64748b;margin-top:0.35rem"></div></div>
       <div class="form-grup"><label>Telefon</label><input type="text" id="og-telefon" placeholder="Veli/öğrenci telefonu"></div>
     </div>
     <div class="modal-btn-grup"><button class="btn-iptal" onclick="modalKapat('ogrenci')">İptal</button><button class="btn-kaydet" id="btn-ogrenci-kaydet" onclick="ogrenciKaydet()">💾 Kaydet</button></div>
@@ -1430,7 +1430,11 @@ function formSifirla(prefix){
       b.style.background=secili?'#eff6ff':'white';
       b.style.color=secili?'#1d4ed8':'inherit';
     });
-    document.getElementById(prefix+'-lisans-bilgi').textContent='Onayladığınız tarihten itibaren 6 ay geçerli olacak.';
+    document.getElementById(prefix+'-lisans-bilgi').textContent='📅 Bitiş tarihi: '+lisansBitisHesapla(6);
+  }
+  if(document.getElementById(prefix+'-lisans')&&document.getElementById(prefix+'-lisans-bitis')){
+    document.getElementById(prefix+'-lisans').value='6';
+    document.getElementById(prefix+'-lisans-bitis').textContent='📅 Bitiş tarihi: '+lisansBitisHesapla(6);
   }
   if(document.getElementById(prefix+'-kota-grup')){
     _secilenKota=10;
@@ -1543,12 +1547,13 @@ async function ogrenciKaydet(){
   const sifre=document.getElementById('og-sifre').value;
   const asama=parseInt(document.getElementById('og-asama').value);
   const sinif=document.getElementById('og-sinif').value.trim();
+  const lisansAy=parseInt(document.getElementById('og-lisans').value);
   if(!ad||!kullanici||!sifre){bildirimGoster('⚠️ Ad, kullanıcı adı ve şifre zorunlu!','hata');return;}
   if(!sinif){bildirimGoster('⚠️ Sınıf bilgisi zorunlu!','hata');return;}
   const btn=document.getElementById('btn-ogrenci-kaydet');btn.textContent='⏳ Kaydediliyor...';
   try{
-    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogrenci',p_asama:asama,p_sinif:sinif});
-    bildirimGoster('✅ Öğrenci eklendi!','basari');modalKapat('ogrenci');ogrencileriYukle();
+    await rpc('kullanici_ekle',{p_ad:ad,p_soyad:soyad,p_kullanici_adi:kullanici,p_sifre:sifre,p_rol:'ogrenci',p_asama:asama,p_sinif:sinif,p_lisans_ay:lisansAy});
+    bildirimGoster('✅ Öğrenci eklendi! Lisans bitiş: '+lisansBitisHesapla(lisansAy),'basari');modalKapat('ogrenci');ogrencileriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
   btn.textContent='💾 Kaydet';
 }
@@ -1605,13 +1610,22 @@ async function ogrenciHizDuzelt(id,kullaniciAdi,mevcutHiz){
 
 let _secilenLisansAy={ogr:6};
 let _secilenKota=10;
+function lisansBitisHesapla(ay){
+  const d=new Date();
+  d.setMonth(d.getMonth()+ay);
+  return d.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function lisansBitisOnizle(prefix){
+  const ay=parseInt(document.getElementById(prefix+'-lisans').value);
+  document.getElementById(prefix+'-lisans-bitis').textContent='📅 Bitiş tarihi: '+lisansBitisHesapla(ay);
+}
 function lisansSureSec(btn,prefix){
   document.querySelectorAll('#'+prefix+'-lisans-grup .lisans-sure-btn').forEach(b=>{
     b.classList.remove('secili');b.style.border='1.5px solid #e2e8f0';b.style.background='white';b.style.color='inherit';
   });
   btn.classList.add('secili');btn.style.border='1.5px solid #2563a8';btn.style.background='#eff6ff';btn.style.color='#1d4ed8';
   _secilenLisansAy[prefix]=parseInt(btn.dataset.ay);
-  document.getElementById(prefix+'-lisans-bilgi').textContent='Onayladığınız tarihten itibaren '+btn.dataset.ay+' ay geçerli olacak.';
+  document.getElementById(prefix+'-lisans-bilgi').textContent='📅 Bitiş tarihi: '+lisansBitisHesapla(parseInt(btn.dataset.ay));
 }
 
 function kotaSec(btn){
@@ -1803,7 +1817,12 @@ async function kullaniciSil(id){
   try{
     await rpc('kullanici_sil',{p_id:id});
     bildirimGoster('🗑️ Kullanıcı silindi.','basari');
-    sifreIslemleriYukle();
+    // Bu fonksiyon hem Öğrenciler hem Şifre İşlemleri sayfasındaki "Sil"
+    // butonundan çağrılıyor — önceden sadece Şifre İşlemleri listesini
+    // yeniliyordu, bu yüzden Öğrenciler sayfasında silinen kayıt sayfa
+    // değiştirilene kadar ekranda kalıyordu. Artık hangisi DOM'da varsa o yenilenir.
+    if(document.getElementById('ogrenciler-liste')) ogrencileriYukle();
+    if(document.getElementById('sifre-liste')) sifreIslemleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 async function kullaniciSifreSifirla(id,kullanici){
@@ -1932,6 +1951,7 @@ async function basvurulariYukle(){
           <option value="aranildi" ${b.durum==='aranildi'?'selected':''}>Arandı</option>
           <option value="tamamlandi" ${b.durum==='tamamlandi'?'selected':''}>Tamamlandı</option>
         </select>
+        <button class="islem-btn" style="background:#fee2e2;color:#991b1b;margin-left:0.4rem" onclick="basvuruSil(${b.id})">🗑️ Sil</button>
       </td>`;
       tbody.appendChild(tr);
     });
@@ -1943,6 +1963,15 @@ async function basvuruDurumGuncelle(id,yeniDurum){
   try{
     await supabase('PATCH','olcum_basvurulari',{durum:yeniDurum},'id=eq.'+id);
     bildirimGoster('✅ Durum güncellendi!','basari');
+    basvurulariYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function basvuruSil(id){
+  if(!confirm('Bu başvuruyu kalıcı olarak silmek istediğinize emin misiniz?'))return;
+  try{
+    await supabase('DELETE','olcum_basvurulari',null,'id=eq.'+id);
+    bildirimGoster('🗑️ Başvuru silindi.','basari');
     basvurulariYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
@@ -1996,6 +2025,7 @@ async function sinusOrtamiYukle(){
           ${p.moderasyon_durumu==='onaylandi'&&!p.ortam_yayinda?`<button class="islem-btn program" onclick="ortamAksiyon(${p.id},'yayinla')">🌌 SinUs Ortamında Yayınla</button>`:''}
           ${p.ortam_yayinda?`<button class="islem-btn sil" onclick="ortamAksiyon(${p.id},'kaldir')">🚫 Ortamdan Kaldır</button>`:''}
           ${!p.web_aday?`<button class="islem-btn duzenle" onclick="ortamAksiyon(${p.id},'web_aday_yap')">⭐ Web Sitesi İçin Seç</button>`:`<button class="islem-btn" style="background:#f1f5f9;color:#64748b" onclick="ortamAksiyon(${p.id},'web_aday_kaldir')">⭐ Adaylıktan Çıkar</button>`}
+          <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="ortamKaliciSil(${p.id})">🗑️ Kalıcı Sil</button>
         </div>
       </div>`;
     }).join('');
@@ -2006,6 +2036,15 @@ async function ortamAksiyon(id,aksiyon){
   try{
     await rpc('admin_ortam_yonet',{p_paylasim_id:id,p_aksiyon:aksiyon});
     bildirimGoster('✅ İşlem tamamlandı.','basari');
+    sinusOrtamiYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function ortamKaliciSil(id){
+  if(!confirm('Bu paylaşımı kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'))return;
+  try{
+    await rpc('admin_ortam_yonet',{p_paylasim_id:id,p_aksiyon:'sil'});
+    bildirimGoster('🗑️ Paylaşım silindi.','basari');
     sinusOrtamiYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
@@ -2072,6 +2111,7 @@ async function veliDegerlendirmeYukle(){
           ${d.moderasyon_durumu==='bekliyor'?`<button class="islem-btn uzat" onclick="veliDegerlendirmeAksiyon(${d.id},'onayla')">✅ Onayla</button><button class="islem-btn sil" onclick="veliDegerlendirmeAksiyon(${d.id},'reddet')">❌ Reddet</button>`:''}
           ${d.moderasyon_durumu==='onaylandi'&&!d.yayinda?`<button class="islem-btn program" onclick="veliDegerlendirmeAksiyon(${d.id},'yayinla')">👨‍👩‍👧 Veliler Ne Diyor'da Yayınla</button>`:''}
           ${d.yayinda?`<button class="islem-btn sil" onclick="veliDegerlendirmeAksiyon(${d.id},'kaldir')">🚫 Vitrinden Kaldır</button>`:''}
+          <button class="islem-btn" style="background:#fee2e2;color:#991b1b" onclick="veliDegerlendirmeKaliciSil(${d.id})">🗑️ Kalıcı Sil</button>
         </div>
       </div>`;
     }).join('');
@@ -2082,6 +2122,15 @@ async function veliDegerlendirmeAksiyon(id,aksiyon){
   try{
     await rpc('admin_veli_degerlendirme_yonet',{p_id:id,p_aksiyon:aksiyon});
     bildirimGoster('✅ İşlem tamamlandı.','basari');
+    veliDegerlendirmeYukle();
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function veliDegerlendirmeKaliciSil(id){
+  if(!confirm('Bu değerlendirmeyi kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'))return;
+  try{
+    await rpc('admin_veli_degerlendirme_yonet',{p_id:id,p_aksiyon:'sil'});
+    bildirimGoster('🗑️ Değerlendirme silindi.','basari');
     veliDegerlendirmeYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
