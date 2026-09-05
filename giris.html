@@ -29,9 +29,9 @@ input:focus{border-color:#2563a8}
 </head>
 <body>
 <div class="giris-kutu">
-  <div class="rozet-wrap"><div class="rozet">🎓 Öğrenci Girişi</div></div>
+  <div class="rozet-wrap"><div class="rozet" id="girisRozeti">🎓 Öğrenci Girişi</div></div>
   <div class="logo">Sin<span>Us</span></div>
-  <div class="altyazi">Hesabına giriş yap ve çalışmana devam et</div>
+  <div class="altyazi" id="girisAltyazi">Hesabına giriş yap ve çalışmana devam et</div>
   <div class="hata" id="hata"></div>
   <div class="basari" id="basari"></div>
   <label>Kullanıcı Adı</label>
@@ -43,6 +43,20 @@ input:focus{border-color:#2563a8}
   <p class="motto">"Her zihin keşfedilmeyi bekleyen bir evrendir."</p>
 </div>
 <script>
+// ── GİRİŞ SAYFASI BAŞLIĞI — index.html'den hangi panel linkiyle
+// gelindiğine göre değişir (?tip=ogretmen/ogrenci). Sadece görünüm
+// içindir; gerçek yönlendirme her zaman giriş sonrası backend'in
+// döndürdüğü asıl role göre yapılır, bu parametre giriş yetkisini
+// etkilemez.
+(function(){
+  const tip = new URLSearchParams(window.location.search).get('tip');
+  if(tip==='ogretmen'){
+    document.getElementById('girisRozeti').textContent = '📘 Öğretmen Girişi';
+    document.getElementById('girisAltyazi').textContent = 'Hesabına giriş yap ve öğrencilerini takip et';
+    document.title = 'SinUs – Öğretmen Girişi';
+  }
+})();
+
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
 
