@@ -45,6 +45,21 @@ input:focus{border-color:#2563a8}
 <script>
 const SUPABASE_URL='https://kwzimkjspdtedqqwztcf.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3emlta2pzcGR0ZWRxcXd6dGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NDg4NDAsImV4cCI6MjA5NzUyNDg0MH0.64Bq_jlCNSdOnOJx3dxw1vNeEaEcMrK3OJeATYQxlcU';
+
+// ── CİHAZ KİMLİĞİ ──────────────────────────────────────────────────────
+// Bu tarayıcıya kalıcı, rastgele bir kimlik atanır (localStorage'da saklanır,
+// çıkış/tekrar giriş yapılsa bile aynı kalır — sadece tarayıcı verisi
+// silinirse ya da farklı bir tarayıcı/gizli mod kullanılırsa değişir).
+// Öğrenci hesabının kaç farklı CİHAZDA kullanıldığını saymak için kullanılır.
+function cihazKimligiAl(){
+  var anahtar='sinus_cihaz_id';
+  var mevcut=localStorage.getItem(anahtar);
+  if(mevcut) return mevcut;
+  var yeni=(crypto&&crypto.randomUUID)?crypto.randomUUID():('cihaz-'+Date.now()+'-'+Math.random().toString(36).slice(2));
+  localStorage.setItem(anahtar,yeni);
+  return yeni;
+}
+
 async function girisYap(){
   var k=document.getElementById('kullanici').value.trim();
   var s=document.getElementById('sifre').value.trim();
@@ -55,10 +70,14 @@ async function girisYap(){
   if(!k||!s){hata.innerText='Lütfen tüm alanları doldurun.';hata.style.display='block';return;}
   btn.disabled=true;btn.innerText='Kontrol ediliyor...';
   try{
-    var r=await fetch(SUPABASE_URL+'/rest/v1/rpc/oturum_baslat',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_kullanici_adi:k,p_sifre:s})});
+    var r=await fetch(SUPABASE_URL+'/rest/v1/rpc/oturum_baslat',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_kullanici_adi:k,p_sifre:s,p_cihaz_id:cihazKimligiAl()})});
     var d=await r.json();
     if(d&&d.length>0&&d[0].lisans_suresi_doldu){
       hata.innerText='⛔ Platform kullanım süreniz tamamlanmıştır. Lütfen SinUs Yönetici ile iletişime geçiniz.';
+      hata.style.display='block';
+      btn.disabled=false;btn.innerText='Giriş Yap';
+    }else if(d&&d.length>0&&d[0].cihaz_limiti_asildi){
+      hata.innerText='⛔ Bu hesap izin verilen azami cihaz sayısında kullanılıyor. Yeni bir cihazdan giriş yapmak için lütfen SinUs Yönetici ile iletişime geçiniz.';
       hata.style.display='block';
       btn.disabled=false;btn.innerText='Giriş Yap';
     }else if(d&&d.length>0){
