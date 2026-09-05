@@ -385,7 +385,9 @@
   function kilitliModuBaslat(){
     backBtn.style.display = 'none';
     startBtn.textContent = 'Başla';
-    document.getElementById('seviyeSeciciKart').style.display = 'none';
+    if(!isNaN(SEVIYE_PARAM) || !isNaN(HIZ_PARAM)){
+      document.getElementById('seviyeSeciciKart').style.display = 'none';
+    }
   }
   if(KILITLI){ kilitliModuBaslat(); }
 
