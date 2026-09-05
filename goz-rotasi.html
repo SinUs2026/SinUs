@@ -333,6 +333,9 @@ const _kParams = new URLSearchParams(window.location.search);
 const KILITLI = _kParams.get('kilitli') === '1';
 const HIZ_PARAM = parseInt(_kParams.get('hiz'));
 const METIN_ID_PARAM = _kParams.get('metin_id');
+// TUR 2+ (bkz. ogrenci-panel.html): metin_id sabit 'hikayeler' kaydı yerine
+// ders_metinleri ortak kütüphanesinden geliyorsa panel bunu 'kaynak' parametresiyle bildirir.
+const KAYNAK_PARAM = _kParams.get('kaynak');
 const KELIME_PARAM = parseInt(_kParams.get('kelime'));
 const SURE_HEDEF_DK = parseInt(_kParams.get('sure'));
 
@@ -344,12 +347,11 @@ function enYakinKpmAdimi(deger){
 }
 
 function kilitliModuBaslat(){
-  if(!isNaN(HIZ_PARAM)) G.kpm = Math.min(3000, Math.max(10, HIZ_PARAM));
+  if(!isNaN(HIZ_PARAM)){ G.kpm = Math.min(3000, Math.max(10, HIZ_PARAM)); document.getElementById('kartHiz').style.display='none'; }
   if(!isNaN(KELIME_PARAM) && KELIME_PARAM>=1 && KELIME_PARAM<=4){
     G.kelimeSayisi = KELIME_PARAM;
     document.getElementById('kartKelimeSayisi').style.display='none';
   }
-  document.getElementById('kartHiz').style.display='none';
   if(METIN_ID_PARAM){
     document.getElementById('kartMetinSec').style.display='none';
   }
@@ -358,7 +360,8 @@ if(KILITLI){ kilitliModuBaslat(); }
 
 async function kilitliMetinYukle(){
   try{
-    const res=await fetch(SUPABASE_URL+'/rest/v1/hikayeler?id=eq.'+METIN_ID_PARAM,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const _metinTablosu = (KAYNAK_PARAM==='ders_metinleri') ? 'ders_metinleri' : 'hikayeler';
+    const res=await fetch(SUPABASE_URL+'/rest/v1/'+_metinTablosu+'?id=eq.'+METIN_ID_PARAM,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
     const data=await res.json();
     if(data.length){
       G.seciliMetin=data[0];
