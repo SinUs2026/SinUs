@@ -333,14 +333,11 @@ function kilitliGerekliSureSnHesapla(){
 }
 
 function kilitliModuBaslat(){
-  document.getElementById('kartMod').style.display='none';
-  document.getElementById('kartTaraf').style.display='none';
-  document.getElementById('kartAsama').style.display='none';
+  if(!isNaN(HIZ_PARAM)){ document.getElementById('kartAsama').style.display='none'; G.asama = Math.min(4, Math.max(1, HIZ_PARAM)); }
+  if(MOD_PARAM==='sayi'||MOD_PARAM==='harf'){ document.getElementById('kartMod').style.display='none'; G.mod = MOD_PARAM; }
+  if(TARAF_PARAM===1||TARAF_PARAM===2){ document.getElementById('kartTaraf').style.display='none'; G.tarafSayisi = TARAF_PARAM; }
   document.getElementById('backBtn').style.display='none';
   document.getElementById('menuBtn').style.display='none';
-  if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
-  if(MOD_PARAM==='sayi'||MOD_PARAM==='harf') G.mod = MOD_PARAM;
-  if(TARAF_PARAM===1||TARAF_PARAM===2) G.tarafSayisi = TARAF_PARAM;
   document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
   document.getElementById('mainStartBtn').onclick = async function(){
     const btn=document.getElementById('mainStartBtn');
