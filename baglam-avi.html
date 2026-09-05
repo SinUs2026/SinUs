@@ -241,10 +241,8 @@ const GUN_PARAM=_kParams.get('gun');
 function kilitliModuBaslat(){
   const zorlukParam=_kParams.get('zorluk');
   const modParam=_kParams.get('mod');
-  if(zorlukParam) G.zorluk=zorlukParam;
-  if(modParam) G.mod=modParam;
-  document.getElementById('kartZorluk').style.display='none';
-  document.getElementById('kartMod').style.display='none';
+  if(zorlukParam){ G.zorluk=zorlukParam; document.getElementById('kartZorluk').style.display='none'; }
+  if(modParam){ G.mod=modParam; document.getElementById('kartMod').style.display='none'; }
   document.getElementById('backBtn').style.display='none';
 }
 if(KILITLI){ kilitliModuBaslat(); }
