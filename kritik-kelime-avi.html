@@ -226,8 +226,7 @@ const KILITLI = _kParams.get('kilitli') === '1';
 const SN_PARAM = parseInt(_kParams.get('sn') || _kParams.get('hiz'));
 
 function kilitliModuBaslat(){
-  document.getElementById('kartZorluk').style.display='none';
-  if(!isNaN(SN_PARAM)) G.sn = SN_PARAM;
+  if(!isNaN(SN_PARAM)){ document.getElementById('kartZorluk').style.display='none'; G.sn = SN_PARAM; }
   document.getElementById('backBtn').style.display='none';
 }
 if(KILITLI){ kilitliModuBaslat(); }
