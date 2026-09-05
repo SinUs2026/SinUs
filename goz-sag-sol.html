@@ -274,12 +274,9 @@ const SURE_PARAM_DK = parseInt(_kParams.get('sure')); // dakika olarak gelir
 const NOKTA_PARAM = parseInt(_kParams.get('nokta')); // 2/4/8/12/16
 
 function kilitliModuBaslat(){
-  document.getElementById('kartHiz').style.display='none';
-  document.getElementById('kartSure').style.display='none';
-  document.getElementById('kartNokta').style.display='none';
-  if(!isNaN(HIZ_PARAM)) G.hiz = Math.min(10, Math.max(1, HIZ_PARAM));
-  if(!isNaN(SURE_PARAM_DK)) G.sure = SURE_PARAM_DK * 60;
-  if([2,4,8,12,16].includes(NOKTA_PARAM)) G.noktaSayisi = NOKTA_PARAM;
+  if(!isNaN(HIZ_PARAM)){ document.getElementById('kartHiz').style.display='none'; G.hiz = Math.min(10, Math.max(1, HIZ_PARAM)); }
+  if(!isNaN(SURE_PARAM_DK)){ document.getElementById('kartSure').style.display='none'; G.sure = SURE_PARAM_DK * 60; }
+  if([2,4,8,12,16].includes(NOKTA_PARAM)){ document.getElementById('kartNokta').style.display='none'; G.noktaSayisi = NOKTA_PARAM; }
   document.getElementById('backBtn').style.display='none';
   document.getElementById('durdurBtn').style.display='none';
   document.getElementById('bittiBtnRow').innerHTML = '';
@@ -348,7 +345,7 @@ function noktaIsaretleriCiz(){
 }
 
 async function baslat(){
-  if(!KILITLI){ G.hiz = parseInt(document.getElementById('hizSlider').value); }
+  if(isNaN(HIZ_PARAM)){ G.hiz = parseInt(document.getElementById('hizSlider').value); }
   G.noktalar = noktalariOlustur(G.noktaSayisi);
   G.mevcutIdx = 0;
   G.yonIdx = 1;
