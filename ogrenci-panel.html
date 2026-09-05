@@ -880,7 +880,8 @@ const TUM_EGZ_GENEL=[
   {dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca',ikon:'🧩'},
   {dosya:'blok-okuma.html',isim:'Blok Okuma',ikon:'📦'},
   {dosya:'baglam-avi.html',isim:'Bağlam Avı',ikon:'🧭'},
-  {dosya:'kelime-takibi.html',isim:'Kelime Takibi',ikon:'🔍'}
+  {dosya:'kelime-takibi.html',isim:'Kelime Takibi',ikon:'🔍'},
+  {dosya:'gorsel-avi.html',isim:'Görsel Avı',ikon:'🎯'}
 ];
 const TUM_EGZ_OKUMA=[
   {dosya:'akan-kelime.html',isim:'Akan Kelime',ikon:'🌊'},
@@ -1317,6 +1318,7 @@ function gorevUrl(g){
   if(g.kelimeSayisi!==undefined && g.kelimeSayisi!==null) url+='&kelimeSayisi='+g.kelimeSayisi;
   if(g.gosterim!==undefined && g.gosterim!==null) url+='&gosterim='+g.gosterim;
   if(g.zorluk!==undefined && g.zorluk!==null) url+='&zorluk='+encodeURIComponent(g.zorluk);
+  if(g.icerik!==undefined && g.icerik!==null) url+='&icerik='+encodeURIComponent(g.icerik);
   if(g.mod!==undefined && g.mod!==null) url+='&mod='+encodeURIComponent(g.mod);
   // Meteor Takibi'nin Tek/Çift Meteor modu — daha önce URL'e hiç eklenmiyordu,
   // bu yüzden admin panelinden planlansa bile meteor-takibi.html'e ulaşmıyordu
