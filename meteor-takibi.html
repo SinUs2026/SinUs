@@ -274,11 +274,9 @@ let selectTimeoutId = null;
 let oturumIptalEdildi = false;
 
 function kilitliModuBaslat(){
-  document.getElementById('kartSeviye').style.display='none';
-  document.getElementById('kartMod').style.display='none';
+  if(!isNaN(HIZ_PARAM)){ document.getElementById('kartSeviye').style.display='none'; G.level = Math.min(10, Math.max(1, HIZ_PARAM)); }
+  if(!isNaN(METEOR_MOD_PARAM)){ document.getElementById('kartMod').style.display='none'; G.mod = (METEOR_MOD_PARAM===2) ? 2 : 1; }
   document.getElementById('backBtn').style.display='none';
-  if(!isNaN(HIZ_PARAM)) G.level = Math.min(10, Math.max(1, HIZ_PARAM));
-  G.mod = (METEOR_MOD_PARAM===2) ? 2 : 1;
   hedefSureMs = (isNaN(SURE_PARAM_DK) ? 3 : SURE_PARAM_DK) * 60000;
   document.getElementById('hudTurPill').style.display='block';
   document.getElementById('mainStartBtn').textContent='▶ BAŞLA';
