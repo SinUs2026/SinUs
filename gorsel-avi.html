@@ -161,9 +161,6 @@ body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--white);min
 
 <script src="odak-modu.js"></script>
 <script>
-(function(){
-"use strict";
-
 // ── PANELe DÖNÜŞ URL'İ ──
 function panelDonusUrl() {
   const from = new URLSearchParams(window.location.search).get('from');
@@ -615,7 +612,6 @@ function menuye(){
 window.menuye = menuye; // OdakModu ihlal modalı "Yeniden Başlat"ta bunu çağırıyor
 
 showScreen("menu");
-})();
 </script>
 </body>
 </html>
