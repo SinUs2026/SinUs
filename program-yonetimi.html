@@ -226,6 +226,23 @@ nav{background:#0a1628;padding:0 2rem;height:60px;display:flex;align-items:cente
             <option value="2">☄️☄️ Çift Meteor (Zor)</option>
           </select>
         </div>
+        <div class="form-grup" id="formGrupGorselZorluk" style="display:none">
+          <label>Zorluk (Görsel Avı)</label>
+          <select class="form-select" id="secGorselZorluk">
+            <option value="kolay" selected>Kolay</option>
+            <option value="orta">Orta</option>
+            <option value="zor">Zor</option>
+          </select>
+        </div>
+        <div class="form-grup" id="formGrupGorselIcerik" style="display:none">
+          <label>İçerik Türü (Görsel Avı)</label>
+          <select class="form-select" id="secGorselIcerik">
+            <option value="sekil" selected>Şekil</option>
+            <option value="harf">Harf</option>
+            <option value="sayi">Sayı</option>
+            <option value="kelime">Kelime</option>
+          </select>
+        </div>
         <div class="form-grup" id="formGrupHiz" style="display:none">
           <label>Hız / Seviye <span id="hizDeger" style="float:right;color:#2563a8;font-weight:700"></span></label>
           <input type="range" id="hizSlider" oninput="hizGuncelle()" style="width:100%">
@@ -297,7 +314,7 @@ const EGZERSIZLER={
   goz:[{dosya:'goz-sag-sol.html',isim:'Sağ-Sol Takip'},{dosya:'goz-asagi-yukari.html',isim:'Yukarı-Aşağı Takip'},{dosya:'goz-sekil.html',isim:'Şekil Takibi'},{dosya:'goz-genel.html',isim:'Genel Hareket'}],
   odak:[{dosya:'meteor-takibi.html',isim:'Meteor Takibi'},{dosya:'ev-takibi.html',isim:'Ev Takibi'},{dosya:'sayi-avi.html',isim:'Sayı Avı'},{dosya:'merkez-nokta.html',isim:'Merkez Nokta'},{dosya:'gizli-nesne.html',isim:'Gizli Nesne'}],
   okuma:[{dosya:'akan-kelime.html',isim:'Akan Kelime'},{dosya:'akan-cumle.html',isim:'Akan Cümle'},{dosya:'ileri-akis.html',isim:'İleri Akış'},{dosya:'kaybolan-metin.html',isim:'Kaybolan Metin (Silinen Cümle)'},{dosya:'kaybolan-kelime.html',isim:'Kaybolan Kelime (Silinen Kelime)'},{dosya:'merkez-kelime.html',isim:'Merkez Kelime'},{dosya:'orp-okuma.html',isim:'ORP Okuma'},{dosya:'tarama-teknigi.html',isim:'Tarama Tekniği'},{dosya:'beliren-metin.html',isim:'Beliren Metin'},{dosya:'goz-rotasi.html',isim:'Göz Rotası'}],
-  genel:[{dosya:'kritik-kelime-avi.html',isim:'Kritik Kelime Avı'},{dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca'},{dosya:'blok-okuma.html',isim:'Blok Okuma'},{dosya:'baglam-avi.html',isim:'Bağlam Avı'},{dosya:'kelime-takibi.html',isim:'Kelime Takibi'}]
+  genel:[{dosya:'kritik-kelime-avi.html',isim:'Kritik Kelime Avı'},{dosya:'kelime-bulmaca.html',isim:'Kelime Bulmaca'},{dosya:'blok-okuma.html',isim:'Blok Okuma'},{dosya:'baglam-avi.html',isim:'Bağlam Avı'},{dosya:'kelime-takibi.html',isim:'Kelime Takibi'},{dosya:'gorsel-avi.html',isim:'Görsel Avı'}]
 };
 const TIP_IKON={goz:'👁️',odak:'🎯',okuma:'📖',genel:'🗂️'};
 const TIP_AD={goz:'Göz Egzersizi',odak:'Odak/Dikkat',okuma:'Okuma Tekniği',genel:'Genel'};
@@ -347,7 +364,7 @@ const OZEL_HIZ_ARALIK={
   // admin 5-10 arası bir değer seçse bile sessizce 4'e düşüyordu.
   'merkez-nokta.html':{min:1,max:4,adim:1,varsayilan:1,birim:' (aşama: 1=Yakın, 4=Çok Uzak)'}
 };
-const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html','kritik-kelime-avi.html','baglam-avi.html','merkez-nokta.html'];
+const METIN_GEREKMEYEN_DOSYALAR=['kelime-bulmaca.html','blok-okuma.html','kritik-kelime-avi.html','baglam-avi.html','merkez-nokta.html','gorsel-avi.html'];
 const TEMA_GEREKEN_DOSYALAR=['blok-okuma.html'];
 const SEKIL_GEREKEN_DOSYALAR=['goz-sekil.html'];
 const NOKTA_GEREKEN_DOSYALAR=['goz-sag-sol.html','goz-asagi-yukari.html'];
@@ -360,9 +377,13 @@ const MERKEZ_NOKTA_DOSYASI=['merkez-nokta.html'];
 // seçilebiliyordu; kilitli/atanmış görevlerde admin bunu hiç planlayamıyordu
 // ve meteor-takibi.html kilitli modda her zaman "Tek Meteor"a sabitleniyordu.
 const METEOR_DOSYASI=['meteor-takibi.html'];
+// Görsel Avı kendi zorluk (kolay/orta/zor) ve içerik türü (şekil/harf/sayı/
+// kelime) çiftine sahip — Bağlam Avı'nın zorluk/mod çiftinden bağımsız.
+const GORSEL_AVI_DOSYASI=['gorsel-avi.html'];
+const GORSEL_ICERIK_ADI={sekil:'Şekil',harf:'Harf',sayi:'Sayı',kelime:'Kelime'};
 const MERKEZ_MOD_ADI={sayi:'🔢 Sayı Modu',harf:'🔤 Harf Modu'};
 const MERKEZ_TARAF_ADI={1:'1️⃣ Tek Taraf',2:'2️⃣ Çift Taraf'};
-const ZORLUK_ADI={baslangic:'Başlangıç',orta:'Orta',ileri:'İleri',plus:'Plus'};
+const ZORLUK_ADI={baslangic:'Başlangıç',orta:'Orta',ileri:'İleri',plus:'Plus',kolay:'Kolay',zor:'Zor'};
 const SEKIL_ISIM={daire:'Daire',kare:'Kare',sekiz:'Sekiz (∞)',ucgen:'Üçgen',zigzag:'Zigzag'};
 const KELIME_TAKIBI_DOSYASI=['kelime-takibi.html'];
 
@@ -418,6 +439,7 @@ function egzersizDegisti(){
   const kelimeTakibiMi = KELIME_TAKIBI_DOSYASI.includes(dosya);
   const merkezNoktaMi = MERKEZ_NOKTA_DOSYASI.includes(dosya);
   const meteorMu = METEOR_DOSYASI.includes(dosya);
+  const gorselAviMi = GORSEL_AVI_DOSYASI.includes(dosya);
 
   const aralik=OZEL_HIZ_ARALIK[dosya]||HIZ_ARALIK[secilenTip];
   document.getElementById('hizSlider').min=aralik.min;
@@ -436,7 +458,9 @@ function egzersizDegisti(){
   document.getElementById('formGrupMerkezMod').style.display = merkezNoktaMi ? 'block' : 'none';
   document.getElementById('formGrupMerkezTaraf').style.display = merkezNoktaMi ? 'block' : 'none';
   document.getElementById('formGrupMeteorMod').style.display = meteorMu ? 'block' : 'none';
-  document.getElementById('formGrupHiz').style.display = (zorlukGerekli || kelimeTakibiMi) ? 'none' : 'block';
+  document.getElementById('formGrupGorselZorluk').style.display = gorselAviMi ? 'block' : 'none';
+  document.getElementById('formGrupGorselIcerik').style.display = gorselAviMi ? 'block' : 'none';
+  document.getElementById('formGrupHiz').style.display = (zorlukGerekli || kelimeTakibiMi || gorselAviMi) ? 'none' : 'block';
   document.getElementById('formGrupKtSayisi').style.display = kelimeTakibiMi ? 'block' : 'none';
   document.getElementById('formGrupKtHiz').style.display = kelimeTakibiMi ? 'block' : 'none';
   document.getElementById('formGrupKtGosterim').style.display = kelimeTakibiMi ? 'block' : 'none';
@@ -499,6 +523,7 @@ function listeGuncelle(){
     const sekilGosterim=g.sekil?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🔷 ${SEKIL_ISIM[g.sekil]||g.sekil}</span>`:'';
     const noktaGosterim=g.nokta?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">⚪ ${g.nokta} Nokta</span>`:'';
     const zorlukGosterim=g.zorluk?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">🎯 ${ZORLUK_ADI[g.zorluk]||g.zorluk}</span>`:'';
+    const icerikGosterim=g.icerik?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🖼 ${GORSEL_ICERIK_ADI[g.icerik]||g.icerik}</span>`:'';
     // g.mod iki farklı egzersizde farklı anlama geliyor: Bağlam Avı'nda
     // normal/sureli, Merkez Nokta'da sayı/harf — dosya adına göre ayırt edilir.
     const modGosterim=g.mod?(MERKEZ_NOKTA_DOSYASI.includes(g.dosya)
@@ -508,7 +533,7 @@ function listeGuncelle(){
     const meteorModGosterim=g.meteorMod?`<span class="badge" style="background:#fdf4ff;color:#7e22ce">${g.meteorMod===2?'☄️☄️ Çift Meteor':'☄️ Tek Meteor'}</span>`:'';
     const ktSayisiGosterim=g.kelimeSayisi?`<span class="badge" style="background:#f0f9ff;color:#0369a1">🔢 ${g.kelimeSayisi} kelime</span>`:'';
     const ktGosterimBicimi=g.gosterim?`<span class="badge" style="background:#f0f9ff;color:#0369a1">👁 ${g.gosterim} kelime/ekran</span>`:'';
-    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${ktSayisiGosterim} ${ktGosterimBicimi} ${metinGosterim} ${temaGosterim} ${sekilGosterim} ${noktaGosterim} ${zorlukGosterim} ${modGosterim} ${tarafGosterim} ${meteorModGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
+    div.innerHTML=`<div class="gorev-tip-icon ${g.tip}">${TIP_IKON[g.tip]||'📌'}</div><div class="gorev-bilgi"><div class="gorev-isim">${isim}</div><div class="gorev-alt"><span class="badge ${g.tip}">${TIP_AD[g.tip]||g.tip}</span> ${hizGosterim} ${ktSayisiGosterim} ${ktGosterimBicimi} ${metinGosterim} ${temaGosterim} ${sekilGosterim} ${noktaGosterim} ${zorlukGosterim} ${icerikGosterim} ${modGosterim} ${tarafGosterim} ${meteorModGosterim}</div></div><span class="gorev-sure">⏱ ${g.sure} dk</span><button class="gorev-yukari" onclick="siraDegistir(${i},-1)">↑</button><button class="gorev-asagi" onclick="siraDegistir(${i},1)">↓</button><button class="gorev-sil" onclick="gorevSil(${i})">✕</button>`;
     liste.appendChild(div);
   });
   ozetGuncelle();
@@ -537,6 +562,9 @@ function gorevEkle(){
     gorev.hiz=document.getElementById('secKtHiz').value;
     gorev.kelimeSayisi=parseInt(document.getElementById('secKtSayisi').value);
     gorev.gosterim=parseInt(document.getElementById('secKtGosterim').value);
+  }else if(GORSEL_AVI_DOSYASI.includes(dosya)){
+    gorev.zorluk=document.getElementById('secGorselZorluk').value;
+    gorev.icerik=document.getElementById('secGorselIcerik').value;
   }else{
     const varsayilanAralik=OZEL_HIZ_ARALIK[dosya]||HIZ_ARALIK[secilenTip];
     gorev.hiz=parseInt(document.getElementById('hizSlider').value)||varsayilanAralik.varsayilan;
