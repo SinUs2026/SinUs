@@ -199,11 +199,10 @@ let kilitliBasariliTurSayaci = 0;
 let oturumIptalEdildi = false;
 
 function kilitliModuBaslat(){
-  document.getElementById('kartAsama').style.display='none';
+  if(!isNaN(HIZ_PARAM)){ document.getElementById('kartAsama').style.display='none'; G.asama = Math.min(4, Math.max(1, HIZ_PARAM)); }
   document.getElementById('backBtn').style.display='none';
   document.getElementById('menuBtn').style.display='none';
   document.getElementById('btnRow').innerHTML = '';
-  if(!isNaN(HIZ_PARAM)) G.asama = Math.min(4, Math.max(1, HIZ_PARAM));
   document.getElementById('mainStartBtn').textContent = '▶ BAŞLA';
   document.getElementById('mainStartBtn').onclick = async function(){
     const btn=document.getElementById('mainStartBtn');
