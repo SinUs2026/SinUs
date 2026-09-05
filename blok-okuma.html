@@ -533,7 +533,7 @@
 
   function egzersiziBaslat(){
     const temaAnahtari = secimTema.value;
-    if(!KILITLI){ kpm = parseInt(secimHiz.value, 10); }
+    if(isNaN(HIZ_PARAM)){ kpm = parseInt(secimHiz.value, 10); }
     dizi = diziyiOlustur(temaAnahtari);
     index = 0;
     duraklatildi = false;
@@ -616,11 +616,13 @@
   }
 
   function kilitliModuBaslat(){
-    document.getElementById('hiz-satir-blok').style.display = 'none';
     document.getElementById('btn-yeni-tema').style.display = 'none';
     document.getElementById('geri-link-baslangic').style.display = 'none';
     document.getElementById('btn-panele-don').style.display = 'none';
-    if(!isNaN(HIZ_PARAM)) kpm = Math.min(3000, Math.max(10, HIZ_PARAM));
+    if(!isNaN(HIZ_PARAM)){
+      document.getElementById('hiz-satir-blok').style.display = 'none';
+      kpm = Math.min(3000, Math.max(10, HIZ_PARAM));
+    }
     const temaSecim = (TEMA_PARAM && TEMALAR[TEMA_PARAM]) ? TEMA_PARAM : Object.keys(TEMALAR)[0];
     secimTema.value = temaSecim;
     document.getElementById('btn-baslat').textContent = 'Başla';
