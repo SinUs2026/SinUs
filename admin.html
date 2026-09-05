@@ -775,6 +775,12 @@ tr:hover td{background:#f8fafc}
       <div class="form-grup"><label>Lisans Başlangıç</label><input type="date" id="sd-baslangic"></div>
       <div class="form-grup"><label>Lisans Bitiş</label><input type="date" id="sd-bitis"></div>
     </div>
+    <div class="form-grup" id="sd-cihaz-blok" style="display:none;border-top:1px solid #f1f5f9;padding-top:1rem;margin-top:0.4rem">
+      <label>📱 Cihaz Limiti <span style="font-weight:400;color:#94a3b8">(bu şifre en fazla kaç farklı cihazda kullanılabilir)</span></label>
+      <input type="number" id="sd-cihaz-limiti" min="1" style="max-width:120px" placeholder="Örn: 3">
+      <div id="sd-cihaz-liste" style="margin-top:0.7rem;font-size:0.8rem;color:#64748b"></div>
+      <button type="button" class="islem-btn" style="background:#fef3c7;color:#92400e;margin-top:0.6rem" onclick="cihazlariSifirla()">♻️ Kayıtlı Cihazları Sıfırla</button>
+    </div>
     <div class="modal-btn-grup">
       <button class="btn-iptal" onclick="modalKapat('sifre-duzenle')">İptal</button>
       <button class="btn-kaydet" onclick="sifreDuzenleKaydet()">💾 Kaydet</button>
@@ -1206,7 +1212,8 @@ const EGZERSIZLER={
     {kod:'kelime-bulmaca',isim:'Kelime Bulmaca',ikon:'🧩',aciklama:'Izgarada gizli kelimeleri bulma.',url:'kelime-bulmaca.html'},
     {kod:'blok-okuma',isim:'Blok Okuma',ikon:'📦',aciklama:'Sabit bakış noktasıyla kelime grubu okuma.',url:'blok-okuma.html'},
     {kod:'baglam-avi',isim:'Bağlam Avı',ikon:'🧭',aciklama:'Metindeki boşluğu bağlamdan çıkararak tamamlama.',url:'baglam-avi.html'},
-    {kod:'kelime-takibi',isim:'Kelime Takibi',ikon:'🔍',aciklama:'Akan metinde hedef kelimeleri takip ederek okuma.',url:'kelime-takibi.html'}
+    {kod:'kelime-takibi',isim:'Kelime Takibi',ikon:'🔍',aciklama:'Akan metinde hedef kelimeleri takip ederek okuma.',url:'kelime-takibi.html'},
+    {kod:'gorsel-avi',isim:'Görsel Avı',ikon:'🎯',aciklama:'Kalabalığın içindeki hedefleri hızlı ve doğru bulma — seçici dikkat ve görsel tarama.',url:'gorsel-avi.html'}
   ]
 };
 const KATEGORI_AD={okuma:'Okuma Tekniği',goz:'Göz Kası',odak:'Dikkat & Odak',genel:'Genel'};
@@ -1788,7 +1795,47 @@ async function sifreDuzenle(id){
     document.getElementById('sd-baslangic').value=k.lisans_baslangic||'';
     document.getElementById('sd-bitis').value=k.lisans_bitis||'';
     document.getElementById('sd-aktif').value=k.aktif?'true':'false';
+
+    // Cihaz limiti/listesi sadece öğrenci hesaplarında anlamlı
+    const cihazBlok=document.getElementById('sd-cihaz-blok');
+    if(k.rol==='ogrenci'){
+      cihazBlok.style.display='block';
+      document.getElementById('sd-cihaz-limiti').value=(k.cihaz_limiti===null||k.cihaz_limiti===undefined)?'':k.cihaz_limiti;
+      cihazListesiYukle(k.id);
+    }else{
+      cihazBlok.style.display='none';
+    }
+
     modalAc('sifre-duzenle');
+  }catch(e){bildirimGoster('❌ '+e.message,'hata');}
+}
+
+async function cihazListesiYukle(ogrenciId){
+  const kap=document.getElementById('sd-cihaz-liste');
+  kap.textContent='⏳ Cihazlar yükleniyor...';
+  try{
+    const cihazlar=await rpc('ogrenci_cihazlari_getir',{p_ogrenci_id:ogrenciId});
+    if(!cihazlar||!cihazlar.length){
+      kap.innerHTML='<em>Bu hesap henüz hiçbir cihazdan giriş yapmadı.</em>';
+      return;
+    }
+    kap.innerHTML='<strong>'+cihazlar.length+' kayıtlı cihaz:</strong><br>'+cihazlar.map(c=>{
+      const son=new Date(c.son_gorulme).toLocaleDateString('tr-TR');
+      const ilk=new Date(c.ilk_gorulme).toLocaleDateString('tr-TR');
+      return '· İlk giriş: '+ilk+' · Son giriş: '+son;
+    }).join('<br>');
+  }catch(e){
+    kap.innerHTML='<em>Cihaz listesi yüklenemedi.</em>';
+  }
+}
+
+async function cihazlariSifirla(){
+  const id=document.getElementById('sd-id').value;
+  if(!confirm('Bu öğrencinin kayıtlı tüm cihazlarını sıfırlamak istediğinize emin misiniz? Öğrenci bir sonraki girişte kullandığı cihaz yeni cihaz olarak sayılacak.'))return;
+  try{
+    await rpc('ogrenci_cihazlari_sifirla',{p_ogrenci_id:id});
+    bildirimGoster('♻️ Kayıtlı cihazlar sıfırlandı.','basari');
+    cihazListesiYukle(id);
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 
@@ -1806,9 +1853,20 @@ async function sifreDuzenleKaydet(){
   };
   try{
     await rpc('kullanici_guncelle',{p_id:id,p_ad:veri.ad,p_soyad:veri.soyad,p_telefon:veri.telefon,p_il:veri.il,p_ilce:veri.ilce,p_lisans_baslangic:veri.lisans_baslangic,p_lisans_bitis:veri.lisans_bitis,p_aktif:veri.aktif});
+
+    // Cihaz limiti bölümü görünürse (öğrenci düzenleniyorsa) onu da kaydet
+    if(document.getElementById('sd-cihaz-blok').style.display!=='none'){
+      const limitDeger=document.getElementById('sd-cihaz-limiti').value.trim();
+      const limitSayi=limitDeger===''?null:parseInt(limitDeger);
+      await rpc('ogrenci_cihaz_limiti_guncelle',{p_ogrenci_id:id,p_yeni_limit:limitSayi});
+    }
+
     bildirimGoster('✅ Kullanıcı güncellendi!','basari');
     modalKapat('sifre-duzenle');
-    sifreIslemleriYukle();
+    // Bu modal hem Öğrenciler hem Şifre İşlemleri sayfasından açılabiliyor —
+    // hangisi DOM'da varsa o yenilenir (bkz. kullaniciSil'deki aynı düzeltme).
+    if(document.getElementById('ogrenciler-liste')) ogrencileriYukle();
+    if(document.getElementById('sifre-liste')) sifreIslemleriYukle();
   }catch(e){bildirimGoster('❌ '+e.message,'hata');}
 }
 
