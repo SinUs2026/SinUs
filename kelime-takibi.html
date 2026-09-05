@@ -262,12 +262,9 @@ const ASAMA_PARAM=_kParams.get('asama');
 const GUN_PARAM=_kParams.get('gun');
 if(KILITLI){
   const ks=_kParams.get('kelimeSayisi'); const hz=_kParams.get('hiz'); const gs=_kParams.get('gosterim');
-  if(ks) W.kelimeSayisi=parseInt(ks);
-  if(hz) W.hiz=hz;
-  if(gs) W.gosterim=parseInt(gs);
-  document.getElementById('kartSayi').style.display='none';
-  document.getElementById('kartHiz').style.display='none';
-  document.getElementById('kartGosterim').style.display='none';
+  if(ks){ W.kelimeSayisi=parseInt(ks); document.getElementById('kartSayi').style.display='none'; }
+  if(hz){ W.hiz=hz; document.getElementById('kartHiz').style.display='none'; }
+  if(gs){ W.gosterim=parseInt(gs); document.getElementById('kartGosterim').style.display='none'; }
   document.getElementById('backBtn').style.display='none';
 }
 
